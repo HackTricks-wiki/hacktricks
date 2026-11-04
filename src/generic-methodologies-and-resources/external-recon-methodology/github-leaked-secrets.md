@@ -2,16 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### git repos और file system में secrets खोजने के लिए Tools
+### git repos और file system में secrets खोजने के Tools
 
 - [TruffleHog](https://github.com/dxa4481/truffleHog)
 - [Gitleaks](https://github.com/gitleaks/gitleaks)
-- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (archived; replaced by [Titus](https://github.com/praetorian-inc/titus))
+- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (archived; इसकी जगह [Titus](https://github.com/praetorian-inc/titus) ने ली है)
 - [ggshield](https://github.com/GitGuardian/ggshield)
 - [RExpository](https://github.com/JaimePolop/RExpository)
 - [detect-secrets](https://github.com/Yelp/detect-secrets)
 - [gitGraber](https://github.com/hisxo/gitGraber)
-- [shhgit](https://github.com/eth0izzle/shhgit) (unmaintained)
+- [shhgit](https://github.com/eth0izzle/shhgit) (अब maintained नहीं है)
 - [github-dorks](https://github.com/techgaun/github-dorks)
 - [gitrob](https://github.com/michenriksen/gitrob) (archived)
 - [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (archived)
@@ -19,24 +19,24 @@
 - [gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [GitDorker](https://github.com/obheda12/GitDorker)
 
-> Notes
+> नोट्स
 > - TruffleHog v3 कई credentials को live verify कर सकता है और GitHub orgs, issues/PRs, gists और wikis को scan कर सकता है। उदाहरण: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
-> - Gitleaks Git repositories, directories और archives को scan करता है। History के लिए `gitleaks git -v --log-opts="--all" <repo>`, directories के लिए `gitleaks dir -v <path>`, और archives को inspect करने के लिए `--max-archive-depth 1` का उपयोग करें।<sup>[[6]](#references)</sup>
-> - Nosey Parker archived है और इसे Titus ने replace कर दिया है। Existing installations अभी भी `noseyparker scan --datastore np.db <path|repo>` के बाद `noseyparker report --datastore np.db` को support करती हैं।<sup>[[7]](#references)[[8]](#references)</sup>
+> - Gitleaks Git repositories, directories और archives को scan करता है। History के लिए `gitleaks git -v --log-opts="--all" <repo>`, directories के लिए `gitleaks dir -v <path>` और archives की जाँच के लिए `--max-archive-depth 1` इस्तेमाल करें।<sup>[[6]](#references)</sup>
+> - Nosey Parker archived है और इसकी जगह Titus ने ली है। मौजूदा installations अब भी `noseyparker scan --datastore np.db <path|repo>` चलाने के बाद `noseyparker report --datastore np.db` का समर्थन करते हैं।<sup>[[7]](#references)[[8]](#references)</sup>
 > - ggshield (GitGuardian CLI) files, repositories और Docker images को scan करता है और local या CI workflows के साथ integrate होता है: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
 
-### GitHub में secrets आमतौर पर कहाँ leak होते हैं
+### GitHub पर secrets आम तौर पर कहाँ leak होते हैं
 
-- GitHub Code Search केवल default branch को index करता है; non-default branches को सीधे inspect करें या उन्हें clone करें।<sup>[[4]](#references)</sup>
-- Full git history और अन्य branches/tags (gitleaks/trufflehog से clone और scan करें; GitHub search केवल indexed content को cover करता है)।<sup>[[4]](#references)[[6]](#references)</sup>
-- Issues, pull requests, comments और descriptions (TruffleHog का GitHub source `--issue-comments` और `--pr-comments` जैसे flags के माध्यम से इन्हें support करता है)।<sup>[[2]](#references)</sup>
-- Actions workflow logs और artifacts (read access होने पर इन्हें देखा या download किया जा सकता है, और secret redaction की guarantee नहीं है)।<sup>[[11]](#references)[[12]](#references)</sup>
+- GitHub Code Search सिर्फ default branch को index करता है; non-default branches की सीधे जाँच करें या उन्हें clone करें।<sup>[[4]](#references)</sup>
+- पूरा git history और अन्य branches/tags (clone करके gitleaks/trufflehog से scan करें; GitHub search सिर्फ indexed content को कवर करता है)।<sup>[[4]](#references)[[6]](#references)</sup>
+- Issues, pull requests, comments और descriptions (TruffleHog का GitHub source इन्हें `--issue-comments` और `--pr-comments` जैसे flags के ज़रिए support करता है)।<sup>[[2]](#references)</sup>
+- Actions workflow logs और artifacts (read access से इन्हें देखा या download किया जा सकता है, और secret redaction की गारंटी नहीं है)।<sup>[[11]](#references)[[12]](#references)</sup>
 - Wikis और release assets।
-- Gists (tooling या UI से search करें; कुछ tools gists को include कर सकते हैं)।<sup>[[2]](#references)[[13]](#references)</sup>
+- Gists (tooling या UI से search करें; कुछ tools gists को शामिल कर सकते हैं)।<sup>[[2]](#references)[[13]](#references)</sup>
 
-> Gotchas
-> - GitHub का Code Search UI regex support करता है, जबकि REST/API path (जिसमें `gh search code` भी शामिल है) legacy engine का उपयोग करता है और regex features expose नहीं करता। Regex queries के लिए UI को प्राथमिकता दें।<sup>[[3]](#references)[[5]](#references)</sup>
-> - GitHub search अपने documented size limit से बड़ी files को exclude करता है और exhaustive नहीं है। Thorough जांच के लिए locally clone करें और secrets scanner से scan करें।<sup>[[4]](#references)</sup>
+> ध्यान देने योग्य बातें
+> - GitHub का Code Search UI regex support करता है, जबकि REST/API तरीका (`gh search code` सहित) legacy engine इस्तेमाल करता है और regex features उपलब्ध नहीं कराता। Regex queries के लिए UI को प्राथमिकता दें।<sup>[[3]](#references)[[5]](#references)</sup>
+> - GitHub search अपने दस्तावेज़ में दी गई size limit से बड़ी files को छोड़ देता है और exhaustive नहीं है। पूरी जाँच के लिए repositories को clone करें और secrets scanner से locally scan करें।<sup>[[4]](#references)</sup>
 
 ### Programmatic org-wide scanning
 
@@ -44,40 +44,62 @@
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
---include-wikis --issue-comments --pr-comments --gist-comments
+  --include-wikis --issue-comments --pr-comments --gist-comments
 ```
 - सभी org repos पर Gitleaks चलाएँ (shallow clone करें और `gitleaks dir` से scan करें)।<sup>[[6]](#references)</sup>
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
-tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
-gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
+  tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
+  gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
 done
 ```
-- मौजूदा installations के लिए mono checkout पर Nosey Parker।<sup>[[7]](#references)</sup>
+- मौजूदा इंस्टॉलेशन के लिए mono checkout पर Nosey Parker।<sup>[[7]](#references)</sup>
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- ggshield quick scans.<sup>[[9]](#references)</sup>
+- ggshield त्वरित स्कैन।<sup>[[9]](#references)</sup>
 ```bash
 # current working tree
 ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> सुझाव: git history के लिए, ऐसे scanners को प्राथमिकता दें जो हटाए गए secrets को पकड़ने के लिए `git log -p --all` को parse करते हों।<sup>[[6]](#references)</sup>
 
-### आधुनिक tokens के लिए Updated dorks
+> सुझाव: git history के लिए, हटाए गए secrets का पता लगाने हेतु ऐसे scanners को प्राथमिकता दें जो `git log -p --all` को parse करते हैं।<sup>[[6]](#references)</sup>
 
-- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`।<sup>[[10]](#references)</sup>
+### Pull-request refs और Gist revision history
+
+सामान्य clones GitHub के `refs/pull/<number>/head` refs को fetch नहीं करते, इसलिए `git log --all` उन commits को नहीं दिखाता जो केवल इन refs के ज़रिए उपलब्ध हैं—जब तक आप उन्हें fetch न करें।<sup>[[14]](#references)[[17]](#references)</sup> PR refs, किसी contributor द्वारा अपना fork delete करने के बाद भी unmerged commits को उजागर कर सकते हैं।<sup>[[15]](#references)</sup> केवल branch history को rewrite करने से sensitive commits PR references के ज़रिए उपलब्ध रह सकते हैं।<sup>[[16]](#references)</sup>
+
+Full clone में, scan करने से पहले चुने गए PR head को fetch करें, या जब अतिरिक्त download उचित हो, तब सभी advertised PR heads के लिए wildcard refspec का इस्तेमाल करें।<sup>[[17]](#references)[[18]](#references)</sup> Gitleaks `git log -p` से local commit patches को scan करता है, इसलिए refs fetch करने के बाद इसे फिर से चलाएँ।<sup>[[6]](#references)</sup>
+
+```bash
+git fetch origin 'refs/pull/123/head:refs/remotes/origin/pr/123'
+# Or fetch every advertised PR head:
+git fetch origin '+refs/pull/*/head:refs/remotes/origin/pr/*'
+gitleaks git -v --log-opts="--all" .
+```
+
+Gist का Git history भी होता है, इसलिए केवल उसकी मौजूदा फ़ाइलें जाँचने से बाद के revision में हटाए गए credential का पता नहीं चल सकता।<sup>[[19]](#references)</sup> दायरे में आने वाले public Gist के लिए, उसका Git repository clone करें और revisions को scan करें।<sup>[[19]](#references)[[6]](#references)</sup>
+
+```bash
+git clone https://gist.github.com/GIST_ID.git
+gitleaks git -v --log-opts="--all" GIST_ID
+```
+
+### आधुनिक tokens के लिए अपडेट किए गए dorks
+
+- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`.<sup>[[10]](#references)</sup>
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
-- Cloud और general:
-- `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
-- `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
-- `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
+- Cloud और सामान्य:
+  - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
+  - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
+  - `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
 
 ### **Dorks**
+
 ```bash
 ".mlab.com password"
 "access_key"
@@ -351,12 +373,15 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
+
 अतिरिक्त code-search workflows के लिए, [Wide Source Code Search](wide-source-code-search.md) देखें।
+
+
 
 ## References
 
-- [1] [public repositories से secrets को बाहर रखना (GitHub Blog, Feb 29, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
-- [2] [TruffleHog v3 – leaked credentials ढूँढें, सत्यापित करें और analyze करें](https://github.com/trufflesecurity/trufflehog)
+- [1] [सार्वजनिक repositories से secrets को बाहर रखना (GitHub Blog, Feb 29, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – leaked credentials ढूँढ़ें, verify करें और analyze करें](https://github.com/trufflesecurity/trufflehog)
 - [3] [GitHub Code Search syntax को समझना](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
 - [4] [code खोजना (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
 - [5] [gh search code](https://cli.github.com/manual/gh_search_code)
@@ -364,8 +389,14 @@ AWS SECRET
 - [7] [Nosey Parker README](https://github.com/praetorian-inc/noseyparker#readme)
 - [8] [Titus README](https://github.com/praetorian-inc/titus#readme)
 - [9] [ggshield README](https://github.com/GitGuardian/ggshield#readme)
-- [10] [Secrets reference (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
+- [10] [Secrets संदर्भ (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
 - [11] [Secrets (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
 - [12] [workflow run logs का उपयोग करना (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
 - [13] [TruffleHog GitHub source](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
+- [14] [Pull request refs और merge branches (GitHub Docs)](https://docs.github.com/en/pull-requests/reference/pull-requests)
+- [15] [Pull requests को locally checkout करना (GitHub Docs)](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/checking-out-pull-requests-locally)
+- [16] [repository से संवेदनशील data हटाना (GitHub Docs)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)
+- [17] [git-fetch दस्तावेज़](https://git-scm.com/docs/git-fetch)
+- [18] [Pull request को scan करना (betterleaks)](https://github.com/betterleaks/betterleaks/blob/main/docs/scanning.md)
+- [19] [Gists के लिए REST API endpoints (GitHub Docs)](https://docs.github.com/en/rest/gists/gists)
 {{#include ../../banners/hacktricks-training.md}}
