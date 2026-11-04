@@ -2,59 +2,59 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Git repo'larında ve dosya sisteminde secrets bulmak için Tools
+### Git repo'larında ve dosya sisteminde secrets bulma araçları
 
 - [TruffleHog](https://github.com/dxa4481/truffleHog)
 - [Gitleaks](https://github.com/gitleaks/gitleaks)
-- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (archived; [Titus](https://github.com/praetorian-inc/titus) ile değiştirildi)
+- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (arşivlendi; yerini [Titus](https://github.com/praetorian-inc/titus) aldı)
 - [ggshield](https://github.com/GitGuardian/ggshield)
 - [RExpository](https://github.com/JaimePolop/RExpository)
 - [detect-secrets](https://github.com/Yelp/detect-secrets)
 - [gitGraber](https://github.com/hisxo/gitGraber)
-- [shhgit](https://github.com/eth0izzle/shhgit) (artık bakımı yapılmıyor)
+- [shhgit](https://github.com/eth0izzle/shhgit) (bakımı yapılmıyor)
 - [github-dorks](https://github.com/techgaun/github-dorks)
-- [gitrob](https://github.com/michenriksen/gitrob) (archived)
-- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (archived)
+- [gitrob](https://github.com/michenriksen/gitrob) (arşivlendi)
+- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (arşivlendi)
 - [git-secrets](https://github.com/awslabs/git-secrets)
 - [gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [GitDorker](https://github.com/obheda12/GitDorker)
 
 > Notlar
 > - TruffleHog v3 birçok credential'ı canlı olarak doğrulayabilir ve GitHub org'larını, issue'ları/PR'ları, gist'leri ve wiki'leri tarayabilir. Örnek: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
-> - Gitleaks, Git repository'lerini, dizinleri ve archive'ları tarar. History için `gitleaks git -v --log-opts="--all" <repo>`, dizinler için `gitleaks dir -v <path>` ve archive'ları incelemek için `--max-archive-depth 1` kullanın.<sup>[[6]](#references)</sup>
-> - Nosey Parker archived durumdadır ve yerini Titus almıştır. Mevcut kurulumlar hâlâ `noseyparker scan --datastore np.db <path|repo>` komutunu ve ardından `noseyparker report --datastore np.db` komutunu destekler.<sup>[[7]](#references)[[8]](#references)</sup>
-> - ggshield (GitGuardian CLI), dosyaları, repository'leri ve Docker image'larını tarar; local veya CI workflow'larıyla entegre olur: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
+> - Gitleaks, Git repository'lerini, dizinleri ve arşivleri tarar. Geçmişi taramak için `gitleaks git -v --log-opts="--all" <repo>`, dizinler için `gitleaks dir -v <path>` kullanın; arşivleri incelemek için `--max-archive-depth 1` ekleyin.<sup>[[6]](#references)</sup>
+> - Nosey Parker arşivlendi ve yerini Titus aldı. Mevcut kurulumlarda `noseyparker scan --datastore np.db <path|repo>` komutunun ardından `noseyparker report --datastore np.db` komutu hâlâ kullanılabilir.<sup>[[7]](#references)[[8]](#references)</sup>
+> - ggshield (GitGuardian CLI) dosyaları, repository'leri ve Docker image'larını tarar; yerel veya CI iş akışlarına entegre olur: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
 
-### GitHub'da secrets'ın yaygın olarak leak ettiği yerler
+### GitHub'da secrets'ın sıkça leak olduğu yerler
 
-- GitHub Code Search yalnızca default branch'i index'ler; default olmayan branch'leri doğrudan inceleyin veya clone edin.<sup>[[4]](#references)</sup>
-- Tüm git history'si ve diğer branch/tag'ler (gitleaks/trufflehog ile clone edip tarayın; GitHub search yalnızca index'lenmiş içeriği kapsar).<sup>[[4]](#references)[[6]](#references)</sup>
-- Issue'lar, pull request'ler, comment'ler ve description'lar (TruffleHog'un GitHub source'u bunları `--issue-comments` ve `--pr-comments` gibi flag'lerle destekler).<sup>[[2]](#references)</sup>
-- Actions workflow log'ları ve artifact'ları (read access bunların görüntülenmesine veya indirilmesine izin verir ve secret redaction garanti edilmez).<sup>[[11]](#references)[[12]](#references)</sup>
+- GitHub Code Search yalnızca varsayılan branch'i indeksler; varsayılan olmayan branch'leri doğrudan inceleyin veya clone edin.<sup>[[4]](#references)</sup>
+- Tüm git geçmişi ve diğer branch/tag'ler (clone edip gitleaks/trufflehog ile tarayın; GitHub araması yalnızca indekslenmiş içeriği kapsar).<sup>[[4]](#references)[[6]](#references)</sup>
+- Issue'lar, pull request'ler, yorumlar ve açıklamalar (TruffleHog'un GitHub kaynağı, `--issue-comments` ve `--pr-comments` gibi flag'lerle bunları destekler).<sup>[[2]](#references)</sup>
+- Actions workflow log'ları ve artifact'ler (okuma erişimi bunları görüntülemeye veya indirmeye olanak tanır; secret'ların redakte edilmesi garanti değildir).<sup>[[11]](#references)[[12]](#references)</sup>
 - Wiki'ler ve release asset'leri.
-- Gist'ler (tooling veya UI ile arayın; bazı tool'lar gist'leri içerebilir).<sup>[[2]](#references)[[13]](#references)</sup>
+- Gist'ler (araçlarla veya arayüzden arayın; bazı araçlar gist'leri de kapsayabilir).<sup>[[2]](#references)[[13]](#references)</sup>
 
 > Dikkat edilmesi gerekenler
-> - GitHub'ın Code Search UI'ı regex'i desteklerken REST/API yolu (`gh search code` dahil) legacy engine'i kullanır ve regex özelliklerini sunmaz. Regex query'leri için UI'ı tercih edin.<sup>[[3]](#references)[[5]](#references)</sup>
-> - GitHub search, belgelenmiş size limit'inin üzerindeki dosyaları hariç tutar ve kapsamlı değildir. Eksiksiz olmak için clone edin ve local'de bir secrets scanner ile tarayın.<sup>[[4]](#references)</sup>
+> - GitHub'ın Code Search arayüzü regex'i desteklerken REST/API yolu (`gh search code` dahil) eski motoru kullanır ve regex özelliklerini sunmaz. Regex sorguları için arayüzü tercih edin.<sup>[[3]](#references)[[5]](#references)</sup>
+> - GitHub araması, belgelenmiş boyut sınırını aşan dosyaları hariç tutar ve kapsamlı değildir. Eksiksiz tarama için repository'yi clone edip yerel bir secrets scanner ile tarayın.<sup>[[4]](#references)</sup>
 
-### Programmatic org-wide scanning
+### Programatik olarak org genelinde tarama
 
-- TruffleHog (GitHub source).<sup>[[2]](#references)[[13]](#references)</sup>
+- TruffleHog (GitHub kaynağı).<sup>[[2]](#references)[[13]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
---include-wikis --issue-comments --pr-comments --gist-comments
+  --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Tüm kuruluş repolarında Gitleaks kullanın (shallow clone yapın ve `gitleaks dir` ile tarayın).<sup>[[6]](#references)</sup>
+- Kuruluşun tüm depolarında Gitleaks çalıştırın (sığ klonlayın ve `gitleaks dir` ile tarayın).<sup>[[6]](#references)</sup>
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
-tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
-gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
+  tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
+  gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
 done
 ```
-- Mevcut kurulumlar için bir mono checkout üzerinde Nosey Parker.<sup>[[7]](#references)</sup>
+- Mevcut kurulumlar için mono checkout üzerinde Nosey Parker.<sup>[[7]](#references)</sup>
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
@@ -66,18 +66,40 @@ ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> İpucu: git geçmişi için, kaldırılmış secret'ları yakalamak amacıyla `git log -p --all` ayrıştıran scanner'ları tercih edin.<sup>[[6]](#references)</sup>
 
-### Modern token'lar için güncellenmiş dorks
+> İpucu: Git geçmişini taramak için, kaldırılmış secrets'ları yakalamak amacıyla `git log -p --all` komutunu ayrıştıran scanner'ları tercih edin.<sup>[[6]](#references)</sup>
+
+### Pull request refs ve Gist revizyon geçmişi
+
+Normal clone'lar GitHub'ın `refs/pull/<number>/head` ref'lerini getirmez. Bu nedenle, bu ref'ler üzerinden erişilebilen commit'leri fetch edene kadar `git log --all` çıktısında göremezsiniz.<sup>[[14]](#references)[[17]](#references)</sup> PR ref'leri, bir katkıcının fork'unu silmesinden sonra bile merge edilmemiş commit'leri açığa çıkarabilir.<sup>[[15]](#references)</sup> Yalnızca branch geçmişini yeniden yazmak, hassas commit'leri PR ref'leri üzerinden erişilebilir durumda bırakabilir.<sup>[[16]](#references)</sup>
+
+Tam bir clone'da taramadan önce seçilen PR head'ini fetch edin veya ek indirme boyutu makulse duyurulan tüm PR head'lerini almak için wildcard refspec kullanın.<sup>[[17]](#references)[[18]](#references)</sup> Gitleaks yerel commit patch'lerini `git log -p` ile tarar; bu nedenle ref'leri fetch ettikten sonra taramayı yeniden çalıştırın.<sup>[[6]](#references)</sup>
+
+```bash
+git fetch origin 'refs/pull/123/head:refs/remotes/origin/pr/123'
+# Or fetch every advertised PR head:
+git fetch origin '+refs/pull/*/head:refs/remotes/origin/pr/*'
+gitleaks git -v --log-opts="--all" .
+```
+
+Bir Gist'in Git geçmişi de vardır; bu nedenle yalnızca mevcut dosyalarını kontrol etmek, sonraki bir revizyonda kaldırılmış bir kimlik bilgisini gözden kaçırabilir.<sup>[[19]](#references)</sup> Kapsam dahilindeki herkese açık bir Gist için Git deposunu klonlayın ve revizyonları tarayın.<sup>[[19]](#references)[[6]](#references)</sup>
+
+```bash
+git clone https://gist.github.com/GIST_ID.git
+gitleaks git -v --log-opts="--all" GIST_ID
+```
+
+### Modern token'lar için güncellenmiş dork'lar
 
 - GitHub token'ları: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`.<sup>[[10]](#references)</sup>
 - Slack token'ları: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
 - Cloud ve genel:
-- `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
-- `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
-- `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
+  - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
+  - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
+  - `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
 
 ### **Dorks**
+
 ```bash
 ".mlab.com password"
 "access_key"
@@ -351,21 +373,30 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
+
 Ek code-search iş akışları için [Wide Source Code Search](wide-source-code-search.md) sayfasına bakın.
+
+
 
 ## References
 
-- [1] [Public repositories dışında secret'ları tutmak (GitHub Blog, 29 Şubat 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
-- [2] [TruffleHog v3 – leak edilmiş kimlik bilgilerini bulma, doğrulama ve analiz etme](https://github.com/trufflesecurity/trufflehog)
-- [3] [GitHub Code Search syntax'ını anlama](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
-- [4] [Code arama (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
+- [1] [Gizli bilgileri herkese açık depolardan uzak tutma (GitHub Blog, 29 Şubat 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – leaked kimlik bilgilerini bulma, doğrulama ve analiz etme](https://github.com/trufflesecurity/trufflehog)
+- [3] [GitHub Code Search sözdizimini anlama](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [4] [Kod arama (eski)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
 - [5] [gh search code](https://cli.github.com/manual/gh_search_code)
 - [6] [Gitleaks README](https://github.com/gitleaks/gitleaks/blob/master/README.md)
 - [7] [Nosey Parker README](https://github.com/praetorian-inc/noseyparker#readme)
 - [8] [Titus README](https://github.com/praetorian-inc/titus#readme)
 - [9] [ggshield README](https://github.com/GitGuardian/ggshield#readme)
-- [10] [Secret'lar için referans (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
-- [11] [Secret'lar (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
-- [12] [Workflow run log'larını kullanma (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
-- [13] [TruffleHog GitHub source'u](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
+- [10] [Secrets başvurusu (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
+- [11] [Secrets (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
+- [12] [İş akışı çalıştırma günlüklerini kullanma (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
+- [13] [TruffleHog GitHub kaynak kodu](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
+- [14] [Pull request referansları ve merge dalları (GitHub Docs)](https://docs.github.com/en/pull-requests/reference/pull-requests)
+- [15] [Pull request'leri yerel olarak checkout etme (GitHub Docs)](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/checking-out-pull-requests-locally)
+- [16] [Bir depodan hassas verileri kaldırma (GitHub Docs)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)
+- [17] [git-fetch belgeleri](https://git-scm.com/docs/git-fetch)
+- [18] [Bir pull request'i tarama (betterleaks)](https://github.com/betterleaks/betterleaks/blob/main/docs/scanning.md)
+- [19] [Gists için REST API uç noktaları (GitHub Docs)](https://docs.github.com/en/rest/gists/gists)
 {{#include ../../banners/hacktricks-training.md}}
