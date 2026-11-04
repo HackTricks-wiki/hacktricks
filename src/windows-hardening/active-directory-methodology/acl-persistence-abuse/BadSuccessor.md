@@ -82,6 +82,16 @@ For an attacker-controlled fake migration, that behavior can turn BadSuccessor i
 
 That makes the technique useful both for direct domain takeover and for follow-on operations such as pass-the-hash or wider credential compromise.
 
+## BetterSuccessor after the KDC patch
+
+The patched KDC validates both sides of a dMSA migration. Besides the dMSA's `msDS-ManagedAccountPrecededByLink` and migration state, the predecessor must point back to the dMSA through `msDS-SupersededManagedAccountLink` and have a compatible `msDS-SupersededServiceAccountState`. A one-way link now fails; an account that can only create a dMSA cannot nominate any arbitrary predecessor. With `CreateChild` for a dMSA in an OU **and** effective write access to the selected target account's migration attributes, an attacker can establish the reciprocal link. The resulting dMSA ticket can carry the predecessor's authorization context and expose its keys in the dMSA key package. This is a targeted credential-access/privilege-amplification path, not proof that the original arbitrary-target BadSuccessor remains exploitable on patched DCs.<sup>[[5]](#references)[[6]](#references)</sup>
+
+In a lab where the target-account write is confirmed, `bloodyAD` can create the dMSA and perform the paired migration writes. Request the dMSA ticket using the returned Kerberos material and check the target account's actual permissions before assuming its privileges or hash were recovered. The tool's `badSuccessor` subcommand name does not imply the unpatched one-way behavior.<sup>[[7]](#references)</sup>
+
+```bash
+KRB5CCNAME=operator.ccache bloodyAD -d example.local --host dc.example.local -k add badSuccessor test_dmsa --ou 'OU=DMSAHolder,DC=example,DC=local' -t 'CN=Target User,OU=Users,DC=example,DC=local'
+```
+
 ## Notes on patch status
 
 The original BadSuccessor behavior is **not just a theoretical 2025 preview issue**. Microsoft assigned it **CVE-2025-53779** and published a security update in **August 2025**.<sup>[[4]](#references)</sup> Keep this attack documented for:
@@ -104,5 +114,8 @@ Do not assume a Windows Server 2025 domain is vulnerable just because dMSA exist
 - [2] [Akamai - BadSuccessor: Abusing dMSA to Escalate Privileges in Active Directory](https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory)
 - [3] [Microsoft Learn - Delegated Managed Service Accounts overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/delegated-managed-service-accounts/delegated-managed-service-accounts-overview)
 - [4] [Microsoft Security Response Center - CVE-2025-53779](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-53779)
+- [5] [Akamai - BadSuccessor Is Dead, Long Live BadSuccessor(?)](https://www.akamai.com/blog/security-research/badsuccessor-is-dead-analyzing-badsuccessor-patch)
+- [6] [Altered Security - BetterSuccessor: Still abusing dMSA after the patch](https://www.alteredsecurity.com/post/bettersuccessor-still-abusing-dmsa-for-privilege-escalation-badsuccessor-after-patch)
+- [7] [0xdf - HTB: Checkpoint](https://0xdf.gitlab.io/2026/10/24/htb-checkpoint.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -114,6 +114,18 @@ Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
 
+## Offline credential extraction from VM snapshots
+
+A readable VM backup can contain a saved **guest memory image**, even without access to the running guest or LSASS. For VMware, identify the `.vmsn` snapshot metadata and its companion `.vmem` when present; do not confuse either with a `.vmdk` disk image. `VMkatz` parses snapshot or VM-directory inputs and can recover [Windows logon-session credentials](credentials-mimikatz.md) such as hashes and tickets from guest memory. It can also inspect virtual disks for SAM/LSA material. Access to the backup files is the prerequisite, not debug rights on the live VM.<sup>[[17]](#references)[[18]](#references)</sup>
+
+```bash
+vmkatz snapshot.vmsn
+vmkatz --disk disk.vmdk snapshot.vmsn   # Resolve paged-out data when a disk is available
+vmkatz /path/to/vm-directory/          # Discover supported VM files
+```
+
+The example in Checkpoint recovered a **local** Administrator NT hash from a standalone VM snapshot. It only authenticated to the domain after separate password reuse was verified; a local hash from a backup is not inherently a domain credential. On a memory-constrained host, VMkatz may scan and release pages incrementally, but copying the snapshot to a larger analysis host can still be preferable.<sup>[[17]](#references)[[18]](#references)</sup>
+
 ## Dumpin lsass with PPLBlade
 
 [**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) is a Protected Process Dumper Tool that support obfuscating memory dump and transferring it on remote workstations without dropping it onto the disk.
@@ -564,5 +576,7 @@ This means **hardware binding prevents off-device export but not same-user use o
 - [14] [Microsoft Learn: Remote Credential Guard and Restricted Admin](https://learn.microsoft.com/en-us/windows/security/identity-protection/remote-credential-guard)
 - [15] [Microsoft Learn: Credentials Protection and Management](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/credentials-protection-and-management)
 - [16] [S12 DumpNTDS.cpp](https://github.com/S12cybersecurity/HandleRedirect/blob/main/DumpNTDS/DumpNTDS/DumpNTDS.cpp)
+- [17] [VMkatz - supported inputs and quick start](https://github.com/nikaiw/VMkatz)
+- [18] [0xdf - HTB: Checkpoint](https://0xdf.gitlab.io/2026/10/24/htb-checkpoint.html)
 
 {{#include ../../banners/hacktricks-training.md}}

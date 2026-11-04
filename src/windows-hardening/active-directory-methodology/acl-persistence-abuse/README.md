@@ -11,6 +11,8 @@
 BadSuccessor.md
 {{#endref}}
 
+For deleted-object ACL abuse and account reanimation, see [AD Recycle Bin reanimation](../privileged-groups-and-token-privileges.md#reanimating-a-deleted-account-through-delegated-acls).
+
 ## **GenericAll Rights on User**
 
 This privilege grants an attacker full control over a target user account. Once `GenericAll` rights are confirmed using the `Get-ObjectAcl` command, an attacker can:

