@@ -896,7 +896,6 @@
   - [SQLite Injection](pentesting-web/sql-injection/sqlite-injection.md)
   - [Sqlmap](pentesting-web/sql-injection/sqlmap.md)
   - [PostgreSQL injection](pentesting-web/sql-injection/postgresql-injection/README.md)
-    - [dblink/lo_import data exfiltration](pentesting-web/sql-injection/postgresql-injection/dblink-lo_import-data-exfiltration.md)
     - [PL/pgSQL Password Bruteforce](pentesting-web/sql-injection/postgresql-injection/pl-pgsql-password-bruteforce.md)
     - [Network - Privesc, Port Scanner and NTLM chanllenge response disclosure](pentesting-web/sql-injection/postgresql-injection/network-privesc-port-scanner-and-ntlm-chanllenge-response-disclosure.md)
     - [Big Binary Files Upload (PostgreSQL)](pentesting-web/sql-injection/postgresql-injection/big-binary-files-upload-postgresql.md)
