@@ -11,6 +11,8 @@
 BadSuccessor.md
 {{#endref}}
 
+For deleted-object ACL abuse and account reanimation, see [AD Recycle Bin reanimation](../privileged-groups-and-token-privileges.md#reanimating-a-deleted-account-through-delegated-acls).
+
 ## **GenericAll Rights on User**
 
 This privilege grants an attacker full control over a target user account. Once `GenericAll` rights are confirmed using the `Get-ObjectAcl` command, an attacker can:
@@ -467,3 +469,4 @@ Notes:
 - [16] [Synacktiv GPOddity](https://github.com/synacktiv/GPOddity)
 - [17] [Synacktiv OUned](https://github.com/synacktiv/OUned)
 - [18] [HTB: Hercules — OU movement and inherited ACL abuse](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
+{{#include ../../../banners/hacktricks-training.md}}

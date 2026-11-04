@@ -13,6 +13,8 @@ If an attacker can create **any** dMSA inside an OU and directly manipulate thos
 
 This technique was coined **BadSuccessor** by Unit 42 in 2025. Microsoft later assigned it **CVE-2025-53779** and released a security update in **August 2025**. The technique remains relevant to unpatched Windows Server 2025 environments and to reviews of dangerous OU delegation.<sup>[[1]](#references)[[2]](#references)[[6]](#references)</sup>
 
+On patched DCs, a [two-sided dMSA migration](acl-persistence-abuse/BadSuccessor.md#bettersuccessor-after-the-kdc-patch) can still expose a target account when the attacker can also write its migration attributes. This is narrower than the original arbitrary-target attack.
+
 ### Attack prerequisites
 
 1. An account that is *allowed* to create objects inside **an Organizational Unit (OU)** *and* has at least one of:
