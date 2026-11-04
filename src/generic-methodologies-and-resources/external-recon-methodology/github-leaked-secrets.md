@@ -69,6 +69,26 @@ ggshield secret scan repo <path-or-url>
 
 > Tip: For git history, prefer scanners that parse `git log -p --all` to catch removed secrets.<sup>[[6]](#references)</sup>
 
+### Pull-request refs and Gist revision history
+
+Normal clones do not fetch GitHub's `refs/pull/<number>/head` refs, so `git log --all` misses commits reachable only through those refs until you fetch them.<sup>[[14]](#references)[[17]](#references)</sup> PR refs can expose unmerged commits even after a contributor deletes their fork.<sup>[[15]](#references)</sup> Rewriting branch history alone may leave sensitive commits reachable through PR references.<sup>[[16]](#references)</sup>
+
+In a full clone, fetch a selected PR head before scanning, or use the wildcard refspec for all advertised PR heads when the extra download is justified.<sup>[[17]](#references)[[18]](#references)</sup> Gitleaks scans local commit patches with `git log -p`, so rerun it after fetching the refs.<sup>[[6]](#references)</sup>
+
+```bash
+git fetch origin 'refs/pull/123/head:refs/remotes/origin/pr/123'
+# Or fetch every advertised PR head:
+git fetch origin '+refs/pull/*/head:refs/remotes/origin/pr/*'
+gitleaks git -v --log-opts="--all" .
+```
+
+A Gist also has a Git history, so checking only its current files can miss a credential removed in a later revision.<sup>[[19]](#references)</sup> For an in-scope public Gist, clone its Git repository and scan the revisions.<sup>[[19]](#references)[[6]](#references)</sup>
+
+```bash
+git clone https://gist.github.com/GIST_ID.git
+gitleaks git -v --log-opts="--all" GIST_ID
+```
+
 ### Updated dorks for modern tokens
 
 - GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`.<sup>[[10]](#references)</sup>
@@ -356,6 +376,8 @@ AWS SECRET
 
 For additional code-search workflows, see [Wide Source Code Search](wide-source-code-search.md).
 
+
+
 ## References
 
 - [1] [Keeping secrets out of public repositories (GitHub Blog, Feb 29, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
@@ -371,5 +393,10 @@ For additional code-search workflows, see [Wide Source Code Search](wide-source-
 - [11] [Secrets (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
 - [12] [Using workflow run logs (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
 - [13] [TruffleHog GitHub source](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
-
+- [14] [Pull request refs and merge branches (GitHub Docs)](https://docs.github.com/en/pull-requests/reference/pull-requests)
+- [15] [Checking out pull requests locally (GitHub Docs)](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/checking-out-pull-requests-locally)
+- [16] [Removing sensitive data from a repository (GitHub Docs)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)
+- [17] [git-fetch documentation](https://git-scm.com/docs/git-fetch)
+- [18] [Scanning a pull request (betterleaks)](https://github.com/betterleaks/betterleaks/blob/main/docs/scanning.md)
+- [19] [REST API endpoints for Gists (GitHub Docs)](https://docs.github.com/en/rest/gists/gists)
 {{#include ../../banners/hacktricks-training.md}}
