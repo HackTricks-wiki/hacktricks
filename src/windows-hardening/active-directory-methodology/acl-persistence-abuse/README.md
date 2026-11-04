@@ -469,4 +469,3 @@ Notes:
 - [16] [Synacktiv GPOddity](https://github.com/synacktiv/GPOddity)
 - [17] [Synacktiv OUned](https://github.com/synacktiv/OUned)
 - [18] [HTB: Hercules — OU movement and inherited ACL abuse](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
-{{#include ../../../banners/hacktricks-training.md}}

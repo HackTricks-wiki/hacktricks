@@ -68,9 +68,7 @@ Get-ADObject -Filter 'isDeleted -eq $true' -IncludeDeletedObjects `
 
 ### Reanimating a deleted account through delegated ACLs
 
-The directory undelete operation requires `Reanimate-Tombstones` on the domain naming-context root, rename rights on the deleted object, and `CREATE_CHILD` on its destination container. A `WRITE` result from an ACL-enumeration tool is a lead, not proof that every required right is effective.<sup>[[18]](#references)</sup>
-
-Check the deleted object's effective ACL and its `lastKnownParent` OU directly: BloodHound paths may miss deleted-object ACLs. A restored account can retain its password hash, but this neither reveals the password nor grants a password reset. Authentication still needs a valid candidate credential, as the Checkpoint example demonstrated.<sup>[[19]](#references)</sup>
+An ACL tool's `WRITE` result for a deleted account is a lead, not proof that all undelete permissions are effective.<sup>[[18]](#references)</sup> Inspect the deleted object's ACL and `lastKnownParent` directly; BloodHound paths may omit deleted-object ACLs.<sup>[[19]](#references)</sup> A restored account can retain its password hash, but restoring it does not disclose the password or grant password-reset rights. Authentication still requires a valid credential.<sup>[[19]](#references)</sup>
 
 To enumerate hidden deleted accounts and confirm the reanimation right from Linux, use `bloodyAD` with the recycled-object and deactivated-link LDAP controls. Then restore the chosen account by its `sAMAccountName`. Replace the example domain, host, and identity with the assessed environment; verify the target DN and `lastKnownParent` before the write.<sup>[[19]](#references)</sup>
 

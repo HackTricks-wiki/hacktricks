@@ -45,5 +45,3 @@ An attacker with write access to the drop share can upload the tested package an
 - [1] [0xdf - HTB: Checkpoint](https://0xdf.gitlab.io/2026/10/24/htb-checkpoint.html)
 - [2] [VS Code - Activation Events](https://code.visualstudio.com/api/references/activation-events)
 - [3] [VS Code - Publishing Extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
-
-{{#include ../banners/hacktricks-training.md}}
