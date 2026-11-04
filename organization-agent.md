@@ -37,11 +37,13 @@
 - Remote MCP OAuth, JSON-RPC enumeration, authorization and interception → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery, repo config, secrets and artifacts → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Server testing and client delivery are distinct.
 - eSIM/eUICC profile management, Java Card VM type confusion, OTA/APDU and card tests → `src/mobile-pentesting/esim-javacard-exploitation.md`. This is a mobile secure element, not Android app internals; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
 
-- Former TODO web topics: Host poisoning → `pentesting-web/reset-password.md`; session auth → `pentesting-web/403-and-401-bypasses.md`; signup/email change → `pentesting-web/registration-vulnerabilities.md`; Jira service desk → `network-services-pentesting/pentesting-web/jira.md`; TRACE → `pentesting-web/hacking-with-cookies/README.md`.
+- Former TODO web topics: host poisoning → password reset; session auth → 401/403; signup/email change → registration; Jira service desk → Jira; TRACE → cookies.
 - Cross-platform host/SaaS collection-tool reference → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters. Its old TODO route redirects here.
 
 - macOS environment-controlled PHP, Lua, Julia, Octave, R, Ruby and Erlang/Elixir interpreter startup → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`. Each runtime keeps its prerequisites, variants and mitigation under headings; shell, Python, PowerShell and framework injection stay separate.
 - MIFARE Classic stored-value tampering (Crypto1, balance diff/integrity, Proxmark3 transcript, magic UID caveats) → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; `proxmark-3.md` keeps generic tool commands and links to this tool-independent card-balance task.
+
+- PostgreSQL `lo_import`/`dblink_connect` exfiltration → `src/pentesting-web/sql-injection/postgresql-injection/README.md`; other dblink tasks remain separate.
 
 ## Researcher entry points
 
