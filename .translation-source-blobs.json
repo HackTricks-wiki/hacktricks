@@ -297,7 +297,7 @@
     "src/generic-methodologies-and-resources/proof-assistant-formal-verification-security.md": "647d9f14bb2649a19426c35af21fae2461d85104",
     "src/generic-methodologies-and-resources/python/README.md": "b8ede9fa01a7c76d931163231b9039cc249bc159",
     "src/generic-methodologies-and-resources/python/basic-python.md": "f8171da4246ddba8761d62acb0ea724df804a22c",
-    "src/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md": "bc0d0295d2997700aee878fb63edc0921fd67076",
+    "src/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md": "507101c10945c0185c1f5c8f8769e4081885bb4c",
     "src/generic-methodologies-and-resources/python/bypass-python-sandboxes/js2py-sandbox-escape-cve-2024-28397.md": "1dbad97ea369575ade4a74b9f0e34c95e754ef18",
     "src/generic-methodologies-and-resources/python/bypass-python-sandboxes/load_name-load_const-opcode-oob-read.md": "c3780f3ba041a14907515e20ac3e13ff708ab9cb",
     "src/generic-methodologies-and-resources/python/bypass-python-sandboxes/reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md": "ea271204c6be30e538210b9022496b67823e4e69",
