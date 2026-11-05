@@ -1,493 +1,518 @@
-# Windows Artifacts
+# Windows आर्टिफैक्ट्स
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## सामान्य Windows Artifacts
+## सामान्य Windows आर्टिफैक्ट्स
 
-### Windows 10 Notifications
+### Windows 10 सूचनाएँ
 
-प्रति-उपयोगकर्ता notification database `%LOCALAPPDATA%\Microsoft\Windows\Notifications` के अंतर्गत होता है (उदाहरण के लिए, `C:\Users\<username>\AppData\Local\Microsoft\Windows\Notifications`)। Windows 10 के शुरुआती releases में `appdb.dat` का उपयोग किया जाता था; Anniversary Update (1607) में `wpndatabase.db` पेश किया गया। SQLite database में notification payloads और timing fields वाली `Notification` table शामिल होती है, हालांकि retention और उपलब्ध data release तथा cleanup policy के अनुसार अलग-अलग हो सकते हैं।<sup>[[3]](#references)</sup>
+प्रति-उपयोगकर्ता सूचना डेटाबेस `%LOCALAPPDATA%\Microsoft\Windows\Notifications` के अंतर्गत होता है (उदाहरण के लिए, `C:\Users\<username>\AppData\Local\Microsoft\Windows\Notifications`)। Windows 10 के शुरुआती रिलीज़ में `appdb.dat` का इस्तेमाल होता था; Anniversary Update (1607) में `wpndatabase.db` आया। SQLite डेटाबेस में notification payloads और समय-संबंधी फ़ील्ड वाला `Notification` टेबल शामिल होता है, हालाँकि डेटा का प्रतिधारण और उपलब्धता रिलीज़ तथा cleanup policy के अनुसार अलग-अलग होती है।<sup>[[3]](#references)</sup>
 
 ### Timeline
 
-Windows Timeline एक activity-history feature है, जिसमें supported applications, documents और अन्य user activity के records हो सकते हैं; इसका coverage application और Windows version पर निर्भर करता है।<sup>[[4]](#references)</sup>
+Windows Timeline एक activity-history सुविधा है, जिसमें समर्थित applications, documents और उपयोगकर्ता की अन्य गतिविधियों के रिकॉर्ड हो सकते हैं; इसका दायरा application और Windows version पर निर्भर करता है।<sup>[[4]](#references)</sup>
 
-Database `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` पर स्थित होता है। इसे SQLite से खोला जा सकता है या [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) से parse किया जा सकता है, जिसके output की समीक्षा [**Timeline Explorer**](https://ericzimmerman.github.io/#!index.md) से की जा सकती है।<sup>[[4]](#references)[[5]](#references)</sup>
+यह डेटाबेस `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` पर मौजूद होता है। इसे SQLite से खोला जा सकता है या [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) से parse किया जा सकता है; इसके output की समीक्षा [**Timeline Explorer**](https://ericzimmerman.github.io/#!index.md) से की जा सकती है।<sup>[[4]](#references)[[5]](#references)</sup>
+
+### Windows Recall snapshots (Copilot+ PCs)
+
+समर्थित Windows 11 Copilot+ PCs पर Recall वैकल्पिक है। मौजूदा builds में snapshots और उनका index, Windows Hello तथा VBS enclave से जुड़ी keys से encrypt किए जाते हैं। Store की offline copy को plaintext SQLite database न मानें; 2024 preview और जारी किए गए design में access की विशेषताएँ अलग-अलग हैं।<sup>[[77]](#references)</sup>
+
+**सक्रिय, enabled Recall session** में, उसी उपयोगकर्ता की `AIXHost.exe` rendering process एक अलग access surface है। TotalRecall Reloaded proof of concept उस process में DLL inject करता है और उसके Recall COM interfaces को call करता है। पूरी history निकालने के लिए उपयोगकर्ता को अब भी Windows Hello से authenticate करना पड़ता है; यह offline decryption या Hello bypass नहीं है। शोधकर्ता ने Windows 11 ARM64 पर इस tool का दस्तावेज़ीकरण किया है, इसलिए इस पर निर्भर होने से पहले target build के साथ इसकी compatibility जाँच लें।<sup>[[78]](#references)[[77]](#references)</sup>
+
+```powershell
+totalrecall.exe --preauth  # Most recent capture and settings; no Hello prompt
+totalrecall.exe --wait     # Wait for the user to open Recall and authenticate
+```
+
+`--preauth` का उपयोग `GetRecentCaptureThumbnail` के ज़रिए Hello के बिना नवीनतम capture का बड़ा rendition अनुरोध करने के लिए होता है। Authorization के बाद, `--wait` screenshots, OCR text और प्रति-capture metadata निकाल सकता है, जिसमें application और window context शामिल हैं। आउटपुट timestamp वाले `extraction_*` directory में लिखा जाता है। ये proof of concept से प्राप्त build-dependent निष्कर्ष हैं; इनसे यह गारंटी नहीं मिलती कि Recall enabled है या हर screen capture की गई थी।<sup>[[78]](#references)</sup>
 
 ### ADS (Alternate Data Streams)
 
-स्थानीय trust boundary के बाहर से download की गई files में **`Zone.Identifier` alternate data stream** हो सकता है, जो zone information record करता है और इसमें URL जैसे origin metadata शामिल हो सकते हैं। इसकी उपस्थिति और fields producer तथा system policy पर निर्भर करती हैं।<sup>[[6]](#references)</sup>
+स्थानीय trust boundary के बाहर से download की गई files में **`Zone.Identifier` alternate data stream** हो सकती है, जो zone की जानकारी दर्ज करती है और इसमें URL जैसे origin metadata शामिल हो सकते हैं। इसकी मौजूदगी और fields, producer और system policy पर निर्भर करते हैं।<sup>[[6]](#references)</sup>
 
 ## **File Backups**
 
 ### Recycle Bin
 
-Vista और बाद के versions में, **Recycle Bin** drive के root में मौजूद **`$Recycle.bin`** folder में पाया जा सकता है (उदाहरण के लिए, `C:\$Recycle.bin`)।\
-जब इस folder में कोई file delete की जाती है, तो 2 specific files बनाई जाती हैं:
+Vista और उसके बाद के versions में, **Recycle Bin** drive के root में मौजूद **`$Recycle.bin`** folder में पाया जा सकता है (उदाहरण के लिए, `C:\$Recycle.bin`)।\
+इस folder में कोई file delete करने पर 2 specific files बनाई जाती हैं:
 
-- `$I{id}`: File information, जिसमें deletion time और original path शामिल होते हैं
+- `$I{id}`: File की जानकारी, जिसमें deletion time और original path शामिल हैं
 - `$R{id}`: File का content
 
 ![File Backups - Recycle Bin: $R{id}: File का content](<../../../images/image (1029).png>)
 
-इन files के होने पर, आप original path और deletion time extract करने के लिए [**Rifiuti2**](https://github.com/abelcheung/rifiuti2) का उपयोग कर सकते हैं (target Windows release के लिए उपयुक्त version का उपयोग करें)।<sup>[[7]](#references)</sup>
+इन files से, original path और deletion time निकालने के लिए [**Rifiuti2**](https://github.com/abelcheung/rifiuti2) का उपयोग किया जा सकता है (target Windows release के अनुसार उपयुक्त version इस्तेमाल करें)।<sup>[[7]](#references)</sup>
+
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
-![File Backups - Recycle Bin: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
 
-### Volume Shadow Copies
+![फ़ाइल बैकअप - Recycle Bin: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
 
-Volume Shadow Copy Service (VSS) files के उपयोग में होने के दौरान volumes की point-in-time shadow copies बना सकता है; shadow copy forensic image का विकल्प नहीं है।<sup>[[8]](#references)</sup>
+### वॉल्यूम शैडो कॉपीज़
 
-Copy metadata सामान्यतः volume root पर `\System Volume Information` से संबद्ध होता है, जिसमें system के अनुसार अलग-अलग identifiers होते हैं:
+Volume Shadow Copy Service (VSS), फ़ाइलों के उपयोग में होने के दौरान वॉल्यूम की किसी निश्चित समय की शैडो कॉपी बना सकती है; शैडो कॉपी फॉरेंसिक इमेज का विकल्प नहीं है।<sup>[[8]](#references)</sup>
 
-![Recycle Bin - Volume Shadow Copies: ये backups सामान्यतः file system के root से System Volume Information में स्थित होते हैं और इनका नाम चित्र में दिखाए गए UIDs से बना होता है](<../../../images/image (94).png>)
+कॉपी का मेटाडेटा आम तौर पर वॉल्यूम के रूट पर मौजूद `\System Volume Information` से जुड़ा होता है; इसके आइडेंटिफ़ायर सिस्टम के अनुसार अलग-अलग होते हैं:
 
-किसी उपयुक्त forensic mounter से image mount करने के बाद, [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) उपलब्ध VSS snapshots को enumerate कर सकता है और उनमें files को browse या copy कर सकता है।<sup>[[9]](#references)</sup>
+![Recycle Bin - वॉल्यूम शैडो कॉपीज़: ये बैकअप आम तौर पर फ़ाइल सिस्टम के रूट में मौजूद System Volume Information में होते हैं और इनके नाम UID से बने होते हैं, जो...](<../../../images/image (94).png>)
 
-![Recycle Bin - Volume Shadow Copies: ArsenalImageMounter से forensics image mount करने पर ShadowCopyView tool का उपयोग shadow copy का निरीक्षण करने और files extract करने के लिए भी किया जा सकता है](<../../../images/image (576).png>)
+उपयुक्त फॉरेंसिक माउंटर से इमेज माउंट करने के बाद, [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) उपलब्ध VSS स्नैपशॉट की सूची दिखा सकता है और उनमें फ़ाइलें ब्राउज़ या कॉपी कर सकता है।<sup>[[9]](#references)</sup>
 
-VSS registry writer configuration में `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` शामिल है, जहाँ backup से exclude की गई files और keys निर्दिष्ट की जा सकती हैं:<sup>[[10]](#references)[[11]](#references)</sup>
+![Recycle Bin - वॉल्यूम शैडो कॉपीज़: फॉरेंसिक इमेज को ArsenalImageMounter से माउंट करने पर, ShadowCopyView टूल का उपयोग शैडो कॉपी की जाँच करने और उसमें से फ़ाइलें निकालने के लिए भी किया जा सकता है...](<../../../images/image (576).png>)
 
-![Recycle Bin - Volume Shadow Copies: registry entry HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore में backup न करने वाली files और keys होती हैं](<../../../images/image (254).png>)
+VSS registry writer configuration में `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` शामिल है, जो उन फ़ाइलों और keys को निर्दिष्ट कर सकता है जिन्हें बैकअप से बाहर रखा गया है:<sup>[[10]](#references)[[11]](#references)</sup>
 
-`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` key में VSS service configuration भी होती है।<sup>[[8]](#references)</sup>
+![Recycle Bin - वॉल्यूम शैडो कॉपीज़: registry entry HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore में वे फ़ाइलें और keys होती हैं जिनका बैकअप नहीं लेना है](<../../../images/image (254).png>)
 
-### Office AutoSaved Files
+`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` key में भी VSS service configuration होती है।<sup>[[8]](#references)</sup>
 
-AutoRecover locations Office application, version और configuration के अनुसार अलग-अलग होती हैं। Word के लिए Microsoft `%APPDATA%\Microsoft\Word` को default location के रूप में document करता है; active path के लिए application settings जाँचें।<sup>[[12]](#references)</sup>
+### Office की AutoSaved फ़ाइलें
+
+AutoRecover के स्थान Office application, version और configuration के अनुसार अलग-अलग होते हैं। Word के लिए, Microsoft `%APPDATA%\Microsoft\Word` को डिफ़ॉल्ट स्थान बताता है; सक्रिय path जानने के लिए application settings देखें।<sup>[[12]](#references)</sup>
 
 ## Shell Items
 
-Shell item ऐसा item होता है जिसमें किसी अन्य file तक पहुँचने के तरीके की जानकारी होती है।
+Shell item में किसी अन्य फ़ाइल तक पहुँचने के बारे में जानकारी होती है।
 
-### Recent Documents (LNK)
+### हाल के दस्तावेज़ (LNK)
 
-जब कोई user किसी item को खोलता है या अन्यथा access करता है, तो Windows सामान्यतः recent-item shortcuts बनाता है:
+Windows में, उपयोगकर्ता द्वारा किसी item को खोलने या किसी अन्य तरीके से उस तक पहुँचने पर, आम तौर पर हाल ही के items के shortcuts बनाए जाते हैं:
 
 - Win7-Win10: `%APPDATA%\Microsoft\Windows\Recent\`
 - Office: `%APPDATA%\Microsoft\Office\Recent\`
 
-Folder access से उस folder और संबंधित parent folders के लिए भी links बन सकते हैं।
+फ़ोल्डर तक पहुँचने पर उस फ़ोल्डर और उससे जुड़े parent folders के links भी बन सकते हैं।
 
-इन link files में target type, target MAC times, volume information और target path शामिल हो सकते हैं। यह metadata किसी removed target की पहचान करने में सहायक हो सकता है, लेकिन artifact स्वयं इस बात का प्रमाण नहीं है कि target किसी विशेष user द्वारा खोला गया था।<sup>[[13]](#references)[[14]](#references)</sup>
+इन link फ़ाइलों में target का type, target के MAC times, volume की जानकारी और target path शामिल हो सकते हैं। यह मेटाडेटा हटाए गए target की पहचान करने में मदद कर सकता है, लेकिन यह artifact अपने आप में इस बात का प्रमाण नहीं है कि किसी खास उपयोगकर्ता ने target खोला था।<sup>[[13]](#references)[[14]](#references)</sup>
 
-LNK के अपने filesystem timestamps और उसमें embedded target timestamps अलग-अलग होते हैं। Corroborating artifacts के बिना link creation को first use या link modification को last use न समझें; format target timestamps को link file के timestamps से अलग store करता है।<sup>[[13]](#references)[[14]](#references)</sup>
+LNK के अपने filesystem timestamps और उसमें मौजूद target timestamps अलग-अलग होते हैं। जब तक अन्य artifacts से पुष्टि न हो, link बनने को पहली बार उपयोग किए जाने के रूप में या link में बदलाव को आखिरी बार उपयोग किए जाने के रूप में न समझें; format, target timestamps को link फ़ाइल के timestamps से अलग संग्रहीत करता है।<sup>[[13]](#references)[[14]](#references)</sup>
 
-मौजूदा [**LinkParser**](http://4discovery.com/our-tools/) link को historical option के रूप में रखा गया है, लेकिन review के दौरान इसका documentation उपलब्ध नहीं था। Documented command-line parser के लिए [**LECmd**](https://github.com/EricZimmerman/LECmd) का उपयोग करें।<sup>[[15]](#references)</sup>
+मौजूदा [**LinkParser**](http://4discovery.com/our-tools/) link को ऐतिहासिक विकल्प के रूप में बरकरार रखा गया है, लेकिन समीक्षा के दौरान इसका documentation उपलब्ध नहीं था। दस्तावेज़ीकृत command-line parser के लिए, [**LECmd**](https://github.com/EricZimmerman/LECmd) का उपयोग करें।<sup>[[15]](#references)</sup>
 
-ये tools सामान्यतः timestamps के दो sets दिखाते हैं:
+ये टूल आम तौर पर timestamps के दो सेट दिखाते हैं:
 
 - **Target timestamps:**
-1. FileModifiedDate
-2. FileAccessDate
-3. FileCreationDate
+  1. FileModifiedDate
+  2. FileAccessDate
+  3. FileCreationDate
 - **Link-file timestamps:**
-1. LinkModifiedDate
-2. LinkAccessDate
-3. LinkCreationDate.
+  1. LinkModifiedDate
+  2. LinkAccessDate
+  3. LinkCreationDate.
 
-पहला set target को refer करता है; दूसरा set स्वयं LNK file को refer करता है। दोनों की व्याख्या parser के documentation और filesystem context के साथ करें।<sup>[[14]](#references)[[15]](#references)</sup>
+पहला सेट target से संबंधित है; दूसरा सेट स्वयं LNK फ़ाइल से संबंधित है। दोनों की व्याख्या parser के documentation और filesystem के संदर्भ में करें।<sup>[[14]](#references)[[15]](#references)</sup>
 
-आप Windows CLI tool: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd) चलाकर भी यही जानकारी प्राप्त कर सकते हैं।<sup>[[15]](#references)</sup>
+आप Windows CLI tool [**LECmd.exe**](https://github.com/EricZimmerman/LECmd) चलाकर भी वही जानकारी प्राप्त कर सकते हैं।<sup>[[15]](#references)</sup>
+
 ```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 ```
-इस मामले में, जानकारी एक CSV file के अंदर save की जाएगी।
+
+इस मामले में, जानकारी को CSV फ़ाइल में सहेजा जाएगा।
 
 ### Jumplists
 
-Jump Lists प्रति-application recent या task-specific items की lists होती हैं और automatic या custom हो सकती हैं।<sup>[[13]](#references)</sup>
+Jump Lists प्रति-एप्लिकेशन हाल ही में उपयोग किए गए या कार्य-विशिष्ट आइटम की सूचियाँ होती हैं। ये स्वचालित या कस्टम हो सकती हैं।<sup>[[13]](#references)</sup>
 
-Automatic Jump Lists को `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\` में store किया जाता है और इनके नाम `{id}.automaticDestinations-ms` जैसे होते हैं, जहाँ ID application की पहचान करती है।
+स्वचालित Jump Lists `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\` में संग्रहीत होती हैं और इनके नाम `{id}.automaticDestinations-ms` जैसे होते हैं, जहाँ ID एप्लिकेशन की पहचान करती है।
 
-Custom Jump Lists को `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations\` में store किया जाता है; application यह नियंत्रित करती है कि वह कौन-से task या item entries create करे।
+कस्टम Jump Lists `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations\` में संग्रहीत होती हैं; एप्लिकेशन नियंत्रित करता है कि वह कौन-सी कार्य या आइटम प्रविष्टियाँ बनाता है।
 
-Filesystem द्वारा बनाए और modified times Jump List file का वर्णन करते हैं, न कि automatically प्रत्येक listed target के first और last access का। Parsed entries को file के timestamps और अन्य artifacts के साथ correlate करें।<sup>[[13]](#references)</sup>
+फ़ाइल सिस्टम के निर्माण और संशोधन समय Jump List फ़ाइल के बारे में बताते हैं, न कि सूची में शामिल हर लक्ष्य तक पहली और आखिरी पहुँच के बारे में। पार्स की गई प्रविष्टियों का फ़ाइल के टाइमस्टैम्प और अन्य आर्टिफ़ैक्ट से मिलान करें।<sup>[[13]](#references)</sup>
 
-आप [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md) का उपयोग करके Jump Lists inspect कर सकते हैं।<sup>[[5]](#references)</sup>
+आप [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md) का उपयोग करके Jump Lists का निरीक्षण कर सकते हैं।<sup>[[5]](#references)</sup>
 
-![Recent Documents (LNK) - Jumplists: आप JumplistExplorer का उपयोग करके jumplists inspect कर सकते हैं](<../../../images/image (168).png>)
+![हाल के दस्तावेज़ (LNK) - Jumplists: आप JumplistExplorer का उपयोग करके jumplists का निरीक्षण कर सकते हैं](<../../../images/image (168).png>)
 
-(_ध्यान दें कि JumplistExplorer द्वारा दिए गए timestamps स्वयं jumplist file से संबंधित हैं_)
+(_ध्यान दें कि JumplistExplorer द्वारा दिए गए टाइमस्टैम्प स्वयं jumplist फ़ाइल से संबंधित हैं_)
 
 ### Shellbags
 
-[**Shellbags क्या हैं, यह जानने के लिए इस link को follow करें।**](interesting-windows-registry-keys.md#shellbags)
+[**Shellbags क्या हैं, यह जानने के लिए इस लिंक पर जाएँ।**](interesting-windows-registry-keys.md#shellbags)
 
 ## Windows USBs का उपयोग
 
-USB use की कभी-कभी removable media से files access किए जाने के समय बनाए गए artifacts से पुष्टि की जा सकती है, जिनमें शामिल हैं:
+कभी-कभी removable media से फ़ाइलों तक पहुँचने पर बने आर्टिफ़ैक्ट से USB के उपयोग की पुष्टि की जा सकती है। इनमें शामिल हैं:
 
 - Windows Recent Folder
 - Microsoft Office Recent Folder
 - Jumplists
 
-[**USBDetective**](https://usbdetective.com) जैसे tools इन artifacts को USB device records के साथ correlate करते हैं, लेकिन artifacts की availability Windows version और application पर निर्भर करती है।<sup>[[18]](#references)</sup>
+[**USBDetective**](https://usbdetective.com) जैसे टूल इन आर्टिफ़ैक्ट का USB डिवाइस रिकॉर्ड से मिलान करते हैं, लेकिन आर्टिफ़ैक्ट की उपलब्धता Windows संस्करण और एप्लिकेशन पर निर्भर करती है।<sup>[[18]](#references)</sup>
 
-Windows XP और Windows 7 MTP workflows के लिए documented testing में, कुछ LNKs original path के बजाय `WPDNSE` folder की ओर point करते थे।<sup>[[16]](#references)</sup>
+Windows XP और Windows 7 MTP workflows के लिए किए गए परीक्षणों में, कुछ LNK मूल पथ के बजाय `WPDNSE` फ़ोल्डर की ओर संकेत करते थे।<sup>[[16]](#references)</sup>
 
-![Shellbags - Windows USBs का उपयोग: ध्यान दें कि कुछ LNK files original path की ओर point करने के बजाय WPDNSE folder की ओर point करती हैं](<../../../images/image (218).png>)
+![Shellbags - Windows USBs का उपयोग: ध्यान दें कि कुछ LNK फ़ाइलें मूल पथ के बजाय WPDNSE फ़ोल्डर की ओर संकेत करती हैं](<../../../images/image (218).png>)
 
-उस study में `%LOCALAPPDATA%\Temp\WPDNSE\{FolderGUID}` के अंदर copies देखी गईं; इसके tests में temporary contents restart के बाद मौजूद नहीं रहे, और GUID को shellbag data के साथ correlate किया जा सका। इसे universal rule के बजाय OS-, device-, और application-dependent behavior मानें।<sup>[[16]](#references)</sup>
+उस अध्ययन में `%LOCALAPPDATA%\Temp\WPDNSE\{FolderGUID}` के अंतर्गत प्रतियाँ मिलीं; उसके परीक्षणों में अस्थायी सामग्री restart के बाद मौजूद नहीं रही, और GUID का मिलान shellbag डेटा से किया जा सका। इसे OS, डिवाइस और एप्लिकेशन पर निर्भर व्यवहार मानें, न कि सार्वभौमिक नियम।<sup>[[16]](#references)</sup>
 
 ### Registry Information
 
-यह जानने के लिए [इस page को check करें](interesting-windows-registry-keys.md#usb-information) कि कौन-सी registry keys USB connected devices के बारे में interesting information रखती हैं।
+[यह जानने के लिए यह पृष्ठ देखें](interesting-windows-registry-keys.md#usb-information) कि USB से जुड़े डिवाइसों के बारे में कौन-सी registry keys में उपयोगी जानकारी होती है।
 
 ### setupapi
 
-Vista और उसके बाद के versions में, device-installation activity के लिए `C:\Windows\inf\setupapi.dev.log` inspect करें। Section headers में `Section start` timestamps शामिल होते हैं; ये setup processing को document करते हैं और इन्हें exact physical insertion time मानने के बजाय अन्य connection evidence के साथ correlate किया जाना चाहिए।<sup>[[17]](#references)</sup>
+Vista और उसके बाद के संस्करणों में, डिवाइस-इंस्टॉलेशन गतिविधि के लिए `C:\Windows\inf\setupapi.dev.log` देखें। सेक्शन हेडर में `Section start` टाइमस्टैम्प शामिल होते हैं; ये setup processing का रिकॉर्ड रखते हैं। इन्हें अन्य कनेक्शन-साक्ष्यों के साथ मिलाकर देखें, न कि डिवाइस को भौतिक रूप से लगाने के सटीक समय के रूप में।<sup>[[17]](#references)</sup>
 
-![Registry Information - setupapi: USB connection कब बनाया गया, इसके timestamps प्राप्त करने के लिए C: Windows inf setupapi.dev.log file check करें (Section start search करें)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![Registry Information - setupapi: USB कनेक्शन कब हुआ, इसके टाइमस्टैम्प पाने के लिए C: Windows inf setupapi.dev.log फ़ाइल देखें (Section start खोजें)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
-[**USBDetective**](https://usbdetective.com) का उपयोग किसी image से connected रह चुके USB devices के बारे में information प्राप्त करने के लिए किया जा सकता है।<sup>[[18]](#references)</sup>
+किसी image से जुड़े USB डिवाइसों के बारे में जानकारी पाने के लिए [**USBDetective**](https://usbdetective.com) का उपयोग किया जा सकता है।<sup>[[18]](#references)</sup>
 
-![setupapi - USB Detective: USBDetective का उपयोग किसी image से connected रह चुके USB devices के बारे में information प्राप्त करने के लिए किया जा सकता है](<../../../images/image (452).png>)
+![setupapi - USB Detective: किसी image से जुड़े USB डिवाइसों के बारे में जानकारी पाने के लिए USBDetective का उपयोग किया जा सकता है](<../../../images/image (452).png>)
 
 ### Plug and Play Cleanup
 
-`Plug and Play Cleanup` नामक scheduled task outdated driver versions को remove करता है। Adam Harrison द्वारा documented Windows 10 task definition उन drivers को भी target करती है जो 30 दिनों से inactive हैं, इसलिए removable-device driver evidence clean up किया जा सकता है; इस behavior को generalize करने से पहले local task definition और Windows build की पुष्टि करें।<sup>[[1]](#references)</sup>
+`Plug and Play Cleanup` नाम का scheduled task पुराने driver versions को हटाता है। Adam Harrison द्वारा प्रलेखित Windows 10 task definition उन drivers को भी लक्षित करती है जो 30 दिनों से निष्क्रिय हों। इसलिए removable-device driver के साक्ष्य साफ़ हो सकते हैं; इस व्यवहार को सामान्य मानने से पहले स्थानीय task definition और Windows build की पुष्टि करें।<sup>[[1]](#references)</sup>
 
-Task निम्नलिखित path पर स्थित है: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
+यह task इस पथ पर मौजूद है: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`।
 
 ![Windows Plug and Play Cleanup scheduled task की XML definition](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
-**Task के मुख्य Components और Settings:**
+**Task के प्रमुख घटक और सेटिंग्स:**
 
-- **pnpclean.dll**: यह DLL वास्तविक cleanup process के लिए responsible है।
-- **UseUnifiedSchedulingEngine**: `TRUE` पर set है, जो generic task scheduling engine के उपयोग को दर्शाता है।
+- **pnpclean.dll**: यह DLL वास्तविक cleanup प्रक्रिया के लिए ज़िम्मेदार है।
+- **UseUnifiedSchedulingEngine**: इसे `TRUE` पर सेट किया गया है, जो generic task scheduling engine के उपयोग को दर्शाता है।
 - **MaintenanceSettings**:
-- **Period ('P1M')**: Task Scheduler को regular Automatic maintenance के दौरान monthly cleanup task initiate करने का निर्देश देता है।
-- **Deadline ('P2M')**: यदि task लगातार दो महीनों तक fail हो, तो Task Scheduler को emergency Automatic maintenance के दौरान task execute करने का निर्देश देता है।
+  - **Period ('P1M')**: Task Scheduler को नियमित Automatic maintenance के दौरान हर महीने cleanup task शुरू करने का निर्देश देता है।
+  - **Deadline ('P2M')**: यदि task लगातार दो महीनों तक विफल रहता है, तो Task Scheduler को emergency Automatic maintenance के दौरान task चलाने का निर्देश देता है।
 
-यह configuration regular maintenance schedule करती है और लगातार failures के बाद retry करती है; exact XML और behavior version-dependent हैं।<sup>[[1]](#references)</sup>
+यह कॉन्फ़िगरेशन नियमित maintenance और लगातार विफलताओं के बाद पुनः प्रयास निर्धारित करती है; सटीक XML और व्यवहार संस्करण पर निर्भर करते हैं।<sup>[[1]](#references)</sup>
 
-**अधिक information के लिए देखें:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)।<sup>[[1]](#references)</sup>
+**अधिक जानकारी के लिए देखें:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html).<sup>[[1]](#references)</sup>
 
 ## Emails
 
-Emails में email के **2 interesting parts: headers और content** होते हैं। **headers** में आपको निम्न जैसी information मिल सकती है:
+Emails में **2 उपयोगी हिस्से होते हैं: headers और email की सामग्री**। **headers** में आपको ऐसी जानकारी मिल सकती है:
 
-- Emails किसने भेजे (email address, IP, email को redirect करने वाले mail servers)
-- Email कब भेजा गया
+- Emails **किसने** भेजे (email address, IP, वे mail servers जिन्होंने email को redirect किया)
+- Email **कब** भेजा गया
 
-इसके अलावा, `References` और `In-Reply-To` headers conversation के साथ replies associate करने के लिए उपयोग किए जाने वाले message IDs रख सकते हैं।<sup>[[76]](#references)</sup>
+इसके अलावा, `References` और `In-Reply-To` headers में ऐसे message IDs हो सकते हैं जिनका उपयोग replies को किसी conversation से जोड़ने के लिए किया जाता है।<sup>[[76]](#references)</sup>
 
 ![Plug and Play Cleanup - Emails: Email कब भेजा गया](<../../../images/image (593).png>)
 
 ### Windows Mail App
 
-यह application email content को auxiliary text या HTML files में ऐसे paths के अंतर्गत save करती है, जैसे `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`; exact numbered folder और file layout artifact के अनुसार अलग हो सकते हैं।<sup>[[75]](#references)</sup>
+यह एप्लिकेशन email की सामग्री को सहायक text या HTML फ़ाइलों में, `\Users\<username>\AppData\Local\Comms\Unistore\data\3\` जैसे पथों के अंतर्गत सहेजता है; सटीक numbered folder और file layout आर्टिफ़ैक्ट के अनुसार अलग हो सकता है।<sup>[[75]](#references)</sup>
 
-Emails का **metadata** और **contacts** **ESE database** `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol` के अंदर पाए जा सकते हैं।<sup>[[75]](#references)</sup>
+Emails का **metadata** और **contacts**, **ESE database** `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol` में मिल सकते हैं।<sup>[[75]](#references)</sup>
 
-`store.vol` Extensible Storage Engine (ESE) format का उपयोग करता है। एक copy पर कार्य करें और [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) जैसे ESE parser का उपयोग करें; यदि किसी tool को `.edb` suffix की आवश्यकता हो, तो केवल copy का नाम बदलें, और `Message` table पर भरोसा करने से पहले table schema verify करें।<sup>[[19]](#references)[[75]](#references)</sup>
+`store.vol` में Extensible Storage Engine (ESE) format का उपयोग होता है। इसकी एक copy पर काम करें और [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) जैसे ESE parser का उपयोग करें; यदि किसी टूल को `.edb` suffix की आवश्यकता हो, तो केवल copy का नाम बदलें। `Message` table पर भरोसा करने से पहले table schema की पुष्टि करें।<sup>[[19]](#references)[[75]](#references)</sup>
 
 ### Microsoft Outlook
 
-Outlook MAPI properties inspect करते समय canonical properties में शामिल हैं:
+Outlook MAPI properties का निरीक्षण करते समय, canonical properties में ये शामिल हैं:
 
-- `PidTagClientSubmitTime`: वह UTC time जब client ने message submit किया।
-- `PidTagConversationIndex`: conversation thread में message की relative position।
-- `PidTagEntryId`: message object के लिए identifier।
-- `PidTagMessageFlags`: submitted, read, unread या attachments होने जैसे status flags।
-- `PidTagLastVerbExecuted`: message के लिए recorded last operation, जैसे open, reply या forward।<sup>[[20]](#references)[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+- `PidTagClientSubmitTime`: वह UTC समय जब client ने message जमा किया।
+- `PidTagConversationIndex`: conversation thread में message की सापेक्ष स्थिति।
+- `PidTagEntryId`: message object का identifier।
+- `PidTagMessageFlags`: status flags, जैसे submitted, read, unread या attachments की मौजूदगी।
+- `PidTagLastVerbExecuted`: message के लिए रिकॉर्ड किया गया आखिरी operation, जैसे open, reply या forward।<sup>[[20]](#references)[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
-Outlook data-file locations version और account type के अनुसार अलग होती हैं। Microsoft PST/OST files के लिए ये common locations document करता है:
+Outlook data-file के स्थान संस्करण और account type के अनुसार अलग होते हैं। Microsoft PST/OST फ़ाइलों के लिए ये सामान्य स्थान बताता है:
 
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-Registry path `HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` Outlook profile और associated data-file configuration की पहचान कर सकता है।
+Registry path `HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` से Outlook profile और संबंधित data-file configuration की पहचान हो सकती है।
 
-PST files में messages, contacts, calendar data और अन्य Outlook items हो सकते हैं। आप [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html) से एक copy inspect कर सकते हैं।<sup>[[25]](#references)[[67]](#references)</sup>
+PST फ़ाइलों में messages, contacts, calendar data और अन्य Outlook items हो सकते हैं। आप इसकी copy का निरीक्षण [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html) से कर सकते हैं।<sup>[[25]](#references)[[67]](#references)</sup>
 
-![Windows Mail App - Microsoft Outlook: आप Kernel PST Viewer tool का उपयोग करके PST file खोल सकते हैं](<../../../images/image (498).png>)
+![Windows Mail App - Microsoft Outlook: आप Kernel PST Viewer टूल का उपयोग करके PST फ़ाइल खोल सकते हैं](<../../../images/image (498).png>)
 
 ### Microsoft Outlook OST Files
 
-**OST file** Exchange या Microsoft 365 accounts के लिए local cache होती है; Cached Exchange Mode POP या IMAP accounts पर लागू नहीं होता। Offline period configurable होता है और अक्सर default रूप से 12 months होता है, जबकि PST/OST size limits अलग configurable settings होती हैं। OST file देखने के लिए [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) का उपयोग किया जा सकता है।<sup>[[26]](#references)[[27]](#references)[[28]](#references)[[68]](#references)</sup>
+**OST फ़ाइल**, Exchange या Microsoft 365 accounts के लिए एक local cache होती है; Cached Exchange Mode POP या IMAP accounts पर लागू नहीं होता। Offline period को कॉन्फ़िगर किया जा सकता है और यह अक्सर डिफ़ॉल्ट रूप से 12 महीने होता है, जबकि PST/OST size limits अलग से कॉन्फ़िगर की जाती हैं। OST फ़ाइल देखने के लिए [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) का उपयोग किया जा सकता है।<sup>[[26]](#references)[[27]](#references)[[28]](#references)[[68]](#references)</sup>
 
-### Retrieving Attachments
+### Attachments पुनः प्राप्त करना
 
-Lost attachments निम्न locations से recover किए जा सकते हैं:
+खोए हुए attachments शायद इन स्थानों से वापस प्राप्त किए जा सकते हैं:
 
-- Legacy Outlook/IE configurations के लिए: `%LOCALAPPDATA%\Temporary Internet Files\Content.Outlook`
-- Newer Outlook/IE11 configurations के लिए: `%LOCALAPPDATA%\Microsoft\Windows\INetCache\Content.Outlook`।<sup>[[65]](#references)</sup>
+- पुराने Outlook/IE configurations के लिए: `%LOCALAPPDATA%\Temporary Internet Files\Content.Outlook`
+- नए Outlook/IE11 configurations के लिए: `%LOCALAPPDATA%\Microsoft\Windows\INetCache\Content.Outlook`।<sup>[[65]](#references)</sup>
 
 ### Thunderbird MBOX Files
 
-**Thunderbird** profile data को `%APPDATA%\Thunderbird\Profiles` के अंतर्गत store करता है; mail folders में account-specific `Mail` या `ImapMail` directories के अंदर extensionless mbox files का सामान्यतः उपयोग किया जाता है।<sup>[[29]](#references)[[30]](#references)</sup>
+**Thunderbird** profile data को `%APPDATA%\Thunderbird\Profiles` के अंतर्गत सहेजता है; mail folders में आम तौर पर account-specific `Mail` या `ImapMail` directories के भीतर बिना extension वाली mbox फ़ाइलें होती हैं।<sup>[[29]](#references)[[30]](#references)</sup>
 
 ### Image Thumbnails
 
-- **Windows XP**: Thumbnail previews सामान्यतः प्रत्येक folder की `thumbs.db` files में store किए जाते थे।
-- **Network folders**: Relevant thumbnail behavior enabled होने पर UNC folder के लिए `thumbs.db` file अभी भी create की जा सकती है; यह assume न करें कि प्रत्येक Windows version या policy इसे create करती है।
-- **Windows Vista और newer**: System thumbnail cache `%USERPROFILE%\AppData\Local\Microsoft\Windows\Explorer` के अंतर्गत centralized होती है और इसमें **thumbcache_xxx.db** जैसी files होती हैं। [**Thumbsviewer**](https://thumbsviewer.github.io) legacy `Thumbs.db` parse कर सकता है, जबकि [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) modern thumbnail-cache databases parse कर सकता है।<sup>[[31]](#references)[[32]](#references)[[33]](#references)</sup>
+- **Windows XP**: Thumbnail previews आम तौर पर हर फ़ोल्डर की `thumbs.db` फ़ाइलों में सहेजे जाते थे।
+- **Network folders**: संबंधित thumbnail behavior सक्षम होने पर UNC folder के लिए भी `thumbs.db` फ़ाइल बनाई जा सकती है; यह न मानें कि हर Windows version या policy इसे बनाती है।
+- **Windows Vista और नए संस्करण**: System thumbnail cache, `%USERPROFILE%\AppData\Local\Microsoft\Windows\Explorer` में केंद्रीकृत होती है और इसमें **thumbcache_xxx.db** जैसी फ़ाइलें होती हैं। [**Thumbsviewer**](https://thumbsviewer.github.io) पुरानी `Thumbs.db` फ़ाइलों को पार्स कर सकता है, जबकि [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) आधुनिक thumbnail-cache databases को पार्स कर सकता है।<sup>[[31]](#references)[[32]](#references)[[33]](#references)</sup>
 
 ### Windows Registry Information
 
-Windows Registry, जिसमें system और user configuration data store होता है, निम्न locations में hive files के अंदर contained होती है:
+Windows Registry, जिसमें system और user configuration data होता है, इन hive files में मौजूद होती है:
 
-- `%WINDIR%\System32\Config` विभिन्न `HKEY_LOCAL_MACHINE` subkeys को support करने वाले machine hives के लिए।
-- `%USERPROFILE%\NTUSER.DAT` किसी user के `HKEY_CURRENT_USER` hive के लिए।
-- कुछ पुराने Windows installations में `%WINDIR%\System32\Config\RegBack\` के अंदर copies होती हैं; Windows 10 version 1803 और उसके बाद के versions इस directory को automatically populate नहीं करते, जब तक periodic backup enabled न हो।<sup>[[34]](#references)[[35]](#references)</sup>
-- Per-user shell और class-registration data आधुनिक Windows में सामान्यतः `%LOCALAPPDATA%\Microsoft\Windows\UsrClass.dat` में भी store किया जाता है।<sup>[[34]](#references)[[66]](#references)</sup>
+- `%WINDIR%\System32\Config` में वे machine hives होते हैं जो विभिन्न `HKEY_LOCAL_MACHINE` subkeys को आधार देते हैं।
+- `%USERPROFILE%\NTUSER.DAT` में user की `HKEY_CURRENT_USER` hive होती है।
+- कुछ पुराने Windows installations में `%WINDIR%\System32\Config\RegBack\` के अंतर्गत copies होती हैं; Windows 10 version 1803 और उसके बाद के संस्करण इस directory को अपने-आप नहीं भरते, जब तक periodic backup सक्षम न हो।<sup>[[34]](#references)[[35]](#references)</sup>
+- आधुनिक Windows में प्रति-user shell और class-registration data आम तौर पर `%LOCALAPPDATA%\Microsoft\Windows\UsrClass.dat` में भी सहेजा जाता है।<sup>[[34]](#references)[[66]](#references)</sup>
 
 ### Tools
 
-Registry hives analyze करने के लिए कुछ tools उपयोगी हैं; किसी output पर भरोसा करने से पहले प्रत्येक tool के supported hive formats और version की पुष्टि करें:
+Registry hives का विश्लेषण करने के लिए कुछ टूल उपयोगी हैं; किसी output पर भरोसा करने से पहले जाँचें कि हर टूल किन hive formats और versions का समर्थन करता है:
 
-- **Registry Editor**: यह Windows में installed होता है। यह current session की Windows registry navigate करने के लिए एक GUI है।
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): यह आपको registry file load करने और GUI के माध्यम से उसमें navigate करने देता है। इसमें interesting information वाली keys को highlight करने वाले Bookmarks भी होते हैं।
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): इसमें भी एक GUI है, जो loaded registry navigate करने देती है और इसमें loaded registry के अंदर interesting information highlight करने वाले plugins भी होते हैं।
-- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): यह एक अन्य GUI application है, जो loaded registry hive से information extract कर सकती है।<sup>[[5]](#references)[[36]](#references)[[37]](#references)</sup>
+- **Registry Editor**: यह Windows में पहले से इंस्टॉल होता है। यह मौजूदा session की Windows registry में नेविगेट करने के लिए GUI है।
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): यह आपको registry file लोड करने और GUI के ज़रिए उसमें नेविगेट करने देता है। इसमें ऐसे Bookmarks भी हैं जो उपयोगी जानकारी वाली keys को दिखाते हैं।
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): इसमें भी GUI है, जो लोड की गई registry में नेविगेट करने देता है; साथ ही इसमें ऐसे plugins हैं जो लोड की गई registry की उपयोगी जानकारी दिखाते हैं।
+- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): एक अन्य GUI एप्लिकेशन, जो लोड की गई registry hive से जानकारी निकाल सकता है।<sup>[[5]](#references)[[36]](#references)[[37]](#references)</sup>
 
-### Recovering Deleted Element
+### हटाए गए Element को पुनः प्राप्त करना
 
-Deleted hive cells तब तक मौजूद रह सकते हैं जब तक उनकी space reuse न हो जाए, लेकिन recovery hive state और parser पर निर्भर करती है; recovered deleted keys को guaranteed records के बजाय validation की आवश्यकता वाले evidence के रूप में मानें।
+हटाए गए hive cells तब तक मौजूद रह सकते हैं, जब तक उनकी जगह का दोबारा उपयोग न हो; लेकिन पुनर्प्राप्ति hive की स्थिति और parser पर निर्भर करती है। पुनर्प्राप्त हटाई गई keys को ऐसे साक्ष्य मानें जिनकी पुष्टि आवश्यक है, न कि पक्के रिकॉर्ड।
 
 ### Last Write Time
 
-Registry keys में last-write timestamp होता है; Windows इसे key या उसकी किसी value entry के लिए expose करता है, इसलिए किसी value का अपना independent modification timestamp आवश्यक नहीं होता।<sup>[[69]](#references)</sup>
+Registry keys में last-write timestamp होता है; Windows इसे key या उसकी किसी भी value entry के लिए दिखाता है। इसलिए किसी value का अपना स्वतंत्र संशोधन timestamp होना ज़रूरी नहीं है।<sup>[[69]](#references)</sup>
 
 ### SAM
 
-**SAM** hive में local user और group account data होता है, जिसमें system की boot-key material द्वारा protected password hashes भी शामिल हैं।<sup>[[38]](#references)[[39]](#references)</sup>
+**SAM** hive में local user और group account data होता है, जिसमें system के boot-key material से सुरक्षित password hashes भी शामिल हैं।<sup>[[38]](#references)[[39]](#references)</sup>
 
-`SAM\Domains\Account\Users` में आप account identifiers और कुछ logon तथा policy fields प्राप्त कर सकते हैं। Offline hash extraction के लिए relevant boot-key material recover करने हेतु `SYSTEM` hive भी आवश्यक है।<sup>[[38]](#references)[[39]](#references)</sup>
+`SAM\Domains\Account\Users` में account identifiers और कुछ logon तथा policy fields प्राप्त किए जा सकते हैं। Offline hash extraction के लिए संबंधित boot-key material पुनः प्राप्त करने हेतु `SYSTEM` hive भी आवश्यक है।<sup>[[38]](#references)[[39]](#references)</sup>
 
-### Windows Registry में Interesting entries
+### Windows Registry में उपयोगी प्रविष्टियाँ
 
 
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
 
-## Programs Executed
+## चलाए गए Programs
 
 ### Basic Windows Processes
 
-[common Windows processes पर एक existing post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) को additional reading के रूप में रखा गया है; किसी भी process-behavior claims की वर्तमान Windows documentation और local evidence से पुष्टि करें।<sup>[[2]](#references)</sup>
+सामान्य Windows processes पर एक मौजूदा [पोस्ट](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) अतिरिक्त पढ़ने के लिए उपलब्ध है; process behavior से जुड़े किसी भी दावे की पुष्टि वर्तमान Windows documentation और स्थानीय साक्ष्य से करें।<sup>[[2]](#references)</sup>
 
 ### Windows Recent APPs
 
-Windows 10 के उन versions में जहाँ यह उपलब्ध है, `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Search\RecentApps` में per-application subkeys होते हैं, जिनमें last-used time और launch count जैसे fields होते हैं; यह artifact बाद के releases से हटा दिया गया था, इसलिए target build को validate करें।<sup>[[64]](#references)</sup>
+Windows 10 के उन versions में जहाँ यह उपलब्ध है, `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Search\RecentApps` में प्रति-application subkeys होती हैं, जिनमें last-used time और launch count जैसे fields शामिल होते हैं; बाद के releases से यह आर्टिफ़ैक्ट हटा दिया गया था, इसलिए लक्षित build की पुष्टि करें।<sup>[[64]](#references)</sup>
 
 ### BAM (Background Activity Moderator)
 
-जिन systems में Background Activity Moderator उपलब्ध है, उनमें `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` या newer `...\bam\State\UserSettings\{SID}` path inspect करें। Values user SID के आधार पर keyed होती हैं और इनमें tracked executable paths तथा FILETIME-like execution data हो सकते हैं; यह artifact version-dependent है और अन्य evidence से corroborate किया जाना चाहिए।<sup>[[63]](#references)</sup>
+जिन systems में Background Activity Moderator उपलब्ध है, उनमें `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` या नया `...\bam\State\UserSettings\{SID}` path देखें। Values को user SID के अनुसार व्यवस्थित किया जाता है और उनमें ट्रैक किए गए executable paths तथा FILETIME-जैसा execution data हो सकता है; यह आर्टिफ़ैक्ट संस्करण पर निर्भर है और अन्य साक्ष्यों से इसकी पुष्टि की जानी चाहिए।<sup>[[63]](#references)</sup>
 
 ### Windows Prefetch
 
-Prefetch resources और launch metadata को cache करता है, ताकि programs अधिक तेज़ी से start हो सकें।
+Prefetching resources और launch metadata को cache करता है, ताकि programs जल्दी शुरू हो सकें।
 
-Prefetch files `C:\Windows\Prefetch` में `.pf` files के रूप में store होती हैं; format, retention और file-count limits Windows version के अनुसार अलग होती हैं। Microsoft Windows 8 और उसके बाद के versions में last eight execution times और अधिकतम 1024 files की retention document करता है, इसलिए पुराने fixed-limit summaries को generalize नहीं किया जाना चाहिए।<sup>[[13]](#references)</sup>
+Prefetch फ़ाइलें `C:\Windows\Prefetch` में `.pf` फ़ाइलों के रूप में सहेजी जाती हैं; format, retention और फ़ाइलों की संख्या की limits Windows version के अनुसार अलग होती हैं। Microsoft के अनुसार Windows 8 और उसके बाद के संस्करण आखिरी आठ execution times और अधिकतम 1024 फ़ाइलें रखते हैं, इसलिए पुराने निश्चित-limit वाले सारांशों को सामान्य नियम न मानें।<sup>[[13]](#references)</sup>
 
-Filename सामान्यतः `{program_name}-{hash}.pf` format का उपयोग करता है, जिसमें hash path और arguments जैसे execution context से derived होता है; Windows 10 और उसके बाद के versions file को compress कर सकते हैं। Presence उपयोगी execution evidence है, लेकिन यह अकेले user execution का proof नहीं है और इसे अन्य artifacts के साथ correlate किया जाना चाहिए।<sup>[[13]](#references)</sup>
+फ़ाइल का नाम आम तौर पर `{program_name}-{hash}.pf` होता है। Hash, path और arguments जैसे execution context से निकाला जाता है; Windows 10 और उसके बाद के संस्करण फ़ाइल को compress कर सकते हैं। फ़ाइल की मौजूदगी execution का उपयोगी साक्ष्य है, लेकिन अपने-आप में यह साबित नहीं करती कि किसी user ने उसे चलाया था। इसकी पुष्टि अन्य आर्टिफ़ैक्ट से करें।<sup>[[13]](#references)</sup>
 
-इन files को inspect करने के लिए आप [**PECmd.exe**](https://github.com/EricZimmerman/PECmd) का उपयोग कर सकते हैं, जो applicable Windows 10 Prefetch files के लिए directory parsing, CSV/HTML output और decompression support document करता है।<sup>[[40]](#references)</sup>
+इन फ़ाइलों का निरीक्षण करने के लिए [**PECmd.exe**](https://github.com/EricZimmerman/PECmd) का उपयोग कर सकते हैं। इसके documentation में लागू Windows 10 Prefetch फ़ाइलों के लिए directory parsing, CSV/HTML output और decompression support शामिल हैं।<sup>[[40]](#references)</sup>
+
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
+
 ![BAM (Background Activity Moderator) - Windows Prefetch: PECmd.exe -d C: Users student Desktop Prefetch --html "C: Users student Desktop out folder"](<../../../images/image (315).png>)
 
 ### Superprefetch
 
-**Superfetch/SysMain**, लोडिंग को बेहतर बनाने के लिए ऐतिहासिक उपयोग पैटर्न का उपयोग करके Prefetch का पूरक बनता है। इन्हें जनरेट करने वाले systems में, इसकी database files आमतौर पर `C:\Windows\Prefetch\Ag*.db` पर मिलती हैं; इनका format और मौजूदगी version पर निर्भर करती है।<sup>[[41]](#references)</sup>
+**Superfetch/SysMain**, loading को बेहतर बनाने के लिए ऐतिहासिक उपयोग पैटर्न का उपयोग करके Prefetch को पूरक बनाता है। जिन सिस्टम में ये फ़ाइलें बनती हैं, वहाँ इसकी database फ़ाइलें आम तौर पर `C:\Windows\Prefetch\Ag*.db` में मिलती हैं; format और उपलब्धता Windows version पर निर्भर करती है।<sup>[[41]](#references)</sup>
 
-इन databases में application names, usage counts, accessed files या volumes, paths और time ranges हो सकते हैं, लेकिन इन्हें exact execution log नहीं माना जाना चाहिए।<sup>[[41]](#references)</sup>
+इन databases में application names, usage counts, access की गई files या volumes, paths और time ranges हो सकते हैं, लेकिन इन्हें execution का सटीक log नहीं मानना चाहिए।<sup>[[41]](#references)</sup>
 
-मौजूदा [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/) link को संभावित parser के रूप में रखा गया है; उपयोग से पहले tool के documentation के अनुसार इसकी वर्तमान उपलब्धता और supported output की पुष्टि करें।
+मौजूदा [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/) link को संभावित parser के रूप में रखा गया है; उपयोग से पहले tool के documentation में इसकी मौजूदा उपलब्धता और समर्थित output की पुष्टि करें।
 
 ### SRUM
 
-**System Resource Usage Monitor** (SRUM), applications और users द्वारा resource usage को record करता है। इसे Windows 8 में पेश किया गया था और यह data को ESE database `C:\Windows\System32\sru\SRUDB.dat` में store करता है।<sup>[[13]](#references)</sup>
+**System Resource Usage Monitor** (SRUM), applications और users द्वारा किए गए resource use को रिकॉर्ड करता है। इसे Windows 8 में पेश किया गया था और यह डेटा ESE database `C:\Windows\System32\sru\SRUDB.dat` में store करता है।<sup>[[13]](#references)</sup>
 
-यह निम्नलिखित जानकारी देता है:
+इसमें निम्नलिखित जानकारी मिलती है:
 
 - AppID और Path
-- Record से संबंधित User/SID
+- रिकॉर्ड से जुड़ा User/SID
 - Sent Bytes
 - Received Bytes
 - Network Interface
 - Connection duration
 - Process duration
 
-Collection cadence और retention implementation पर निर्भर करते हैं; यह मानकर न चलें कि प्रत्येक record exact 60-minute execution interval को दर्शाता है।<sup>[[13]](#references)</sup>
+डेटा संग्रह का अंतराल और retention, implementation पर निर्भर करते हैं; यह न मानें कि हर रिकॉर्ड ठीक 60 मिनट के execution interval को दर्शाता है।<sup>[[13]](#references)</sup>
 
-आप वर्तमान tool version में documented options का उपयोग करके [**srum_dump**](https://github.com/MarkBaggett/srum-dump) से data extract और review कर सकते हैं।<sup>[[42]](#references)</sup>
+आप [**srum_dump**](https://github.com/MarkBaggett/srum-dump) से डेटा extract और review कर सकते हैं। इसके लिए मौजूदा tool version में documented options का उपयोग करें।<sup>[[42]](#references)</sup>
+
 ```bash
 .\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -o C:\Users\student\Desktop\srum --NO_CONFIRM
 ```
+
 ### AppCompatCache (ShimCache)
 
-**AppCompatCache**, जिसे **ShimCache** के नाम से भी जाना जाता है, Windows application-compatibility infrastructure का हिस्सा है और compatibility decisions के लिए file metadata रिकॉर्ड करता है। hive path, record format, retained capacity और fields Windows release के अनुसार अलग-अलग होते हैं; modern Windows पर, केवल ShimCache यह साबित नहीं कर सकता कि किसी user ने file execute की थी। संबंधित `SYSTEM` hive को [**AppCompatCacheParser tool**](https://github.com/EricZimmerman/AppCompatCacheParser) से parse करें और इसके output की execution artifacts के साथ पुष्टि करें।<sup>[[13]](#references)[[43]](#references)</sup>
+**AppCompatCache**, जिसे **ShimCache** के नाम से भी जाना जाता है, Windows के application-compatibility infrastructure का हिस्सा है और compatibility संबंधी निर्णयों के लिए file metadata रिकॉर्ड करता है। Hive path, record format, retained capacity और fields, Windows के release के अनुसार अलग-अलग होते हैं; आधुनिक Windows पर, केवल ShimCache से यह साबित नहीं होता कि किसी user ने कोई file execute की थी। संबंधित `SYSTEM` hive को [**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser) से parse करें और इसके output की पुष्टि execution artifacts से करें।<sup>[[13]](#references)[[43]](#references)</sup>
 
-![SRUM - AppCompatCache (ShimCache): संग्रहीत information को parse करने के लिए AppCompatCacheParser tool का उपयोग recommended है](<../../../images/image (75).png>)
+![SRUM - AppCompatCache (ShimCache): संग्रहित जानकारी parse करने के लिए, AppCompatCacheParser tool का उपयोग करने की सलाह दी जाती है](<../../../images/image (75).png>)
 
 ### Amcache
 
-**Amcache.hve** file एक registry hive है, जो Windows द्वारा देखे गए applications और files की inventory रखती है। यह सामान्यतः `C:\Windows\AppCompat\Programs\Amcache.hve` पर मिलती है।
+**Amcache.hve** file एक registry hive है, जो Windows द्वारा देखे गए applications और files की सूची रखती है। यह आमतौर पर `C:\Windows\AppCompat\Programs\Amcache.hve` पर मिलती है।
 
-इसमें associated और unassociated file entries, paths और SHA1 values शामिल हो सकते हैं, लेकिन इसकी मौजूदगी inventory evidence है और यह अपने-आप में यह साबित नहीं करती कि किसी process ने execute किया था।<sup>[[13]](#references)[[44]](#references)</sup>
+इसमें संबंधित और असंबंधित file entries, paths और SHA1 values हो सकती हैं, लेकिन इसकी मौजूदगी केवल inventory का साक्ष्य है और इससे अपने आप यह साबित नहीं होता कि कोई process execute हुआ था।<sup>[[13]](#references)[[44]](#references)</sup>
 
-**Amcache.hve** को extract और analyze करने के लिए [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) tool का उपयोग करें। यह command hive को parse करती है और CSV output लिखती है।<sup>[[44]](#references)</sup>
+**Amcache.hve** से data निकालने और उसका विश्लेषण करने के लिए [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) tool का उपयोग करें। यह command hive को parse करके CSV output लिखती है।<sup>[[44]](#references)</sup>
 
 उदाहरण के लिए:
+
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
-दिए गए CSV files में, `Amcache_Unassociated file entries` उन files की जांच करते समय उपयोगी हो सकती हैं जो किसी पहचाने गए program से associated नहीं हैं।<sup>[[44]](#references)</sup>
+
+जनरेट की गई CSV फ़ाइलों में, `Amcache_Unassociated file entries` उन फ़ाइलों की जाँच करते समय उपयोगी हो सकती है जो किसी पहचाने गए प्रोग्राम से संबद्ध नहीं हैं।<sup>[[44]](#references)</sup>
 
 ### RecentFileCache
 
-Windows 7 systems पर, `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` में हाल ही में देखे गए binaries की जानकारी हो सकती है; इसकी availability और semantics version-dependent हैं।
+Windows 7 सिस्टम पर, `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` में हाल ही में देखे गए binaries के बारे में जानकारी हो सकती है; इसकी उपलब्धता और अर्थ version पर निर्भर करते हैं।
 
-आप file को parse करने के लिए [**RecentFileCacheParser**](https://github.com/EricZimmerman/RecentFileCacheParser) का उपयोग कर सकते हैं।<sup>[[45]](#references)</sup>
+फ़ाइल को parse करने के लिए [**RecentFileCacheParser**](https://github.com/EricZimmerman/RecentFileCacheParser) का उपयोग किया जा सकता है।<sup>[[45]](#references)</sup>
 
 ### Scheduled tasks
 
-Scheduled-task evidence आधुनिक tasks के लिए `C:\Windows\System32\Tasks` में और legacy tasks के लिए `.job` files के साथ `C:\Windows\Tasks` में मिल सकता है; OS के लिए उपयुक्त task definition format की जांच करें।<sup>[[73]](#references)[[74]](#references)</sup>
+आधुनिक tasks के प्रमाण `C:\Windows\System32\Tasks` में और legacy tasks के `.job` फ़ाइलों के साथ `C:\Windows\Tasks` में मिल सकते हैं; OS के अनुसार उपयुक्त task definition format की जाँच करें।<sup>[[73]](#references)[[74]](#references)</sup>
 
 ### Services
 
-Service Control Manager database `SYSTEM\CurrentControlSet\Services` के अंतर्गत होता है (offline SYSTEM hive के लिए संबंधित control-set key की जांच करें); इसमें executable paths और start types जैसे service और driver configuration शामिल होते हैं।<sup>[[72]](#references)</sup>
+Service Control Manager का database `SYSTEM\CurrentControlSet\Services` के अंतर्गत होता है (offline SYSTEM hive के लिए, संबंधित control-set key की जाँच करें); इसमें executable paths और start types जैसी service और driver configuration होती है।<sup>[[72]](#references)</sup>
 
 ### **Windows Store**
 
-Installed Windows Store applications को `\ProgramData\Microsoft\Windows\AppRepository\` के अंतर्गत दर्शाया जा सकता है, जिसमें database **`StateRepository-Machine.srd`** शामिल है। Schema और paths Windows release के अनुसार अलग-अलग होते हैं।<sup>[[71]](#references)</sup>
+इंस्टॉल किए गए Windows Store applications, `\ProgramData\Microsoft\Windows\AppRepository\` के अंतर्गत दर्ज हो सकते हैं; इसमें database **`StateRepository-Machine.srd`** भी शामिल है। Schema और paths, Windows release के अनुसार बदलते हैं।<sup>[[71]](#references)</sup>
 
-Database में application identifiers, package numbers और display names हो सकते हैं। Identifiers में gaps अपने-आप में यह प्रमाण नहीं हैं कि कोई application uninstall किया गया था; package और registry state से corroborate करें।
+Database में application identifiers, package numbers और display names हो सकते हैं। Identifiers में gaps अपने-आप में इस बात का प्रमाण नहीं हैं कि कोई application uninstall किया गया था; package और registry state से इसकी पुष्टि करें।
 
-Package registrations `HKLM\Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\` के अंतर्गत भी दिखाई दे सकते हैं। Microsoft removed provisioned apps के लिए version-specific `Deprovisioned` subkey को document करता है; यह न मानें कि हर build में `Deleted` subkey मौजूद होती है।<sup>[[70]](#references)</sup>
+Package registrations, `HKLM\Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\` के अंतर्गत भी मिल सकते हैं। Microsoft, हटाए गए provisioned apps के लिए version-specific `Deprovisioned` subkey का दस्तावेज़ देता है; यह न मानें कि हर build में `Deleted` subkey मौजूद होती है।<sup>[[70]](#references)</sup>
 
 ## Windows Events
 
-Provider के आधार पर, Windows events में निम्न शामिल हो सकते हैं:
+Provider के आधार पर, Windows events में ये जानकारी हो सकती है:
 
 - क्या हुआ
-- एक `TimeCreated` timestamp, जिसकी व्याख्या event schema और host time context के साथ की जानी चाहिए
+- `TimeCreated` timestamp, जिसकी व्याख्या event schema और host के समय-संदर्भ के अनुसार करनी चाहिए
 - शामिल users
 - शामिल hosts (hostname, IP)
-- Access की गई assets (files, folders, printers या services)।<sup>[[49]](#references)</sup>
+- एक्सेस किए गए assets (files, folders, printers या services)।<sup>[[49]](#references)</sup>
 
-Windows Vista से पहले, event logs सामान्यतः `C:\Windows\System32\config` के अंतर्गत legacy binary format का उपयोग करते थे; Vista और उसके बाद Windows Event Log format का उपयोग करते हैं, सामान्यतः `C:\Windows\System32\winevt\Logs` के अंतर्गत, जहां `.evtx` files में XML-rendered event data होती है।<sup>[[46]](#references)[[47]](#references)</sup>
+Windows Vista से पहले, event logs आम तौर पर `C:\Windows\System32\config` के अंतर्गत legacy binary format का उपयोग करते थे; Vista और उसके बाद के versions में Windows Event Log format का उपयोग होता है, जो सामान्यतः `C:\Windows\System32\winevt\Logs` के अंतर्गत होता है। इसमें `.evtx` फ़ाइलें होती हैं, जिनमें event data को XML के रूप में render किया जाता है।<sup>[[46]](#references)[[47]](#references)</sup>
 
-SYSTEM registry channel configuration को **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`** के अंतर्गत store करता है, जिसमें configured file path और retention settings शामिल हैं।<sup>[[47]](#references)</sup>
+SYSTEM registry, channel configuration को **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`** के अंतर्गत रखता है; इसमें configured file path और retention settings शामिल हैं।<sup>[[47]](#references)</sup>
 
 इन्हें Windows Event Viewer (**`eventvwr.msc`**) या [**Event Log Explorer**](https://eventlogxp.com) और [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md) जैसे tools से देखा जा सकता है।<sup>[[5]](#references)[[48]](#references)[[61]](#references)</sup>
 
-## Understanding Windows Security Event Logging
+## Windows Security Event Logging को समझना
 
-Vista और उसके बाद, Security channel सामान्यतः `C:\Windows\System32\winevt\Logs\Security.evtx` पर store होता है। इसका maximum size और retention policy configurable होता है; circular logging के साथ, file अपनी limit तक पहुंचने पर पुराने records overwrite हो सकते हैं। Relevant auditing enabled होने पर channel authentication, logoff, privilege, audit-policy और object-access events record कर सकता है।<sup>[[46]](#references)[[47]](#references)</sup>
+Vista और उसके बाद के versions में, Security channel आम तौर पर `C:\Windows\System32\winevt\Logs\Security.evtx` में संग्रहीत होता है। इसका अधिकतम आकार और retention policy configurable हैं; circular logging में, फ़ाइल अपनी सीमा तक पहुँचने पर पुराने records overwrite हो सकते हैं। प्रासंगिक auditing सक्षम होने पर यह channel authentication, logoff, privilege, audit-policy और object-access events रिकॉर्ड कर सकता है।<sup>[[46]](#references)[[47]](#references)</sup>
 
-### Key Event IDs for User Authentication:
+### User Authentication के लिए प्रमुख Event IDs:
 
 - **Event ID 4624**: Account logon सफल रहा।<sup>[[50]](#references)</sup>
 - **Event ID 4625**: Account logon विफल रहा।<sup>[[51]](#references)</sup>
-- **Event ID 4634**: Logon session समाप्त किया गया।<sup>[[52]](#references)</sup>
+- **Event ID 4634**: Logon session समाप्त हुआ।<sup>[[52]](#references)</sup>
 - **Event ID 4647**: User ने logoff शुरू किया।<sup>[[53]](#references)</sup>
-- **Event ID 4672**: New logon को special privileges assign किए गए; यह system और administrator accounts के लिए common है, इसलिए यह अपने-आप में malicious activity का प्रमाण नहीं है।<sup>[[54]](#references)</sup>
+- **Event ID 4672**: नए logon को special privileges दिए गए; यह system और administrator accounts के लिए सामान्य है, इसलिए अपने-आप में malicious activity का प्रमाण नहीं है।<sup>[[54]](#references)</sup>
 
-#### Logon types commonly recorded in 4624, 4625, 4634, and 4647:
+#### 4624, 4625, 4634 और 4647 में आम तौर पर दर्ज किए जाने वाले Logon types:
 
-- **Interactive (2)**: Interactive local logon।
-- **Network (3)**: Shared resource तक access।
+- **Interactive (2)**: स्थानीय interactive logon।
+- **Network (3)**: साझा resource तक पहुँच।
 - **Batch (4)**: Batch-process logon।
 - **Service (5)**: Service logon।
 - **Unlock (7)**: Workstation unlock।
-- **NetworkCleartext (8)**: ऐसा network logon जो authentication package को credentials cleartext में supply करता है।
-- **NewCredentials (9)**: Outbound connections के लिए supplied alternate credentials का उपयोग करने वाला logon।
+- **NetworkCleartext (8)**: ऐसा network logon जिसमें authentication package को credentials cleartext में दिए जाते हैं।
+- **NewCredentials (9)**: Outbound connections के लिए दिए गए वैकल्पिक credentials का उपयोग करने वाला logon।
 - **RemoteInteractive (10)**: Remote Desktop या Terminal Services logon।
 - **CachedInteractive (11)**: Cached domain credentials का उपयोग करने वाला interactive logon।
 - **CachedRemoteInteractive (12)**: Cached remote-interactive logon।
-- **CachedUnlock (13)**: Cached credentials का उपयोग करने वाला unlock।<sup>[[50]](#references)[[51]](#references)</sup>
+- **CachedUnlock (13)**: Cached credentials का उपयोग करके unlock।<sup>[[50]](#references)[[51]](#references)</sup>
 
-#### Status and Sub Status Codes for EventID 4625:
+#### EventID 4625 के Status और Sub Status Codes:
 
 - **0xC0000064**: ऐसा कोई user नहीं है।
 - **0xC000006A**: User name सही है, लेकिन password गलत है।
-- **0xC0000234**: Account lock out है।
+- **0xC0000234**: Account lock हो गया है।
 - **0xC0000072**: Account disabled है।
-- **0xC000006F**: Allowed hours के बाहर logon।
-- **0xC0000070**: Workstation restriction violation।
-- **0xC0000193**: Account expired है।
-- **0xC0000071**: Password expired है।
-- **0xC0000133**: Client और server के बीच time difference बहुत अधिक है।
+- **0xC000006F**: अनुमत समय के बाहर logon।
+- **0xC0000070**: Workstation restriction का उल्लंघन।
+- **0xC0000193**: Account की अवधि समाप्त हो गई है।
+- **0xC0000071**: Password की अवधि समाप्त हो गई है।
+- **0xC0000133**: Client और server के समय का अंतर बहुत अधिक है।
 - **0xC0000224**: Account को अपना password बदलना होगा।
-- **0xC0000225**: `STATUS_NOT_FOUND`; केवल यह code किसी system bug या attack की पहचान नहीं करता।
-- **0xC000015B**: Requested logon type account को grant नहीं किया गया है।<sup>[[51]](#references)[[55]](#references)</sup>
+- **0xC0000225**: `STATUS_NOT_FOUND`; केवल इस code से किसी system bug या attack की पहचान नहीं होती।
+- **0xC000015B**: Account को अनुरोधित logon type की अनुमति नहीं है।<sup>[[51]](#references)[[55]](#references)</sup>
 
 #### EventID 4616:
 
-- **Time Change**: System time बदला गया। कई events routine time-service correction को दर्शाते हैं, इसलिए इसे tampering मानने से पहले actor और time source से correlate करें।<sup>[[56]](#references)</sup>
+- **समय में बदलाव**: System का समय बदला गया। कई events में सामान्य time-service correction दिखाई देती है, इसलिए इसे छेड़छाड़ मानने से पहले actor और time source की पुष्टि करें।<sup>[[56]](#references)</sup>
 
-#### Event IDs 12, 13, 1074, 6005, 6006, 6008, and 6009:
+#### Event IDs 12, 13, 1074, 6005, 6006, 6008 और 6009:
 
-- **Power and service context**: Event 12 OS start record करता है, 13 OS shutdown, 1074 planned shutdown या restart, 6008 unexpected shutdown, और 6009 boot के समय Windows version record करता है। Events 6005 और 6006 क्रमशः Event Log service के start और stop होने का संकेत देते हैं; ये स्वयं OS startup और shutdown का प्रमाण नहीं हैं।<sup>[[57]](#references)[[58]](#references)</sup>
+- **Power और service संदर्भ**: Event 12 OS start रिकॉर्ड करता है, 13 OS shutdown, 1074 नियोजित shutdown या restart, 6008 अप्रत्याशित shutdown और 6009 boot के समय Windows version रिकॉर्ड करता है। Events 6005 और 6006 क्रमशः Event Log service के शुरू और बंद होने का संकेत देते हैं; ये अपने-आप में OS startup और shutdown का प्रमाण नहीं हैं।<sup>[[57]](#references)[[58]](#references)</sup>
 
 #### EventID 1102:
 
-- **Log Deletion**: Event 1102 record करता है कि Security audit log clear किया गया; केवल इस event से intent मानने के बजाय actor और आसपास के events की जांच करें।<sup>[[62]](#references)</sup>
+- **Log Deletion**: Event 1102 रिकॉर्ड करता है कि Security audit log साफ़ किया गया; केवल इस event से मंशा मानने के बजाय actor और आसपास के events की जाँच करें।<sup>[[62]](#references)</sup>
 
-#### EventIDs for USB Device Tracking:
+#### USB Device Tracking के EventIDs:
 
-- **20001 / 20003**: `UserPnp` device-installation events, जो first-use या installation activity स्थापित करने में सहायता कर सकते हैं।
+- **20001 / 20003**: `UserPnp` device-installation events, जो पहली बार उपयोग या installation activity स्थापित करने में मदद कर सकते हैं।
 - **10000 / 10100**: `DriverFrameworks-UserMode` events, जो device activity के साथ दिखाई दे सकते हैं।
-- **Event ID 112**: `DeviceSetupManager/Admin` activity, जो insertion-related timestamps प्रदान कर सकती है।
-- Provider, channel और event semantics Windows version के अनुसार अलग-अलग होते हैं; meaning निर्धारित करने से पहले provider name और event payload की जांच करें।<sup>[[59]](#references)</sup>
+- **Event ID 112**: `DeviceSetupManager/Admin` activity, जिससे insertion से संबंधित timestamps मिल सकते हैं।
+- Provider, channel और event के अर्थ Windows version के अनुसार बदलते हैं; कोई अर्थ निर्धारित करने से पहले provider name और event payload की जाँच करें।<sup>[[59]](#references)</sup>
 
-Logon types और उनसे associated credential material के practical examples के लिए [Altered Security's detailed guide](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them) देखें।<sup>[[60]](#references)</sup>
+Logon types और उनसे संबंधित credential material के व्यावहारिक उदाहरणों के लिए, [Altered Security की विस्तृत मार्गदर्शिका](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them) देखें।<sup>[[60]](#references)</sup>
 
-Event details, जिनमें logon type, status, substatus, source address और process fields शामिल हैं, Event ID 4625 के context प्रदान करते हैं; status code या repeated failure pattern investigative lead है, conclusion नहीं।<sup>[[51]](#references)[[55]](#references)</sup>
+Event details—जैसे logon type, status, substatus, source address और process fields—Event ID 4625 का संदर्भ देते हैं; status code या बार-बार विफल होने का pattern जाँच का सुराग है, निष्कर्ष नहीं।<sup>[[51]](#references)[[55]](#references)</sup>
 
-### Recovering Windows Events
+### Windows Events पुनर्प्राप्त करना
 
-क्योंकि event logs सामान्यतः circular होते हैं, logger द्वारा overwrite किए गए records recover नहीं किए जा सकते। Live system के साथ interact करने से पहले forensic image या working copy preserve करें; **Bulk_extractor** जैसे validated parser या carver का उपयोग केवल यह confirm करने के बाद करें कि tool version target `.evtx` data को support करता है, और केवल events recover करने के प्रयास में running system को unplug न करें।<sup>[[46]](#references)</sup>
+चूँकि event logs आम तौर पर circular होते हैं, logger द्वारा overwrite किए गए records शायद पुनर्प्राप्त न किए जा सकें। किसी live system से संपर्क करने से पहले forensic image या working copy सुरक्षित रखें; **Bulk_extractor** जैसे validated parser या carver का उपयोग तभी करें जब यह पुष्टि कर लें कि tool का version लक्षित `.evtx` data को support करता है, और केवल events पुनर्प्राप्त करने की कोशिश में चालू system का power unplug न करें।<sup>[[46]](#references)</sup>
 
-### Identifying Common Attacks via Windows Events
+### Windows Events से सामान्य Attacks की पहचान करना
 
-Practical event-ID reference के लिए मौजूदा [Red Team Recipe](https://redteamrecipe.com/event-codes/) link देखें और इसके examples को ऊपर दिए गए provider documentation के विरुद्ध validate करें।
+व्यावहारिक event-ID संदर्भ के लिए, मौजूदा [Red Team Recipe](https://redteamrecipe.com/event-codes/) link देखें और उसके उदाहरणों की ऊपर दिए गए provider documentation से पुष्टि करें।
 
 #### Brute Force Attacks
 
-Repeated Event ID 4625 failures को बाद की 4624 success, logon type, status, source और account context के साथ correlate करें; यह sequence investigation का indicator है, attack का प्रमाण नहीं।<sup>[[50]](#references)[[51]](#references)</sup>
+बार-बार होने वाली Event ID 4625 विफलताओं को बाद की 4624 सफलता, logon type, status, source और account संदर्भ से correlate करें; यह क्रम जाँच का संकेत है, attack का प्रमाण नहीं।<sup>[[50]](#references)[[51]](#references)</sup>
 
-#### Time Change
+#### समय में बदलाव
 
-Event ID 4616 system-time changes record करता है, जो timeline analysis को जटिल बना सकते हैं; इसकी तुलना time-service और host evidence से करें।<sup>[[56]](#references)</sup>
+Event ID 4616 system-time में बदलाव रिकॉर्ड करता है, जिससे timeline analysis जटिल हो सकता है; इसकी तुलना time-service और host के प्रमाणों से करें।<sup>[[56]](#references)</sup>
 
 #### USB Device Tracking
 
-USB event IDs provider-specific होते हैं; `UserPnp` 20001/20003, `DriverFrameworks-UserMode` 10000/10100 और `DeviceSetupManager/Admin` 112 को SetupAPI और registry artifacts के साथ correlate करें।<sup>[[17]](#references)[[59]](#references)</sup>
+USB event IDs provider-specific होते हैं; `UserPnp` 20001/20003, `DriverFrameworks-UserMode` 10000/10100 और `DeviceSetupManager/Admin` 112 को SetupAPI और registry artifacts से correlate करें।<sup>[[17]](#references)[[59]](#references)</sup>
 
 #### System Power Events
 
-OS start, shutdown, restart और unexpected-power context के लिए 12/13/1074/6008/6009 का उपयोग करें; 6005/6006 Event Log service start/stop को mark करते हैं।<sup>[[57]](#references)[[58]](#references)</sup>
+OS start, shutdown, restart और अप्रत्याशित power की स्थिति के लिए 12/13/1074/6008/6009 का उपयोग करें; 6005/6006, Event Log service के शुरू/बंद होने को दर्शाते हैं।<sup>[[57]](#references)[[58]](#references)</sup>
 
 #### Log Deletion
 
-Security Event ID 1102 record करता है कि Security audit log clear किया गया और इसे responsible account तथा process के साथ correlate किया जाना चाहिए।<sup>[[62]](#references)</sup>
+Security Event ID 1102 रिकॉर्ड करता है कि Security audit log साफ़ किया गया; इसे ज़िम्मेदार account और process से correlate करना चाहिए।<sup>[[62]](#references)</sup>
+
+
 
 ## References
 
-- [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
-- [2] [jonahacks.medium.com - Common Windows Processes की जांच](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d)
-- [3] [Windows 10 Notifications का Digital Forensic View](https://iconline.ipleiria.pt/server/api/core/bitstreams/833e160a-e382-46b4-82ad-fb2c8c995d62/content)
+- [1] [Windows Plug and Play की सफ़ाई](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+- [2] [jonahacks.medium.com - सामान्य Windows Processes की जाँच](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d)
+- [3] [Windows 10 Notifications का Digital Forensic दृष्टिकोण](https://iconline.ipleiria.pt/server/api/core/bitstreams/833e160a-e382-46b4-82ad-fb2c8c995d62/content)
 - [4] [WxTCmd](https://github.com/EricZimmerman/WxTCmd)
-- [5] [Eric Zimmerman forensic tools](https://ericzimmerman.github.io/#!index.md)
+- [5] [Eric Zimmerman के forensic tools](https://ericzimmerman.github.io/#!index.md)
 - [6] [Zone.Identifier और Alternate Data Streams](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/6e3f7352-d11c-4d76-8c39-2516a9df36e8)
 - [7] [Rifiuti2](https://github.com/abelcheung/rifiuti2)
 - [8] [Volume Shadow Copy Service](https://learn.microsoft.com/en-us/windows/server/storage/file-server/volume-shadow-copy-service)
 - [9] [ShadowCopyView](https://www.nirsoft.net/utils/shadow_copy_view.html)
 - [10] [VSS के अंतर्गत Registry backup और restore operations](https://learn.microsoft.com/en-us/windows/win32/vss/registry-backup-and-restore-operations-under-vss)
 - [11] [Backup और restore के लिए Registry keys](https://learn.microsoft.com/en-us/windows/win32/backup/registry-keys-for-backup-and-restore)
-- [12] [AutoRecover location पर Word performance issue](https://learn.microsoft.com/en-us/previous-versions/troubleshoot/microsoft-365/microsoft-365-apps/word/performance-issue-on-autorecover-location)
+- [12] [AutoRecover location पर Word की performance समस्या](https://learn.microsoft.com/en-us/previous-versions/troubleshoot/microsoft-365/microsoft-365-apps/word/performance-issue-on-autorecover-location)
 - [13] [Incident Response Guidebook](https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/IR-Guidebook-Final.pdf)
 - [14] [MS-SHLLINK: Shell Link Binary File Format](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-shllink/c3376b21-0931-45e4-b2fc-a48ac0e60d15)
 - [15] [LECmd](https://github.com/EricZimmerman/LECmd)
@@ -497,14 +522,14 @@ Security Event ID 1102 record करता है कि Security audit log clea
 - [19] [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html)
 - [20] [PidTagClientSubmitTime](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxprops/ca98145f-7f87-42b4-b0ef-124c6c6f8d83)
 - [21] [PidTagConversationIndex](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxprops/57f8de0f-5f53-423a-8947-7943dd959997)
-- [22] [EntryID और Related Types](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxcdata/57e8bcbf-11d0-40fe-8833-5558bb9c0c89)
+- [22] [EntryID और संबंधित Types](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxcdata/57e8bcbf-11d0-40fe-8833-5558bb9c0c89)
 - [23] [PidTagMessageFlags](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxcmsg/a0c52fe2-3014-43a7-942d-f43f6f91c366)
 - [24] [PidTagLastVerbExecuted](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxomsg/87a8b6b8-59a4-4859-9dcd-8b0f36e3d729?redirectedfrom=MSDN)
-- [25] [Outlook data files को ढूंढना और transfer करना](https://support.microsoft.com/en-us/outlook/find-and-transfer-outlook-data-files-from-one-computer-to-another)
-- [26] [Cached Exchange Mode को turn on करना](https://support.microsoft.com/en-us/outlook/turn-on-cached-exchange-mode)
-- [27] [केवल items का एक subset synchronized है](https://learn.microsoft.com/en-us/troubleshoot/outlook/user-interface/only-subset-items-synchronized)
-- [28] [Outlook data files के लिए size limits configure करना](https://learn.microsoft.com/en-us/microsoft-365-apps/outlook/data-files/configure-size-limit-outlook-data-files)
-- [29] [Profiles - Thunderbird user data को कहां store करता है](https://support.mozilla.org/bm/kb/profiles-where-thunderbird-stores-user-data)
+- [25] [Outlook data files ढूँढ़ना और transfer करना](https://support.microsoft.com/en-us/outlook/find-and-transfer-outlook-data-files-from-one-computer-to-another)
+- [26] [Cached Exchange Mode चालू करना](https://support.microsoft.com/en-us/outlook/turn-on-cached-exchange-mode)
+- [27] [केवल कुछ items ही synchronized होते हैं](https://learn.microsoft.com/en-us/troubleshoot/outlook/user-interface/only-subset-items-synchronized)
+- [28] [Outlook data files के size limits configure करना](https://learn.microsoft.com/en-us/microsoft-365-apps/outlook/data-files/configure-size-limit-outlook-data-files)
+- [29] [Profiles - Thunderbird user data कहाँ संग्रहीत करता है](https://support.mozilla.org/bm/kb/profiles-where-thunderbird-stores-user-data)
 - [30] [Thunderbird account settings और mbox directories](https://support.mozilla.org/en-US/kb/dangerous-directories-Thunderbird-account-settings)
 - [31] [IThumbnailCache interface](https://learn.microsoft.com/en-us/windows/win32/api/thumbcache/nn-thumbcache-ithumbnailcache)
 - [32] [Thumbs Viewer](https://thumbsviewer.github.io)
@@ -514,9 +539,9 @@ Security Event ID 1102 record करता है कि Security audit log clea
 - [36] [RegRipper 3.0](https://github.com/keydet89/RegRipper3.0)
 - [37] [Windows Registry Recovery](https://www.mitec.cz/wrr.html)
 - [38] [Registry को remotely edit करना](https://learn.microsoft.com/en-us/troubleshoot/windows-server/system-management-components/remotely-edit-the-registry)
-- [39] [Passwords technical overview](https://learn.microsoft.com/en-us/windows-server/security/kerberos/passwords-technical-overview)
+- [39] [Passwords का तकनीकी अवलोकन](https://learn.microsoft.com/en-us/windows-server/security/kerberos/passwords-technical-overview)
 - [40] [PECmd](https://github.com/EricZimmerman/PECmd)
-- [41] [Superfetch evidence](https://kb.binalyze.com/air/features/acquisition/supported-evidence/windows-collections-detail/superfetch)
+- [41] [Superfetch के प्रमाण](https://kb.binalyze.com/air/features/acquisition/supported-evidence/windows-collections-detail/superfetch)
 - [42] [srum-dump](https://github.com/MarkBaggett/srum-dump)
 - [43] [AppCompatCacheParser](https://github.com/EricZimmerman/AppCompatCacheParser)
 - [44] [AmcacheParser](https://github.com/EricZimmerman/AmcacheParser)
@@ -532,24 +557,26 @@ Security Event ID 1102 record करता है कि Security audit log clea
 - [54] [Event 4672](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4672)
 - [55] [MS-ERREF: NTSTATUS values](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/596a1078-e883-4972-9bbc-49e60bebca55)
 - [56] [Event 4616](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4616)
-- [57] [System event logs का उपयोग करके unexpected reboots troubleshoot करना](https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs)
-- [58] [Troubleshoot shutdown in process](https://learn.microsoft.com/en-us/troubleshoot/windows-server/installing-updates-features-roles/troubleshoot-error-shutdown-in-process)
-- [59] [USB Storage Device Forensics for Windows 10](https://www.researchgate.net/publication/318514858_USB_Storage_Device_Forensics_for_Windows_10)
-- [60] [Fantastic Windows Logon Types](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)
+- [57] [System event logs का उपयोग करके अप्रत्याशित reboots की समस्या का निवारण](https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs)
+- [58] [प्रक्रिया में shutdown की समस्या का निवारण](https://learn.microsoft.com/en-us/troubleshoot/windows-server/installing-updates-features-roles/troubleshoot-error-shutdown-in-process)
+- [59] [Windows 10 के लिए USB Storage Device Forensics](https://www.researchgate.net/publication/318514858_USB_Storage_Device_Forensics_for_Windows_10)
+- [60] [Windows Logon Types की विस्तृत जानकारी](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)
 - [61] [Event Log Explorer](https://eventlogxp.com)
 - [62] [Event 1102](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-1102)
 - [63] [Background activity moderator](https://winreg-kb.readthedocs.io/en/latest/sources/system-keys/Background-activity-moderator.html)
 - [64] [Registry - RecentApps](https://artefacts.help/windows_registry_recentapps.html)
-- [65] [Quick Print Outlook Desktop में PDF attachments print करना बंद करता है](https://support.microsoft.com/en-gb/office/quick-print-stops-printing-pdf-attachments-in-outlook-desktop-512fdeb0-6a88-4e6c-9285-cf957290aad2)
+- [65] [Outlook Desktop में Quick Print से PDF attachments की printing बंद हो जाती है](https://support.microsoft.com/en-gb/office/quick-print-stops-printing-pdf-attachments-in-outlook-desktop-512fdeb0-6a88-4e6c-9285-cf957290aad2)
 - [66] [Windows Registry files](https://winreg-kb.readthedocs.io/en/latest/sources/windows-registry/Files.html)
 - [67] [Kernel PST Viewer](https://www.nucleustechnologies.com/es/visor-de-pst.html)
 - [68] [Kernel OST Viewer](https://www.nucleustechnologies.com/ost-viewer.html)
 - [69] [RegQueryInfoKeyA](https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regqueryinfokeya)
-- [70] [Update के दौरान removed apps को वापस आने से रोकना](https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update)
-- [71] [NIST CFTT: FTK और Registry Viewer Test Results](https://www.dhs.gov/sites/default/files/publications/test_results_nist_windows_registry_forensic_tool_ftk_7.0.0.163_registry_viewer_2.0.0.7_april_2019.pdf)
-- [72] [Database of Installed Services](https://learn.microsoft.com/en-us/windows/win32/services/database-of-installed-services)
+- [70] [Update के दौरान हटाए गए apps को फिर से आने से रोकना](https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update)
+- [71] [NIST CFTT: FTK और Registry Viewer के परीक्षण परिणाम](https://www.dhs.gov/sites/default/files/publications/test_results_nist_windows_registry_forensic_tool_ftk_7.0.0.163_registry_viewer_2.0.0.7_april_2019.pdf)
+- [72] [इंस्टॉल की गई Services का Database](https://learn.microsoft.com/en-us/windows/win32/services/database-of-installed-services)
 - [73] [Tasks](https://learn.microsoft.com/en-us/windows/win32/taskschd/tasks)
-- [74] [Scheduled Tasks Fail with Error Task Scheduler Service Is Not Available](https://learn.microsoft.com/en-us/troubleshoot/windows-client/system-management-components/task-schedular-service-is-not-available)
-- [75] [Windows Mail database को navigate करना](https://eprints.whiterose.ac.uk/133161/1/Navigating_the_Windows_Mail_database_accepted.pdf)
+- [74] [Task Scheduler Service उपलब्ध नहीं होने की त्रुटि से Scheduled Tasks विफल होते हैं](https://learn.microsoft.com/en-us/troubleshoot/windows-client/system-management-components/task-schedular-service-is-not-available)
+- [75] [Windows Mail database को खंगालना](https://eprints.whiterose.ac.uk/133161/1/Navigating_the_Windows_Mail_database_accepted.pdf)
 - [76] [RFC 5322: Internet Message Format](https://datatracker.ietf.org/doc/html/rfc5322#section-3.6.4)
+- [77] [Windows clients के लिए Recall प्रबंधित करना](https://learn.microsoft.com/en-us/windows/client-management/manage-recall)
+- [78] [TotalRecall Reloaded](https://github.com/xaitax/TotalRecall)
 {{#include ../../../banners/hacktricks-training.md}}
