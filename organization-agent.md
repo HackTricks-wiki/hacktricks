@@ -23,8 +23,9 @@
 - UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
 - Blockchain chapters → top-level Blockchain & Smart Contract Security (`blockchain-and-crypto-currencies/README.md` entry). Bitcoin P2P stays in Network Services, DApp tests in Web, cryptocurrency privacy in Privacy.
-- VM escape entry point `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md` maps guest network/display/storage/shared-folder surfaces to QEMU/KVM, VirtualBox, and VMware cases; substantive chapters retain their paths. Slirp's custom-allocator mechanism stays under `libc-heap/`, but its SUMMARY entry belongs with guest-to-host cases.
-- General Web API testing (SOAP/REST/GraphQL discovery, CXF XOP and tRPC cases, tools) is at `src/pentesting-web/web-api-pentesting.md`; the 80/443 service overview links directly to it. Cloud retains provider-specific API control-plane semantics.
+- VM guest surfaces → `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md`, linking QEMU/KVM, VirtualBox and VMware chapters. Slirp allocator stays in `libc-heap/` but appears with guest-to-host cases in SUMMARY.
+- SOAP/REST/GraphQL testing → `src/pentesting-web/web-api-pentesting.md`; the 80/443 overview links there. Cloud keeps provider-specific APIs.
+- Go `net/http` `ServeMux` `CONNECT` path canonicalization → `src/pentesting-web/403-and-401-bypasses.md#go-nethttp-servemux-connect-path-canonicalization`; 80/443 and TiDB link there. This is a method/path authorization mismatch, not a Go product guide.
 - RDPexec → `src/network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session`; Windows Lateral Movement links directly there, avoiding a procedure-free stub.
 - Python `venv` and wheel builds → `src/generic-methodologies-and-resources/python/basic-python.md#virtual-environments-and-wheel-builds-venv`; the Python hub links to this heading, not a thin setup page.
 - 401/403 authorization bypasses → `src/pentesting-web/403-and-401-bypasses.md`; broader request/response behavior → `src/pentesting-web/special-http-headers.md`. The 80/443 service overview links to both and retains product discovery; old routes redirect.
@@ -37,7 +38,7 @@
 - Remote MCP OAuth, JSON-RPC enumeration, authorization and interception → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery, repo config, secrets and artifacts → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Server testing and client delivery are distinct.
 - eSIM/eUICC profile management, Java Card VM type confusion, OTA/APDU and card tests → `src/mobile-pentesting/esim-javacard-exploitation.md`. This is a mobile secure element, not Android app internals; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
 
-- Former TODO web topics: host poisoning → password reset; session auth → 401/403; signup/email change → registration; Jira service desk → Jira; TRACE → cookies.
+- Former TODO web topics now live at the relevant Web chapters: password reset, 401/403, registration, Jira and cookies.
 - Cross-platform host/SaaS collection-tool reference → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters. Its old TODO route redirects here.
 
 - macOS environment-controlled PHP, Lua, Julia, Octave, R, Ruby and Erlang/Elixir interpreter startup → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`. Each runtime keeps its prerequisites, variants and mitigation under headings; shell, Python, PowerShell and framework injection stay separate.
