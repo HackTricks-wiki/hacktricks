@@ -107,7 +107,7 @@
     "src/binary-exploitation/libc-heap/tcache-bin-attack.md": "e43ee7c838488002591402057135f04590b56800",
     "src/binary-exploitation/libc-heap/unlink-attack.md": "80deecc85ef8132f9bb5c9da302ad6256ad6b61b",
     "src/binary-exploitation/libc-heap/unsorted-bin-attack.md": "5c0c202fae891607070940965cf025a68720cbc5",
-    "src/binary-exploitation/libc-heap/use-after-free/README.md": "8803e9e4bb2dc564af44177498372e3c03d36134",
+    "src/binary-exploitation/libc-heap/use-after-free/README.md": "6c95dade5533d1f584d5e6bba392c481a121d7dd",
     "src/binary-exploitation/libc-heap/use-after-free/first-fit.md": "b738ad4eb9fcdfe1c5fda57b9d03d1b349454e2f",
     "src/binary-exploitation/libc-heap/virtualbox-slirp-nat-packet-heap-exploitation.md": "437bd717f83c683d389da3ba777d96efb63d061a",
     "src/binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md": "2c95b746a404a6abd9daa45f3ab51403d1d77583",
