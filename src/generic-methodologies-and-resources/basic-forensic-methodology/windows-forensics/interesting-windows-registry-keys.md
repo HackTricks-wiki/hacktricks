@@ -1,12 +1,12 @@
-# Interesujące klucze Rejestru Windows
+# Interesujące klucze rejestru Windows
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Hives Rejestru Windows to jeden z najszybszych sposobów przejścia od pytania _co się wydarzyło?_ do ustalenia _który użytkownik, kiedy i skąd?_. W przypadku analizy działającego systemu preferuj `CurrentControlSet`; podczas analizy hive offline najpierw ustal, który `ControlSet00x` był aktywny, zamiast wpisywać na sztywno `ControlSet001`.
+Hives rejestru Windows to jeden z najszybszych sposobów, by przejść od pytania _co się stało?_ do ustalenia _który użytkownik, kiedy i skąd?_. Podczas analizy na żywo preferuj `CurrentControlSet`; w przypadku analizy offline hive najpierw ustal, który `ControlSet00x` był aktywny, zamiast na sztywno zakładać `ControlSet001`.
 
 ### Informacje o wersji Windows i właścicielu
 
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: edycja/kompilacja Windows, czas instalacji, zarejestrowany właściciel, nazwa produktu i inne metadane kompilacji.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: edycja/kompilacja systemu Windows, czas instalacji, zarejestrowany właściciel, nazwa produktu i inne metadane kompilacji.
 - `SYSTEM\Select`: mapuje wartości `Current`, `Default` i `LastKnownGood` na rzeczywiste wartości `ControlSet00x` używane przez system.
 
 ### Nazwa komputera
@@ -19,70 +19,72 @@ Hives Rejestru Windows to jeden z najszybszych sposobów przejścia od pytania _
 
 ### Śledzenie czasu dostępu
 
-- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` wskazuje, czy znaczniki czasu ostatniego dostępu NTFS są aktualizowane.
+- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` wskazuje, czy aktualizowane są znaczniki czasu ostatniego dostępu NTFS.
 - Aby to włączyć, użyj: `fsutil behavior set disablelastaccess 0`
 
-### Szczegóły zamykania systemu
+### Szczegóły zamknięcia systemu
 
 - `SYSTEM\CurrentControlSet\Control\Windows`: czas ostatniego zamknięcia systemu.
-- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: starsze systemy mogą również udostępniać liczniki zamknięć systemu.
+- Starsze systemy mogą również udostępniać liczniki zamknięć w `SYSTEM\CurrentControlSet\Control\Watchdog\Display`.
 
 ### Konfiguracja sieci
 
-- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: adresy IP interfejsu, dzierżawy DHCP, dane bramy i DNS.<sup>[[1]](#references)</sup>
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: nazwa profilu sieciowego/SSID oraz czas pierwszego i ostatniego połączenia.
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` oraz `...\Unmanaged\{GUID}`: dane korelacji profilu, takie jak adres MAC bramy i sufiks DNS.
-- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: lokalne foldery współdzielone publikowane przez hosta.
+- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: adresy IP interfejsu, dzierżawy DHCP, brama i dane DNS.<sup>[[1]](#references)</sup>
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: nazwa profilu sieciowego/SSID oraz czasy pierwszego i ostatniego połączenia.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` i `...\Unmanaged\{GUID}`: dane korelacyjne profilu, takie jak adres MAC bramy i sufiks DNS.
+- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: lokalne foldery udostępnione przez hosta.
 
-### Zdalny dostęp i historia udziałów sieciowych
+### Historia dostępu zdalnego i udziałów sieciowych
 
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: wychodząca lista MRU RDP (`MRU0`..`MRU9`).<sup>[[1]](#references)</sup>
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: historia wychodzących połączeń RDP dla poszczególnych hostów. Podklucze zwykle przechowują `UsernameHint`, a czas `LastWrite` klucza jest użytecznym punktem odniesienia.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: mapowane dyski sieciowe, udziały UNC i punkty montowania nośników wymiennych powiązane z konkretnym użytkownikiem.
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: lista MRU wychodzących połączeń RDP (`MRU0`..`MRU9`).<sup>[[1]](#references)</sup>
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: historia wychodzących połączeń RDP dla poszczególnych hostów. Podklucze często przechowują `UsernameHint`, a czas `LastWrite` klucza to przydatny punkt odniesienia.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: zmapowane dyski sieciowe, udziały UNC i punkty montowania nośników wymiennych powiązane z konkretnym użytkownikiem.
 
-### Programy uruchamiane automatycznie i zaplanowana persistence
+### Programy uruchamiane automatycznie i zaplanowana persystencja
 
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` oraz `...\Tasks\{GUID}`: metadane zaplanowanych zadań. Jeśli zadanie istnieje tutaj, ale wartość `SD` nie występuje w `Tree\<TaskName>`, podejrzewaj ukryte manipulacje zadaniami w stylu Tarrask i skoreluj je z `C:\Windows\System32\Tasks\<TaskName>`.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` i `...\Tasks\{GUID}`: metadane zaplanowanych zadań. Jeśli zadanie istnieje tutaj, ale brakuje wartości `SD` w `Tree\<TaskName>`, podejrzewaj ukryte manipulacje zadaniami w stylu Tarrask i skoreluj je z `C:\Windows\System32\Tasks\<TaskName>`.
 
-### Wyszukiwania, wpisywane ścieżki i MRU
+### Wyszukiwania, wpisane ścieżki i MRU
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: wyszukiwane hasła w File Explorer.<sup>[[1]](#references)</sup>
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: ścieżki w Explorer wpisane ręcznie.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: ostatnie 26 poleceń `Win + R`. `MRUList` zachowuje ich kolejność.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: wyszukiwane frazy w Eksploratorze plików.<sup>[[1]](#references)</sup>
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: ścieżki ręcznie wpisane w Eksploratorze.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: ostatnie 26 poleceń uruchomionych za pomocą `Win + R`. `MRUList` zachowuje ich kolejność.
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: ostatnio otwierane dokumenty i foldery.
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU`
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU`
-- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: ostatnie pliki Office.
+- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: ostatnio używane pliki pakietu Office.
 
 ### Śledzenie aktywności użytkownika
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: historia uruchomień wykonywanych za pośrednictwem GUI. Nazwy wartości są zakodowane za pomocą ROT13, a dane binarne zawierają liczniki uruchomień i czas ostatniego uruchomienia.<sup>[[1]](#references)</sup>
-- Traktuj `UserAssist` jako silny dowód pomocniczy, a nie samodzielną podstawę wnioskowania: śledzi głównie aplikacje lub pliki `.lnk` uruchamiane przez Explorer i może pomijać wykonanie z wiersza poleceń lub przez usługę. W Windows 10+ niektóre wpisy nie muszą oznaczać, że proces faktycznie został w pełni wykonany.
-- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` oraz `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: ślady wykonania w nowszych wersjach Windows 10/11 z przypisaniem SID i czasem ostatniego wykonania. Są szczególnie przydatne dla plików binarnych wykonywanych lokalnie, ale starsze wpisy mogą szybko wygasać, a wykonanie z udziałów sieciowych/nośników wymiennych jest mniej wiarygodne.
-- W przypadku szerszych artefaktów wykonania, takich jak Prefetch, Amcache, ShimCache i SRUM, zobacz główny [przegląd Windows forensics](README.md#programs-executed).
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: historia uruchomień z interfejsu graficznego. Nazwy wartości są zakodowane za pomocą ROT13, a dane binarne zawierają liczniki uruchomień i czas ostatniego uruchomienia.<sup>[[1]](#references)</sup>
+- Traktuj `UserAssist` jako mocne dowody pomocnicze, a nie samodzielną podstawę do oceny: śledzi głównie aplikacje lub pliki `.lnk` uruchamiane przez Eksplorator i może nie odnotowywać uruchomień z wiersza poleceń lub usług. W systemie Windows 10 i nowszych niektóre wpisy nie muszą oznaczać, że proces faktycznie się uruchomił.
+- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` i `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: ślady uruchomień w nowoczesnych systemach Windows 10/11 z przypisaniem do SID i czasem ostatniego uruchomienia. Są szczególnie przydatne w przypadku plików binarnych uruchamianych lokalnie, ale starsze wpisy mogą szybko znikać, a dane o uruchomieniach z udziałów sieciowych/nośników wymiennych są mniej wiarygodne.
+- Więcej informacji o artefaktach uruchamiania, takich jak Prefetch, Amcache, ShimCache i SRUM, znajdziesz w głównym [omówieniu analizy śledczej systemu Windows](./#programs-executed).
 
 ### Shellbags
 
 - Shellbags są przechowywane zarówno w `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`, jak i w `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.<sup>[[1]](#references)</sup>
-- Wpisy `NTUSER.DAT` są szczególnie przydatne do badania przeglądania UNC/sieci, natomiast `UsrClass.dat` jest miejscem, w którym Windows Vista+ zwykle przechowuje shellbags lokalnych folderów i folderów na nośnikach wymiennych.
-- Mogą wskazywać istnienie folderu, poruszanie się po nim i preferencje widoku folderu, nawet po usunięciu folderu. Dostęp podobny do działania Explorera do plików archiwów również może pozostawiać ślady shellbags.<sup>[[1]](#references)</sup>
-- Nie każdy shellbag dowodzi pomyślnego dostępu do folderu, dlatego potwierdzaj ustalenia za pomocą LNK, Jump Lists, znaczników czasu lub mapowań woluminów.
+- Wpisy `NTUSER.DAT` są szczególnie przydatne przy przeglądaniu UNC/sieci, natomiast w systemie Windows Vista i nowszych Shellbags dotyczące folderów lokalnych/nośników wymiennych są zazwyczaj przechowywane w `UsrClass.dat`.
+- Mogą wskazywać istnienie folderu, nawigowanie po nim i preferencje widoku folderu, nawet po jego usunięciu. Dostęp do plików archiwów za pomocą Eksploratora lub podobnych narzędzi może również pozostawić ślady Shellbags.<sup>[[1]](#references)</sup>
+- Nie każdy Shellbag dowodzi, że dostęp do folderu zakończył się powodzeniem, dlatego potwierdź ustalenia za pomocą plików LNK, Jump Lists, znaczników czasu lub mapowań woluminów.
 - Użyj **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** lub **SBECmd**, aby je przeanalizować.
 
 ### Informacje o USB
 
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: główny inwentarz urządzeń pamięci masowej USB (producent, produkt, wersja, numer seryjny/instancja urządzenia).
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: szerszy inwentarz urządzeń USB, obejmujący również urządzenia niebędące nośnikami danych.
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: w nowszych kompilacjach Windows 10/11 jest to cenne miejsce zawierające znaczniki czasu cyklu życia poszczególnych urządzeń, takie jak czas instalacji, pierwszej instalacji, ostatniego podłączenia i ostatniego odłączenia.<sup>[[2]](#references)</sup>
-- `HKLM\SYSTEM\MountedDevices`: mapuje woluminy i identyfikatory urządzeń na litery dysków / GUID-y woluminów. Może przetrwać tylko ostatnie mapowanie dla danej litery dysku.
-- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: przydatny punkt odniesienia dla numerów seryjnych woluminów i metadanych wcześniejszych nośników.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: specyficzna dla użytkownika historia interakcji z literami dysków i udziałami.<sup>[[2]](#references)</sup>
-- Nowoczesne telefony i tablety podłączone za pomocą MTP/PTP mogą **nie** pojawiać się w `USBSTOR`. Sprawdź również `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` oraz `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`.<sup>[[2]](#references)</sup>
-- Aby powiązać urządzenie z użytkownikiem, przejdź od identyfikatorów urządzenia lub woluminu do artefaktów właściwych dla użytkownika, takich jak shellbags, LNK, Jump Lists, `RecentDocs` i `MountPoints2`.<sup>[[2]](#references)</sup>
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: podstawowy wykaz urządzeń pamięci masowej USB (producent, produkt, wersja, numer seryjny/instancja urządzenia).
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: szerszy wykaz urządzeń USB, także tych, które nie służą do przechowywania danych.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: w nowszych kompilacjach Windows 10/11 to cenne miejsce z sygnaturami czasowymi cyklu życia poszczególnych urządzeń, takimi jak instalacja, pierwsza instalacja, ostatnie podłączenie i ostatnie odłączenie.<sup>[[2]](#references)</sup>
+- `HKLM\SYSTEM\MountedDevices`: mapuje woluminy i identyfikatory urządzeń na litery dysków / GUID-y woluminów. Dla danej litery dysku może przetrwać tylko ostatnie mapowanie.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: przydatny punkt odniesienia dla numerów seryjnych woluminów i metadanych poprzednio używanych nośników.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: historia interakcji konkretnego użytkownika z literami dysków i udziałami.<sup>[[2]](#references)</sup>
+- Nowoczesne telefony i tablety podłączone przez MTP/PTP mogą **nie** pojawić się w `USBSTOR`. Sprawdź również `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` i `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`.<sup>[[2]](#references)</sup>
+- Aby powiązać urządzenie z użytkownikiem, przejdź od identyfikatorów urządzenia lub woluminu do artefaktów poszczególnych użytkowników, takich jak Shellbags, pliki LNK, Jump Lists, `RecentDocs` i `MountPoints2`.<sup>[[2]](#references)</sup>
+
+
 
 ## References
 
