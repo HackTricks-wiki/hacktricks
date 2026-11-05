@@ -596,7 +596,6 @@
   - [Fortinet Fortiweb](network-services-pentesting/pentesting-web/fortinet-fortiweb.md)
   - [Git](network-services-pentesting/pentesting-web/git.md)
   - [GeoNetwork](network-services-pentesting/pentesting-web/geonetwork.md)
-  - [Golang](network-services-pentesting/pentesting-web/golang.md)
   - [Grafana](network-services-pentesting/pentesting-web/grafana.md)
   - [GraphQL](network-services-pentesting/pentesting-web/graphql.md)
   - [H2 - Java SQL database](network-services-pentesting/pentesting-web/h2-java-sql-database.md)
