@@ -63,7 +63,7 @@ Windows Registry hives are one of the fastest ways to pivot from _what happened?
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: GUI-driven execution history. Value names are ROT13-encoded, and the binary data includes run counters and last run time.<sup>[[1]](#references)</sup>
 - Treat `UserAssist` as strong supporting evidence, not a standalone verdict: it mainly tracks apps or `.lnk` files launched through Explorer and can miss command-line or service execution. On Windows 10+, some entries do not necessarily mean the process fully ran.
 - `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` and `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: modern Windows 10/11 execution traces with SID attribution and last execution time. These are especially useful for locally executed binaries, but older entries can age out quickly and executions from network shares/removable media are less reliable.
-- For broader execution artifacts such as Prefetch, Amcache, ShimCache, and SRUM, see the main [Windows forensics overview](README.md#programs-executed).
+- For broader execution artifacts such as Prefetch, Amcache, ShimCache, and SRUM, see the main [Windows forensics overview](./#programs-executed).
 
 ### Shellbags
 
@@ -84,9 +84,10 @@ Windows Registry hives are one of the fastest ways to pivot from _what happened?
 - Modern phones and tablets connected via MTP/PTP may **not** appear under `USBSTOR`. Check `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` and `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices` as well.<sup>[[2]](#references)</sup>
 - To tie a device to a user, pivot from device or volume identifiers into per-user artifacts such as shellbags, LNKs, Jump Lists, `RecentDocs`, and `MountPoints2`.<sup>[[2]](#references)</sup>
 
+
+
 ## References
 
 - [1] [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
 - [2] [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
-
 {{#include ../../../banners/hacktricks-training.md}}

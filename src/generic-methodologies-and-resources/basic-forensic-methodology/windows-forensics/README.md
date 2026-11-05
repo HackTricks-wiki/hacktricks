@@ -14,6 +14,19 @@ Windows Timeline is an activity-history feature that can contain records for sup
 
 The database resides at `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. It can be opened with SQLite or parsed with [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd), whose output can be reviewed with [**Timeline Explorer**](https://ericzimmerman.github.io/#!index.md).<sup>[[4]](#references)[[5]](#references)</sup>
 
+### Windows Recall snapshots (Copilot+ PCs)
+
+Recall is opt-in on supported Windows 11 Copilot+ PCs. Current builds encrypt snapshots and their index with keys tied to Windows Hello and a VBS enclave. Do not treat an offline copy of the store as a plaintext SQLite database; the 2024 preview and the released design have different access properties.<sup>[[77]](#references)</sup>
+
+For a **live, enabled Recall session**, the same-user `AIXHost.exe` rendering process is a different access surface. The TotalRecall Reloaded proof of concept injects a DLL into that process and calls its Recall COM interfaces. Full-history extraction still requires the user to authenticate with Windows Hello; this is not an offline decryption or a Hello bypass. The researcher documented the tool on Windows 11 ARM64, so verify compatibility with the target build before relying on it.<sup>[[78]](#references)[[77]](#references)</sup>
+
+```powershell
+totalrecall.exe --preauth  # Most recent capture and settings; no Hello prompt
+totalrecall.exe --wait     # Wait for the user to open Recall and authenticate
+```
+
+`--preauth` uses `GetRecentCaptureThumbnail` to request a large rendition of the latest capture without Hello. After authorization, `--wait` can extract screenshots, OCR text, and per-capture metadata, including application and window context. The output is written under a timestamped `extraction_*` directory. These are build-dependent findings from the proof of concept, not a guarantee that Recall is enabled or that every screen was captured.<sup>[[78]](#references)</sup>
+
 ### ADS (Alternate Data Streams)
 
 Files downloaded from outside the local trust boundary may contain the **`Zone.Identifier` alternate data stream**, which records zone information and can include origin metadata such as a URL. Its presence and fields depend on the producer and system policy.<sup>[[6]](#references)</sup>
@@ -484,6 +497,8 @@ Use 12/13/1074/6008/6009 for OS start, shutdown, restart, and unexpected-power c
 
 Security Event ID 1102 records that the Security audit log was cleared and should be correlated with the responsible account and process.<sup>[[62]](#references)</sup>
 
+
+
 ## References
 
 - [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
@@ -562,5 +577,6 @@ Security Event ID 1102 records that the Security audit log was cleared and shoul
 - [74] [Scheduled Tasks Fail with Error Task Scheduler Service Is Not Available](https://learn.microsoft.com/en-us/troubleshoot/windows-client/system-management-components/task-schedular-service-is-not-available)
 - [75] [Navigating the Windows Mail database](https://eprints.whiterose.ac.uk/133161/1/Navigating_the_Windows_Mail_database_accepted.pdf)
 - [76] [RFC 5322: Internet Message Format](https://datatracker.ietf.org/doc/html/rfc5322#section-3.6.4)
-
+- [77] [Manage Recall for Windows clients](https://learn.microsoft.com/en-us/windows/client-management/manage-recall)
+- [78] [TotalRecall Reloaded](https://github.com/xaitax/TotalRecall)
 {{#include ../../../banners/hacktricks-training.md}}
