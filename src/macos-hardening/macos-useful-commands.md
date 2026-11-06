@@ -2,13 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Εργαλεία αυτόματης Enumeration σε macOS
+### Εργαλεία αυτόματης απαρίθμησης για macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Συγκεκριμένες εντολές macOS
+### Συγκεκριμένες εντολές για macOS
+
+Χρησιμοποιήστε την `sw_vers` για την έκδοση και το build του macOS.<sup>[[2]](#references)</sup> Αναζητήστε τιμές υλικού με την `sysctl` και στατιστικά σελίδων μνήμης με την `vm_stat`, αντί για τις εντολές `/proc/cpuinfo`, `/proc/meminfo` και `free`, οι οποίες είναι διαθέσιμες μόνο στο Linux.<sup>[[3]](#references)[[4]](#references)</sup>
+
 ```bash
 #System info
 date
@@ -17,10 +20,11 @@ uptime #show time from starting
 w #list users
 whoami #this user
 finger username #info about user
-uname -a #sysinfo
-cat /proc/cpuinfo #processor
-cat /proc/meminfo #memory
-free #check memory
+uname -a #Darwin kernel information
+sw_vers #macOS version and build
+sysctl -n hw.model #Hardware model identifier
+sysctl -n hw.memsize #Physical memory in bytes
+vm_stat #Memory statistics in pages
 df #check disk
 
 launchctl list #List services
@@ -46,7 +50,7 @@ system_profiler SPAirPortDataType #Airport Info
 
 #Searches
 mdfind password #Show all the files that contains the word password
-mfind -name password #List all the files containing the word password in the name
+mdfind -name password #Search indexed file names for password
 
 
 #Open any app
@@ -59,8 +63,8 @@ caffeinate &
 
 
 #Screenshot
-# This will ask for permission to the user
-screencapture -x /tmp/ss.jpg #Save screenshot in that file
+# May prompt for Screen Recording permission; -x does not bypass it
+screencapture -x /tmp/ss.png #Save screenshot; -x only suppresses the sound
 
 
 #Get clipboard info
@@ -85,6 +89,9 @@ networksetup -getinfo Wi-Fi #Wi-Fi info
 networksetup -getautoproxyurl Wi-Fi #Get proxy URL for Wifi
 networksetup -getwebproxy Wi-Fi #Wifi Web proxy
 networksetup -getftpproxy Wi-Fi #Wifi ftp proxy
+scutil --proxy #Current system proxy configuration
+scutil --dns #Current DNS resolver configuration
+scutil --nc list #Configured VPN services
 
 
 #Brew
@@ -110,29 +117,49 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist (enable ssh)
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist (disable ssh)
 #Start apache
 sudo apachectl (start|status|restart|stop)
-##Web folder: /Library/WebServer/Documents/
+ ##Web folder: /Library/WebServer/Documents/
 #Remove DNS cache
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Γρήγορος έλεγχος anti-analysis / virtualization
 
-Ορισμένα macOS stealers καλούν το `system_profiler` για να ανιχνεύσουν VM και **τερματίζουν με διακριτό exit code (π.χ. 100)**, ώστε να αποφεύγουν το sandbox detonation<sup>[[1]](#references)</sup>:
+Το `mdfind` αναζητά στο ευρετήριο μεταδεδομένων του Spotlight, επομένως η απουσία αποτελέσματος δεν αποδεικνύει ότι ένα αρχείο δεν υπάρχει.<sup>[[5]](#references)</sup> Για αναζήτηση στο σύστημα αρχείων σε προσβάσιμες διαδρομές, χρησιμοποιήστε `find "$HOME" -iname '*password*' 2>/dev/null`.<sup>[[11]](#references)</sup> Οι κατάλογοι που προστατεύονται από το TCC ενδέχεται και πάλι να μην είναι προσβάσιμοι στη διεργασία που εκτελεί την εντολή.<sup>[[9]](#references)</sup>
+
+Για αναγνώριση δικτύου, συγκρίνετε τις αποθηκευμένες ρυθμίσεις proxy μιας υπηρεσίας από το `networksetup` με την τρέχουσα κατάσταση proxy, DNS και VPN από το `scutil`.<sup>[[6]](#references)[[12]](#references)</sup> Ένα VPN μπορεί να εφαρμόσει ρύθμιση proxy, η οποία είναι ορατή μέσω του `scutil --proxy`.<sup>[[13]](#references)</sup> Μια επέκταση δικτύου μπορεί να φιλτράρει την κίνηση χωρίς να εμφανίζεται ως συμβατικό proxy.<sup>[[10]](#references)</sup> Δείτε τα [αμυντικά εργαλεία του macOS](macos-security-and-privilege-escalation/macos-defensive-apps.md#quick-triage-of-defensive-tooling) πριν υποθέσετε ότι είναι δυνατή η απευθείας εξερχόμενη σύνδεση.
+
+### Λήψη στιγμιότυπου οθόνης από συνεδρία SSH
+
+Ένα απομακρυσμένο shell δεν ανήκει αυτομάτως στο GUI bootstrap του συνδεδεμένου χρήστη. Αν έχετε τα απαιτούμενα δικαιώματα και υπάρχει ενεργή συνεδρία GUI, εντοπίστε το σωστό PID του `loginwindow` για εκείνη τη συνεδρία και εκτελέστε το `screencapture` στο bootstrap της με το `launchctl bsexec`.<sup>[[7]](#references)</sup> Με αυτόν τον τρόπο υιοθετείται το Mach bootstrap και το πλαίσιο της συνεδρίας ελέγχου, **όχι** το UID της διεργασίας ή η άδεια TCC για Εγγραφή οθόνης.<sup>[[8]](#references)</sup> Η λήψη μπορεί και πάλι να απορριφθεί ή να εμφανιστεί αίτημα συγκατάθεσης· δείτε τις [άδειες λήψης στιγμιότυπου οθόνης](macos-security-and-privilege-escalation/macos-security-protections/macos-input-monitoring-screen-capture-accessibility.md#screen-capture-ktccservicescreencapture).<sup>[[9]](#references)</sup>
+
+```bash
+pgrep -fl loginwindow # Identify the loginwindow PID for the target GUI session
+LOGINWINDOW_PID=1234 # Replace with that PID
+sudo launchctl bsexec "$LOGINWINDOW_PID" /usr/sbin/screencapture -x /tmp/ss.png
+```
+
+### Γρήγορος έλεγχος anti-analysis / εικονικοποίησης
+
+Ορισμένα macOS stealers καλούν το `system_profiler` για να εντοπίσουν VMs και **τερματίζονται με ξεχωριστό κωδικό εξόδου (π.χ., 100)**, ώστε να αποφύγουν την πυροδότηση σε sandbox<sup>[[1]](#references)</sup>:
+
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
-exit 100
+  exit 100
 fi
 ```
-### Εγκατεστημένο Λογισμικό & Υπηρεσίες
 
-Ελέγξτε για **ύποπτες** εφαρμογές που είναι εγκατεστημένες και για **δικαιώματα** επί των εγκατεστημένων πόρων:
+### Εγκατεστημένο λογισμικό και υπηρεσίες
+
+Ελέγξτε για **ύποπτες** εγκατεστημένες εφαρμογές και για τα **δικαιώματα** στους εγκατεστημένους πόρους:
+
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Διεργασίες χρηστών
+
+### Διεργασίες χρήστη
+
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -143,13 +170,28 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
+
 ### Δημιουργία χρήστη
 
-Χωρίς prompts
+Χωρίς προτροπές
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+
 
 ## References
 
 - [1] [2025, η χρονιά του Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [2] [Εγχειρίδιο Apple sw_vers](https://keith.github.io/xcode-man-pages/sw_vers.1.html)
+- [3] [Εγχειρίδιο Apple sysctl](https://keith.github.io/xcode-man-pages/sysctl.8.html)
+- [4] [Προβολή της χρήσης εικονικής μνήμης από την Apple](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/VMPages.html)
+- [5] [Εγχειρίδιο Apple mdfind](https://keith.github.io/xcode-man-pages/mdfind.1.html)
+- [6] [Εγχειρίδιο Apple scutil](https://keith.github.io/xcode-man-pages/scutil.8.html)
+- [7] [Εγχειρίδιο Apple screencapture](https://keith.github.io/xcode-man-pages/screencapture.1.html)
+- [8] [Εγχειρίδιο Apple launchctl](https://keith.github.io/xcode-man-pages/launchctl.1.html)
+- [9] [Ασφάλεια πλατφορμών Apple](https://help.apple.com/pdf/security/en_US/apple-platform-security-guide.pdf)
+- [10] [Τεκμηρίωση ανάπτυξης επέκτασης δικτύου Santa](https://github.com/northpolesec/santa/blob/main/docs/docs/deployment/profile-network-extension.md)
+- [11] [Εγχειρίδιο Apple find](https://keith.github.io/xcode-man-pages/find.1.html)
+- [12] [Εγχειρίδιο Apple networksetup](https://keith.github.io/xcode-man-pages/networksetup.8.html)
+- [13] [Οδηγός διαχειριστή Cisco Secure Client](https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/Cisco-Secure-Client-5/admin/guide/b-cisco-secure-client-admin-guide-5-1.pdf)
 {{#include ../banners/hacktricks-training.md}}
