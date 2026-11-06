@@ -4,15 +4,15 @@
 
 ## Lista kontrolna triage
 
-1. Ustal, z czym masz do czynienia: encodingiem, szyfrowaniem, hashem, signature czy MAC.
-2. Ustal, co jest kontrolowane: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), częściowy wyciek.
-3. Sklasyfikuj: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Najpierw sprawdź najbardziej prawdopodobne możliwości: dekodowanie kolejnych warstw, XOR z known-plaintext, ponowne użycie nonce, błędne użycie trybu, zachowanie oracle.
-5. Sięgaj po zaawansowane metody tylko wtedy, gdy są potrzebne: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+1. Ustal, z czym masz do czynienia: kodowaniem, szyfrowaniem, hashem, podpisem czy MAC.
+2. Ustal, co jest kontrolowane: tekst jawny/szyfrogram, IV/nonce, klucz, oracle (padding/błąd/timing), częściowy wyciek.
+3. Sklasyfikuj: symetryczne (AES/CTR/GCM), klucz publiczny (RSA/ECC), hash/MAC (SHA/MD5/HMAC), klasyczne (Vigenere/XOR).
+4. Najpierw sprawdź najbardziej prawdopodobne możliwości: dekodowanie kolejnych warstw, XOR z tekstem jawnym, ponowne użycie nonce, niewłaściwe użycie trybu, zachowanie oracle.
+5. Sięgaj po zaawansowane metody tylko wtedy, gdy są potrzebne: sieci (LLL/Coppersmith), SMT/Z3, side-channel.
 
 ## Zasoby online i narzędzia
 
-Przydają się, gdy zadanie polega na identyfikacji i zdejmowaniu kolejnych warstw albo gdy potrzebujesz szybko potwierdzić hipotezę.
+Przydają się do rozpoznawania i rozwarstwiania danych lub szybkiego potwierdzania hipotez.
 
 ### Wyszukiwanie hashy
 
@@ -24,15 +24,15 @@ Przydają się, gdy zadanie polega na identyfikacji i zdejmowaniu kolejnych wars
 - GPUHash.me.<sup>[[5]](#references)</sup>
 - Hash Toolkit.<sup>[[6]](#references)</sup>
 
-Nie przesyłaj prawdziwych hashy haseł ani poufnych materiałów z zadania do zewnętrznych usług wyszukiwania. Jeśli masz obawy dotyczące ujawnienia danych, warunków korzystania lub zasad konkursu, wybierz atak offline z wordlistą i regułami.
+Nie przesyłaj prawdziwych hashy haseł ani poufnych materiałów z zadania do zewnętrznych usług wyszukiwania. Jeśli masz obawy dotyczące ujawnienia danych, warunków korzystania z usługi lub zasad konkursu, wybierz atak offline z użyciem wordlisty/reguł.
 
-### Narzędzia pomocne przy identyfikacji
+### Narzędzia pomocne w identyfikacji
 
 - CyberChef (Magic, dekodowanie i konwersja).<sup>[[7]](#references)</sup>
-- dCode (środowisko do testowania szyfrów i encodingów).<sup>[[8]](#references)</sup>
-- Boxentriq (narzędzia do rozwiązywania szyfrów podstawieniowych).<sup>[[9]](#references)</sup>
+- dCode (środowisko do szyfrów i kodowań).<sup>[[8]](#references)</sup>
+- Boxentriq (narzędzia do łamania szyfrów podstawieniowych).<sup>[[9]](#references)</sup>
 
-### Platformy do ćwiczeń / materiały
+### Platformy treningowe / materiały referencyjne
 
 - CryptoHack (praktyczne zadania z kryptografii).<sup>[[10]](#references)</sup>
 - Cryptopals (klasyczne pułapki współczesnej kryptografii).<sup>[[11]](#references)</sup>
@@ -40,35 +40,37 @@ Nie przesyłaj prawdziwych hashy haseł ani poufnych materiałów z zadania do z
 ### Automatyczne dekodowanie
 
 - Ciphey.<sup>[[12]](#references)</sup>
-- python-codext (testuje wiele systemów liczbowych i encodingów).<sup>[[13]](#references)</sup>
+- python-codext (próbuje wielu systemów liczbowych i kodowań).<sup>[[13]](#references)</sup>
 
-## Encodingi i szyfry klasyczne
+Informacje o kodzie źródłowym języków ezoterycznych i stanie niestandardowych interpreterów znajdziesz w [Crypto CTF Misc](../ctf-misc/).
+
+## Kodowania i szyfry klasyczne
 
 ### Technika
 
-Wiele zadań crypto CTF składa się z transformacji nakładanych warstwami: encodingu base + prostego podstawienia + kompresji. Celem jest rozpoznanie kolejnych warstw i bezpieczne ich zdejmowanie.
+Wiele zadań crypto CTF polega na nakładaniu kolejnych transformacji: kodowanie base + proste podstawienie + kompresja. Celem jest rozpoznanie kolejnych warstw i bezpieczne ich usunięcie.
 
-### Encodingi: wypróbuj wiele systemów liczbowych
+### Kodowania: wypróbuj wiele systemów liczbowych
 
-Jeśli podejrzewasz encoding nakładany warstwami (base64 → base32 → …), wypróbuj:
+Jeśli podejrzewasz kodowanie warstwowe (base64 → base32 → …), wypróbuj:
 
 - CyberChef „Magic”
 - `codext` (python-codext): `codext <string>`
 
 Typowe wskazówki:
 
-- Base64: `A-Za-z0-9+/=` (padding `=` jest częsty)
-- Base32: `A-Z2-7=` (często występuje dużo znaków paddingu `=`)
-- Ascii85/Base85: gęsto występująca interpunkcja; czasem opakowane w `<~ ~>`
+- Base64: `A-Za-z0-9+/=` (często występuje dopełnienie `=`)
+- Base32: `A-Z2-7=` (często występuje dużo dopełnienia `=`)
+- Ascii85/Base85: gęsto rozmieszczone znaki interpunkcyjne; czasem ujęte w `<~ ~>`
 
-### Podstawienie / monoalfabetyczne
+### Podstawienie / szyfr monoalfabetyczny
 
-- Solver kryptogramów Boxentriq.<sup>[[9]](#references)</sup>
+- Narzędzie Boxentriq do łamania kryptogramów.<sup>[[9]](#references)</sup>
 - quipqiup.<sup>[[14]](#references)</sup>
 
-#### Known-plaintext recovery nazw plików Base32 z podstawieniem
+#### Odzyskiwanie na podstawie znanego tekstu jawnego w przypadku podstawionych nazw plików Base32
 
-Jeśli zaciemniona nazwa pliku zawiera wyłącznie znaki `a-z2-7`, po usunięciu stałego sufiksu ma około `ceil(8 * byte_length / 5)` znaków, a ten sam plaintext daje taki sam wynik dla różnych plików, sprawdź hipotezę **unpadded Base32, po którym następuje podstawienie symboli o stałej regule**. Same te wskazówki nie stanowią dowodu. Zbierz przewidywalne nazwy plików i odpowiadające im ciphertexty, zachowaj wielkość liter, zakoduj każdy plaintext w Base32 i wyrównaj symbole pozycja po pozycji. Każdy powtarzający się symbol plaintextu musi odpowiadać temu samemu symbolowi ciphertextu, a odwzorowanie odwrotne również musi być jednoznaczne. W jednym przypadku ransomware takie pary dostarczyły nazwy `ntuser.ini` i `NTUSER.DAT`; pozwoliło to odzyskać nazwy plików, **ale nie ich zawartość ani klucze szyfrujące**.<sup>[[28]](#references)</sup>
+Jeśli zaciemniona nazwa pliku zawiera wyłącznie znaki `a-z2-7`, ma około `ceil(8 * byte_length / 5)` znaków po usunięciu stałego sufiksu, a ten sam tekst jawny daje taki sam wynik dla różnych plików, sprawdź hipotezę o **unpadded Base32, po którym następuje podstawienie symboli według stałego schematu**. Same te wskazówki nie stanowią dowodu. Zbierz przewidywalne nazwy plików i odpowiadające im szyfrogramy, zachowaj wielkość liter, zakoduj każdą nazwę tekstu jawnego w Base32 i dopasuj symbole pozycja po pozycji. Każdy powtarzający się symbol tekstu jawnego musi odpowiadać temu samemu symbolowi szyfrogramu, a odwzorowanie odwrotne również musi być jednoznaczne. W jednym przypadku ransomware pary `ntuser.ini` i `NTUSER.DAT` posłużyły do tego celu; pozwoliło to odzyskać nazwy plików, **a nie zawartość plików ani klucze szyfrowania**.<sup>[[28]](#references)</sup>
 
 ```python
 import base64
@@ -87,11 +89,11 @@ assert "".join(forward[c] for c in b32) == target
 print(clear.decode("ascii"))
 ```
 
-Jeśli cel zawiera niezmapowane symbole, zdobądź więcej znanych par lub permutuj wyłącznie mapowania nieużywanych symboli Base32. Przywróć padding do granicy ośmiu znaków, odrzuć nieprawidłowe Base32 i nazwy po dekodowaniu zawierające znaki niedrukowalne, a następnie ponownie zakoduj pozostałe kandydaty i porównaj z **całym** oryginalnym ciphertextem. Powtarzające się bloki ciphertextu mogą dostarczyć dodatkowych wskazówek: w powyższym przypadku `3gpng2wv` odpowiadało Base32 `gaydambq`, które dekoduje się do pięciu znaków ASCII `0`. Sam drukowalny kandydat nie jest jednoznacznym dowodem.<sup>[[28]](#references)</sup>
+Jeśli cel zawiera niemapowane symbole, uzyskaj więcej znanych par lub permutuj wyłącznie mapowania nieużywanych symboli Base32. Przywróć padding do granicy ośmiu znaków, odrzucaj nieprawidłowe Base32 i zdekodowane nazwy zawierające znaki niedrukowalne, a następnie ponownie zakoduj pozostałe kandydatury i porównaj z **całym** oryginalnym ciphertextem. Powtarzające się bloki ciphertextu mogą dostarczyć dodatkowych wskazówek: w powyższym przypadku `3gpng2wv` mapowało się z powrotem na Base32 `gaydambq`, które dekoduje się do pięciu zer ASCII. Sama drukowalna kandydatura nie jest jednoznacznym dowodem.<sup>[[28]](#references)</sup>
 
 ### Caesar / ROT / Atbash
 
-- Automatyczny dekoder szyfru Caesar od Nayuki.<sup>[[15]](#references)</sup>
+- Automatyczny łamacz szyfru Caesar od Nayuki.<sup>[[15]](#references)</sup>
 - Narzędzie Atbash od Rumkin.<sup>[[16]](#references)</sup>
 
 ### Vigenère
@@ -99,9 +101,9 @@ Jeśli cel zawiera niezmapowane symbole, zdobądź więcej znanych par lub permu
 - Narzędzie Vigenère od dCode.<sup>[[8]](#references)</sup>
 - Solver Vigenère od Guballa.<sup>[[17]](#references)</sup>
 
-### Szyfr Bacona
+### Bacon cipher
 
-Często występuje w postaci grup po 5 bitów lub 5 liter:
+Często występuje w grupach po 5 bitów lub 5 liter:
 
 ```
 00111 01101 01010 00000 ...
@@ -114,7 +116,7 @@ AABBB ABBAB ABABA AAAAA ...
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
 
-### Runy
+### Runes
 
 Runy często są alfabetami podstawieniowymi; wyszukaj „futhark cipher” i spróbuj użyć tabel mapowania.
 
@@ -122,24 +124,24 @@ Runy często są alfabetami podstawieniowymi; wyszukaj „futhark cipher” i sp
 
 ### Technika
 
-Kompresja często pojawia się jako dodatkowa warstwa (zlib/deflate/gzip/xz/zstd), czasem zagnieżdżona. Jeśli wynik prawie daje się sparsować, ale wygląda jak śmieci, podejrzewaj kompresję.
+Kompresja stale pojawia się jako dodatkowa warstwa (zlib/deflate/gzip/xz/zstd), czasem zagnieżdżona. Jeśli wynik prawie daje się sparsować, ale wygląda jak śmieci, podejrzewaj kompresję.
 
 ### Szybka identyfikacja
 
 - `file <blob>`
-- Szukaj magicznych bajtów:
+- Szukaj bajtów magicznych:
   - gzip: `1f 8b`
-  - zlib: zwykle `78 01`, `78 5e`, `78 9c` lub `78 da` (drugi bajt zależy od flag kompresji)
+  - zlib: zazwyczaj `78 01`, `78 5e`, `78 9c` lub `78 da` (drugi bajt zależy od flag kompresji)
   - zip: `50 4b 03 04`
   - bzip2: `42 5a 68` (`BZh`)
   - xz: `fd 37 7a 58 5a 00`
   - zstd: `28 b5 2f fd`
 
-### Raw DEFLATE
+### Surowy DEFLATE
 
-CyberChef oferuje **Raw Deflate/Raw Inflate** — często jest to najszybsze rozwiązanie, gdy blob wygląda na skompresowany, ale `zlib` zawodzi.
+CyberChef ma **Raw Deflate/Raw Inflate**, co często jest najszybszym rozwiązaniem, gdy blob wygląda na skompresowany, ale `zlib` zawodzi.
 
-### Przydatne CLI
+### Przydatne polecenia CLI
 
 ```bash
 python3 - blob.bin <<'PY'
@@ -153,11 +155,11 @@ for wbits in [zlib.MAX_WBITS, -zlib.MAX_WBITS]:
 PY
 ```
 
-## Typowe konstrukcje kryptograficzne CTF
+## Typowe konstrukcje kryptograficzne w CTF
 
 ### Technika
 
-Pojawiają się często, ponieważ wynikają z realistycznych błędów programistów lub nieprawidłowego użycia popularnych bibliotek. Zazwyczaj należy je rozpoznać i zastosować znany workflow ekstrakcji lub rekonstrukcji.
+Pojawiają się często, ponieważ wynikają z realistycznych błędów programistów lub nieprawidłowego użycia popularnych bibliotek. Zwykle chodzi o rozpoznanie konstrukcji i zastosowanie znanego sposobu ekstrakcji lub rekonstrukcji.
 
 ### Fernet
 
@@ -168,15 +170,15 @@ Typowa wskazówka: dwa ciągi Base64 (token + klucz).
 
 ### Shamir Secret Sharing
 
-Jeśli widzisz wiele udziałów i wspomniany jest próg `t`, prawdopodobnie chodzi o Shamir.
+Jeśli widzisz wiele udziałów i pojawia się próg `t`, prawdopodobnie chodzi o Shamir.
 
-- Rekonstruktor online (tylko dla niepoufnych udziałów CTF).<sup>[[19]](#references)</sup>
+- Rekonstruktor online (wyłącznie dla niepoufnych udziałów z CTF).<sup>[[19]](#references)</sup>
 
 ### Formaty OpenSSL z solą
 
-CTF-y czasem zawierają wyniki `openssl enc` (nagłówek często zaczyna się od `Salted__`).
+W CTF czasami otrzymuje się wyniki polecenia `openssl enc` (nagłówek często zaczyna się od `Salted__`).
 
-Narzędzia pomocnicze do bruteforce:
+Narzędzia pomocnicze do brute force:
 
 - `bruteforce-salted-openssl`.<sup>[[20]](#references)</sup>
 - `easy_BFopensslCTF`.<sup>[[21]](#references)</sup>
@@ -193,15 +195,15 @@ Praktyczny zestaw narzędzi do CTF:
 
 - Python oraz `pycryptodome` do prymitywów symetrycznych i szybkiego prototypowania.<sup>[[25]](#references)</sup>
 - SageMath do arytmetyki modularnej, CRT, krat i zadań związanych z RSA/ECC.<sup>[[26]](#references)</sup>
-- Z3 do zadań opartych na ograniczeniach (gdy problem kryptograficzny można sprowadzić do ograniczeń).<sup>[[27]](#references)</sup>
+- Z3 do wyzwań opartych na ograniczeniach (gdy problem kryptograficzny można sprowadzić do ograniczeń).<sup>[[27]](#references)</sup>
 
-Sugerowane pakiety Pythona:
+Polecane pakiety Pythona:
 
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
+
 
 ## References
 
@@ -210,10 +212,10 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [3] [wyszukiwanie hashes.org](https://hashes.org/search.php)
 - [4] [OnlineHashCrack](https://www.onlinehashcrack.com/)
 - [5] [GPUHash.me](https://gpuhash.me/)
-- [6] [Zestaw narzędzi Hash](https://hashtoolkit.com/reverse-hash)
+- [6] [Hash Toolkit](https://hashtoolkit.com/reverse-hash)
 - [7] [GCHQ CyberChef](https://gchq.github.io/CyberChef/)
 - [8] [narzędzia dCode](https://www.dcode.fr/tools-list)
-- [9] [narzędzia Boxentriq do łamania szyfrów](https://www.boxentriq.com/code-breaking)
+- [9] [narzędzia Boxentriq do łamania kodów](https://www.boxentriq.com/code-breaking)
 - [10] [CryptoHack](https://cryptohack.org/)
 - [11] [Cryptopals](https://cryptopals.com/)
 - [12] [Ciphey](https://github.com/Ciphey/Ciphey)
@@ -221,9 +223,9 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [14] [quipqiup](https://quipqiup.com/)
 - [15] [Nayuki - automatyczne łamanie szyfru Cezara](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
 - [16] [Rumkin - szyfr Atbash](https://rumkin.com/tools/cipher/atbash/)
-- [17] [rozwiązywanie szyfru Vigenère’a przez Guballa](https://www.guballa.de/vigenere-solver)
+- [17] [solver Vigenère’a Guballi](https://www.guballa.de/vigenere-solver)
 - [18] [Asecuritysite - dekoder Fernet](https://asecuritysite.com/encryption/ferdecode)
-- [19] [rekonstruktor współdzielenia sekretu Shamira](https://christian.gen.co/secrets/)
+- [19] [rekonstruktor dzielenia sekretu Shamira](https://christian.gen.co/secrets/)
 - [20] [bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [21] [easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 - [22] [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
@@ -232,4 +234,5 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [25] [dokumentacja PyCryptodome](https://pycryptodome.readthedocs.io/en/latest/)
 - [26] [SageMath](https://www.sagemath.org/)
 - [27] [Z3](https://github.com/Z3Prover/z3)
-- [28] [Eye Research – łamanie schematów szyfrowania na łatwiznę](https://labs.eye.security/breaking-encryption-schemes-the-lazy-way/)
+- [28] [Eye Research – łamanie schematów szyfrowania na leniwy sposób](https://labs.eye.security/breaking-encryption-schemes-the-lazy-way/)
+{{#include ../../banners/hacktricks-training.md}}
