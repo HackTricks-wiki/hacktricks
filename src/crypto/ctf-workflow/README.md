@@ -42,6 +42,8 @@ Do not submit real password hashes or confidential challenge material to third-p
 - Ciphey.<sup>[[12]](#references)</sup>
 - python-codext (tries many bases/encodings).<sup>[[13]](#references)</sup>
 
+For esoteric-language source and custom interpreter state, see [Crypto CTF Misc](../ctf-misc/).
+
 ## Encodings & classical ciphers
 
 ### Technique
@@ -201,7 +203,7 @@ Suggested Python packages:
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
+
 
 ## References
 
@@ -233,3 +235,4 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [26] [SageMath](https://www.sagemath.org/)
 - [27] [Z3](https://github.com/Z3Prover/z3)
 - [28] [Eye Research – Breaking encryption schemes the lazy way](https://labs.eye.security/breaking-encryption-schemes-the-lazy-way/)
+{{#include ../../banners/hacktricks-training.md}}
