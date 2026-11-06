@@ -109,7 +109,7 @@ Disassembly of section __TEXT,__stubs:
 you can see that we are **jumping to the address of the GOT**, which in this case is resolved non-lazy and will contain the address of the printf function.
 
 In other situations instead of directly jumping to the GOT, it could jump to **`__DATA.__la_symbol_ptr`** which will load a value that represents the function that it's trying to load, then jump to **`__TEXT.__stub_helper`** which jumps the **`__DATA.__nl_symbol_ptr`** which contains the address of **`dyld_stub_binder`** which takes as parameters the number of the function and an address.\
-This last function, after finding the address of the searched function writes it in the corresponding location in **`__TEXT.__stub_helper`** to avoid doing lookups in the future.
+The binder resolves the symbol and updates its **`__DATA.__la_symbol_ptr`** slot. The stub then uses that resolved pointer on later calls; it is not rewritten in `__TEXT.__stub_helper`.<sup>[[5]](#references)</sup>
 
 > [!TIP]
 > However, notice that current dyld versions load everything as non-lazy.
@@ -272,7 +272,21 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
 
+### Trace runtime library resolution
+
+For a launch you can control, trace an `@rpath` or weak-library candidate before placing a replacement dylib. `DYLD_PRINT_SEARCHING` reports paths considered by dyld, while `DYLD_PRINT_LIBRARIES` shows the images actually loaded. `DYLD_PRINT_LOADERS` distinguishes a `JustInTimeLoader` from a `PrebuiltLoader` and reports use of a prebuilt loader set.<sup>[[6]](#references)</sup>
+
+```bash
+DYLD_PRINT_SEARCHING=1 DYLD_PRINT_LOADERS=1 DYLD_PRINT_LIBRARIES=1 /path/to/binary 2>&1 | tee /tmp/dyld-search.log
+```
+
+Look for the `LC_RPATH` line identifying the image that supplied a run path, then compare `possible path(...)` candidates with `found: dylib-from-disk`, `found: dylib-from-cache`, or a rejection. A candidate path is **not** proof that the dylib loaded. The first usable disk path before the expected library is the one to test for write access and [library-validation restrictions](./#library-validation).<sup>[[7]](#references)</sup>
+
+A prebuilt loader can reuse recorded dependency information instead of repeating a full path search. Sparse search output is therefore not evidence that an image has no dependencies; inspect its load commands with `otool -l` and compare the library list.<sup>[[8]](#references)</sup> These diagnostics also require dyld's print-variable permission, so a protected target may ignore them entirely.<sup>[[2]](#references)</sup> See [Dylib Hijacking](./#dylib-hijacking) for the actual replacement-library prerequisites.
+
 ### Others
+
+Some switches below are specific to older dyld releases. Check support on the target version rather than assuming every variable still works.<sup>[[2]](#references)[[9]](#references)</sup>
 
 - `DYLD_BIND_AT_LAUNCH`: Lazy bindings are resolved with non lazy ones
 - `DYLD_DISABLE_PREFETCH`: Disable pre-fetching of \_\_DATA and \_\_LINKEDIT content
@@ -283,15 +297,15 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_APIS`: Print libdyld API calls
 - `DYLD_PRINT_APIS_APP`: Print libdyld API calls made by main
 - `DYLD_PRINT_BINDINGS`: Print symbols when bound
-- `DYLD_WEAK_BINDINGS`: Only print weak symbols when bound
+- `DYLD_PRINT_WEAK_BINDINGS` (dyld2): Print weak symbol bindings
 - `DYLD_PRINT_CODE_SIGNATURES`: Print code signature registration operations
 - `DYLD_PRINT_DOFS`: Print D-Trace object format sections as loaded
 - `DYLD_PRINT_ENV`: Print env seen by dyld
-- `DYLD_PRINT_INTERPOSTING`: Print interposting operations
+- `DYLD_PRINT_INTERPOSING`: Print interposing operations
 - `DYLD_PRINT_LIBRARIES`: Print librearies loaded
 - `DYLD_PRINT_OPTS`: Print load options
-- `DYLD_REBASING`: Print symbol rebasing operations
-- `DYLD_RPATHS`: Print expansions of @rpath
+- `DYLD_PRINT_REBASINGS` (dyld2): Print symbol rebasing operations
+- `DYLD_PRINT_RPATHS` (dyld2): Print expansions of `@rpath`
 - `DYLD_PRINT_SEGMENTS`: Print mappings of Mach-O segments
 - `DYLD_PRINT_STATISTICS`: Print timing statistics
 - `DYLD_PRINT_STATISTICS_DETAILS`: Print detailed timing statistics
@@ -312,11 +326,17 @@ Or downloading the dyld project from [https://opensource.apple.com/tarballs/dyld
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
 
+
+
 ## References
 
 - [1] [dyld — `dyld/dyldMain.cpp` (process startup path)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
 - [2] [dyld — `dyld/DyldProcessConfig.cpp` (process/security configuration)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
 - [3] [XNU — `bsd/kern/kern_exec.c` (kernel side of `execve`, loading dyld)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
 - [4] [dyld — `include/mach-o/dyld_images.h` (`dyld_all_image_infos` structure)](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)
-
+- [5] [fishhook — lazy and non-lazy symbol pointer binding](https://github.com/meta/fishhook)
+- [6] [dyld(1) — dynamic-linker diagnostics](https://github.com/apple-oss-distributions/dyld/blob/main/doc/man/man1/dyld.1)
+- [7] [dyld — runtime library-path search](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/Loader.cpp)
+- [8] [dyld4 — prebuilt and just-in-time loaders](https://github.com/apple-oss-distributions/dyld/blob/main/doc/dyld4.md)
+- [9] [dyld2 — legacy diagnostic variable names](https://github.com/apple-oss-distributions/dyld/blob/dyld-852.2/src/dyld2.cpp)
 {{#include ../../../../banners/hacktricks-training.md}}
