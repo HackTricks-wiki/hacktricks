@@ -1,61 +1,61 @@
-# macOS Dyld Process
+# macOS Dyldプロセス
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## 基本情報
 
-Mach-o バイナリの実際の**エントリポイント**は、`LC_LOAD_DYLINKER`で定義されている動的リンカーで、通常は`/usr/lib/dyld`です。<sup>[[3]](#references)</sup>
+Mach-oバイナリの実際の**entrypoint**は、`LC_LOAD_DYLINKER`で定義されるdynamic linkerで、通常は`/usr/lib/dyld`です。<sup>[[3]](#references)</sup>
 
-このリンカーは、実行ファイルのすべてのライブラリを見つけてメモリにマッピングし、すべての非遅延ライブラリをリンクする必要があります。この処理の後に初めて、バイナリのエントリポイントが実行されます。
+このlinkerは、実行ファイルのすべてのライブラリを特定してメモリにマップし、すべてのnon-lazyライブラリをリンクする必要があります。この処理が完了して初めて、バイナリのentry-pointが実行されます。
 
-もちろん、**`dyld`**には依存関係がありません（システムコールとlibSystemの抜粋を使用します）。
+もちろん、**`dyld`**には依存関係がありません（syscallとlibSystemの抜粋を使用します）。
 
 > [!CAUTION]
-> このリンカーに脆弱性がある場合、あらゆるバイナリ（高度な権限を持つものも含む）の実行前に実行されるため、**権限昇格**が可能になります。
+> このlinkerに脆弱性がある場合、あらゆるバイナリ（高い特権を持つものも含む）の実行前に実行されるため、**特権昇格**が可能になります。
 
 ### フロー
 
-Dyldは**`dyldboostrap::start`**によって読み込まれます。この関数は**スタックカナリア**なども読み込みます。この関数は、**`apple`**引数ベクターでこれらの値やその他の**機密**な**値**を受け取るためです。<sup>[[1]](#references)</sup>
+Dyldは**`dyldboostrap::start`**によってロードされます。この関数は**stack canary**などもロードします。この関数は、**`apple`**引数ベクターでこれらの**機密**な**値**を受け取るためです。<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`**はdyldのエントリポイントであり、最初に`configureProcessRestrictions()`を実行します。通常、この処理は次のページで説明されている**`DYLD_*`**環境変数を制限します。<sup>[[2]](#references)</sup>
+**`dyls::_main()`**はdyldのentry pointであり、最初に`configureProcessRestrictions()`を実行します。通常、この関数は以下で説明されている**`DYLD_*`**環境変数を制限します。<sup>[[2]](#references)</sup>
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-次に、重要なシステムライブラリをあらかじめリンクしたdyld shared cacheをマッピングし、その後、バイナリが依存するライブラリをマッピングします。必要なライブラリがすべて読み込まれるまで、再帰的に処理が続きます。したがって、処理順序は次のとおりです。
+次に、重要なシステムライブラリを事前リンクしたdyld shared cacheをマップし、続いてバイナリが依存するライブラリをマップします。必要なライブラリがすべてロードされるまで、この処理を再帰的に続けます。そのため、処理は次のようになります。
 
-1. `DYLD_INSERT_LIBRARIES`で挿入されたライブラリを読み込む（許可されている場合）
-2. 次に、shared cache内のライブラリを読み込む
-3. 次に、インポートされたライブラリを読み込む
+1. `DYLD_INSERT_LIBRARIES`で挿入されたライブラリをロードする（許可されている場合）
+2. 次に、shared cache内のライブラリをロードする
+3. 次に、インポートされたライブラリをロードする
    1. その後、ライブラリのインポートを再帰的に続ける
 
-すべてのライブラリが読み込まれると、これらのライブラリの**初期化関数**が実行されます。これらは、`LC_ROUTINES[_64]`（現在は非推奨）で定義された**`__attribute__((constructor))`**、または`S_MOD_INIT_FUNC_POINTERS`フラグが付いたセクション（通常は**`__DATA.__MOD_INIT_FUNC`**）内のポインターを使って記述されます。
+すべてのライブラリがロードされると、それらの**initializer**が実行されます。これらは、`LC_ROUTINES[_64]`（現在は非推奨）で定義される**`__attribute__((constructor))`**、または`S_MOD_INIT_FUNC_POINTERS`フラグが設定されたセクション（通常は**`__DATA.__MOD_INIT_FUNC`**）内のポインターを使って記述されます。
 
-終了処理関数は**`__attribute__((destructor))`**で記述され、`S_MOD_TERM_FUNC_POINTERS`フラグが付いたセクション（**`__DATA.__mod_term_func`**）に配置されます。
+Terminatorは**`__attribute__((destructor))`**で記述され、`S_MOD_TERM_FUNC_POINTERS`フラグが設定されたセクション（**`__DATA.__mod_term_func`**）に配置されます。
 
-こちらも参照してください: [Reflective Mach-O Loading](../reflective-mach-o-loading.md)。
+こちらも参照: [Reflective Mach-O Loading](../reflective-mach-o-loading.md)。
 
 ### スタブ
 
-macOS上のすべてのバイナリは動的リンクされています。そのため、異なるマシンやコンテキストでバイナリが適切なコードにジャンプできるように、いくつかのスタブセクションが含まれています。バイナリの実行時に、少なくとも非遅延シンボルについては、dyldがこれらのアドレスを解決します。
+macOS上のすべてのバイナリは動的リンクされています。そのため、異なるマシンやコンテキストでバイナリが正しいコードにジャンプできるようにするスタブセクションが含まれています。バイナリの実行時に、これらのアドレス（少なくともnon-lazyのもの）を解決するのがdyldです。
 
-バイナリ内のスタブセクションの例:
+バイナリ内のスタブセクションには、次のようなものがあります。
 
 - **`__TEXT.__[auth_]stubs`**: `__DATA`セクションからのポインター
-- **`__TEXT.__stub_helper`**: 呼び出す関数の情報を使って動的リンクを行う小さなコード
-- **`__DATA.__[auth_]got`**: Global Offset Table（インポートされた関数のアドレス。解決されると、`S_NON_LAZY_SYMBOL_POINTERS`フラグが付いているためロード時にバインドされる）
-- **`__DATA.__nl_symbol_ptr`**: 非遅延シンボルポインター（`S_NON_LAZY_SYMBOL_POINTERS`フラグが付いているためロード時にバインドされる）
-- **`__DATA.__la_symbol_ptr`**: 遅延シンボルポインター（初回アクセス時にバインドされる）
+- **`__TEXT.__stub_helper`**: 呼び出す関数に関する情報を使って動的リンクを呼び出す小さなコード
+- **`__DATA.__[auth_]got`**: Global Offset Table（インポートされた関数のアドレス。解決時にバインドされる。`S_NON_LAZY_SYMBOL_POINTERS`フラグが設定されているため、ロード時にバインドされる）
+- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointer（`S_NON_LAZY_SYMBOL_POINTERS`フラグが設定されているため、ロード時にバインドされる）
+- **`__DATA.__la_symbol_ptr`**: Lazy symbol pointer（初回アクセス時にバインドされる）
 
 > [!WARNING]
-> "auth\_"というプレフィックスが付いたポインターは、プロセス内の暗号化キーを使って保護されています（PAC）。さらに、ポインターをたどる前に検証するため、arm64命令の`BLRA[A/B]`を使用できます。また、RETアドレスの代わりにRETA\[A/B]を使用できます。\
-> 実際、**`__TEXT.__auth_stubs`**内のコードは、要求された関数を呼び出す際に**`bl`**ではなく**`braa`**を使ってポインターを認証します。
+> "auth\_"プレフィックスが付いたポインターは、プロセス内の暗号化キーを使って保護されています（PAC）。また、ポインターをたどる前に検証するため、arm64命令の`BLRA[A/B]`を使用できます。RETアドレスの代わりに`RETA[A/B]`を使用することもできます。\
+> 実際、**`__TEXT.__auth_stubs`**内のコードは、要求された関数を呼び出す際にポインターを認証するため、**`bl`**の代わりに**`braa`**を使用します。
 >
-> また、現在のdyldバージョンではすべてが非遅延として読み込まれる点にも注意してください。
+> また、現在のdyldのバージョンでは、**すべてがnon-lazyとしてロードされます**。
 
-### 遅延シンボルの調査
+### Lazy symbolの特定
 
 ```c
 //gcc load.c -o load
@@ -75,7 +75,7 @@ int main (int argc, char **argv, char **envp, char **apple)
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
 
-printfを呼び出すジャンプ先が **`__TEXT.__stubs`** であることがわかります:
+printf を呼び出すためのジャンプ先が **`__TEXT.__stubs`** であることが確認できます:
 
 ```bash
 objdump --section-headers ./load
@@ -91,7 +91,7 @@ Idx Name          Size     VMA              Type
   4 __got         00000008 0000000100004000 DATA
 ```
 
-**`__stubs`** セクションの逆アセンブルでは：
+**`__stubs`**セクションの逆アセンブルでは:
 
 ```bash
 objdump -d --section=__stubs ./load
@@ -106,21 +106,21 @@ Disassembly of section __TEXT,__stubs:
 100003fa0: d61f0200    	br	x16
 ```
 
-GOTのアドレスに**ジャンプしている**ことがわかります。この場合、これはnon-lazyとして解決され、`printf`関数のアドレスが格納されます。
+GOT のアドレスへ **ジャンプしている**ことがわかります。この場合、GOT は non-lazy として解決され、`printf` 関数のアドレスが格納されます。
 
-別の状況では、GOTに直接ジャンプする代わりに、**`__DATA.__la_symbol_ptr`**にジャンプする場合があります。ここで、読み込もうとしている関数を表す値がロードされ、続いて**`__TEXT.__stub_helper`**にジャンプします。これは**`__DATA.__nl_symbol_ptr`**にジャンプし、そこには**`dyld_stub_binder`**のアドレスが格納されています。この関数は、関数番号とアドレスをパラメータとして受け取ります。\
-この関数は、検索対象の関数のアドレスを見つけると、今後ルックアップを行わずに済むよう、そのアドレスを**`__TEXT.__stub_helper`**内の対応する場所に書き込みます。
+別の状況では、GOT に直接ジャンプする代わりに、**`__DATA.__la_symbol_ptr`** へジャンプすることがあります。ここでは、ロードしようとしている関数を表す値が読み込まれ、続いて **`__TEXT.__stub_helper`** へジャンプします。そこから **`__DATA.__nl_symbol_ptr`** へジャンプし、ここには **`dyld_stub_binder`** のアドレスが格納されています。`dyld_stub_binder` は、関数の番号とアドレスを引数として受け取ります。\
+binder はシンボルを解決し、対応する **`__DATA.__la_symbol_ptr`** のスロットを更新します。スタブは後続の呼び出しで、解決済みのポインターを使用します。`__TEXT.__stub_helper` の内容が書き換えられるわけではありません。<sup>[[5]](#references)</sup>
 
 > [!TIP]
-> ただし、現在のdyldバージョンでは、すべてがnon-lazyとしてロードされる点に注意してください。
+> ただし、現在の dyld バージョンではすべて non-lazy としてロードされることに注意してください。
 
 #### Dyld opcodes
 
-最後に、**`dyld_stub_binder`**は指定された関数を見つけ、再度検索せずに済むよう適切なアドレスに書き込む必要があります。そのために、dyld内のopcodes（有限状態機械）を使用します。
+最後に、**`dyld_stub_binder`** は指定された関数を見つけ、再度検索せずに済むよう、適切なアドレスに書き込む必要があります。そのために、dyld 内の opcodes（有限状態機械）を使用します。
 
-## apple\[]引数ベクトル
+## apple\[] 引数ベクトル
 
-macOSでは、main関数は実際には3つではなく4つの引数を受け取ります。4つ目はappleと呼ばれ、各エントリは`key=value`の形式です。たとえば:
+macOS では、main 関数は実際には 3 つではなく 4 つの引数を受け取ります。4 つ目は apple と呼ばれ、各エントリーは `key=value` の形式です。たとえば：
 
 ```c
 // gcc apple.c -o apple
@@ -132,7 +132,7 @@ int main (int argc, char **argv, char **envp, char **apple)
 }
 ```
 
-結果:
+結果：
 
 ```
 0: executable_path=./a
@@ -150,9 +150,9 @@ int main (int argc, char **argv, char **envp, char **apple)
 ```
 
 > [!TIP]
-> これらの値が main function に到達する頃には、機密情報はすでに削除されています。そうでなければ data leak になっていたでしょう。
+> これらの値が main 関数に到達する頃には、機密情報はすでに値から削除されています。削除されていなければ、data leak が発生していたでしょう。
 
-main に入る前にデバッグすれば、これらの興味深い値をすべて確認できます。
+main に入る前にデバッグして、これらの興味深い値をすべて確認できます。
 
 <pre><code>lldb ./apple
 
@@ -195,17 +195,17 @@ main に入る前にデバッグすれば、これらの興味深い値をすべ
 
 ## dyld_all_image_infos
 
-これは dyld がエクスポートする構造体で、dyld の状態に関する情報を含みます。[**ソースコード**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)で確認でき、バージョン、dyld_image_info 配列へのポインター、dyld_image_notifier へのポインター、proc が shared cache から切り離されているかどうか、libSystem initializer が呼び出されたかどうか、dyld 自身の Mach header へのポインター、dyld version string などの情報があります。<sup>[[4]](#references)</sup>
+これは dyld がエクスポートする、dyld の状態に関する情報を含む構造体です。[**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) で確認でき、バージョン、dyld_image_info 配列へのポインタ、dyld_image_notifier へのポインタ、proc が shared cache から切り離されているかどうか、libSystem の初期化関数が呼び出されたかどうか、dyld 自身の Mach header へのポインタ、dyld のバージョン文字列などの情報を含みます。<sup>[[4]](#references)</sup>
 
-## dyld 環境変数
+## dyld の環境変数
 
 ### dyld のデバッグ
 
-dyld の動作を理解するのに役立つ興味深い環境変数：
+dyld の動作を把握するのに役立つ興味深い環境変数:
 
 - **DYLD_PRINT_LIBRARIES**
 
-読み込まれる各ライブラリを確認します：
+ロードされる各ライブラリを確認します。
 
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
@@ -264,7 +264,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 
 - **DYLD_PRINT_INITIALIZERS**
 
-各ライブラリのイニシャライザーが実行されるたびに出力します:
+各ライブラリの初期化関数が実行される際に出力します:
 
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
@@ -272,50 +272,71 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
 
-### Others
+### ランタイムのライブラリ解決をトレースする
 
-- `DYLD_BIND_AT_LAUNCH`: Lazy bindings を non-lazy bindings とともに解決する
-- `DYLD_DISABLE_PREFETCH`: \_\_DATA と \_\_LINKEDIT のコンテンツの pre-fetching を無効にする
-- `DYLD_FORCE_FLAT_NAMESPACE`: Single-level bindings
-- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: 解決パス
-- `DYLD_INSERT_LIBRARIES`: 特定の library をロードする
+制御可能な起動では、置き換え用の dylib を配置する前に、`@rpath` または weak-library の候補をトレースします。`DYLD_PRINT_SEARCHING` は dyld が検討したパスを報告し、`DYLD_PRINT_LIBRARIES` は実際にロードされたイメージを表示します。`DYLD_PRINT_LOADERS` は `JustInTimeLoader` と `PrebuiltLoader` を区別し、prebuilt loader set の使用状況を報告します。<sup>[[6]](#references)</sup>
+
+```bash
+DYLD_PRINT_SEARCHING=1 DYLD_PRINT_LOADERS=1 DYLD_PRINT_LIBRARIES=1 /path/to/binary 2>&1 | tee /tmp/dyld-search.log
+```
+
+`LC_RPATH` 行を確認して run path を提供した image を特定し、`possible path(...)` の候補を `found: dylib-from-disk`、`found: dylib-from-cache`、または拒否の結果と照合します。候補パスは、dylib がロードされた証拠には**なりません**。想定される library より前にある、最初に使用可能な disk path について、書き込み権限と [library-validation の制限](./#library-validation)を確認します。<sup>[[7]](#references)</sup>
+
+prebuilt loader は、完全なパス検索を繰り返す代わりに、記録済みの依存情報を再利用できます。そのため、検索結果が少なくても image に依存関係がないとは限りません。`otool -l` で load command を調べ、library list と照合してください。<sup>[[8]](#references)</sup> これらの診断には dyld の print-variable 権限も必要なため、保護された target では完全に無視されることがあります。<sup>[[2]](#references)</sup> 実際に置換 library を使うための前提条件は [Dylib Hijacking](./#dylib-hijacking) を参照してください。
+
+### その他
+
+以下の一部のスイッチは、古い dyld リリース固有のものです。すべての変数が今も機能すると決めつけず、target のバージョンでサポートされているか確認してください。<sup>[[2]](#references)[[9]](#references)</sup>
+
+- `DYLD_BIND_AT_LAUNCH`: Lazy binding を non lazy binding とともに解決する
+- `DYLD_DISABLE_PREFETCH`: \_\_DATA および \_\_LINKEDIT の内容の pre-fetching を無効にする
+- `DYLD_FORCE_FLAT_NAMESPACE`: Single-level binding
+- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: 解決に使うパス
+- `DYLD_INSERT_LIBRARIES`: 指定した library をロードする
 - `DYLD_PRINT_TO_FILE`: dyld のデバッグ情報をファイルに書き込む
-- `DYLD_PRINT_APIS`: libdyld API の呼び出しを出力する
-- `DYLD_PRINT_APIS_APP`: main が行った libdyld API の呼び出しを出力する
-- `DYLD_PRINT_BINDINGS`: バインド時にシンボルを出力する
-- `DYLD_WEAK_BINDINGS`: バインド時に weak symbols のみを出力する
-- `DYLD_PRINT_CODE_SIGNATURES`: code signature の登録操作を出力する
-- `DYLD_PRINT_DOFS`: ロード時に D-Trace object format のセクションを出力する
-- `DYLD_PRINT_ENV`: dyld が認識した env を出力する
-- `DYLD_PRINT_INTERPOSTING`: interposting 操作を出力する
-- `DYLD_PRINT_LIBRARIES`: ロードされた libraries を出力する
-- `DYLD_PRINT_OPTS`: ロードオプションを出力する
-- `DYLD_REBASING`: シンボルの rebasing 操作を出力する
-- `DYLD_RPATHS`: @rpath の展開を出力する
-- `DYLD_PRINT_SEGMENTS`: Mach-O セグメントのマッピングを出力する
-- `DYLD_PRINT_STATISTICS`: タイミング統計を出力する
-- `DYLD_PRINT_STATISTICS_DETAILS`: 詳細なタイミング統計を出力する
-- `DYLD_PRINT_WARNINGS`: 警告メッセージを出力する
+- `DYLD_PRINT_APIS`: libdyld API 呼び出しを表示する
+- `DYLD_PRINT_APIS_APP`: main による libdyld API 呼び出しを表示する
+- `DYLD_PRINT_BINDINGS`: binding 時にシンボルを表示する
+- `DYLD_PRINT_WEAK_BINDINGS` (dyld2): weak symbol binding を表示する
+- `DYLD_PRINT_CODE_SIGNATURES`: code signature の登録操作を表示する
+- `DYLD_PRINT_DOFS`: ロード時に D-Trace object format section を表示する
+- `DYLD_PRINT_ENV`: dyld が認識した環境変数を表示する
+- `DYLD_PRINT_INTERPOSING`: interposing 操作を表示する
+- `DYLD_PRINT_LIBRARIES`: ロードされた librearies を表示する
+- `DYLD_PRINT_OPTS`: load option を表示する
+- `DYLD_PRINT_REBASINGS` (dyld2): シンボルの rebasing 操作を表示する
+- `DYLD_PRINT_RPATHS` (dyld2): `@rpath` の展開を表示する
+- `DYLD_PRINT_SEGMENTS`: Mach-O segment のマッピングを表示する
+- `DYLD_PRINT_STATISTICS`: timing statistics を表示する
+- `DYLD_PRINT_STATISTICS_DETAILS`: 詳細な timing statistics を表示する
+- `DYLD_PRINT_WARNINGS`: warning message を表示する
 - `DYLD_SHARED_CACHE_DIR`: shared library cache に使用するパス
-- `DYLD_SHARED_REGION`: "use"、"private"、"avoid"
+- `DYLD_SHARED_REGION`: "use", "private", "avoid"
 - `DYLD_USE_CLOSURES`: closures を有効にする
 
-次のような方法で、さらに見つけることができます:
+次のような方法で、さらに確認できます:
 
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
 
-または [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) から dyld プロジェクトをダウンロードし、フォルダー内で次を実行します:
+または [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) から dyld プロジェクトをダウンロードし、フォルダー内で次を実行します。
 
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
 
+
+
 ## References
 
-- [1] [dyld — `dyld/dyldMain.cpp` (プロセスの起動経路)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
-- [2] [dyld — `dyld/DyldProcessConfig.cpp` (プロセス/セキュリティ設定)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
-- [3] [XNU — `bsd/kern/kern_exec.c` (`execve` のカーネル側処理、dyld のロード)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
-- [4] [dyld — `include/mach-o/dyld_images.h` (`dyld_all_image_infos` 構造体)](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)
+- [1] [dyld — `dyld/dyldMain.cpp`（プロセス起動パス）](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
+- [2] [dyld — `dyld/DyldProcessConfig.cpp`（プロセス／セキュリティ設定）](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
+- [3] [XNU — `bsd/kern/kern_exec.c`（`execve` のカーネル側処理、dyld のロード）](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
+- [4] [dyld — `include/mach-o/dyld_images.h`（`dyld_all_image_infos` 構造体）](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)
+- [5] [fishhook — lazy および non-lazy シンボルポインターのバインド](https://github.com/meta/fishhook)
+- [6] [dyld(1) — dynamic linker の診断](https://github.com/apple-oss-distributions/dyld/blob/main/doc/man/man1/dyld.1)
+- [7] [dyld — ランタイムのライブラリパス検索](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/Loader.cpp)
+- [8] [dyld4 — 事前ビルドローダーと Just-In-Time ローダー](https://github.com/apple-oss-distributions/dyld/blob/main/doc/dyld4.md)
+- [9] [dyld2 — レガシーな診断変数名](https://github.com/apple-oss-distributions/dyld/blob/dyld-852.2/src/dyld2.cpp)
 {{#include ../../../../banners/hacktricks-training.md}}
