@@ -2,13 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Інструменти автоматичного перерахування для macOS
+### Інструменти автоматичного переліку даних macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
 ### Спеціальні команди macOS
+
+Використовуйте `sw_vers`, щоб дізнатися версію та збірку macOS.<sup>[[2]](#references)</sup> Запитуйте значення апаратного забезпечення за допомогою `sysctl`, а статистику сторінок пам’яті — за допомогою `vm_stat`, а не команд `/proc/cpuinfo`, `/proc/meminfo` і `free`, доступних лише в Linux.<sup>[[3]](#references)[[4]](#references)</sup>
+
 ```bash
 #System info
 date
@@ -17,10 +20,11 @@ uptime #show time from starting
 w #list users
 whoami #this user
 finger username #info about user
-uname -a #sysinfo
-cat /proc/cpuinfo #processor
-cat /proc/meminfo #memory
-free #check memory
+uname -a #Darwin kernel information
+sw_vers #macOS version and build
+sysctl -n hw.model #Hardware model identifier
+sysctl -n hw.memsize #Physical memory in bytes
+vm_stat #Memory statistics in pages
 df #check disk
 
 launchctl list #List services
@@ -46,7 +50,7 @@ system_profiler SPAirPortDataType #Airport Info
 
 #Searches
 mdfind password #Show all the files that contains the word password
-mfind -name password #List all the files containing the word password in the name
+mdfind -name password #Search indexed file names for password
 
 
 #Open any app
@@ -59,8 +63,8 @@ caffeinate &
 
 
 #Screenshot
-# This will ask for permission to the user
-screencapture -x /tmp/ss.jpg #Save screenshot in that file
+# May prompt for Screen Recording permission; -x does not bypass it
+screencapture -x /tmp/ss.png #Save screenshot; -x only suppresses the sound
 
 
 #Get clipboard info
@@ -85,6 +89,9 @@ networksetup -getinfo Wi-Fi #Wi-Fi info
 networksetup -getautoproxyurl Wi-Fi #Get proxy URL for Wifi
 networksetup -getwebproxy Wi-Fi #Wifi Web proxy
 networksetup -getftpproxy Wi-Fi #Wifi ftp proxy
+scutil --proxy #Current system proxy configuration
+scutil --dns #Current DNS resolver configuration
+scutil --nc list #Configured VPN services
 
 
 #Brew
@@ -110,29 +117,49 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist (enable ssh)
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist (disable ssh)
 #Start apache
 sudo apachectl (start|status|restart|stop)
-##Web folder: /Library/WebServer/Documents/
+ ##Web folder: /Library/WebServer/Documents/
 #Remove DNS cache
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Швидка перевірка на anti-analysis / virtualization
 
-Деякі macOS stealers викликають `system_profiler`, щоб виявити VM, і **завершують роботу з окремим кодом виходу (наприклад, 100)**, щоб уникнути детонації в sandbox<sup>[[1]](#references)</sup>:
+`mdfind` запитує індекс метаданих Spotlight, тому відсутність результату не доводить, що файлу немає.<sup>[[5]](#references)</sup> Щоб шукати у доступних шляхах файлової системи, використовуйте `find "$HOME" -iname '*password*' 2>/dev/null`.<sup>[[11]](#references)</sup> Каталоги, захищені TCC, усе ще можуть бути недоступними для процесу, який виконує команду.<sup>[[9]](#references)</sup>
+
+Для розвідки мережі порівняйте збережені налаштування проксі служби, отримані через `networksetup`, з поточним станом проксі, DNS і VPN, отриманим через `scutil`.<sup>[[6]](#references)[[12]](#references)</sup> VPN може передати конфігурацію проксі, видиму через `scutil --proxy`.<sup>[[13]](#references)</sup> Розширення мережі може фільтрувати трафік, не відображаючись як звичайний проксі.<sup>[[10]](#references)</sup> Перш ніж припускати, що прямий вихід у мережу доступний, див. [захисні інструменти macOS](macos-security-and-privilege-escalation/macos-defensive-apps.md#quick-triage-of-defensive-tooling).
+
+### Знімок екрана з SSH-сеансу
+
+Віддалена оболонка не автоматично належить до GUI bootstrap увійшлого користувача. Якщо маєте необхідні привілеї та активний GUI-сеанс, визначте правильний PID `loginwindow` для цього сеансу й запустіть `screencapture` у його bootstrap за допомогою `launchctl bsexec`.<sup>[[7]](#references)</sup> Це переносить контекст Mach bootstrap і audit session, **але не** UID процесу чи дозвіл TCC на запис екрана.<sup>[[8]](#references)</sup> Знімок усе ще може бути заборонений або викликати запит на згоду; див. [дозволи на знімок екрана](macos-security-and-privilege-escalation/macos-security-protections/macos-input-monitoring-screen-capture-accessibility.md#screen-capture-ktccservicescreencapture).<sup>[[9]](#references)</sup>
+
+```bash
+pgrep -fl loginwindow # Identify the loginwindow PID for the target GUI session
+LOGINWINDOW_PID=1234 # Replace with that PID
+sudo launchctl bsexec "$LOGINWINDOW_PID" /usr/sbin/screencapture -x /tmp/ss.png
+```
+
+### Швидка перевірка anti-analysis / віртуалізації
+
+Деякі macOS stealers викликають `system_profiler`, щоб виявити VM, і **переривають виконання з окремим кодом завершення (наприклад, 100)**, щоб уникнути спрацювання в sandbox<sup>[[1]](#references)</sup>:
+
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
-exit 100
+  exit 100
 fi
 ```
+
 ### Встановлене програмне забезпечення та служби
 
-Перевірте наявність **підозрілих** встановлених застосунків і **привілеїв** щодо встановлених ресурсів:
+Перевірте **встановлені програми на наявність підозрілих**, а також **привілеї** щодо встановлених ресурсів:
+
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Процеси користувачів
+
+### Процеси користувача
+
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -143,13 +170,28 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
+
 ### Створення користувача
 
 Без запитів
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
+
+
 ## References
 
-- [1] [2025 рік Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025 — рік Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [2] [Посібник Apple sw_vers](https://keith.github.io/xcode-man-pages/sw_vers.1.html)
+- [3] [Посібник Apple sysctl](https://keith.github.io/xcode-man-pages/sysctl.8.html)
+- [4] [Перегляд використання віртуальної пам’яті Apple](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/VMPages.html)
+- [5] [Посібник Apple mdfind](https://keith.github.io/xcode-man-pages/mdfind.1.html)
+- [6] [Посібник Apple scutil](https://keith.github.io/xcode-man-pages/scutil.8.html)
+- [7] [Посібник Apple screencapture](https://keith.github.io/xcode-man-pages/screencapture.1.html)
+- [8] [Посібник Apple launchctl](https://keith.github.io/xcode-man-pages/launchctl.1.html)
+- [9] [Безпека платформ Apple](https://help.apple.com/pdf/security/en_US/apple-platform-security-guide.pdf)
+- [10] [Документація з розгортання мережевого розширення Santa](https://github.com/northpolesec/santa/blob/main/docs/docs/deployment/profile-network-extension.md)
+- [11] [Посібник Apple find](https://keith.github.io/xcode-man-pages/find.1.html)
+- [12] [Посібник Apple networksetup](https://keith.github.io/xcode-man-pages/networksetup.8.html)
+- [13] [Посібник адміністратора Cisco Secure Client](https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/Cisco-Secure-Client-5/admin/guide/b-cisco-secure-client-admin-guide-5-1.pdf)
 {{#include ../banners/hacktricks-training.md}}
