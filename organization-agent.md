@@ -2,11 +2,11 @@
 
 ## Principles
 
-- Give each reusable mechanism one substantive home; service/platform/tool entry points keep distinct prerequisites and link to the relevant heading.
-- Use headings when variants share mechanism and task; split when transport, prerequisites, or task differ. Size alone is not decisive.
-- Main HackTricks owns general security techniques; HackTricks Cloud owns provider/service/IAM-specific pivots. Use verified public URLs for cross-book links.
-- A removed Markdown chapter needs a whole-page mdBook redirect in `book.toml`. Update current local links; historical fragments are out of scope. Preserve unique content before deleting a source.
-- Recheck paths and pending PR overlap before editing.
+- One substantive home per mechanism; service/platform/tool entry points link to it and keep distinct prerequisites.
+- Use headings for one task/mechanism; split by transport, prerequisites or task, not size.
+- Main owns general techniques; Cloud owns provider/service/IAM pivots. Use public cross-book URLs.
+- Removed chapters need whole-page `book.toml` redirects. Update local links, preserve unique content; historical fragments are out of scope.
+- Recheck paths and pending PR overlap.
 
 ## Canonical locations and boundaries
 
@@ -46,6 +46,8 @@
 
 - PostgreSQL `lo_import`/`dblink_connect` exfiltration → `src/pentesting-web/sql-injection/postgresql-injection/README.md`; other dblink tasks remain separate.
 
+- Legacy PHP `safe_mode` Windows command-path, `fopen`, and Linux `proc_open` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/legacy-php-safe-mode-bypasses.md`. Group by restriction, split prerequisites by heading; Perl extension remains separate for modern CGI loading and broader bypasses.
+
 ## Researcher entry points
 
 - Board debug/serial/glitching → Hardware Hacking; RFID/NFC/radio/iButton → Radio Hacking.
@@ -58,7 +60,7 @@
 
 ## Deferred
 
-- `network-services-pentesting/pentesting-web/` is mixed; audit inbound links and product prerequisites before wholesale moves. Web ownership alone does not justify URL churn.
-- `todo/more-tools.md` is an uncurated cross-domain list; audit destinations before splitting. SaaS collection tools in Main warrant coordinated Cloud ownership review.
-- Blockchain overview and Privacy cryptocurrency need a union audit before consolidation.
-- Audit long escalation and iOS exploitation by task and links, not length alone.
+- `network-services-pentesting/pentesting-web/` is mixed; audit links and prerequisites before moves. Web ownership alone does not justify URL churn.
+- `todo/more-tools.md`: audit cross-domain destinations before splitting; coordinate SaaS tools with Cloud.
+- Blockchain and Privacy cryptocurrency need a union audit.
+- Audit long escalation and iOS chapters by task and links, not length.
