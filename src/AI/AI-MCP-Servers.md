@@ -285,6 +285,23 @@ AuthN/AuthZ
 - OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.<sup>[[37]](#references)</sup>
 - After OAuth, the authorization server issues an access token that the client presents to the MCP server, which acts as the protected resource/resource server. The access token is distinct from `Mcp-Session-Id`, which carries transport session state after `initialize` rather than authentication.<sup>[[40]](#references)[[41]](#references)</sup>
 
+#### MCP token passthrough must not create an anonymous session
+
+When a gateway accepts both local API keys and upstream OAuth2 bearer tokens, inspect what happens **after local key validation fails**. LiteLLM's separate MCP auth handler previously caught a local `401` or `403` and substituted an empty `UserAPIKeyAuth()` to support OAuth2 passthrough. Any `Authorization` header reached that branch, so an invalid token could initialize a session without a validated LiteLLM identity. This is not a general bypass of the gateway's other administrative endpoints.<sup>[[48]](#references)[[49]](#references)</sup>
+
+On an authorized, affected instance, compare an absent header with an invalid Bearer value. The reported probe creates an MCP session if it returns HTTP 200 and `mcp-session-id`; the header is transport state, **not** proof that the token authenticated.<sup>[[48]](#references)</sup>
+
+```http
+POST /mcp/ HTTP/1.1
+Authorization: Bearer a
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{"jsonrpc":"2.0","method":"initialize","id":1,"params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"probe","version":"1.0"}}}
+```
+
+Follow the [remote MCP workflow](#remote-mcp-server-testing-workflow) to check which tools that session can access. In LiteLLM, a server configured with `allow_all_keys` could also be visible to the empty identity created by this fallback.<sup>[[48]](#references)</sup> The fix in v1.84.0 rejects failed local validation instead of treating it as upstream OAuth2 passthrough.<sup>[[49]](#references)</sup> For the separate guardrail and pass-through boundaries, see [LLM Gateway Trust Boundaries](AI-LLM-Gateway-Security.md#guardrail-registration-can-bypass-a-ui-only-sandbox).
+
 #### Pre-session abuse: OAuth discovery to local code execution
 
 When a desktop client reaches a remote MCP server through a helper such as `mcp-remote`, the dangerous surface may appear **before** `initialize`, `tools/list`, or any ordinary JSON-RPC traffic. In 2025, researchers showed that `mcp-remote` versions `0.0.5` to `0.1.15` could accept attacker-controlled OAuth discovery metadata and forward a crafted `authorization_endpoint` string into the operating system URL handler (`open`, `xdg-open`, `start`, etc.), yielding local code execution on the connecting workstation.<sup>[[43]](#references)[[44]](#references)</sup>
@@ -754,6 +771,8 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [45] [Apex Accelerator: malicious npm packages, LLM and MCP interception](https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages)
 - [46] [Keeping MCP Server Instructions Out of Your Agent's System Prompt](https://webofmike.com/mcp-discovery-prompt-injection/)
 - [47] [How Some Malicious AI Skills Hide Instructions from Reviewers](https://blog.virustotal.com/2026/10/how-some-malicious-ai-skills-hide.html)
+- [48] [Wiz — Off Guard: Breaking LiteLLM from Authentication Bypass to Cloud Compromise](https://wiz.io/blog/off-guard-breaking-litellm-from-authentication-bypass-to-cloud-compromise)
+- [49] [LiteLLM v1.84.0 release notes](https://github.com/BerriAI/litellm-docs/blob/main/release_notes/v1.84.0/index.md)
 
 {{#include ../banners/hacktricks-training.md}}
 
