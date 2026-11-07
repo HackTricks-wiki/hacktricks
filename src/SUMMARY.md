@@ -1092,6 +1092,7 @@
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
   - [WWW2Exec - \_\_printf_arginfo_table](binary-exploitation/arbitrary-write-2-exec/aw2exec-__printf_arginfo_table.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
+- [Brotli Block-Switch Decoder State Corruption](binary-exploitation/brotli-block-switch-decoder-state-corruption.md)
   - [FreeBSD Kernel Exploitation and VNET Jail Escape](binary-exploitation/freebsd-kernel-exploitation-vnet-jail-escape.md)
 - [VM Escape and Hypervisor Exploitation](binary-exploitation/vm-escape-and-hypervisor-exploitation.md)
   - [QEMU/KVM VM Escape Chains](binary-exploitation/qemu-kvm-vm-escape-chains.md)
