@@ -44,11 +44,11 @@ Content-Type: application/json
 }
 ```
 
-The registration endpoint also accepted ordinary API keys because it lacked a `PROXY_ADMIN` check. Where no master key or JWT/OAuth2 authentication was configured, the pre-fix auth handler assigned `PROXY_ADMIN` even to anonymous requests. An unchanged example master key (`sk-1234`) supplied another admin path. The fix changed the no-auth role to `INTERNAL_USER`, added guardrail admin checks, and validated and restricted builtins during registration. These role and code-execution boundaries are separate from the [MCP token-fallback issue](AI-MCP-Servers.md#mcp-token-passthrough-must-not-create-an-anonymous-session).<sup>[[2]](#references)[[3]](#references)</sup>
+The registration endpoint also accepted ordinary API keys because it lacked a `PROXY_ADMIN` check. Where no master key or JWT/OAuth2 authentication was configured, the pre-fix auth handler assigned `PROXY_ADMIN` even to anonymous requests. The fix changed the no-auth role to `INTERNAL_USER`, added guardrail admin checks, and validated and restricted builtins during registration. These role and code-execution boundaries are separate from the [MCP token-fallback issue](AI-MCP-Servers.md#mcp-token-passthrough-must-not-create-an-anonymous-session).<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## Admin pass-through routes can proxy cloud metadata
 
-LiteLLM's pass-through endpoint feature lets an administrator configure an HTTP target and optionally append subpaths. Unlike the per-request `user_config` routing issue above, this requires **configuration-write authority**; the feature itself is intended to trust administrators. In the reported deployment, the target was not checked against private or link-local addresses. Before v1.83.0, `/config/update` also accepted ordinary authenticated keys and could update pass-through configuration.<sup>[[2]](#references)[[4]](#references)</sup>
+LiteLLM's pass-through endpoint feature lets an administrator configure an HTTP target and optionally append subpaths. Unlike the per-request `user_config` routing issue above, this requires **configuration-write authority**; the feature itself is intended to trust administrators. In the reported deployment, the target was not checked against private or link-local addresses.<sup>[[2]](#references)[[4]](#references)</sup> Before v1.83.0, ordinary authenticated keys could also reach `/config/update` because it lacked an administrator role check; see [UI route classification](#ui-route-classification-is-not-authorization) for the related configuration-write boundary.<sup>[[2]](#references)[[6]](#references)</sup>
 
 With that authority and network reachability from the proxy to EC2 metadata, a route such as the following exposes metadata through the gateway. The `include_subpath` flag makes `/meta/meta-data/iam/security-credentials/` map under `/latest/`.<sup>[[2]](#references)[[4]](#references)</sup>
 
@@ -60,7 +60,7 @@ Content-Type: application/json
 {"path":"/meta","target":"http://169.254.169.254/latest/","headers":{},"include_subpath":true}
 ```
 
-For IMDSv2, a GET alone is not sufficient: the proxy must permit a `PUT` to `/meta/api/token` and relay the token-request header, then relay the returned token on a GET to `/meta/meta-data/iam/security-credentials/<role>`.<sup>[[2]](#references)[[5]](#references)</sup> LiteLLM's `x-pass-` header handling strips that prefix before forwarding, so `x-pass-X-aws-ec2-metadata-token-ttl-seconds: 21600` and `x-pass-X-aws-ec2-metadata-token: <token>` can supply those headers.<sup>[[2]](#references)</sup> Reachability and the IMDSv2 response hop limit still matter, especially from a container.<sup>[[5]](#references)</sup> See [Cloud SSRF](../pentesting-web/ssrf-server-side-request-forgery/cloud-ssrf.md#aws) for the metadata workflow and limits; this gateway variation is the **admin-controlled persistent route plus request-header relay**.
+The [Cloud SSRF guide](../pentesting-web/ssrf-server-side-request-forgery/cloud-ssrf.md#aws) covers the IMDSv2 token exchange; this route must permit its `PUT` request and relay both metadata headers.<sup>[[5]](#references)</sup> LiteLLM's generic pass-through header handling strips the `x-pass-` prefix before forwarding, so `x-pass-X-aws-ec2-metadata-token-ttl-seconds: 21600` and `x-pass-X-aws-ec2-metadata-token: <token>` can supply those headers.<sup>[[2]](#references)[[7]](#references)</sup> The proxy must reach IMDS, the token response must traverse the configured hop limit, and the token request must not carry `X-Forwarded-For`.<sup>[[5]](#references)</sup> The gateway-specific variation is the **admin-controlled persistent route plus request-header relay**.
 
 ## References
 
@@ -69,5 +69,7 @@ For IMDSv2, a GET alone is not sufficient: the proxy must permit a `PUT` to `/me
 - [3] [LiteLLM PR #22095 — fix unauthenticated RCE and sandbox escape in custom code guardrail](https://github.com/BerriAI/litellm/pull/22095)
 - [4] [LiteLLM — Create Pass Through Endpoints](https://docs.litellm.ai/docs/proxy/pass_through)
 - [5] [AWS — How Instance Metadata Service Version 2 works](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-metadata-v2-how-it-works.html)
+- [6] [LiteLLM advisory — unrestricted proxy configuration endpoint](https://github.com/advisories/GHSA-53mr-6c8q-9789)
+- [7] [LiteLLM pass-through header forwarding implementation](https://github.com/BerriAI/litellm/blob/v1.84.0/litellm/passthrough/utils.py)
 
 {{#include ../banners/hacktricks-training.md}}

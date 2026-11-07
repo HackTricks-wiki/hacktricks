@@ -300,7 +300,7 @@ Accept: application/json, text/event-stream
 {"jsonrpc":"2.0","method":"initialize","id":1,"params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"probe","version":"1.0"}}}
 ```
 
-Reuse the session for `tools/list` and test a permitted tool with controlled arguments. In LiteLLM, an MCP server configured with `allow_all_keys` could also be visible to the empty identity created by this fallback. The fix in v1.84.0 rejects failed local validation instead of treating it as upstream OAuth2 passthrough. For the separate gateway guardrail and pass-through boundaries, see [LLM Gateway Trust Boundaries](AI-LLM-Gateway-Security.md#guardrail-registration-can-bypass-a-ui-only-sandbox).<sup>[[48]](#references)[[49]](#references)</sup>
+Follow the [remote MCP workflow](#remote-mcp-server-testing-workflow) to check which tools that session can access. In LiteLLM, a server configured with `allow_all_keys` could also be visible to the empty identity created by this fallback.<sup>[[48]](#references)</sup> The fix in v1.84.0 rejects failed local validation instead of treating it as upstream OAuth2 passthrough.<sup>[[49]](#references)</sup> For the separate guardrail and pass-through boundaries, see [LLM Gateway Trust Boundaries](AI-LLM-Gateway-Security.md#guardrail-registration-can-bypass-a-ui-only-sandbox).
 
 #### Pre-session abuse: OAuth discovery to local code execution
 
