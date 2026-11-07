@@ -1044,7 +1044,6 @@
 - [Integer Overflow](binary-exploitation/integer-overflow-and-underflow.md)
 - [Format Strings](binary-exploitation/format-strings/README.md)
   - [Format Strings - Arbitrary Read Example](binary-exploitation/format-strings/format-strings-arbitrary-read-example.md)
-  - [Format Strings Template](binary-exploitation/format-strings/format-strings-template.md)
 - [Libc Heap](binary-exploitation/libc-heap/README.md)
   - [Bins & Memory Allocations](binary-exploitation/libc-heap/bins-and-memory-allocations.md)
   - [Heap Memory Functions](binary-exploitation/libc-heap/heap-memory-functions/README.md)
