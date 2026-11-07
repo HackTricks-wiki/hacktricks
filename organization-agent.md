@@ -4,9 +4,9 @@
 
 - One substantive home per mechanism; service/platform/tool entry points link to it and keep distinct prerequisites.
 - Use headings for one task/mechanism; split by transport, prerequisites or task, not size.
-- Main owns general techniques; Cloud owns provider/service/IAM pivots. Use public cross-book URLs.
-- Removed chapters need whole-page `book.toml` redirects. Update local links, preserve unique content; historical fragments are out of scope.
-- Recheck paths and pending PR overlap.
+- Main owns general techniques; Cloud owns provider/IAM pivots; use public URLs.
+- Removed chapters need whole-page `book.toml` redirects; preserve content and current links, not historical fragments.
+- Recheck paths and PR overlap.
 
 ## Canonical locations and boundaries
 
@@ -34,33 +34,28 @@
 - Chosen-input MD5 suffix and `0e` numeric-zero searches are headings at `src/crypto/hashes/README.md#chosen-input-md5-hash-searches`, not Python sandbox topics. PHP type-juggling behavior and version caveats stay in `network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling`; both entry points link directly to the relevant explanation.
 - WSGI/uWSGI, Zabbix and CCTV products remain in `network-services-pentesting/pentesting-web/`, nested under 80/443 rather than Kerberos. Web triage and SSRF/Gopher link to WSGI; port/side-service caveats stay with products.
 - AI fuzzing seeds/harnesses/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source review, mobile entry-point tasks and kernel audits → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`. Split by research task, not platform; both stay in AI.
-
 - Remote MCP OAuth, JSON-RPC enumeration, authorization and interception → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery, repo config, secrets and artifacts → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Server testing and client delivery are distinct.
-- eSIM/eUICC profile management, Java Card VM type confusion, OTA/APDU and card tests → `src/mobile-pentesting/esim-javacard-exploitation.md`. This is a mobile secure element, not Android app internals; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
+- eSIM/eUICC profile management, Java Card VM type confusion, OTA/APDU and card tests → `src/mobile-pentesting/esim-javacard-exploitation.md`. Mobile secure element, not app internals; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
 
-- Former TODO web topics now live at the relevant Web chapters: password reset, 401/403, registration, Jira and cookies.
 - Cross-platform host/SaaS collection-tool reference → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters. Its old TODO route redirects here.
-
 - macOS environment-controlled PHP, Lua, Julia, Octave, R, Ruby and Erlang/Elixir interpreter startup → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`. Each runtime keeps its prerequisites, variants and mitigation under headings; shell, Python, PowerShell and framework injection stay separate.
 - MIFARE Classic stored-value tampering (Crypto1, balance diff/integrity, Proxmark3 transcript, magic UID caveats) → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; `proxmark-3.md` keeps generic tool commands and links to this tool-independent card-balance task.
-
 - PostgreSQL `lo_import`/`dblink_connect` exfiltration → `src/pentesting-web/sql-injection/postgresql-injection/README.md`; other dblink tasks remain separate.
-
 - Legacy PHP `safe_mode` Windows command-path, `fopen`, and Linux `proc_open` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/legacy-php-safe-mode-bypasses.md`. Group by restriction, split prerequisites by heading; Perl extension remains separate for modern CGI loading and broader bypasses.
+
+- Format-string arbitrary-write `FmtStr` GOT-overwrite template (local/TCP/SSH, offset discovery, padding, `.fini_array` option) → `src/binary-exploitation/format-strings/README.md#pwntools-template`; the separate arbitrary-read examples stay in their own chapter because they demonstrate a different exploitation objective. Old URL redirects.
 
 ## Researcher entry points
 
-- Board debug/serial/glitching → Hardware Hacking; RFID/NFC/radio/iButton → Radio Hacking.
-- OT safety → ICS; Modbus/OPC UA/BACnet → Network Services. Android image → Forensics; app tests → Mobile.
-- Guest surfaces → VM Escape; SOAP/REST/GraphQL → Web APIs; 401/403 → Web authorization; header behavior → Special HTTP Headers.
-- LFI/PHP upload race → Web File Inclusion; eSIM/Java Card → Mobile eSIM; modem/SoC → Android baseband.
+- Board debug/serial/glitching → Hardware; RFID/NFC → Radio. OT safety → ICS; OT protocols → Network Services. Android images → Forensics; app tests/eSIM → Mobile; guest surfaces → VM Escape.
+- SOAP/REST/GraphQL → Web APIs; 401/403 → Web authorization; LFI upload race → Web File Inclusion.
 - Browser `nosniff`, UTF-16 script, ICO width → XS-Leaks; executable cross-origin script inclusion → XSSI; in-origin script injection → XSS.
 - `R_PROFILE`, `RUBYOPT`, `ERL_AFLAGS` → macOS interpreter startup chapter.
 - Same-site HTML-injection leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; unlike cross-origin XS-Leaks, injection and the probed page share an origin. Former standalone page redirects.
 
 ## Deferred
 
-- `network-services-pentesting/pentesting-web/` is mixed; audit links and prerequisites before moves. Web ownership alone does not justify URL churn.
+- `network-services-pentesting/pentesting-web/` is mixed; audit links/prerequisites before moves, not ownership alone.
 - `todo/more-tools.md`: audit cross-domain destinations before splitting; coordinate SaaS tools with Cloud.
 - Blockchain and Privacy cryptocurrency need a union audit.
-- Audit long escalation and iOS chapters by task and links, not length.
+- Audit long escalation/iOS chapters by task, not length.
