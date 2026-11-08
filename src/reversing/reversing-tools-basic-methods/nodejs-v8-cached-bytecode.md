@@ -1,79 +1,106 @@
-# Node.js/V8 Cached Bytecodeの静的Deobfuscation
+# Node.js/V8 Cached Bytecodeの静的デオブfuscation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-V8 cached dataは**version-dependentでlossyな表現**であり、JavaScript sourceでも、従来のnative executableでもありません。したがって有用なstatic workflowは、まず外側のpackingを除去し、対応するV8 buildでcacheをdisassembleし、中間的なpseudocode modelへliftし、sampleを実行せずにdependency-awareなtransformationsを適用するというものです。[View8](https://github.com/suleram/View8)と[jsc_deobfuscator](https://github.com/hasherezade/jsc_deobfuscator)は、`javascript-obfuscator`で保護されたNode.js payloadsに対してこのアプローチを実装しています。<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+V8 cached dataは**バージョン依存の情報損失を伴う表現**であり、JavaScriptソースでも従来型のネイティブ実行ファイルでもありません。そのため、有効な静的ワークフローは、まず外側のパッキングを解除し、対応するV8ビルドでキャッシュを逆アセンブルして、中間的な疑似コードモデルに変換し、サンプルを実行せずに依存関係を考慮した変換を適用する、という流れになります。[View8](https://github.com/suleram/View8)と[jsc_deobfuscator](https://github.com/hasherezade/jsc_deobfuscator)は、`javascript-obfuscator`で保護されたNode.jsペイロードに対して、このアプローチを実装しています。<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
-## Cacheの取得とdisassemble
+## キャッシュの取得と逆アセンブル
 
-まず、すべての`.jsc`ファイルが同じwrapperを持つと決めつけず、preload/launcherを調査します。たとえば、`node.exe -r preflight.js app.jsc`のようなlauncherは、main moduleの前に`preflight.js`を実行します。分析対象となったfamilyでは、preloadがBrotli layerを除去していました。unpacking後、bundled runtimeから正確なNode.js/V8 generationを特定します。あるV8 versionで生成されたcacheは、別のversionでは拒否されたり、誤ってdecodeされたりする可能性があります。そのため、正確なV8 tagに対応する`v8dasm`をbuildまたは入手し、必要なView8およびstring-printing patchesを適用します。<sup>[[1]](#references)[[2]](#references)</sup>
+まず、すべての`.jsc`ファイルに同じラッパーが使われていると決めつけずに、preload/launcherを調べてください。たとえば、`node.exe -r preflight.js app.jsc`のようなlauncherは、メインモジュールの前に`preflight.js`を実行します。解析対象のファミリーでは、preloadがBrotliレイヤーを解除していました。展開後、バンドルされたランタイムから正確なNode.js/V8世代を特定します。あるV8バージョンで生成されたキャッシュは、別のバージョンでは拒否されたり、誤ってデコードされたりする可能性があるため、該当するV8タグ用の`v8dasm`をビルドまたは入手し、必要なView8パッチと文字列出力パッチを適用してください。<sup>[[1]](#references)[[2]](#references)</sup>
 
-Toolkitのnon-executing workflowは次のとおりです。<sup>[[2]](#references)</sup>
+このツールキットの非実行ワークフローは次のとおりです。<sup>[[2]](#references)</sup>
+
 ```bash
 brotli -d app.jsc -o app.decompressed.jsc
 /path/to/matching-v8dasm app.decompressed.jsc > app.jsc.disasm.txt
 mkdir -p decompiled deobfuscated
 python3 View8/view8.py --input_format disassembled \
---inp app.jsc.disasm.txt --normalize \
---out decompiled/app.dec.txt \
---export_format decompiled serialized
+  --inp app.jsc.disasm.txt --normalize \
+  --out decompiled/app.dec.txt \
+  --export_format decompiled serialized
 python3 deobf_all.py --inp decompiled/app.dec.pkl \
---out deobfuscated/app.deobf.txt \
---export_format decompiled serialized
+  --out deobfuscated/app.deobf.txt \
+  --export_format decompiled serialized
 ```
-`--normalize` は、実行ごとに生成される関数へ安定した識別子を付与します。テキスト出力は検査用であり、シリアライズされたオブジェクトグラフにより、独立したパスでも関数、宣言元、スコープ、メタデータ間の関係を保持できます。これは**再構築されたものでも、実行可能な JavaScript でもありません**。<sup>[[1]](#references)[[2]](#references)</sup>
 
-### View8 の pseudocode を IR として読む
+`--normalize` を使うと、生成された関数に実行ごとに変わらない識別子が付与されます。テキスト出力は調査用です。シリアライズされたオブジェクトグラフを使うと、独立したパスで関数、宣言元、スコープ、メタデータの関連を保持できます。これは **再構築された JavaScript でも、実行可能な JavaScript でもありません**。<sup>[[1]](#references)[[2]](#references)</sup>
 
-典型的な名前は `func_<name>_0x<address>` で、引数は `a0...aN`、virtual register は `r0...rN`、`ACCU` は V8 の accumulator です。`start` は root declarer であり、`Scope[...]`、globals、dictionaries は、nested function によって capture または共有される値をモデル化します。すべての式を JavaScript の構文として parse しないでください。たとえば、View8 の `!r6 === "0"` は比較全体の否定（`r6 !== "0"`）を表しており、これは branch を再構築する際に重要です。<sup>[[1]](#references)[[3]](#references)</sup>
+### V8をビルドせずにキャッシュをトリアージする
 
-## 依存関係を考慮した deobfuscation
+raw または Brotli でラップされたキャッシュに対して、`jscd` は Node.js でサンプルを読み込まずにヘッダーを識別し、定数と関数を列挙できます。まずこれを使って、ファイルが対応するバージョンテーブルに含まれているかを確認し、より特殊な View8 の難読化解除パスを適用する前に、優先して調査する関数を絞り込みます。<sup>[[4]](#references)</sup>
 
-次の pass に必要な入力が明らかになる順序で transformation を適用し、出力が安定するまで propagation を繰り返します。実用的な順序は次のとおりです。<sup>[[1]](#references)[[2]](#references)</sup>
+バージョンハッシュは識別の手掛かりであり、単体の逆アセンブラが生成元と同じフラグや読み取り専用スナップショットを使用している証拠ではありません。<sup>[[4]](#references)[[5]](#references)</sup>
 
-1. declarer hierarchy をたどり、globals、registers、dictionaries、`Scope[...]` references から値を propagation します。
-2. string-decoder の引数を復元し、encrypted calls を plaintext に置き換えます。
-3. 隣接する string chunks を fold します。これにより得られる property names と dispatcher-order strings が、後続の pass を解決します。
-4. control flow の flattening を解除し、call proxies と atomic-operation wrappers を inline 化して、dictionary に保持された function references を解決します。
-5. 解決された各 string、key、proxy が別の indirection layer を明らかにする可能性があるため、再度 propagation します。
-6. 認識済みの one-shot initialization thunks を collapse し、call sites の解決後にのみ dead helpers を削除します。
+```bash
+jscd info app.jsc
+jscd strings app.jsc > app.strings.txt
+jscd functions app.jsc > app.functions.txt
+jscd disasm app.jsc > app.jsc.disasm.txt
+```
 
-### shifted RC4 string arrays を black box として復元する
+`jscd disasm` は View8 互換のリスティングを出力するため、cache がサポートされていれば、上記の View8 コマンドでは `v8dasm` の代わりにその出力を使用できます。関数ツリーと併せて文字列を調べ、decoder の呼び出しや有力なエントリーポイントを探してください。`jscd` が出力する近似的な JavaScript を元のソースとして扱ってはいけません。ツールがバージョンを拒否する場合や、read-only-heap のプレースホルダーが残る場合は、推測でプロパティ名を補うのではなく、対応する V8 build に切り替えるか、同じ build の name map を指定してください。<sup>[[4]](#references)</sup>
 
-一般的な `javascript-obfuscator` の構成では、Base64 で encode された RC4 chunks を 1 つの array に格納します。Decoder wrappers は numeric offset と短い key を渡し、引数の順序が逆になっている場合もあります。その後、closure scopes に capture された定数を加算または減算します。root decoder が過度に obfuscate されている場合は、function 全体を再構築するのではなく、unknown array-index shift を経験的に復元します。<sup>[[1]](#references)</sup>
+Electron アプリケーション内の cache を調べる場合は、まず [ASAR を展開し、main と preload のエントリーポイントを調べてください](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)。V8 のバージョン文字列が一致していても、Electron と Node の cache では snapshot や pointer-compression のレイアウトが異なる場合があります。<sup>[[4]](#references)</sup>
 
-`N` 個の chunks からなる array と、同じ decoder への複数の calls に対しては、次のようにします。<sup>[[1]](#references)</sup>
+### View8 の擬似コードを IR として読む
+
+一般的な名前は `func_<name>_0x<address>`、引数は `a0...aN`、仮想レジスタは `r0...rN` で、`ACCU` は V8 の accumulator です。`start` はルートの declarer で、`Scope[...]`、globals、dictionaries は、ネストした関数がキャプチャまたは共有する値を表します。すべての式を JavaScript の構文として解析してはいけません。たとえば、View8 の `!r6 === "0"` は比較全体の否定（`r6 !== "0"`）を表し、分岐を復元する際に重要です。<sup>[[1]](#references)[[3]](#references)</sup>
+
+## 依存関係を考慮した難読化解除
+
+次のパスに必要な入力が明らかになる順序で変換を適用し、出力が安定するまで伝播を繰り返します。実用的な順序は次のとおりです。<sup>[[1]](#references)[[2]](#references)</sup>
+
+1. declarer の階層をたどり、globals、registers、dictionaries、`Scope[...]` の参照から値を伝播させます。
+2. string decoder の引数を復元し、暗号化された呼び出しを平文に置き換えます。
+3. 隣接する文字列チャンクを結合します。こうして得られるプロパティ名と dispatcher の順序文字列によって、後続のパスが可能になります。
+4. 制御フローの flattening を解除し、call proxy と atomic-operation wrapper を inline 化して、dictionary に格納された関数参照を解決します。
+5. 解決された文字列、キー、proxy によって別の間接参照が明らかになる場合があるため、再度伝播させます。
+6. 呼び出し箇所を解決した後に限り、認識済みの one-shot 初期化 thunk を畳み込み、不要な helper を削除します。
+
+### シフトされた RC4 文字列配列をブラックボックスとして復元する
+
+よくある `javascript-obfuscator` の構成では、Base64 エンコードされた RC4 チャンクが1つの配列に格納されています。decoder wrapper は数値オフセットと短いキーを渡し、引数の順序が逆になっている場合もあります。その後、closure scope にキャプチャされた定数を加算または減算します。ルート decoder が強く難読化されている場合は、関数全体を復元するのではなく、未知の配列インデックスのシフトを実測して特定してください。<sup>[[1]](#references)</sup>
+
+`N` 個のチャンクを持つ配列と、同じ decoder を呼び出す複数の呼び出しについては、次のとおりです。<sup>[[1]](#references)</sup>
+
 ```text
 for each observed (numeric_argument, rc4_key):
-candidates = {}
-for shift in 0 .. N-1:
-index = apply_observed_sign(numeric_argument, shift)
-plaintext = RC4(Base64Decode(chunks[index]), rc4_key)
-if plaintext passes encoding/printability checks:
-candidates.add(shift)
+    candidates = {}
+    for shift in 0 .. N-1:
+        index = apply_observed_sign(numeric_argument, shift)
+        plaintext = RC4(Base64Decode(chunks[index]), rc4_key)
+        if plaintext passes encoding/printability checks:
+            candidates.add(shift)
 root_shift = intersection(candidate_sets)
 ```
-単一の printable な復号結果だけで shift を確定しないでください。誤った ciphertext でも偶然 printable に見えることがあります。少なくとも 3 つの異なる観測結果を使用し、それらすべてで妥当なテキストを生成する一意の shift のみを受け入れてください。次に、wrapper/declarer graph をたどり、各加算または減算を累積し、数値引数が先に来るかどうかを記録します。この metadata を sample ごとに cache し、decoder の呼び出しを置き換え、隣接する plaintext chunk を連結して、triage 用に文字列を個別に出力します。<sup>[[1]](#references)[[2]](#references)</sup>
 
-### unflattening 中も semantics を保持する
+単一の復号結果が印字可能だからといって、shiftを採用しないでください。誤ったciphertextでも偶然、印字可能に見えることがあります。少なくとも3つの異なる観察結果を使い、すべてで妥当なテキストになる一意のshiftだけを採用してください。次にwrapper/declarerのグラフをたどり、各加算または減算を累積し、数値引数が先に来るかどうかを記録します。このメタデータをサンプルごとにキャッシュし、decoder呼び出しを置き換え、隣接する平文チャンクを連結し、トリアージ用に文字列を個別にエクスポートします。<sup>[[1]](#references)[[2]](#references)</sup>
 
-`3|2|1|0|4` のような文字列で駆動される dispatcher loop では、order string を decode し、各 state comparison を対応する block に割り当て、View8 の negated-condition notation を考慮したうえで、dispatcher の順序に従って block を出力します。ネストされた `continue` は通常の fall-through ではなく、dispatcher へ戻る early jump を表している場合があります。loop を削除するときは、その `continue` を削除し、そこを囲む `if` の後に元々続いていた statements を生成した `else` branch に移動します。dispatcher を単に削除するだけでは behavior が変わります。<sup>[[1]](#references)</sup>
+### 展開時もセマンティクスを維持する
 
-### proxy、operation、lazy thunk を inline する
+`3|2|1|0|4`のような文字列で駆動されるdispatcher loopでは、順序文字列をデコードし、各state比較をブロックに対応付け、View8の否定条件の表記を考慮してから、dispatcherの順序でブロックを出力します。ネストされた`continue`は通常のフォールスルーではなく、dispatcherに戻る早期ジャンプを表す場合があります。loopを削除する際は、その`continue`を削除し、囲んでいる`if`の後に元々あった文を、生成した`else`ブランチに移動します。dispatcherを削除するだけでは動作が変わってしまいます。<sup>[[1]](#references)</sup>
 
-`return a0(a1, a2)` のような forwarding helper は、call site を direct call に置き換える前に normalize します。subtraction、division、comparison、membership test、invocation 用の wrapper も同様に扱います。helper reference 自体が decrypted dictionary key や closure value の背後に保存されている場合があるため、inlining の前後に string propagation と structure propagation を実行します。<sup>[[1]](#references)</sup>
+### proxy、演算、遅延thunkをインライン化する
 
-また、保存された function を一度だけ呼び出し、その reference を clear し、結果を cache して、後続の call ではその cache を返す closure も認識します。initialization site でこの thunk を collapse すると、基盤となる dispatcher または capability function が明らかになります。ただし、元の実行が **one-shot and cached** であり、すべての call を新規 invocation として model 化していないことを注記してください。<sup>[[1]](#references)</sup>
+呼び出し箇所を直接呼び出しに置き換える前に、`return a0(a1, a2)`のような転送helperを正規化します。減算、除算、比較、メンバーシップテスト、呼び出しのwrapperも同様に扱います。helperへの参照自体が復号された辞書キーやclosureの値の背後に保存されている場合があるため、インライン化の前後に文字列と構造の伝播を実行します。<sup>[[1]](#references)</sup>
+
+保存された関数を一度呼び出し、その参照をクリアし、結果をキャッシュして、以後の呼び出しではそのキャッシュを返すclosureも認識してください。初期化箇所でこのようなthunkをまとめると、基盤となるdispatcherまたはcapability functionが見えるようになります。ただし、元の実行は毎回の新規呼び出しではなく、**一度だけ実行され、結果がキャッシュされる**ものとして注記してください。<sup>[[1]](#references)</sup>
 
 ## Safety and validation notes
 
-- Python `pickle` の loading は code を実行できます。trusted な View8 run によってローカルで生成された `.pkl` ファイルだけを load し、sample が提供した pickle を data として扱わないでください。<sup>[[2]](#references)</sup>
-- Pattern-driven pass は汎用的な JavaScript decompiler ではありません。未解決の expression を保持し、曖昧な dispatcher variant は rewrite を強制せず手動で確認してください。<sup>[[1]](#references)[[2]](#references)</sup>
-- LLM-assisted function name は navigation hint であり、evidence ではありません。使用する場合は dependency を leaf-first で処理しますが、すべての label を body、argument、string、data flow、API、side effect と照合して検証してください。<sup>[[1]](#references)[[2]](#references)</sup>
+- Pythonの`pickle`読み込みはコードを実行する可能性があります。信頼できるView8の実行でローカルに生成された`.pkl`ファイルだけを読み込んでください。サンプルから提供されたpickleをデータとして扱ってはいけません。<sup>[[2]](#references)</sup>
+- 関数本体が見つからないからといって、ソースにその関数がなかったとは限りません。V8は、初回呼び出しでコンパイルされるまで、遅延関数をメタデータとしてシリアライズする場合があります。静的トリアージでは、そのような関数を未解決としてマークしたままにしてください。<sup>[[6]](#references)</sup>
+- パターン駆動のパスは汎用JavaScript decompilerではありません。未解決の式はそのまま保持し、曖昧なdispatcherのバリエーションは、無理に書き換えず手動で調査してください。<sup>[[1]](#references)[[2]](#references)</sup>
+- LLMが補助した関数名は、コード内の移動に使うヒントであり、根拠ではありません。これらを使う場合は依存関係をleaf-firstで処理し、各ラベルを関数本体、引数、文字列、データフロー、API、副作用と照らし合わせて検証してください。<sup>[[1]](#references)[[2]](#references)</sup>
+
+
 
 ## References
 
-- [1] [Seal を破る: JSCeal の compiled V8 Bytecode の static deobfuscation](https://research.checkpoint.com/2026/breaking-the-seal-static-deobfuscation-of-jsceals-compiled-v8-bytecode)
+- [1] [Breaking the Seal: JSCealのコンパイル済みV8 Bytecodeの静的Deobfuscation](https://research.checkpoint.com/2026/breaking-the-seal-static-deobfuscation-of-jsceals-compiled-v8-bytecode)
 - [2] [hasherezade/jsc_deobfuscator](https://github.com/hasherezade/jsc_deobfuscator)
 - [3] [suleram/View8](https://github.com/suleram/View8)
+- [4] [ejfkdev/jscd](https://github.com/ejfkdev/jscd)
+- [5] [V8 SerializedCodeDataヘッダー](https://chromium.googlesource.com/v8/v8/+/main/src/snapshot/code-serializer.h)
+- [6] [Node.js vm.Scriptのcode cache](https://nodejs.org/api/vm.html#scriptcreatecacheddata)
 {{#include ../../banners/hacktricks-training.md}}
