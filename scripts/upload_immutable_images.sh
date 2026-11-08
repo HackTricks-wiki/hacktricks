@@ -13,6 +13,7 @@ cache_control="public,max-age=31536000,immutable"
 
 for image in \
   hacktricks-summer-discount-2026-v1.webp \
+  hacktricks-black-friday-2026-v1.webp \
   arte-badge-v1.webp \
   grte-badge-v1.webp \
   azrte-badge-v1.webp \
