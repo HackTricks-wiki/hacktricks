@@ -133,6 +133,14 @@ For manual inspection and access checking, **TokenUniverse** can open process/th
 leaked-handle-exploitation.md
 {{#endref}}
 
+### Hunt live thread impersonation tokens
+
+A service thread can temporarily impersonate a client even when its **process primary token** belongs to the service account, so process-owner scans can miss the client context.<sup>[[4]](#references)</sup> TokenUniverse can list accessible process/thread tokens; in System Informer, inspect a process's **Threads** tab and its **Impersonation** column to find candidate threads.<sup>[[13]](#references)[[14]](#references)</sup>
+
+For a targeted API check, take a `TH32CS_SNAPTHREAD` snapshot, filter `THREADENTRY32.th32OwnerProcessID` to the service PID, then call `OpenThread(THREAD_QUERY_INFORMATION, FALSE, tid)` and `OpenThreadToken(thread, TOKEN_QUERY | TOKEN_DUPLICATE, TRUE, &token)` for each accessible thread.<sup>[[15]](#references)[[16]](#references)</sup> `TRUE` makes the token-open access check use the caller's **process** context, which matters if the scanner itself is impersonating at identification level.<sup>[[17]](#references)</sup> Query the token's user, type, impersonation level and logon ID before trying the duplication/process-creation flow above.<sup>[[7]](#references)</sup> A thread may stop impersonating between enumeration and open; no token, anonymous tokens, protected threads, thread DACLs and token DACLs can prevent collection.<sup>[[16]](#references)[[17]](#references)</sup> Unlike scanning a service's retained token handles, this tests the **currently assigned thread token**.
+
+For an attack path that obtains a thread token by making a privileged client connect to your pipe instead of scanning existing threads, see [named-pipe client impersonation](named-pipe-client-impersonation.md).
+
 #### Impersonate Tokens
 
 Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
@@ -141,7 +149,7 @@ Some practical notes that are easy to forget while operating:<sup>[[1]](#referen
 
 - **`CreateProcessWithTokenW`** requires **`SeImpersonatePrivilege`** in the caller and the new process will run in the **caller's session**.
 - **`CreateProcessAsUserW`** is a possible fallback when `CreateProcessWithTokenW` fails with `1314` only if the caller satisfies its privilege requirements. It is also the correct choice when the child must run in the **session referenced by the token**.<sup>[[9]](#references)[[10]](#references)</sup>
-- If a token comes from **`LogonUser(LOGON32_LOGON_NETWORK)`**, it is usually an **impersonation token**, so you need **`DuplicateTokenEx(..., TokenPrimary, ...)`** before trying to spawn a process with it.
+- **`LogonUser(LOGON32_LOGON_NETWORK)`** returns an **impersonation token**. Convert it with **`DuplicateTokenEx(..., TokenPrimary, ...)`** before process creation. Even after conversion, the resulting process cannot use that network logon to access authenticated remote shares or printers: this logon type does not cache credentials. Use an interactive or network-cleartext logon when you have credentials and need onward network access; do not confuse this with `LOGON32_LOGON_NEW_CREDENTIALS` (`runas /netonly`), which keeps local identity while supplying outbound credentials.<sup>[[18]](#references)</sup>
 - Not every impersonation token is equally useful: **`SecurityIdentification`** lets you inspect the user but **not act as them**. If a coercion primitive or pipe/RPC client gives you only an identification-level token, check **`TokenImpersonationLevel`** and switch to a primitive that yields **`SecurityImpersonation`** or better.
 
 #### Token theft without touching LSASS
@@ -165,6 +173,8 @@ privilege-escalation-abusing-tokens.md
 
 Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
 
+
+
 ## References
 
 - [1] [Understanding and Abusing Access Tokens — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
@@ -180,5 +190,9 @@ Take a look to [**all the possible token privileges and some definitions on this
 - [11] [DuplicateHandle function - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-duplicatehandle)
 - [12] [BeichenDream/SharpToken](https://github.com/BeichenDream/SharpToken)
 - [13] [diversenok/TokenUniverse](https://github.com/diversenok/TokenUniverse)
-
+- [14] [System Informer thread-token feature request](https://github.com/winsiderss/systeminformer/issues/1275)
+- [15] [Traversing the thread list - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/toolhelp/traversing-the-thread-list)
+- [16] [NtOpenThreadToken - Microsoft Learn](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/nf-ntifs-ntopenthreadtoken)
+- [17] [OpenThreadToken - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openthreadtoken)
+- [18] [LogonUserA - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-logonusera)
 {{#include ../../banners/hacktricks-training.md}}
