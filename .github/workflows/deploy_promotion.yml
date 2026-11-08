@@ -30,6 +30,7 @@ jobs:
         shell: bash
         env:
           BUCKET: hacktricks-wiki
+          SITE_URL: https://hacktricks.wiki
           DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
           set -euo pipefail
@@ -44,6 +45,7 @@ jobs:
           with open('/tmp/languages.txt', 'w') as output:
               output.write('\n'.join(prefixes) + '\n')
           PYCODE
+          invalidation_paths=()
           while IFS= read -r prefix; do
             aws s3 cp src/images/hacktricks-black-friday-2026-v1.webp \
               "s3://${BUCKET}/${prefix}images/hacktricks-black-friday-2026-v1.webp" \
@@ -57,10 +59,23 @@ jobs:
               aws s3 cp theme/discount.css "s3://${BUCKET}/${prefix}${stylesheet}" \
                 --content-type text/css --cache-control 'public,max-age=300' --only-show-errors
             done
+            # CloudFront only expands a wildcard at the END of a path.
+            # Include query-string variants without clearing unrelated book assets.
+            invalidation_paths+=(
+              "/${prefix}theme/discount.js*" "/${prefix}discount.js*"
+              "/${prefix}theme/discount.css*" "/${prefix}discount.css*"
+            )
           done < /tmp/languages.txt
           invalidation_id=$(aws cloudfront create-invalidation \
             --distribution-id "$DISTRIBUTION_ID" \
-            --paths '/*/theme/discount.js' '/*/discount.js' '/*/theme/discount.css' '/*/discount.css' \
+            --paths "${invalidation_paths[@]}" \
             --query Invalidation.Id --output text)
           aws cloudfront wait invalidation-completed \
             --distribution-id "$DISTRIBUTION_ID" --id "$invalidation_id"
+          while IFS= read -r prefix; do
+            curl --fail --silent --show-error --retry 3 "${SITE_URL}/${prefix}theme/discount.js" | cmp - theme/discount.js
+            curl --fail --silent --show-error --retry 3 "${SITE_URL}/${prefix}theme/discount.css" | cmp - theme/discount.css
+            curl --fail --silent --show-error --retry 3 "${SITE_URL}/${prefix}images/hacktricks-black-friday-2026-v1.webp" \
+              | cmp - src/images/hacktricks-black-friday-2026-v1.webp
+            echo "Verified live promotion assets: ${SITE_URL}/${prefix}"
+          done < /tmp/languages.txt
