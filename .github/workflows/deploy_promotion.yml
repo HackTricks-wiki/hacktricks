@@ -59,11 +59,10 @@ jobs:
               aws s3 cp theme/discount.css "s3://${BUCKET}/${prefix}${stylesheet}" \
                 --content-type text/css --cache-control 'public,max-age=300' --only-show-errors
             done
-            # CloudFront only expands a wildcard at the END of a path.
-            # Include query-string variants without clearing unrelated book assets.
+            # Exact paths avoid CloudFront's limit of 15 concurrent wildcard paths.
             invalidation_paths+=(
-              "/${prefix}theme/discount.js*" "/${prefix}discount.js*"
-              "/${prefix}theme/discount.css*" "/${prefix}discount.css*"
+              "/${prefix}theme/discount.js" "/${prefix}discount.js"
+              "/${prefix}theme/discount.css" "/${prefix}discount.css"
             )
           done < /tmp/languages.txt
           invalidation_id=$(aws cloudfront create-invalidation \
