@@ -1,79 +1,106 @@
-# Node.js/V8 Cached Bytecode'un Statik Deobfuscation'ı
+# Node.js/V8 Önbelleğe Alınmış Bytecode'un Statik Gizleme Açma İşlemi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-V8 cached data, JavaScript source veya geleneksel bir native executable değil, **sürüme bağlı, kayıplı bir gösterimdir**. Bu nedenle kullanışlı bir statik workflow şu şekildedir: dış paketlemeyi kaldırın, cache'i eşleşen V8 build'i ile disassemble edin, bir intermediate pseudocode modeline aktarın ve sample'ı çalıştırmadan dependency-aware transformations uygulayın. [View8](https://github.com/suleram/View8) ve [jsc_deobfuscator](https://github.com/hasherezade/jsc_deobfuscator), `javascript-obfuscator` ile korunan Node.js payload'ları için bu yaklaşımı uygular.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+V8 önbelleğe alınmış verisi, JavaScript kaynak kodu ya da geleneksel bir yerel çalıştırılabilir dosya değil, **sürüme bağlı ve bilgi kayıplı bir gösterimdir**. Bu nedenle yararlı bir statik iş akışı şöyledir: dış paketlemeyi kaldırın, önbelleği eşleşen V8 derlemesiyle disassemble edin, ara düzey bir sözde kod modeline dönüştürün ve örneği çalıştırmadan bağımlılıkları dikkate alan dönüşümler uygulayın. [View8](https://github.com/suleram/View8) ve [jsc_deobfuscator](https://github.com/hasherezade/jsc_deobfuscator), `javascript-obfuscator` ile korunmuş Node.js payload'ları için bu yaklaşımı uygular.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
-## Cache'i edinme ve disassemble etme
+## Önbelleği edinme ve disassemble etme
 
-İlk olarak her `.jsc` dosyasının aynı wrapper'a sahip olduğunu varsaymak yerine preload/launcher'ı inceleyin. Örneğin `node.exe -r preflight.js app.jsc` gibi bir launcher, ana modülden önce `preflight.js` dosyasını çalıştırır; analiz edilen ailede preload, bir Brotli katmanını kaldırıyordu. Unpacking işleminden sonra, bundled runtime'dan Node.js/V8 generation'ını kesin olarak belirleyin. Bir V8 sürümünde üretilen cache, başka bir V8 sürümü tarafından reddedilebilir veya yanlış decode edilebilir. Bu nedenle tam V8 tag'i için bir `v8dasm` build edin veya edinin ve gerekli View8 ile string-printing patch'lerini uygulayın.<sup>[[1]](#references)[[2]](#references)</sup>
+Her `.jsc` dosyasının aynı sarmalayıcıya sahip olduğunu varsaymak yerine önce preload/launcher'ı inceleyin. Örneğin `node.exe -r preflight.js app.jsc` gibi bir launcher, ana modülden önce `preflight.js` dosyasını çalıştırır; analiz edilen ailede preload, Brotli katmanını kaldırıyordu. Paketi açtıktan sonra, birlikte sunulan runtime'dan tam Node.js/V8 sürümünü belirleyin. Bir V8 sürümüyle oluşturulan önbellek, başka bir sürüm tarafından reddedilebilir veya yanlış çözümlenebilir. Bu nedenle ilgili V8 etiketi için bir `v8dasm` derleyin ya da edinin ve gerekli View8 ile string yazdırma yamalarını uygulayın.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Toolkit'in çalıştırma gerektirmeyen workflow'u şöyledir:<sup>[[2]](#references)</sup>
+Araç takımının çalıştırma gerektirmeyen iş akışı şöyledir:<sup>[[2]](#references)</sup>
+
 ```bash
 brotli -d app.jsc -o app.decompressed.jsc
 /path/to/matching-v8dasm app.decompressed.jsc > app.jsc.disasm.txt
 mkdir -p decompiled deobfuscated
 python3 View8/view8.py --input_format disassembled \
---inp app.jsc.disasm.txt --normalize \
---out decompiled/app.dec.txt \
---export_format decompiled serialized
+  --inp app.jsc.disasm.txt --normalize \
+  --out decompiled/app.dec.txt \
+  --export_format decompiled serialized
 python3 deobf_all.py --inp decompiled/app.dec.pkl \
---out deobfuscated/app.deobf.txt \
---export_format decompiled serialized
+  --out deobfuscated/app.deobf.txt \
+  --export_format decompiled serialized
 ```
-`--normalize`, oluşturulan functions için çalıştırmalar arasında kararlı identifiers sağlar. Metin çıktısı inceleme içindir; serialized object graph, bağımsız pass'lerin function, declarer, scope ve metadata ilişkilerini korumasını sağlar. Bu, **yeniden oluşturulmuş veya çalıştırılabilir JavaScript değildir**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### View8 pseudocode'u bir IR olarak okuyun
+`--normalize`, oluşturulan fonksiyonlara çalıştırmalar arasında kararlı tanımlayıcılar verir. Metin çıktısı inceleme içindir; serileştirilmiş nesne grafiği, bağımsız geçişlerin fonksiyon, bildirici, kapsam ve metadata ilişkilerini korumasını sağlar. Bu, **yeniden oluşturulmuş veya çalıştırılabilir JavaScript değildir**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Tipik isimler `func_<name>_0x<address>` biçimindedir, arguments `a0...aN`, virtual registers `r0...rN` ve `ACCU`, V8'in accumulator'ıdır. `start` root declarer'dır; `Scope[...]`, globals ve dictionaries, nested functions tarafından capture edilen veya paylaşılan değerleri modeller. Her expression'ı JavaScript syntax'ı olarak parse etmeyin: örneğin View8'in `!r6 === "0"` ifadesi, karşılaştırmanın tamamının negation'ını (`r6 !== "0"`) temsil eder; bu, branch'leri yeniden oluştururken önemlidir.<sup>[[1]](#references)[[3]](#references)</sup>
+### V8'i derlemeden ön inceleme
 
-## Dependency-aware deobfuscation
+Ham veya Brotli ile sarılmış bir cache için `jscd`, örneği Node.js'te yüklemeden başlığı belirleyebilir ve sabitlerle fonksiyonları listeleyebilir. Dosyanın sürüm tabloları tarafından desteklenip desteklenmediğini kontrol etmek ve daha özelleşmiş View8 deobfuscation geçişlerinden önce fonksiyonlara öncelik vermek için önce bunu kullanın.<sup>[[4]](#references)</sup>
 
-Bir sonraki pass'in ihtiyaç duyduğu input'ları açığa çıkaracak sırayla transformations uygulayın ve output stabilize olana kadar propagation'ı tekrarlayın. Pratik bir sıra şöyledir:<sup>[[1]](#references)[[2]](#references)</sup>
+Sürüm hash'i bir tanımlama ipucudur; tek başına, bağımsız bir disassembler'ın üreticiyle aynı flag'lere veya salt okunur snapshot'a sahip olduğunu kanıtlamaz.<sup>[[4]](#references)[[5]](#references)</sup>
 
-1. Declarer hierarchy'yi dolaşın ve globals, registers, dictionaries ve `Scope[...]` references içindeki değerleri propagate edin.
-2. String-decoder arguments'larını recover edin ve encrypted calls'ları plaintext ile değiştirin.
-3. Ardışık string chunks'larını fold edin; ortaya çıkan property names ve dispatcher-order strings, sonraki pass'lerin kilidini açar.
-4. Control flow'u unflatten edin, call proxies ve atomic-operation wrappers'ları inline edin ve dictionary'lerde tutulan function references'larını resolve edin.
-5. Tekrar propagate edin; çünkü her çözümlenen string, key veya proxy başka bir indirection katmanını açığa çıkarabilir.
-6. Tanınan one-shot initialization thunks'larını collapse edin ve dead helpers'ları ancak call sites çözümlendikten sonra kaldırın.
+```bash
+jscd info app.jsc
+jscd strings app.jsc > app.strings.txt
+jscd functions app.jsc > app.functions.txt
+jscd disasm app.jsc > app.jsc.disasm.txt
+```
 
-### Shift edilmiş RC4 string arrays'larını black box olarak recover edin
+`jscd disasm`, View8 ile uyumlu bir listeleme üretir; bu nedenle cache desteklendiğinde yukarıdaki View8 komutu `v8dasm` yerine bu çıktıyı kullanabilir. Decoder çağrılarını ve olası giriş noktalarını bulmak için string’leri işlev ağacıyla birlikte inceleyin; `jscd`'nin yaklaşık JavaScript çıktısını orijinal kaynak olarak kabul etmeyin. Araç sürümü reddederse veya salt okunur yığın yer tutucularını çözümlenmeden bırakırsa, tahmin ederek özellik adları atamak yerine eşleşen bir V8 build’ine dönün ya da aynı build’den bir ad eşleme dosyası sağlayın.<sup>[[4]](#references)</sup>
 
-Yaygın bir `javascript-obfuscator` layout'u, Base64 ile encode edilmiş RC4 chunks'larını tek bir array'de depolar. Decoder wrappers sayısal bir offset ve kısa bir key sağlar; bazen arguments sırası ters çevrilir, ardından closure scopes içinde capture edilen constants eklenir veya çıkarılır. Root decoder fazla obfuscated olduğunda, tüm function'ı yeniden oluşturmak yerine bilinmeyen array-index shift'ini ampirik olarak recover edin.<sup>[[1]](#references)</sup>
+Bir Electron uygulamasının içindeki cache için önce [ASAR'ı çıkarın ve main ile preload giriş noktalarını inceleyin](../../network-services-pentesting/pentesting-web/electron-desktop-apps/). V8 sürüm dizeleri aynı olsa bile Electron ve Node cache’lerinin snapshot ve pointer-compression düzenleri farklı olabilir.<sup>[[4]](#references)</sup>
 
-`N` adet chunk'tan oluşan bir array ve aynı decoder'a yapılan birkaç call için:<sup>[[1]](#references)</sup>
+### View8 pseudocode'unu IR olarak okuma
+
+Tipik adlandırma biçimi `func_<name>_0x<address>` şeklindedir; argümanlar `a0...aN`, sanal register’lar `r0...rN`, `ACCU` ise V8'in accumulator'ıdır. `start` kök bildiricidir; `Scope[...]`, global'ler ve sözlükler iç içe işlevler tarafından yakalanan veya paylaşılan değerleri modeller. Her ifadeyi JavaScript sözdizimi olarak yorumlamayın: örneğin, View8'deki `!r6 === "0"` ifadesi karşılaştırmanın tamamının olumsuzlanmasını (`r6 !== "0"`) temsil eder; bu, dalları yeniden oluştururken önemlidir.<sup>[[1]](#references)[[3]](#references)</sup>
+
+## Bağımlılıkları gözeten deobfuscation
+
+Bir sonraki geçiş için gereken girdileri ortaya çıkaracak sırayla dönüşümler uygulayın ve çıktı sabitlenene kadar değer yayılımını tekrarlayın. Uygulanabilir bir sıra şöyledir:<sup>[[1]](#references)[[2]](#references)</sup>
+
+1. Bildirici hiyerarşisini izleyin ve global'lerden, register’lardan, sözlüklerden ve `Scope[...]` başvurularından değerleri yayın.
+2. String decoder argümanlarını bulun ve şifrelenmiş çağrıları açık metinle değiştirin.
+3. Bitişik string parçalarını birleştirin; ortaya çıkan özellik adları ve dispatcher sıralama string’leri sonraki geçişlerin önünü açar.
+4. Kontrol akışını düzleştirmeyi geri alın, çağrı proxy'lerini ve atomik işlem sarmalayıcılarını satır içine alın, sözlüklerde tutulan işlev başvurularını çözümleyin.
+5. Her çözümlenen string, anahtar veya proxy başka bir dolaylılık katmanını ortaya çıkarabileceğinden değerleri yeniden yayın.
+6. Tanınan tek kullanımlık başlatma thunk'larını birleştirin ve kullanılmayan yardımcıları yalnızca çağrı noktaları çözümlendikten sonra kaldırın.
+
+### Kaydırılmış RC4 string dizilerini black box olarak kurtarma
+
+Yaygın bir `javascript-obfuscator` düzeninde, tek bir dizide Base64 ile kodlanmış RC4 parçaları bulunur. Decoder sarmalayıcıları sayısal bir offset ve kısa bir key sağlar; bunlar bazen ters argüman sırasındadır. Ardından closure scope'larında yakalanan sabitleri ekler veya çıkarırlar. Kök decoder aşırı derecede obfuscation uygulanmışsa, işlevin tamamını yeniden oluşturmaya çalışmak yerine bilinmeyen dizi indeks kaymasını deneysel olarak bulun.<sup>[[1]](#references)</sup>
+
+`N` parça içeren bir dizi ve aynı decoder'a yapılan birkaç çağrı için:<sup>[[1]](#references)</sup>
+
 ```text
 for each observed (numeric_argument, rc4_key):
-candidates = {}
-for shift in 0 .. N-1:
-index = apply_observed_sign(numeric_argument, shift)
-plaintext = RC4(Base64Decode(chunks[index]), rc4_key)
-if plaintext passes encoding/printability checks:
-candidates.add(shift)
+    candidates = {}
+    for shift in 0 .. N-1:
+        index = apply_observed_sign(numeric_argument, shift)
+        plaintext = RC4(Base64Decode(chunks[index]), rc4_key)
+        if plaintext passes encoding/printability checks:
+            candidates.add(shift)
 root_shift = intersection(candidate_sets)
 ```
-Tek bir printable decryption sonucundan shift kabul etmeyin: yanlış ciphertext tesadüfen printable görünebilir. En az üç farklı gözlem kullanın ve yalnızca hepsi için makul metin üreten benzersiz bir shift'i kabul edin. Ardından wrapper/declarer graph'ını dolaşarak her addition veya subtraction işlemini biriktirin ve numeric argument'ın önce gelip gelmediğini kaydedin. Bu metadata'yı her sample için cache'leyin, decoder çağrılarını değiştirin, bitişik plaintext parçalarını birleştirin ve triage için string'leri ayrı olarak export edin.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Unflattening sırasında semantics'i koruyun
+Tek bir yazdırılabilir çözümlemeye bakarak shift değerini kabul etmeyin: yanlış ciphertext, tesadüfen yazdırılabilir görünebilir. En az üç farklı gözlem kullanın ve yalnızca hepsi için makul metin üreten benzersiz bir shift değerini kabul edin. Ardından wrapper/declarer grafiğini izleyin; her toplama veya çıkarma işlemini biriktirin ve sayısal argümanın önce gelip gelmediğini kaydedin. Bu metadata'yı her örnek için önbelleğe alın, decoder çağrılarını değiştirin, bitişik plaintext parçalarını birleştirin ve triage için string'leri ayrı olarak dışa aktarın.<sup>[[1]](#references)[[2]](#references)</sup>
 
-`3|2|1|0|4` gibi string'lerle yönlendirilen dispatcher loop'larında order string'i decode edin, her state comparison'ı ilgili block'uyla eşleyin, ardından View8'in negated-condition notation'ını hesaba katıp block'ları dispatcher sırasına göre üretin. İç içe bir `continue`, sıradan bir fall-through yerine dispatcher'a geri dönen erken bir jump'ı temsil edebilir. Loop'u kaldırırken bu `continue`'ı silin ve başlangıçta onu kapsayan `if` ifadesinden sonra gelen statement'ları oluşturulan bir `else` branch'ine taşıyın; yalnızca dispatcher'ı silmek behavior'ı değiştirir.<sup>[[1]](#references)</sup>
+### Unflatten işlemi sırasında semantiği koruyun
 
-### Proxy'leri, operation'ları ve lazy thunk'ları inline edin
+`3|2|1|0|4` gibi string'lerle yönlendirilen dispatcher döngülerinde, sıralama string'ini decode edin, her state karşılaştırmasını ilgili bloğa eşleyin, View8'in olumsuz koşul gösterimini hesaba katın, ardından blokları dispatcher sırasına göre çıkarın. İç içe bir `continue`, olağan akışta devam etmek yerine dispatcher'a geri dönen erken bir atlama olabilir. Döngüyü kaldırırken bu `continue` ifadesini silin ve onu kapsayan `if` ifadesinden sonra gelen deyimleri oluşturulan bir `else` dalına taşıyın; yalnızca dispatcher'ı silmek davranışı değiştirir.<sup>[[1]](#references)</sup>
 
-Call site'larını direct call'larla değiştirmeden önce `return a0(a1, a2)` gibi forwarding helper'larını normalize edin. Subtraction, division, comparison, membership test veya invocation için kullanılan wrapper'ları da benzer şekilde ele alın. Helper reference'ın kendisi decrypted dictionary key veya closure value arkasında tutuluyor olabileceğinden, string ve structure propagation'ı inlining işleminden önce ve sonra çalıştırın.<sup>[[1]](#references)</sup>
+### Proxy'leri, işlemleri ve lazy thunk'ları inline edin
 
-Ayrıca stored function'ı bir kez çağıran, reference'ını temizleyen, sonucu cache'leyen ve sonraki çağrılarda bu cache'i döndüren closure'ları da tanıyın. Böyle bir thunk'ı initialization site'ında collapse etmek, underlying dispatcher veya capability function'ı açığa çıkarır; ancak original execution'ın her çağrıyı fresh invocation olarak modellemek yerine **one-shot ve cached** olduğunu belirtin.<sup>[[1]](#references)</sup>
+Çağrı noktalarını doğrudan çağrılarla değiştirmeden önce `return a0(a1, a2)` gibi yönlendirme yardımcılarını normalize edin. Çıkarma, bölme, karşılaştırma, üyelik testi veya çağrı wrapper'larına da aynı şekilde yaklaşın. Yardımcıya yapılan başvurunun kendisi, çözülmüş bir sözlük anahtarının veya closure değerinin arkasında saklanıyor olabileceğinden, inline işleminden önce ve sonra string ve yapı yayılımı çalıştırın.<sup>[[1]](#references)</sup>
 
-## Safety ve validation notları
+Ayrıca saklanan bir işlevi bir kez çağıran, başvurusunu temizleyen, sonucu önbelleğe alan ve sonraki çağrılarda bu önbelleği döndüren closure'ları da tanıyın. Böyle bir thunk'ı başlatma noktasında daraltmak, alttaki dispatcher'ı veya capability işlevini ortaya çıkarır; ancak özgün çalıştırmanın her çağrıda yeniden çağırma değil, **tek seferlik ve önbelleğe alınmış** olduğunu belirtin.<sup>[[1]](#references)</sup>
 
-- Python `pickle` loading code çalıştırabilir. Yalnızca trusted View8 run tarafından local olarak oluşturulan `.pkl` dosyalarını load edin; sample-supplied pickle'ı asla data olarak değerlendirmeyin.<sup>[[2]](#references)</sup>
-- Pattern-driven pass'ler genel amaçlı bir JavaScript decompiler değildir. Çözümlenmemiş expression'ları koruyun ve belirsiz dispatcher variant'larını rewrite etmeye zorlamak yerine manuel olarak inceleyin.<sup>[[1]](#references)[[2]](#references)</sup>
-- LLM-assisted function name'leri navigation hint'leridir, evidence değildir. Bunları kullanıyorsanız dependency'leri leaf-first işleyin; ancak her label'ı body, argument'lar, string'ler, data flow, API'ler ve side effect'lere göre doğrulayın.<sup>[[1]](#references)[[2]](#references)</sup>
+## Güvenlik ve doğrulama notları
+
+- Python `pickle` yükleme işlemi kod çalıştırabilir. Yalnızca güvenilir View8 çalıştırmasının yerel olarak oluşturduğu `.pkl` dosyalarını yükleyin; örneğin sağladığı bir pickle'ı asla veri olarak değerlendirmeyin.<sup>[[2]](#references)</sup>
+- Bir işlev gövdesinin eksik olması, kaynakta bu işlevin bulunmadığını kanıtlamaz: V8, lazy bir işlevi ilk çağrıda derlenene kadar metadata olarak serileştirebilir. Statik triage sırasında bu tür işlevleri çözümlenmemiş olarak işaretli tutun.<sup>[[6]](#references)</sup>
+- Pattern odaklı geçişler genel amaçlı bir JavaScript decompiler değildir. Çözümlenmemiş ifadeleri koruyun ve belirsiz dispatcher varyantlarını yeniden yazmaya zorlamak yerine elle inceleyin.<sup>[[1]](#references)[[2]](#references)</sup>
+- LLM destekli işlev adları, kanıt değil gezinme ipuçlarıdır. Bunları kullanıyorsanız bağımlılıkları yapraklardan başlayarak işleyin; ancak her etiketi gövdeye, argümanlara, string'lere, veri akışına, API'lere ve yan etkilere göre doğrulayın.<sup>[[1]](#references)[[2]](#references)</sup>
+
+
 
 ## References
 
-- [1] [Breaking the Seal: Static Deobfuscation of JSCeal's Compiled V8 Bytecode](https://research.checkpoint.com/2026/breaking-the-seal-static-deobfuscation-of-jsceals-compiled-v8-bytecode)
+- [1] [Mührü Kırmak: JSCeal'ın Derlenmiş V8 Bytecode'unun Statik Gizleme Kaldırma İşlemi](https://research.checkpoint.com/2026/breaking-the-seal-static-deobfuscation-of-jsceals-compiled-v8-bytecode)
 - [2] [hasherezade/jsc_deobfuscator](https://github.com/hasherezade/jsc_deobfuscator)
 - [3] [suleram/View8](https://github.com/suleram/View8)
+- [4] [ejfkdev/jscd](https://github.com/ejfkdev/jscd)
+- [5] [V8 SerializedCodeData başlığı](https://chromium.googlesource.com/v8/v8/+/main/src/snapshot/code-serializer.h)
+- [6] [Node.js vm.Script kod önbelleği](https://nodejs.org/api/vm.html#scriptcreatecacheddata)
 {{#include ../../banners/hacktricks-training.md}}
