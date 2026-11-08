@@ -7,6 +7,7 @@
 - Main owns general techniques; Cloud owns provider/IAM pivots; use public URLs.
 - Removed chapters need whole-page `book.toml` redirects; preserve content and current links, not historical fragments.
 - Recheck paths and PR overlap.
+- Keep implementation PoCs beside their mechanism heading when they share the same prerequisites; code size alone does not justify a separate page.
 
 ## Canonical locations and boundaries
 
@@ -19,7 +20,7 @@
 - Android acquisition, locked-device options, physical/ADB imaging and LiME → `src/generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md`. Mobile owns app testing; malware post-exploitation is separate.
 - Firmware acquisition, package decryption, updates and early boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay under firmware, not Stack Overflow.
 - TODO relocations: Rust → `src/generic-methodologies-and-resources/rust-basics.md`; investment terms → `src/blockchain/blockchain-and-crypto-currencies/investment-terms.md`; cookies → `src/welcome/cookies-policy.md`; recon/reputation/breach APIs → `src/generic-methodologies-and-resources/external-recon-methodology/reconnaissance-and-threat-intelligence-apis.md`.
-- `src/pentesting-web/referer-header-and-referrer-policy.md` owns browser Referer leakage, Referrer-Policy, and injected referrer meta behavior; OAuth retains its specific consequences and links there. `src/pentesting-web/sensitive-information-exfiltration.md` is a route map for private pages across CORS/XSS/dangling markup/clickjacking; its cited Apache case stays there.
+- `src/pentesting-web/referer-header-and-referrer-policy.md` owns Referer leakage, Referrer-Policy and injected meta behavior; OAuth links there. `sensitive-information-exfiltration.md` maps private-page routes across CORS/XSS/dangling markup/clickjacking.
 - UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
 - Blockchain chapters → top-level Blockchain & Smart Contract Security (`blockchain-and-crypto-currencies/README.md` entry). Bitcoin P2P stays in Network Services, DApp tests in Web, cryptocurrency privacy in Privacy.
@@ -35,14 +36,15 @@
 - WSGI/uWSGI, Zabbix and CCTV products remain in `network-services-pentesting/pentesting-web/`, nested under 80/443 rather than Kerberos. Web triage and SSRF/Gopher link to WSGI; port/side-service caveats stay with products.
 - AI fuzzing seeds/harnesses/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source review, mobile entry-point tasks and kernel audits → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`. Split by research task, not platform; both stay in AI.
 - Remote MCP OAuth, JSON-RPC enumeration, authorization and interception → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery, repo config, secrets and artifacts → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Server testing and client delivery are distinct.
-- eSIM/eUICC profile management, Java Card VM type confusion, OTA/APDU and card tests → `src/mobile-pentesting/esim-javacard-exploitation.md`. Mobile secure element, not app internals; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
+- eSIM/eUICC, Java Card and OTA/APDU → `src/mobile-pentesting/esim-javacard-exploitation.md`; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
 
-- Cross-platform host/SaaS collection-tool reference → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters. Its old TODO route redirects here.
-- macOS environment-controlled PHP, Lua, Julia, Octave, R, Ruby and Erlang/Elixir interpreter startup → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`. Each runtime keeps its prerequisites, variants and mitigation under headings; shell, Python, PowerShell and framework injection stay separate.
-- MIFARE Classic stored-value tampering (Crypto1, balance diff/integrity, Proxmark3 transcript, magic UID caveats) → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; `proxmark-3.md` keeps generic tool commands and links to this tool-independent card-balance task.
+- Cross-platform collection tools → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters.
+- macOS interpreter startup (PHP, Lua, Julia, Octave, R, Ruby, Erlang/Elixir) → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`; runtime prerequisites stay under headings, distinct from shell/Python/PowerShell.
+- MIFARE Classic balance tampering → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; `proxmark-3.md` keeps generic tool commands.
 - PostgreSQL `lo_import`/`dblink_connect` exfiltration → `src/pentesting-web/sql-injection/postgresql-injection/README.md`; other dblink tasks remain separate.
 - Legacy PHP `safe_mode` Windows command-path, `fopen`, and Linux `proc_open` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/legacy-php-safe-mode-bypasses.md`. Group by restriction, split prerequisites by heading; Perl extension remains separate for modern CGI loading and broader bypasses.
 
+- Recursive CSS `@import` exfiltration PoC → `src/pentesting-web/xs-search/css-injection/README.md#recursive-import-css-exfiltration-poc`; attribute-selector mechanism and complete commented server/victim code belong together; the former code-only URL redirects. LESS compilation remains separate (server-side prerequisite).
 - Format-string arbitrary-write `FmtStr` GOT-overwrite template (local/TCP/SSH, offset discovery, padding, `.fini_array` option) → `src/binary-exploitation/format-strings/README.md#pwntools-template`; the separate arbitrary-read examples stay in their own chapter because they demonstrate a different exploitation objective. Old URL redirects.
 
 ## Researcher entry points
