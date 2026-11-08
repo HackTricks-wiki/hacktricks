@@ -36,7 +36,8 @@
     width: min(92vw, 520px);
     max-height: min(92vh, 760px);
     isolation: isolate;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     border-radius: 16px;
     padding: 12px;
     background: transparent;
