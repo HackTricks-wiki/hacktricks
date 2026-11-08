@@ -1120,7 +1120,7 @@
     "src/windows-hardening/ntlm/places-to-steal-ntlm-creds.md": "f2194796339a3338f9b4d6e1866520ad15c62435",
     "src/windows-hardening/protocol-handler-shell-execute-abuse.md": "84362691d59cdf9f2a8385a13f32c3083543f427",
     "src/windows-hardening/stealing-credentials/README.md": "5ec937db2a363ee330eaa3a9acc6530211bd8080",
-    "src/windows-hardening/stealing-credentials/credentials-mimikatz.md": "d4e9823b5ef1067429ae1e057be56272ff1d5dea",
+    "src/windows-hardening/stealing-credentials/credentials-mimikatz.md": "5b776d0588ed6661eb59babceb74a964800abeb2",
     "src/windows-hardening/stealing-credentials/credentials-protections.md": "921e63a5754c5583c444b6ff90d428722c89e1c1",
     "src/windows-hardening/stealing-credentials/wts-impersonator.md": "9cc7c580de99dd0e3f0c18942337bf3fa1ffab3f",
     "src/windows-hardening/virtualized-payload-execution.md": "862766e82d52f9cff95d455a58936bf96147da42",
