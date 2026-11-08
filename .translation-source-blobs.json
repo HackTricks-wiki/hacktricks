@@ -1034,7 +1034,7 @@
     "src/reversing/reversing-tools-basic-methods/angr/angr-examples.md": "79182f6bf453e28e32c46106b671104809231948",
     "src/reversing/reversing-tools-basic-methods/blobrunner.md": "3bb864d2fe3f5728c50757947b54b726386ce819",
     "src/reversing/reversing-tools-basic-methods/cheat-engine.md": "53e86f13beb6ca1f082ebccd3b82eeace1ac445d",
-    "src/reversing/reversing-tools-basic-methods/nodejs-v8-cached-bytecode.md": "0589d200c2a3f6590dd8e88ee75c0def00bacb60",
+    "src/reversing/reversing-tools-basic-methods/nodejs-v8-cached-bytecode.md": "d38a6ccea72fe2b7e3924cf002f5feed38d7c46d",
     "src/reversing/reversing-tools-basic-methods/satisfiability-modulo-theories-smt-z3.md": "0ce9fad606cc32bc6f4e6835f2cc05e71884379c",
     "src/reversing/reversing-tools-basic-methods/windbg-automation.md": "3c17b497162ae74aa67badcb6228628bd99c9d2a",
     "src/reversing/reversing-tools-basic-methods/windows-kernel-debugging-kernelflirt.md": "fd233ea1795c9862cb3105cd3dd96c955b437ab7",
