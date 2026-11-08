@@ -1,0 +1,66 @@
+name: Deploy promotion banner
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-promotion-banner
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate campaign
+        run: |
+          node --check theme/discount.js
+          node --test scripts/test_discount.js
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Update promotion on every deployed language
+        shell: bash
+        env:
+          BUCKET: hacktricks-wiki
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          # Discover only existing language roots; leave book content untouched.
+          aws s3api list-objects-v2 --bucket "$BUCKET" --delimiter / \
+            --query 'CommonPrefixes[].Prefix' --output json > /tmp/prefixes.json
+          python3 - <<'PYCODE'
+          import json, re
+          prefixes = [p for p in json.load(open('/tmp/prefixes.json')) if re.fullmatch(r'[a-z]{2}/', p)]
+          if 'en/' not in prefixes:
+              raise SystemExit('Expected the deployed English book')
+          with open('/tmp/languages.txt', 'w') as output:
+              output.write('\n'.join(prefixes) + '\n')
+          PYCODE
+          while IFS= read -r prefix; do
+            aws s3 cp src/images/hacktricks-black-friday-2026-v1.webp \
+              "s3://${BUCKET}/${prefix}images/hacktricks-black-friday-2026-v1.webp" \
+              --content-type image/webp --cache-control 'public,max-age=31536000,immutable' --only-show-errors
+            # mdBook versions have emitted both paths. Cover both existing page layouts.
+            for script in theme/discount.js discount.js; do
+              aws s3 cp theme/discount.js "s3://${BUCKET}/${prefix}${script}" \
+                --content-type application/javascript --cache-control 'public,max-age=300' --only-show-errors
+            done
+            for stylesheet in theme/discount.css discount.css; do
+              aws s3 cp theme/discount.css "s3://${BUCKET}/${prefix}${stylesheet}" \
+                --content-type text/css --cache-control 'public,max-age=300' --only-show-errors
+            done
+          done < /tmp/languages.txt
+          invalidation_id=$(aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths '/*/theme/discount.js' '/*/discount.js' '/*/theme/discount.css' '/*/discount.css' \
+            --query Invalidation.Id --output text)
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$DISTRIBUTION_ID" --id "$invalidation_id"
