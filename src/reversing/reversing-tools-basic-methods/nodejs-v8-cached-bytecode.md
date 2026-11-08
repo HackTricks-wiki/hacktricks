@@ -25,6 +25,23 @@ python3 deobf_all.py --inp decompiled/app.dec.pkl \
 
 `--normalize` gives generated functions stable identifiers across runs. The text output is for inspection; the serialized object graph lets independent passes preserve function, declarer, scope and metadata relationships. It is **not reconstructed or runnable JavaScript**.<sup>[[1]](#references)[[2]](#references)</sup>
 
+### Triage a cache without building V8
+
+For a raw or Brotli-wrapped cache, `jscd` can identify the header and enumerate constants and functions without loading the sample in Node.js. Use this first to check whether its version tables support the file and to prioritize functions before the more specialized View8 deobfuscation passes.<sup>[[4]](#references)</sup>
+
+The version hash is an identification hint, not proof that a standalone disassembler has the same flags or read-only snapshot as the producer.<sup>[[4]](#references)[[5]](#references)</sup>
+
+```bash
+jscd info app.jsc
+jscd strings app.jsc > app.strings.txt
+jscd functions app.jsc > app.functions.txt
+jscd disasm app.jsc > app.jsc.disasm.txt
+```
+
+`jscd disasm` emits a View8-compatible listing, so the View8 command above can use that output instead of `v8dasm` when the cache is supported. Inspect strings alongside the function tree to locate decoder calls and likely entry points; do not treat `jscd`'s approximate JavaScript output as the original source. If the tool rejects the version or leaves read-only-heap placeholders, return to a matching V8 build or supply a name map from the same build rather than guessing property names.<sup>[[4]](#references)</sup>
+
+For a cache inside an Electron application, first [extract the ASAR and inspect its main and preload entry points](../../network-services-pentesting/pentesting-web/electron-desktop-apps/). Electron and Node caches can differ in snapshot and pointer-compression layout even when their V8 version strings match.<sup>[[4]](#references)</sup>
+
 ### Read View8 pseudocode as an IR
 
 Typical names are `func_<name>_0x<address>`, arguments are `a0...aN`, virtual registers are `r0...rN`, and `ACCU` is V8's accumulator. `start` is the root declarer, while `Scope[...]`, globals and dictionaries model values captured or shared by nested functions. Do not parse every expression as JavaScript syntax: for example, View8's `!r6 === "0"` represents negation of the complete comparison (`r6 !== "0"`), which matters when rebuilding branches.<sup>[[1]](#references)[[3]](#references)</sup>
@@ -72,13 +89,18 @@ Also recognize closures that invoke a stored function once, clear its reference,
 ## Safety and validation notes
 
 - Python `pickle` loading can execute code. Only load `.pkl` files generated locally by the trusted View8 run; never treat a sample-supplied pickle as data.<sup>[[2]](#references)</sup>
+- A missing function body is not proof that the source lacked that function: V8 may serialize a lazy function as metadata until it is compiled on first call. Keep such functions marked unresolved during static triage.<sup>[[6]](#references)</sup>
 - Pattern-driven passes are not a general JavaScript decompiler. Preserve unresolved expressions and manually inspect ambiguous dispatcher variants rather than forcing a rewrite.<sup>[[1]](#references)[[2]](#references)</sup>
 - LLM-assisted function names are navigation hints, not evidence. Process dependencies leaf-first if using them, but verify every label against the body, arguments, strings, data flow, APIs and side effects.<sup>[[1]](#references)[[2]](#references)</sup>
+
+
 
 ## References
 
 - [1] [Breaking the Seal: Static Deobfuscation of JSCeal's Compiled V8 Bytecode](https://research.checkpoint.com/2026/breaking-the-seal-static-deobfuscation-of-jsceals-compiled-v8-bytecode)
 - [2] [hasherezade/jsc_deobfuscator](https://github.com/hasherezade/jsc_deobfuscator)
 - [3] [suleram/View8](https://github.com/suleram/View8)
-
+- [4] [ejfkdev/jscd](https://github.com/ejfkdev/jscd)
+- [5] [V8 SerializedCodeData header](https://chromium.googlesource.com/v8/v8/+/main/src/snapshot/code-serializer.h)
+- [6] [Node.js vm.Script code cache](https://nodejs.org/api/vm.html#scriptcreatecacheddata)
 {{#include ../../banners/hacktricks-training.md}}
