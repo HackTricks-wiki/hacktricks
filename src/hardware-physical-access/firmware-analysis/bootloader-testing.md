@@ -80,6 +80,22 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
    - Abuse cases to test: attacker-controlled USB/SD media earlier in `boot_targets`, writable `/boot/extlinux/extlinux.conf`, rogue TFTP supplying `boot.scr`, or SPI-backed script execution via `script_offset_f`.
    - If the platform relies on FIT verification, make sure configurations are signed at the configuration level and not only per-image; `required-mode=all` is stronger than accepting any single required key.
 
+### SPL external FIT data copied before verification
+
+For SPL FIT loading, an intact configuration signature does not make external payload metadata safe. U-Boot excludes `data-position`, `data-offset`, and `data-size` from signed configuration properties. In affected `load_simple_fit()` paths, SPL derives a source offset and copy length from those fields, then calls `info->read()` **before** checking the image hash. A crafted FIT on writable boot media can therefore overwrite RAM without forging a signature. The signed `load` property normally fixes the destination, so first determine whether an oversized copy can reach the stack or other control data from that address.<sup>[[15]](#references)[[16]](#references)</sup>
+
+Trace the board's actual loader and memory map instead of assuming a flash read: the demonstrated RAM loader reached `spl_ram_load_read()` and `memcpy()`. At the call site, record the FIT base (`fit_offset`), `ARCH_DMA_MINALIGN`, aligned `read_offset` and `size`, destination `src_ptr`, and saved return-address location. Check whether a contiguous mapped source region covers the required copy distance, whether it overlaps the destination, and whether bytes at the source position can supply a pointer into attacker-controlled FIT data. The generic [partial return-address overwrite technique](../../binary-exploitation/stack-overflow/ret2win/) applies if a full pointer cannot satisfy the loader's alignment constraints.<sup>[[16]](#references)</sup>
+
+On the tested 32-bit AST2600 layout, `src_ptr` was `0x80001000` and `memcpy`'s saved return address was at `0x902ffe24`. The source contained a useful little-endian pointer at `0x902fffe4`; the loader added `0x10000` to `data-position` and rounded the resulting offset down to 64 bytes. An aligned position and a one-byte-short copy changed only the low three bytes of the saved return address, preserving its known zero high byte. These values illustrate the calculation; re-derive them for each SPL build and stack layout.<sup>[[16]](#references)</sup>
+
+```text
+distance      = saved_return_slot - destination = 0x102fee24
+data-position = pointer_slot - distance - fit_offset = 0x7fff11c0
+data-size     = distance + 3 = 0x102fee27
+```
+
+The upstream fix bounds both the raw `data-size` and the **block-aligned** transfer size before `info->read()`. Its overlay path passes the actual buffer capacity, while other callers use `CONFIG_SYS_BOOTM_LEN`, which is only a loose ceiling rather than proof that the destination has that much free memory. When assessing a vendor fork, verify those checks are present and compare the permitted copy range with the board's real SPL stack and reserved regions.<sup>[[15]](#references)[[16]](#references)</sup>
+
 ## Network-boot surface (DHCP/PXE) and rogue servers
 
 9. PXE/DHCP parameter fuzzing
@@ -201,5 +217,7 @@ Be cautious when interacting with SPI/NAND flash during early boot (e.g., ground
 - [12] [BlackLotus UEFI bootkit: Myth confirmed](https://www.welivesecurity.com/2023/03/01/blacklotus-uefi-bootkit-myth-confirmed/)
 - [13] [BlackX: a BlackLotus-like UEFI bootkit](https://securelist.com/uefi-bootkit-blackx/121539/)
 - [14] [How to manage Windows Boot Manager revocations for Secure Boot changes](https://support.microsoft.com/en-us/servicing/os/windows/2023/03/how-to-manage-the-windows-boot-manager-revocations-for-secure-boot-changes-associated-with-cve-2023)
+- [15] [U-Boot patch: bound the external data size before reading it](https://github.com/u-boot/u-boot/commit/8f71d7170f5c3abadee45683e35ae6d925b6d417)
+- [16] [Hidden beneFITs: Bypassing Signature Verification in U-Boot SPL](https://www.binarly.io/blog/signature-verification-bypass-in-u-boot-spl)
 
 {{#include ../../banners/hacktricks-training.md}}
