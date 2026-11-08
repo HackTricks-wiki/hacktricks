@@ -1,10 +1,10 @@
 ;(function discount() {
-  var CAMPAIGN_ID = "summer-" + new Date().getFullYear()
+  var CAMPAIGN_ID = "black-friday-2026"
   var DISMISS_KEY = "htDiscountDismissedUntil:" + CAMPAIGN_ID
   var DISMISS_MS = 10 * 24 * 60 * 60 * 1000
-  var IMAGE_PATH = "images/hacktricks-summer-discount-2026-v1.webp"
-  var TARGET_URL = "https://hacktricks-training.com"
-  var TITLE = "HackTricks Training Summer Discount"
+  var IMAGE_PATH = "images/hacktricks-black-friday-2026-v1.webp"
+  var TARGET_URL = "https://hacktricks-training.com/courses"
+  var TITLE = "HackTricks Training Black Friday 2026 — 20% off courses, 15% off labs and exams, plus 10% off bundles"
 
   function storageGet(key) {
     try {
@@ -45,8 +45,9 @@
   }
 
   function isCampaignActive() {
-    // getMonth() is zero-based; 6 covers July 1 through July 31 in the visitor's local time.
-    return new Date().getMonth() === 6
+    // Match the training campaign: all of November 2026, using UTC boundaries.
+    var now = Date.now()
+    return now >= Date.UTC(2026, 10, 1) && now < Date.UTC(2026, 11, 1)
   }
 
   function isDismissed() {
@@ -68,7 +69,7 @@
     }, 220)
   }
 
-  function dismissFor15Days(overlay, onKeydown) {
+  function dismissFor10Days(overlay, onKeydown) {
     storageSet(DISMISS_KEY, String(Date.now() + DISMISS_MS))
     close(overlay, onKeydown)
   }
@@ -136,7 +137,7 @@
 
     var kicker = document.createElement("span")
     kicker.className = "ht-discount-kicker"
-    kicker.textContent = "Summer offer"
+    kicker.textContent = "Black Friday offer"
 
     var closeButton = document.createElement("button")
     closeButton.className = "ht-discount-close"
@@ -191,7 +192,7 @@
     })
 
     delayButton.addEventListener("click", function() {
-      dismissFor15Days(overlay, onKeydown)
+      dismissFor10Days(overlay, onKeydown)
     })
 
     overlay.addEventListener("click", function(event) {
