@@ -1129,7 +1129,7 @@
     "src/windows-hardening/vscode-extension-abuse.md": "879879ac59e86fda1f4cc98ec0ae66ddcc2c86f4",
     "src/windows-hardening/windows-local-privilege-escalation/README.md": "7208258837669d6c97c7f1730f8a0ef5e8529eec",
     "src/windows-hardening/windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md": "8876ab7f29b77e5fda149f0b59ec0bcbf8316115",
-    "src/windows-hardening/windows-local-privilege-escalation/access-tokens.md": "7f6da0d9644a338c249d2dcdba66682ca671eb05",
+    "src/windows-hardening/windows-local-privilege-escalation/access-tokens.md": "f3ea9284e85e60d2d1e132dc799009a674d56b29",
     "src/windows-hardening/windows-local-privilege-escalation/acls-dacls-sacls-aces.md": "8010775805c16f6a500fcc80566232d7676168e4",
     "src/windows-hardening/windows-local-privilege-escalation/appenddata-addsubdirectory-permission-over-service-registry.md": "15344683445af23d6aab240a23b764f2c056a1bc",
     "src/windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md": "92227c14ca1aae1f138cce7b17d7bbd0a0e9048d",
