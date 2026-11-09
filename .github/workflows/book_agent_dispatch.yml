@@ -46,7 +46,7 @@ jobs:
               let pr;
               for (let attempt = 0; attempt < (waitForMergeability ? 20 : 1); attempt++) {
                 pr = (await github.rest.pulls.get({...source, pull_number: number})).data;
-                if (pr.mergeable !== null || pr.state !== 'open') break;
+                if (pr.user?.login?.toLowerCase() !== 'carlospolop' || pr.mergeable !== null || pr.state !== 'open') break;
                 await sleep(3000);
               }
               return pr;
@@ -60,7 +60,7 @@ jobs:
             }
             async function route(number, reviewNew) {
               const pr = await inspect(number, reviewNew);
-              if (pr.state !== 'open') return;
+              if (pr.state !== 'open' || pr.user?.login?.toLowerCase() !== 'carlospolop') return;
               if (pr.mergeable === false || (reviewNew && pr.mergeable === null)) {
                 await dispatch('book-conflict-fix.yml', number);
                 if (pr.mergeable === null) core.warning(`Mergeability is still unknown for #${number}; the fixer will check the merge directly.`);
@@ -77,7 +77,10 @@ jobs:
               const number = Number(context.payload.inputs.pr);
               if (!Number.isSafeInteger(number) || number < 1) throw new Error('A valid PR number is required');
               if (context.payload.inputs.probe === 'true') {
-                await dispatch('book-pr-review.yml', number, true);
+                const pr = await inspect(number, false);
+                if (pr.state === 'open' && pr.user?.login?.toLowerCase() === 'carlospolop') {
+                  await dispatch('book-pr-review.yml', number, true);
+                }
               } else {
                 await route(number, true);
               }
@@ -99,6 +102,7 @@ jobs:
                 }
               }
               for (const pr of prs) {
+                if (pr.user?.login?.toLowerCase() !== 'carlospolop') continue;
                 if (changed !== null) {
                   if (!changed.size) continue;
                   const files = await github.paginate(github.rest.pulls.listFiles, {
