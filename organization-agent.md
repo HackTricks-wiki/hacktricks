@@ -12,7 +12,7 @@
 
 - Rlogin/Rsh trusted-host protocols → `src/network-services-pentesting/pentesting-rlogin.md`; password-based Rexec stays separate.
 - SCM/SCMR execution (PsExec, WinExec, SMBExec, SCMExec, SharpMove) → `src/windows-hardening/lateral-movement/psexec-and-winexec.md`; scheduler, DCOM, WMI, WinRM and RDP stay separate.
-- POSIX CPU timer TOCTOU/IRQ/task-work, ptrace PoCs and Chronomaly → `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`; Linux Hardening links there. Kernel exploitation belongs in Binary Exploitation; host assessment in Linux Hardening.
+- POSIX CPU timer TOCTOU/IRQ/task-work, ptrace PoCs and Chronomaly → `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`; Linux Hardening links there. Kernel exploits belong in Binary Exploitation, host assessment in Linux Hardening.
 - Board, side-channel, fault and signal work → `src/hardware-physical-access/hardware-hacking/`; physical → `physical-attacks.md`; firmware → `firmware-analysis/`; radio/iButton → `radio-hacking/`.
 - Model execution, fine-tuning, serving and hosted tools → `src/AI/AI-Model-Tools-and-Platforms.md`, separate from attacks and architecture. Burp Intruder, extensions and Session Switcher → `src/pentesting-web/burp-suite.md`, separate from checklist and IDOR.
 - OT/ICS process-safety and planning are at `src/industrial-control-systems/README.md`; Modbus protocol models and testing are at `src/network-services-pentesting/pentesting-modbus.md`. OPC UA and BACnet remain protocol-specific Network Services chapters.
@@ -33,7 +33,7 @@
 - PHP multipart temporary-upload LFI races, including the PHP 7.0/7.2 crash/cleanup variant → `src/pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md#segmentation-fault-variant-on-php-70-and-72`. Keep phpinfo disclosure, session upload-progress files and filter-only payloads separate: different primitives.
 - Chosen-input MD5 suffix and `0e` numeric-zero searches are headings at `src/crypto/hashes/README.md#chosen-input-md5-hash-searches`, not Python sandbox topics. PHP type-juggling behavior and version caveats stay in `network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling`; both entry points link directly to the relevant explanation.
 - WSGI/uWSGI, Zabbix and CCTV products remain in `network-services-pentesting/pentesting-web/`, nested under 80/443 rather than Kerberos. Web triage and SSRF/Gopher link to WSGI; port/side-service caveats stay with products.
-- AI fuzzing seeds/harnesses/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source review, mobile entry-point tasks and kernel audits → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`. Split by research task, not platform; both stay in AI.
+- AI fuzzing/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source review/mobile/kernel audits → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`. Split by research task, not platform.
 - Remote MCP OAuth, JSON-RPC enumeration, authorization and interception → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery, repo config, secrets and artifacts → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Server testing and client delivery are distinct.
 - eSIM/eUICC, Java Card and OTA/APDU → `src/mobile-pentesting/esim-javacard-exploitation.md`; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
 
@@ -41,12 +41,13 @@
 - macOS interpreter startup (PHP, Lua, Julia, Octave, R, Ruby, Erlang/Elixir) → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`; runtime prerequisites stay under headings, distinct from shell/Python/PowerShell.
 - MIFARE Classic balance tampering → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; `proxmark-3.md` keeps generic tool commands.
 - PostgreSQL `lo_import`/`dblink_connect` exfiltration → `src/pentesting-web/sql-injection/postgresql-injection/README.md`; other dblink tasks remain separate.
-- Legacy PHP `safe_mode` Windows command-path, `fopen`, and Linux `proc_open` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/legacy-php-safe-mode-bypasses.md`. Group by restriction, split prerequisites by heading; Perl extension remains separate for modern CGI loading and broader bypasses.
+- Legacy PHP `safe_mode` Windows command-path, `fopen`, Linux `proc_open` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/legacy-php-safe-mode-bypasses.md`; Perl extension stays separate.
 
 - Recursive CSS `@import` exfiltration PoC → `src/pentesting-web/xs-search/css-injection/README.md#recursive-import-css-exfiltration-poc`; attribute-selector mechanism and complete commented server/victim code belong together; the former code-only URL redirects. LESS compilation remains separate (server-side prerequisite).
 - Format-string arbitrary-write `FmtStr` GOT-overwrite template (local/TCP/SSH, offset discovery, padding, `.fini_array` option) → `src/binary-exploitation/format-strings/README.md#pwntools-template`; the separate arbitrary-read examples stay in their own chapter because they demonstrate a different exploitation objective. Old URL redirects.
 
-- Historical Adobe Reader PDF upload external entities/same-origin bypass → `src/pentesting-web/file-upload/README.md#pdf-upload-adobe-reader-xxe-and-same-origin-policy-bypass`; Web XXE links directly. Keep its reader/browser version caveat outside generic XML parser PoCs.
+- Historical Adobe Reader PDF upload XXE/SOP bypass → `src/pentesting-web/file-upload/README.md#pdf-upload-adobe-reader-xxe-and-same-origin-policy-bypass`; Web XXE links there; retain reader/browser caveats.
+- FTP bounce scanning → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-attack.md`; uploaded-request cross-protocol relay and second-FTP retrieval → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-protocol-relay.md`. Distinct tasks/prerequisites; overview links to both; old URL redirects.
 
 ## Researcher entry points
 
@@ -62,4 +63,3 @@
 - Audit cross-domain `todo/more-tools.md` before splitting; coordinate SaaS with Cloud.
 - Blockchain and Privacy cryptocurrency need a union audit.
 - Audit long escalation/iOS chapters by task, not length.
-- Revalidate paths and pending PR overlap before editing.
