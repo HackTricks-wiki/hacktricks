@@ -838,7 +838,6 @@
   - [LFI2RCE via Eternal waiting](pentesting-web/file-inclusion/lfi2rce-via-eternal-waiting.md)
   - [LFI2RCE Via compress.zlib + PHP_STREAM_PREFER_STUDIO + Path Disclosure](pentesting-web/file-inclusion/lfi2rce-via-compress.zlib-+-php_stream_prefer_studio-+-path-disclosure.md)
 - [File Upload](pentesting-web/file-upload/README.md)
-  - [PDF Upload - XXE and CORS bypass](pentesting-web/file-upload/pdf-upload-xxe-and-cors-bypass.md)
 - [Formula/CSV/Doc/LaTeX/GhostScript Injection](pentesting-web/formula-csv-doc-latex-ghostscript-injection.md)
 - [gRPC-Web Pentest](pentesting-web/grpc-web-pentest.md)
 - [HTTP Connection Contamination](pentesting-web/http-connection-contamination.md)
