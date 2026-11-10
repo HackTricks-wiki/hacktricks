@@ -462,6 +462,7 @@
   - [Windows Registry Hive Exploitation](windows-hardening/windows-local-privilege-escalation/windows-registry-hive-exploitation.md)
 - [Basic Win CMD for Pentesters](windows-hardening/basic-cmd-for-pentesters.md)
 - [Basic PowerShell for Pentesters](windows-hardening/basic-powershell-for-pentesters/README.md)
+  - [Windows Enumeration with .NET](windows-hardening/basic-powershell-for-pentesters/dotnet-enumeration.md)
   - [PowerView/SharpView](windows-hardening/basic-powershell-for-pentesters/powerview.md)
 - [Antivirus (AV) Bypass](windows-hardening/av-bypass.md)
   - [Virtualized Payload Execution and Custom VM Evasion](windows-hardening/virtualized-payload-execution.md)
