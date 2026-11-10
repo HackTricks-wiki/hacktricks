@@ -78,6 +78,8 @@ curl --unix-socket /run/podman/podman.sock http://d/_ping
 curl --unix-socket /run/podman/podman.sock http://d/v1.40.0/images/json
 ```
 
+For PHP code execution constrained by `open_basedir`, [Unix socket connections remain a separate route](../../../network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/#unix-sockets-outside-open_basedir) when the PHP process has OS permission to connect.
+
 This matters during post-exploitation because defenders sometimes remove the usual client binaries but leave the management socket mounted. On Podman hosts, remember that the high-value path differs between rootful and rootless deployments: `unix:///run/podman/podman.sock` for rootful service instances and `unix://$XDG_RUNTIME_DIR/podman/podman.sock` for rootless ones.
 
 ### Full Example: Docker Socket To Host Root
@@ -223,9 +225,10 @@ What is interesting here:
 | CRI-O | Local privileged socket | CRI endpoint is intended for node-local trusted components | mounting `crio.sock`, exposing the CRI endpoint to untrusted workloads |
 | Kubernetes kubelet | Node-local management API | Kubelet should not be broadly reachable from Pods; access may expose pod state, credentials, and execution features depending on authn/authz | mounting kubelet sockets or certs, weak kubelet auth, host networking plus reachable kubelet endpoint |
 
+
+
 ## References
 
 - [1] [containerd socket exploitation part 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
 - [2] [Kubernetes API Server Bypass Risks](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
-
 {{#include ../../../banners/hacktricks-training.md}}

@@ -103,6 +103,7 @@ jobs:
           mkdir -p /tmp/immutable-images
           cp \
             src/images/hacktricks-summer-discount-2026-v1.webp \
+            src/images/hacktricks-black-friday-2026-v1.webp \
             src/images/arte-badge-v1.webp \
             src/images/grte-badge-v1.webp \
             src/images/azrte-badge-v1.webp \
@@ -113,6 +114,7 @@ jobs:
             src/images/arte-sponsor-v1.webp \
             /tmp/immutable-images/
           cp theme/discount.js /tmp/discount.js
+          cp theme/discount.css /tmp/discount.css
           cp theme/index.hbs /tmp/index.hbs
           cp scripts/seo_postprocess.py /tmp/seo_postprocess.py
 
@@ -230,6 +232,10 @@ jobs:
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
           cp /tmp/immutable-images/* ./book/images/
           cp /tmp/discount.js ./book/discount.js
+          mkdir -p ./book/theme
+          cp /tmp/discount.js ./book/theme/discount.js
+          cp /tmp/discount.css ./book/discount.css
+          cp /tmp/discount.css ./book/theme/discount.css
           cp /tmp/ht_searcher.js ./book/theme/ht_searcher.js
       
       - name: Push search index to hacktricks-searchindex repo
