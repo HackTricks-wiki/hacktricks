@@ -2,25 +2,24 @@
 
 ## Principles
 
-- One substantive home per mechanism; service/platform/tool entry points link to it and keep distinct prerequisites.
-- Use headings for one task/mechanism; split by transport, prerequisites or task, not size.
+- One home per mechanism; service, platform and tool entry points link there and retain distinct prerequisites.
+- Use headings for one task/mechanism; split by task or prerequisites, not size.
 - Main owns general techniques; Cloud owns provider/IAM pivots; use public URLs.
-- Removed chapters need whole-page `book.toml` redirects; preserve content and current links, not historical fragments.
-- Recheck paths and PR overlap.
-- Keep implementation PoCs beside their mechanism heading when they share the same prerequisites; code size alone does not justify a separate page.
+- Removed chapters need whole-page `book.toml` redirects; preserve content and current links, not fragments.
+- Keep PoCs with their mechanism when prerequisites match; code size alone does not justify a page.
 
 ## Canonical locations and boundaries
 
-- Trusted-host Rlogin (513/TCP) and Rsh (514/TCP) → `src/network-services-pentesting/pentesting-rlogin.md`; Rexec (512/TCP) stays separate because it uses passwords and a distinct wire protocol.
-- SCM/SCMR execution (PsExec, WinExec, SMBExec, SCMExec, SharpMove) → `src/windows-hardening/lateral-movement/psexec-and-winexec.md`; scheduler, DCOM, WMI, WinRM and RDP are separate interfaces. Cloud pivots stay in Cloud.
+- Rlogin/Rsh trusted-host protocols → `src/network-services-pentesting/pentesting-rlogin.md`; password-based Rexec stays separate.
+- SCM/SCMR execution (PsExec, WinExec, SMBExec, SCMExec, SharpMove) → `src/windows-hardening/lateral-movement/psexec-and-winexec.md`; scheduler, DCOM, WMI, WinRM and RDP stay separate.
 - POSIX CPU timer TOCTOU/IRQ/task-work, ptrace PoCs and Chronomaly → `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`; Linux Hardening links there. Kernel exploitation belongs in Binary Exploitation; host assessment in Linux Hardening.
-- Board, side-channel, fault and signal work → `src/hardware-physical-access/hardware-hacking/`; physical access → `physical-attacks.md`; firmware → `firmware-analysis/`; radio/iButton → `radio-hacking/`.
+- Board, side-channel, fault and signal work → `src/hardware-physical-access/hardware-hacking/`; physical → `physical-attacks.md`; firmware → `firmware-analysis/`; radio/iButton → `radio-hacking/`.
 - Model execution, fine-tuning, serving and hosted tools → `src/AI/AI-Model-Tools-and-Platforms.md`, separate from attacks and architecture. Burp Intruder, extensions and Session Switcher → `src/pentesting-web/burp-suite.md`, separate from checklist and IDOR.
 - OT/ICS process-safety and planning are at `src/industrial-control-systems/README.md`; Modbus protocol models and testing are at `src/network-services-pentesting/pentesting-modbus.md`. OPC UA and BACnet remain protocol-specific Network Services chapters.
 - Android acquisition, locked-device options, physical/ADB imaging and LiME → `src/generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md`. Mobile owns app testing; malware post-exploitation is separate.
 - Firmware acquisition, package decryption, updates and early boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay under firmware, not Stack Overflow.
 - TODO relocations: Rust → `src/generic-methodologies-and-resources/rust-basics.md`; investment terms → `src/blockchain/blockchain-and-crypto-currencies/investment-terms.md`; cookies → `src/welcome/cookies-policy.md`; recon/reputation/breach APIs → `src/generic-methodologies-and-resources/external-recon-methodology/reconnaissance-and-threat-intelligence-apis.md`.
-- `src/pentesting-web/referer-header-and-referrer-policy.md` owns Referer leakage, Referrer-Policy and injected meta behavior; OAuth links there. `sensitive-information-exfiltration.md` maps private-page routes across CORS/XSS/dangling markup/clickjacking.
+- Referer leakage, Referrer-Policy and injected meta → `src/pentesting-web/referer-header-and-referrer-policy.md`; OAuth links there. `sensitive-information-exfiltration.md` maps CORS/XSS/dangling markup/clickjacking routes.
 - UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
 - Blockchain chapters → top-level Blockchain & Smart Contract Security (`blockchain-and-crypto-currencies/README.md` entry). Bitcoin P2P stays in Network Services, DApp tests in Web, cryptocurrency privacy in Privacy.
@@ -47,17 +46,20 @@
 - Recursive CSS `@import` exfiltration PoC → `src/pentesting-web/xs-search/css-injection/README.md#recursive-import-css-exfiltration-poc`; attribute-selector mechanism and complete commented server/victim code belong together; the former code-only URL redirects. LESS compilation remains separate (server-side prerequisite).
 - Format-string arbitrary-write `FmtStr` GOT-overwrite template (local/TCP/SSH, offset discovery, padding, `.fini_array` option) → `src/binary-exploitation/format-strings/README.md#pwntools-template`; the separate arbitrary-read examples stay in their own chapter because they demonstrate a different exploitation objective. Old URL redirects.
 
+- Historical Adobe Reader PDF upload external entities/same-origin bypass → `src/pentesting-web/file-upload/README.md#pdf-upload-adobe-reader-xxe-and-same-origin-policy-bypass`; Web XXE links directly. Keep its reader/browser version caveat outside generic XML parser PoCs.
+
 ## Researcher entry points
 
-- Board debug/serial/glitching → Hardware; RFID/NFC → Radio. OT safety → ICS; OT protocols → Network Services. Android images → Forensics; app tests/eSIM → Mobile; guest surfaces → VM Escape.
+- Board debug/serial/glitching → Hardware; RFID/NFC → Radio. OT safety → ICS; OT protocols → Network Services. Android images → Forensics; app/eSIM → Mobile; guest surfaces → VM Escape.
 - SOAP/REST/GraphQL → Web APIs; 401/403 → Web authorization; LFI upload race → Web File Inclusion.
 - Browser `nosniff`, UTF-16 script, ICO width → XS-Leaks; executable cross-origin script inclusion → XSSI; in-origin script injection → XSS.
 - `R_PROFILE`, `RUBYOPT`, `ERL_AFLAGS` → macOS interpreter startup chapter.
-- Same-site HTML-injection leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; unlike cross-origin XS-Leaks, injection and the probed page share an origin. Former standalone page redirects.
+- Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; unlike cross-origin XS-Leaks, injection and the probed page share an origin. Former standalone page redirects.
 
 ## Deferred
 
-- `network-services-pentesting/pentesting-web/` is mixed; audit links/prerequisites before moves, not ownership alone.
-- `todo/more-tools.md`: audit cross-domain destinations before splitting; coordinate SaaS tools with Cloud.
+- Audit mixed `network-services-pentesting/pentesting-web/` before moves.
+- Audit cross-domain `todo/more-tools.md` before splitting; coordinate SaaS with Cloud.
 - Blockchain and Privacy cryptocurrency need a union audit.
 - Audit long escalation/iOS chapters by task, not length.
+- Revalidate paths and pending PR overlap before editing.
