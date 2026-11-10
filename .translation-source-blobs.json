@@ -1149,7 +1149,7 @@
     "src/windows-hardening/windows-local-privilege-escalation/kernel-race-condition-object-manager-slowdown.md": "1774bb0fa99cd8a2b5d04e4f08a2ccc95c7337f3",
     "src/windows-hardening/windows-local-privilege-escalation/leaked-handle-exploitation.md": "c82eeb0fdafbd9c38cf437b7355224126ba23cd9",
     "src/windows-hardening/windows-local-privilege-escalation/local-ntlm-reflection-via-smb-arbitrary-port.md": "3fefdaa1057b307ada4008b7d26718218feb0f24",
-    "src/windows-hardening/windows-local-privilege-escalation/msi-wrapper.md": "90be41b7fe3b7211c6d7c735242d723d77a186e6",
+    "src/windows-hardening/windows-local-privilege-escalation/msi-wrapper.md": "58eec4083d90da5bfd20c3015ae68149fdf6c710",
     "src/windows-hardening/windows-local-privilege-escalation/named-pipe-client-impersonation.md": "01a20efcfcc48c258e6164c6de247403872baa21",
     "src/windows-hardening/windows-local-privilege-escalation/notepad-plus-plus-plugin-autoload-persistence.md": "2aa045610adfb76bf618e89addb59db6bf5b93e3",
     "src/windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md": "e8f2a3088a5857f60e0cb408f74bebfd8e57eec7",
