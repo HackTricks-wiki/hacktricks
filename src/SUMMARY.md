@@ -559,7 +559,7 @@
 - [7/tcp/udp - Pentesting Echo](network-services-pentesting/7-tcp-udp-pentesting-echo.md)
 - [21 - Pentesting FTP](network-services-pentesting/pentesting-ftp/README.md)
   - [FTP Bounce attack - Scan](network-services-pentesting/pentesting-ftp/ftp-bounce-attack.md)
-  - [FTP Bounce - Download 2ºFTP file](network-services-pentesting/pentesting-ftp/ftp-bounce-download-2oftp-file.md)
+  - [FTP Bounce - Cross-Protocol Relay and FTP File Retrieval](network-services-pentesting/pentesting-ftp/ftp-bounce-protocol-relay.md)
 - [22 - Pentesting SSH/SFTP](network-services-pentesting/pentesting-ssh.md)
 - [23 - Pentesting Telnet](network-services-pentesting/pentesting-telnet.md)
 - [25,465,587 - Pentesting SMTP/s](network-services-pentesting/pentesting-smtp/README.md)
