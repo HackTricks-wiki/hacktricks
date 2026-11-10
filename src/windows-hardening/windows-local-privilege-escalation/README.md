@@ -72,6 +72,8 @@ local-ntlm-reflection-via-smb-arbitrary-port.md
 
 ## System Info
 
+For local inventory from an existing PowerShell session, see [Windows Enumeration with .NET](../basic-powershell-for-pentesters/dotnet-enumeration.md). These examples complement the checks below without launching separate enumeration executables.
+
 ### Version info enumeration
 
 Check if the Windows version has any known vulnerability (check also the patches applied).
