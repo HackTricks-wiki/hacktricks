@@ -2,30 +2,34 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Mutational Grammar Fuzzing: Coverage teenoor semantiek
+## Mutasionele grammar-fuzzing: dekking vs. semantiek
 
-In **mutational grammar fuzzing** word invoere gemuteer terwyl hulle **grammatikaal geldig** bly. In coverage-guided-modus word slegs monsters wat **nuwe coverage** veroorsaak as corpus-sade gestoor. Vir **taikteikens** (parsers, interpreters, enjins) kan dit foute miskyk wat **semantiese/dataflow-kettings** vereis, waar die uitvoer van een konstruk die invoer van ’n ander word.<sup>[[1]](#references)</sup>
+In **mutasionele grammar-fuzzing** word invoere gemuteer terwyl hulle **grammar-valid** bly. In coverage-guided-modus word slegs monsters wat **nuwe dekking** aktiveer as corpus-seeds gestoor. Vir **taikteikens** (parsers, interpreters, engines) kan dit foute mis wat **semantiese/dataflow-kettings** vereis, waar die uitvoer van een konstruk die invoer van ’n ander word.<sup>[[1]](#references)</sup>
 
-**Mislukkingsmodus:** die fuzzer vind sade wat afsonderlik `document()` en `generate-id()` (of soortgelyke primitives) uitvoer, maar **nie die gekoppelde dataflow behou nie**. Daarom word die monster wat “nader aan die fout” is, weggegooi omdat dit nie coverage byvoeg nie. Met **3+ afhanklike stappe** word lukrake herkombinering duur, en coverage-terugvoer lei nie die soektog nie.<sup>[[1]](#references)</sup>
+**Faalmodus:** die fuzzer vind seeds wat afsonderlik `document()` en `generate-id()` (of soortgelyke primitiewe) toets, maar **nie die gekoppelde dataflow behou nie**. Gevolglik word die monster wat “nader aan die fout” is, weggegooi omdat dit nie dekking byvoeg nie. Met **3+ afhanklike stappe** word ewekansige herkombinasie duur, en coverage-terugvoer stuur nie die soektog nie.<sup>[[1]](#references)</sup>
 
-**Implikasie:** oorweeg vir grammatikas met baie afhanklikhede om **mutational en generative fases te kombineer**, of om generering na **function-chaining-patrone** te stuur (nie net na coverage nie).<sup>[[1]](#references)</sup>
+**Implikasie:** oorweeg vir grammars met baie afhanklikhede om **mutasionele en generatiewe fases te kombineer**, of om generering te laat voorkeur gee aan **funksiekettingspatrone** (nie net dekking nie).<sup>[[1]](#references)</sup>
 
 ## Slaggate met corpus-diversiteit
 
-Coverage-guided-mutasie is **gulsig**: ’n monster met nuwe coverage word onmiddellik gestoor, en behou dikwels groot onveranderde dele. Met verloop van tyd word corpora **byna-duplikate** met min strukturele diversiteit. Aggressiewe minimalisering kan nuttige konteks verwyder, dus is ’n praktiese kompromie **grammatika-bewuste minimalisering** wat **ná ’n minimum token-drempel stop** (verminder geraas terwyl genoeg omliggende struktuur behoue bly om mutasievriendelik te wees).<sup>[[1]](#references)</sup>
+Coverage-guided-mutasie is **gierig**: ’n monster met nuwe dekking word onmiddellik gestoor, en behou dikwels groot onveranderde dele. Met verloop van tyd word corpora **byna-duplikate** met min strukturele diversiteit. Aggressiewe minimalisering kan nuttige konteks verwyder, dus is **grammar-bewuste minimalisering** ’n praktiese kompromie: **stop sodra ’n minimum token-drempel bereik is** (verminder geraas terwyl genoeg omliggende struktuur behoue bly om mutasies te ondersteun).<sup>[[1]](#references)</sup>
 
-’n Praktiese corpus-reël vir mutational fuzzing is: **verkies ’n klein stel struktureel verskillende sade wat coverage maksimeer** bo ’n groot hoop byna-duplikate. In die praktyk beteken dit gewoonlik die volgende.<sup>[[1]](#references)[[3]](#references)</sup>
+’n Praktiese corpus-reël vir mutasionele fuzzing is: **verkies ’n klein stel struktureel verskillende seeds wat dekking maksimeer** bo ’n groot hoop byna-duplikate. In die praktyk beteken dit gewoonlik die volgende.<sup>[[1]](#references)[[3]](#references)</sup>
 
-- Begin met **monsters uit die werklike wêreld** (openbare corpora, crawling, vasgelegde verkeer, lêerstelle uit die teiken-ekosisteem).
-- Distilleer dit met **coverage-gebaseerde corpus-minimalisering** eerder as om elke geldige monster te behou.
-- Hou sade **klein genoeg** sodat mutasies op betekenisvolle velde land, eerder as om die meeste siklusse aan irrelevante grepe te bestee.
-- Voer corpus-minimalisering weer uit ná groot harness-/instrumentasieveranderinge, want die “beste” corpus verander wanneer reachability verander.
+- Begin met **werklike monsters** (openbare corpora, crawling, vasgelegde verkeer, lêerstelle uit die teiken-ekosisteem).
+- Distilleer hulle met **dekking-gebaseerde corpus-minimalisering** eerder as om elke geldige monster te behou.
+- Hou seeds **klein genoeg** sodat mutasies betekenisvolle velde tref, eerder as om die meeste siklusse aan irrelevante grepe te bestee.
+- Voer corpus-minimalisering weer uit ná groot veranderinge aan die harness of instrumentering, want die “beste” corpus verander wanneer bereikbaarheid verander.
 
-## Vergelykingsbewuste mutasie vir magiese waardes
+## Groot gegenereerde programme en timeout-vooroordeel
 
-’n Algemene rede waarom fuzzers ’n plato bereik, is nie sintaksis nie, maar **harde vergelykings**: magiese grepe, lengtekontroles, enum-stringe, kontrolesomme of parser-dispatch-waardes wat deur `memcmp`, switch-tabelle of opeenvolgende vergelykings beskerm word. Suiwer lukrake mutasie mors siklusse deur hierdie waardes greep vir greep te probeer raai.
+Vir compiler- en interpreter-fuzzing moet ’n invoer moontlik ’n **drempel vir die grootte van gegenereerde kode** oorskry, eerder as ’n nuwe parser-vertakking te bereik. In die V8-[voorbeeld met exception-handler-offsets](../binary-exploitation/chrome-exploiting.md#exception-handler-offsets-narrower-than-maximum-bytecode-size) moes ’n geldige toetsgeval meer as 256 MiB bytecode bevat voordat die afgekapte handler-offset saak gemaak het. Herhaalde `yield*`-konstrukte kon daardie grens bereik, maar dit het sekondes geneem om die toetsgeval op ’n debug-build te compileer. Voorkeure vir klein invoere en kort execution-timeouts kan hierdie klas benadeel, selfs wanneer grammar-dekking hoog is. Oorweeg drempels vir grootte en timeout-beleid afsonderlik wanneer packed offsets of ander lengte-afhanklike metadata geoudit word; hierdie advies vir die veldtog is ’n afleiding uit die gerapporteerde faalmodus.<sup>[[29]](#references)</sup>
 
-Gebruik vir hierdie teikens **comparison tracing** (byvoorbeeld AFL++ `CMPLOG` / Redqueen-styl werkvloeie), sodat die fuzzer operande van mislukte vergelykings kan waarneem en mutasies kan stuur na waardes wat daaraan voldoen.<sup>[[3]](#references)</sup>
+## Vergelykingsbewuste mutasie vir magic values
+
+’n Algemene rede waarom fuzzers vashaak, is nie sintaksis nie, maar **harde vergelykings**: magic bytes, lengte-kontroles, enum-strings, checksums of parser-dispatch-waardes wat deur `memcmp`, switch-tabelle of opeenvolgende vergelykings beskerm word. Suiwer ewekansige mutasie mors siklusse deur hierdie waardes byte vir byte te probeer raai.
+
+Gebruik vir hierdie teikens **vergelyking-tracing** (byvoorbeeld AFL++ `CMPLOG` / Redqueen-styl werkvloeie), sodat die fuzzer operande van mislukte vergelykings kan waarneem en mutasies kan stuur na waardes wat daaraan voldoen.<sup>[[3]](#references)</sup>
 
 ```bash
 ./configure --cc=afl-clang-fast
@@ -42,55 +46,55 @@ afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 
 **Praktiese notas:**
 
-- Dit is veral nuttig wanneer die teiken diep logika agter **lêerhandtekeninge**, **protokolwerkwoorde**, **tipe-etikette** of **weergaweafhanklike kenmerkbisse** wegsteek.
-- Gebruik dit saam met **woordeboeke** wat uit werklike voorbeelde, protokolspesifikasies of ontfoutingslogboeke verkry is. ’n Klein woordeboek met grammatikatokens, blokname, werkwoorde en skeidingstekens is dikwels waardevoller as ’n massiewe generiese woordelys.
-- As die teiken baie opeenvolgende kontroles uitvoer, los eers die vroegste “magic”-vergelykings op en verklein dan die resulterende korpus weer, sodat latere fases vanaf reeds geldige voorvoegsels begin.
+- Dit is veral nuttig wanneer die teiken diep logika agter **file signatures**, **protocol verbs**, **type tags** of **version-dependent feature bits** versteek.
+- Kombineer dit met **dictionaries** wat uit werklike voorbeelde, protocol-spesifikasies of debug logs onttrek is. ’n Klein dictionary met grammar-tokens, chunk-name, verbs en skeidingstekens is dikwels meer waardevol as ’n massiewe generiese woordelys.
+- As die teiken baie opeenvolgende kontroles uitvoer, los eers die vroegste “magic”-vergelykings op en minimaliseer dan die resulterende corpus weer, sodat latere fases met reeds geldige voorvoegsels begin.
 
 ## Fuzzing van lêer-API’s wat ’n lêernaamtaal versteek
 
-’n Parameter met die naam `filename`, `path` of `URL` kan ’n toegangspunt tot ’n interpreter wees, eerder as ’n letterlike lêeropsoek. CFITSIO Extended Filename Syntax (EFS) evalueer byvoorbeeld selektors tussen vierkantige hakies, ry-/pikseleks­presies, berekende kolomme, histogramme en transformasies voordat dit die oopgemaakte objek teruggee; sommige vorme skep ook tydelike kopieë. Klassifiseer tydens kartering van die aanvalsvlak elke open-/import-API as **literal-path** of **interpreted-path**, en fuzz dan die produksie-ingangspunt wat toepassings werklik aanroep.<sup>[[20]](#references)[[22]](#references)</sup>
+’n Parameter met die naam `filename`, `path` of `URL` kan ’n interpreter-ingangspunt wees eerder as ’n letterlike lêeropsoek. CFITSIO Extended Filename Syntax (EFS) evalueer byvoorbeeld selectors tussen hakies, ry-/pixel-uitdrukkings, berekende kolomme, histogramme en transformasies voordat die oopgemaakte objek teruggegee word; sommige vorme skep ook tydelike kopieë. Klassifiseer elke open-/import-API tydens aanvalsvlak-kartering as **literal-path** of **interpreted-path**, en fuzz die produksie-ingangspunt wat toepassings werklik aanroep.<sup>[[20]](#references)[[22]](#references)</sup>
 
-Vir die gevolglike SSRF-, lêerkopieer- en protocol-handler-primitiewe—en veiliger literal-path-API’s—sien [Mini-tale vir lêername as SSRF-/lêerprimitiewe](../pentesting-web/ssrf-server-side-request-forgery/index.html#filename-mini-languages-as-ssrffile-primitives-cfitsio-efs).<sup>[[20]](#references)</sup>
+Vir die gevolglike SSRF-, lêerkopie- en protocol-handler-primitives—en veiliger literal-path-API’s—sien [Filename mini-languages as SSRF/file primitives](../pentesting-web/ssrf-server-side-request-forgery/index.html#filename-mini-languages-as-ssrffile-primitives-cfitsio-efs).<sup>[[20]](#references)</sup>
 
-### Hou die ondersteunende objek apart van die program wat gefuzz word
+### Hou die onderliggende objek apart van die program wat gefuzz word
 
-Wanneer die grammatika in ’n lêernaam-agtervoegsel voorkom, mis die parser as jy net die grepe van die verwysde lêer wysig. ’n Klein harness kan eerder een toetsgeval as ’n string lees en dit aan die interpreted open-API deurgee; die CFITSIO-veldtog het die meeste EFS-parsers en -evalueerders bereik deur `fits_open_file()` in leesalleenmodus aan te roep. Hou geldige ondersteunende lêers afsonderlik beskikbaar, sodat wysigings op die selektor-/uitdrukkings­taal kan fokus, eerder as om voortdurend die basispad te breek.<sup>[[22]](#references)</sup>
+Wanneer die grammar in ’n lêernaamagtervoegsel voorkom, mis die parser as jy net die bytes van die verwysde lêer muteer. ’n Klein harness kan eerder een testcase as ’n string lees en dit aan die interpreted open-API deurgee; die CFITSIO-veldtog het die meeste EFS-parsers en -evaluators bereik deur `fits_open_file()` in leesalleenmodus aan te roep. Hou geldige onderliggende lêers apart beskikbaar, sodat mutasies op die selector-/expression-taal kan fokus eerder as om voortdurend die basispad te beskadig.<sup>[[22]](#references)</sup>
 
-Gebruik saadwaardes wat elk ’n ander grammatika-familie bereik, en lei dan ’n kompakte woordeboek af uit sowel die spesifikasie as die lexer-/parserbron. As dekking stagneer terwyl invoere herhaaldelik in dieselfde sintaksisfoutpad misluk, behou geldige voorvoegsels en voeg skeidingstekens, operatore, sleutelwoorde, funksiename en verteenwoordigende veldname by, eerder as om net die tyd vir ewekansige wysigings te verleng.<sup>[[22]](#references)</sup>
+Gebruik seeds wat elk ’n ander grammar-familie bereik, en stel dan ’n kompakte dictionary saam uit sowel die spesifikasie as die lexer-/parser-bronkode. As coverage ’n plato bereik terwyl insette herhaaldelik in dieselfde syntax-error-pad misluk, behou geldige voorvoegsels en voeg skeidingstekens, operators, keywords, funksiename en verteenwoordigende veldname by, eerder as om net die tyd vir ewekansige mutasies te verleng.<sup>[[22]](#references)</sup>
 
-Voer die harness met die grammatikawoordeboek uit, byvoorbeeld:<sup>[[3]](#references)[[22]](#references)</sup>
+Laat die harness met die grammar-dictionary loop, byvoorbeeld:<sup>[[3]](#references)[[22]](#references)</sup>
 
 ```bash
 afl-fuzz -i filename-seeds -o out -x filename-language.dict -- ./filename-harness @@
 ```
 
-### Beperk newe-effekte van ’n "read-only" harness
+### Beperk newe-effekte van die "read-only"-harnas
 
-’n Read-only-biblioteekvlag waarborg nie ’n toetsgeval sonder newe-effekte nie: die lêernaamtaal kan die invoer herskryf, uitvoerlêers skep of tydelike objekte materialiseer. Die CFITSIO-veldtog het aanvanklik saadlêers vernietig en onverwagte lêers oor die lêerstelsel versprei, daarom was opruiming en isolasie nodig.<sup>[[22]](#references)</sup>
+’n Read-only-biblioteekvlag waarborg nie ’n toetssaak sonder newe-effekte nie: die lêernaamtaal kan die invoer herskryf, uitvoerlêers skep of tydelike voorwerpe materialiseer. Die CFITSIO-veldtog het aanvanklik seed-lêers vernietig en onverwagte lêers deur die lêerstelsel agtergelaat, daarom was skoonmaak en isolasie nodig.<sup>[[22]](#references)</sup>
 
-- Gee elke worker ’n weggooibare werkgids en privaat tydelike gids.
-- Stel kopieë van kanonieke ondersteuningslêers beskikbaar; moenie die teiken ooit die enigste kopie in die corpus laat verander nie.
-- Deaktiveer netwerktoegang tensy afgeleë backends die beoogde teiken is, en beperk skryfbare paaie met ’n container, mount namespace of soortgelyke sandbox.
-- Stel die gids ná elke uitvoering of worker-bondel terug en beskou onverwagte lêerstelselveranderings as bykomende bevindings.
+- Gee elke worker ’n weggooibare werkgids en ’n private tydelike gids.
+- Stel kopieë van kanonieke rugsteunlêers beskikbaar; moet nooit toelaat dat die teiken die enigste kopie van die corpus verander nie.
+- Deaktiveer netwerktoegang, tensy afgeleë backends die beoogde teiken is, en beperk skryfbare paaie met ’n container, mount namespace of ekwivalente sandbox.
+- Stel die gids terug ná elke uitvoering of worker-bondel, en behandel onverwagte lêerstelselveranderinge as bykomende bevindings.
 
 ### Crash-na-patch-na-fuzz-lus
 
-Groepeer crashes voordat jy herstelwerk doen, sodat duisende artefakte nie duisende patch-take word nie. In die CFITSIO-assessering het AFLTriage die aanvanklike stel crashes tot ’n paar hoofoorsake verminder; die gevolglike advies toon duidelike foute, waaronder verkeerde kontroles van bestemmingsgroottes, verouderde pointers ná `realloc()`, rekenkundige foute en onveilige opruimpaaie in die parser.<sup>[[21]](#references)[[22]](#references)</sup>
+Groepeer crashes voordat jy herstelwerk doen, sodat duisende artefakte nie duisende patch-take word nie. In die CFITSIO-assessering het AFLTriage die aanvanklike crash-stel tot ’n paar hoofoorsake verminder; die daaropvolgende advies beskryf verskillende foute, insluitend verkeerde kontroles van bestemmingsgroottes, verouderde wysers ná `realloc()`, rekenkundige foute en onveilige parser-opruimingspaaie.<sup>[[21]](#references)[[22]](#references)</sup>
 
-1. Minimeer ’n verteenwoordigende invoer vir elke groep en reproduseer dit met AddressSanitizer.
-2. Teken die presiese foutiewe toegang, bronligging, geskiedenis van toewysing/vrystelling en parsertoestand aan wat die invariant ongeldig gemaak het.
-3. Pas een noukeurig afgebakende kandidaat-patch toe en bou weer met dieselfde coverage- en sanitizer-instrumentasie.
-4. Speel die oorspronklike reproduseerder **en elke invoer in sy groep** weer af; aktiveer ook leak-detection, want ’n geheueveiligheidsregstelling kan eienaarskap op ’n foutpad verbreek.
-5. Voer funksionele toetse met werklike lêers uit, en hervat dan vanaf die opgehoopte tou (of voer daardie tou weer in as die engine ’n vars uitvoergids ná veranderinge aan die binary vereis).
-6. Herhaal: deur die eerste oppervlakkige crash te verwyder, kan bestaande sade dikwels tot ’n dieper parsertoestand vorder.
+1. Minimaliseer ’n verteenwoordigende invoer vir elke groep en reproduseer dit met AddressSanitizer.
+2. Teken die presiese foutiewe toegang, bronligging, geskiedenis van toekenning/vrystelling en parser-toestand aan wat die invariant ongeldig gemaak het.
+3. Pas een noukeurig afgebakende kandidaat-patch toe en bou weer met dieselfde dekking- en sanitizer-instrumentasie.
+4. Speel die oorspronklike reproduseerder **en elke invoer in sy groep** weer af; aktiveer ook lekopsporing, want ’n geheueveiligheidsherstel kan eienaarskap op ’n foutpad breek.
+5. Voer funksionele toetse met werklike lêers uit, en hervat dan vanaf die opgehoopte tou (of voer daardie tou weer in as die engine ’n nuwe uitvoergids ná ’n verandering aan die binary vereis).
+6. Herhaal: deur die eerste oppervlakkige crash te verwyder, kan bestaande seeds dikwels verder vorder tot ’n dieper parser-toestand.
 
-’n LLM kan stap 2 bespoedig en ’n konsep vir stap 3 opstel wanneer dit die crashende invoer, sanitizer-verslag, harness en relevante bronkode ontvang, maar sy patch bly onvertroubaar. Die sanitizer-herhaling en regressiepoorte—nie die model se verduideliking nie—bepaal of die herstel aanvaar word.<sup>[[22]](#references)</sup>
+’n LLM kan stap 2 bespoedig en ’n konsep vir stap 3 opstel wanneer dit die crashende invoer, sanitizer-verslag, harnas en relevante bronkode ontvang, maar sy patch bly onbetroubaar. Die sanitizer-herhaling en regressiehekke—nie die model se verduideliking nie—bepaal of die herstel aanvaar word.<sup>[[22]](#references)</sup>
 
-## Ryker terugvoer wanneer Edge Coverage verskillende paaie saamsmelt
+## Ryker terugvoer wanneer edge coverage verskillende paaie saamvoeg
 
-Normale edge coverage kan nie twee uitvoerings onderskei wat deur dieselfde helper via verskillende callers beweeg of verskillende kombinasies van vertakkings binne ’n funksie neem nie. Dit maak saak in gedeelde decoders, protokolversenders en interpreter-helpers waar die **roete** na ’n edge die aktiewe toestand bepaal. Om elke oproepkonteks naïef na te spoor is ook gevaarlik: die coverage-map en tou kan geweldig uitbrei. Navorsing oor konteksbewuste fuzzing beveel dus aan om slegs belowende kontekste te verfyn, eerder as om die hele oproepgrafiek as konteksbewus te behandel.<sup>[[14]](#references)</sup>
+Gewone edge coverage kan nie twee uitvoerings onderskei wat dieselfde helper via verskillende oproepers deurloop, of verskillende kombinasies van vertakkings binne ’n funksie volg nie. Dit maak saak in gedeelde decoders, protokolverspreiders en interpreter-helpers waar die **roete** na ’n edge die aktiewe toestand bepaal. Om elke oproepkonteks naïef na te spoor is ook gevaarlik: die dekkingskaart en tou kan ontplof. Navorsing oor konteksensitiewe fuzzing beveel daarom aan dat slegs belowende kontekste verfyn word, eerder as om die hele oproepgrafiek as konteksensitief te behandel.<sup>[[14]](#references)</sup>
 
-Onlangse AFL++-weergawes bied **Ball-Larus-paddekking per funksie** bykomend tot normale edge coverage. Dit ken ’n kenmerk aan elke asikliese pad deur ’n funksie toe; terugkante van lusse word verwyder, dus onderskei hierdie terugvoer kombinasies van vertakkings, maar **nie die aantal lusiterasies nie**. Begin met die ontspanne vlak `1`, en beperk strenger modusse dan tot verdagte parser-/toestandmasjienkode, omdat die aantal paaie eksponensieel kan groei.<sup>[[13]](#references)</sup>
+Onlangse AFL++-weergawes bied **Ball-Larus-paddekking per funksie** bykomend tot gewone edge coverage. Dit ken ’n kenmerk toe aan elke asikliese pad deur ’n funksie; terugkante van lusse word verwyder, dus onderskei hierdie terugvoer kombinasies van vertakkings, maar **nie die aantal lusiterasies nie**. Begin met die ontspanne vlak `1`, en pas dan strenger modusse slegs toe op verdagte parser-/toestandsmasjienkode, want die aantal paaie kan eksponensieel groei.<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -102,7 +106,7 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-Vir ’n helper wat vanaf baie sekuriteitsrelevante plekke geroep word, kan LTO-modus elke funksiepad met sy onmiddellike call site kombineer:<sup>[[13]](#references)</sup>
+Vir 'n hulpfunksie wat vanaf baie sekuriteitsrelevante plekke aangeroep word, kan LTO-modus elke funksiepad met sy onmiddellike aanroepingsplek kombineer:<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -115,50 +119,50 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-**Veldtogriglyne:** pas ryker terugvoer konserwatief toe en monitor die koste daarvan vir die coverage-map/queue.<sup>[[13]](#references)[[14]](#references)</sup>
+**Veldtogleiding:** pas ryker terugvoer versigtig toe en monitor die koste daarvan vir die coverage-map/queue.<sup>[[13]](#references)[[14]](#references)</sup>
 
-- Laat ’n gewone edge-coverage-instansie parallel loop; ryker terugvoer is slegs nuttig as die ekstra queue/map-koste nie die aantal uitvoerings per sekonde drasties verminder nie.
-- Gebruik `AFL_LLVM_ALLOWLIST` om path/caller-instrumentering te beperk wanneer groot biblioteke met baie templates of generiese nutskode die map oorheers.
-- Funksies met buitensporig baie asikliese paths kan deur AFL++ oorgeslaan word; waarskuwings tydens samestelling is ’n aanduiding dat die teiken allowlisting of ’n minder streng vlak nodig het.
-- Caller + path coverage ondersteun slegs een caller-diepte. Moenie dit met dieper context-stacks kombineer nie.
-- Path-ID’s kan tussen groot LLVM-weergawes verander. Hou die toolchain konstant gedurende ’n veldtog en moenie PATH-gebaseerde korpora sinkroniseer asof hul feature-ID’s stabiel oor builds heen is nie.
-- Hierdie terugvoer vul `CMPLOG` aan: comparison-tracing bepaal **watter waarde ’n guard slaag**, terwyl path/caller-terugvoer behou **watter roete en vertakkingskombinasie dit bereik het**.
+- Laat ’n gewone edge-coverage-instansie parallel loop; ryker terugvoer is net nuttig as die ekstra queue/map-koste nie die aantal uitvoerings per sekonde verlaag nie.
+- Gebruik `AFL_LLVM_ALLOWLIST` om path/caller-instrumentasie te beperk wanneer groot biblioteke met baie templates of generiese nutskode die map oorheers.
+- Funksies met buitensporig baie asikliese paaie kan deur AFL++ oorgeslaan word; waarskuwings tydens samestelling dui daarop dat die teiken allowlisting of ’n minder streng vlak nodig het.
+- Caller + path coverage ondersteun net een caller-diepte. Moenie dit met dieper konteksstapels kombineer nie.
+- Path-ID’s kan tussen groot LLVM-weergawes verander. Hou die toolchain vir ’n veldtog vas en sinkroniseer nie PATH-gebaseerde corpora asof hul feature-ID’s stabiel tussen builds is nie.
+- Hierdie terugvoer vul `CMPLOG` aan: vergelykingnasporing bepaal **watter waarde ’n guard slaag**, terwyl path/caller-terugvoer bewaar **watter roete en vertakkingskombinasie dit bereik het**.
 
-## Stateful Fuzzing: Sequences Is Seeds
+## Toestandafhanklike Fuzzing: Sequences Is Seeds
 
-Vir **protokolle**, **gewaarmerkte werkvloeie** en **meerfase-parsers** is die interessante eenheid dikwels nie ’n enkele blob nie, maar ’n **message sequence**. Om die hele transkripsie in een lêer saam te voeg en dit blindelings te muteer, is gewoonlik ondoeltreffend, omdat die fuzzer elke stap ewe veel muteer, selfs wanneer slegs die latere boodskap die kwesbare toestand bereik.<sup>[[4]](#references)</sup>
+Vir **protokolle**, **gewaarmerkte werkvloeie** en **parsers met verskeie fases** is die interessante eenheid dikwels nie ’n enkele blob nie, maar ’n **boodskapsequence**. Om die hele transkripsie in een lêer saam te voeg en dit blindelings te muteer, is gewoonlik ondoeltreffend, want die fuzzer muteer elke stap ewe veel, selfs wanneer net die latere boodskap die kwesbare toestand bereik.<sup>[[4]](#references)</sup>
 
-’n Doeltreffender patroon is om die **sequence self as die seed** te behandel en **waarneembare toestand** (antwoordkodes, protokoltoestande, parserfases, teruggestuurde objekttipes) as bykomende terugvoer te gebruik.<sup>[[4]](#references)</sup>
+’n Meer doeltreffende patroon is om die **sequence self as die seed** te behandel en **waarneembare toestand** (antwoordkodes, protokoltoestande, parserfases, teruggegewe objeksoorte) as bykomende terugvoer te gebruik.<sup>[[4]](#references)</sup>
 
-- Hou **geldige voorvoegselboodskappe** stabiel en fokus mutasies op die boodskap wat die **toestandsoorgang aandryf**.
-- Kas identifiseerders en bediener-gegenereerde waardes uit vorige antwoorde wanneer die volgende stap daarvan afhanklik is.
-- Verkies mutasie/splicing per boodskap bo mutasie van die hele geserialiseerde transkripsie as ’n ondeursigtige blob.
-- As die protokol betekenisvolle antwoordkodes blootstel, gebruik hulle as ’n **goedkoop toestandsorakel** om voorkeur te gee aan sequences wat verder vorder.
+- Hou **geldige voorvoegselboodskappe** stabiel en fokus mutasies op die boodskap wat die **toestandsoorgang dryf**.
+- Kas identifiseerders en bedienergegenereerde waardes uit vorige antwoorde wanneer die volgende stap daarvan afhanklik is.
+- Verkies mutasie/splitsing per boodskap bo die mutasie van die hele geserialiseerde transkripsie as ’n ondeursigtige blob.
+- As die protokol betekenisvolle antwoordkodes blootstel, gebruik dit as ’n **goedkoop toestandsorakel** om voorkeur te gee aan sequences wat dieper vorder.
 
-Dit is dieselfde rede waarom geverifieerde foute, versteekte oorgange of parserfoute wat “eers ná die handdruk” voorkom, dikwels deur vanilla-lêerstyl-fuzzing gemis word: die fuzzer moet **volgorde, toestand en afhanklikhede** behou, nie net struktuur nie.<sup>[[4]](#references)</sup>
+Dit is dieselfde rede waarom geverifieerde foute, versteekte oorgange of parserfoute wat “eers ná die handdruk” voorkom, dikwels deur gewone lêerstyl-fuzzing gemis word: die fuzzer moet **volgorde, toestand en afhanklikhede** bewaar, nie net struktuur nie.<sup>[[4]](#references)</sup>
 
-### Android Binder: multi-client driver fuzzing
+### Android Binder: Fuzzing van ’n multi-client-bestuurder
 
-Hoë edge coverage kan steeds IPC-driver-foute mis omdat coverage nie **objekeienaarskap, verwysingtellings, hangende boodskappe, opruimvolgorde of thread-interleavings** beskryf nie. Die [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md)-bladsy behandel die bestuurder se objekmodel; hierdie voorbeeld fokus op die fuzzer-harnas. Android Binder is ’n nuttige model: dit is nie genoeg om beide die toewysings- en vrymaakpaaie te bereik as die fuzzer nie verskeie prosesse in die vereiste volgorde op dieselfde kernel-objek kan laat werk nie.<sup>[[15]](#references)</sup>
+Hoë edge coverage kan steeds IPC-bestuurderfoute mis, want coverage beskryf nie **objekeienaarskap, verwysingtellings, hangende boodskappe, opruimingsvolgorde of draadinterleavings** nie. Die bladsy oor [Android Binder IPC-internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) dek die bestuurder se objekmodel; hierdie voorbeeld fokus op die fuzzer-harnas. Android Binder is ’n nuttige model: om beide die toekennings- en vrymaakpaaie te bereik, is nie genoeg as die fuzzer nie verskeie prosesse in die vereiste volgorde op dieselfde kernel-objek kan laat werk nie.<sup>[[15]](#references)</sup>
 
-#### Model the protocol, not isolated `ioctl` buffers
+#### Modelleer die protokol, nie afsonderlike `ioctl`-buffers nie
 
-Stel ’n toetsgeval voor as ’n geordende grammatika van **kliëntidentiteit + bewerking + gestruktureerde argumente**. Die Binder LKL-fuzzer gebruik protobuf en `libprotobuf-mutator`, met een aanhoudende konteksbestuurderkliënt en twee gewone kliënte. ’n Semantiese harnas behou dan die verwantskappe wat blinde greepmutasie sou vernietig.<sup>[[15]](#references)</sup>
+Stel ’n toetsgeval voor as ’n geordende grammatika van **kliëntidentiteit + bewerking + gestruktureerde argumente**. Die Binder LKL-fuzzer gebruik protobuf en `libprotobuf-mutator`, met een aanhoudende konteksbestuurder-kliënt en twee gewone kliënte. ’n Semantiese harnas behou dan die verwantskappe wat blinde bytemutasie sou vernietig.<sup>[[15]](#references)</sup>
 
-- Kas waardes wat deur vorige bewerkings teruggestuur is. Byvoorbeeld, `BC_FREE_BUFFER` moet ’n transaksiebufferwyser hergebruik wat deur ’n vorige `ioctl` teruggestuur is.
-- Genereer geldige verstekantwoorde sodat sinchroniese transaksies kan voltooi en latere bewerkings bereikbaar bly.
-- Verwerp onmoontlike oorgange soos selftransaksies of verskeie hangende transaksies na dieselfde teiken.
-- Hou enkelinstansie-opstarttoestand buite die terugstelling per inset. Binder laat slegs een `BINDER_SET_CONTEXT_MGR`-registrasie per selflaai toe, dus sou die herhaaldelike vernietiging en herskepping van daardie kliënt latere insette ongeldig maak.
+- Kas waardes wat deur vroeëre bewerkings teruggegee word. `BC_FREE_BUFFER` moet byvoorbeeld ’n transaksiebufferwyser hergebruik wat deur ’n vorige `ioctl` teruggegee is.
+- Genereer geldige verstekantwoorde sodat sinchrone transaksies kan voltooi en latere bewerkings bereikbaar bly.
+- Verwerp onmoontlike oorgange, soos selftransaksies of verskeie hangende transaksies na dieselfde teiken.
+- Hou enkelvoudige selflaaitoestand buite die terugstelling per invoer. Binder laat net een `BINDER_SET_CONTEXT_MGR`-registrasie per selflaai toe, dus sou dit latere invoere ongeldig maak om daardie kliënt herhaaldelik te vernietig en te herskep.
 
-’n Nuttige sjabloon vir ’n lewensduurwedloop is om een kliënt ’n objek te laat oordra, draad- of prosesopruiming te begin, en die ontvangende kliënt terselfdertyd die transaksiebuffer te laat vrystel. In die CVE-2020-0423-voorbeeld kon ’n `BINDER_TYPE_WEAK_BINDER`-oordrag, gevolg deur ’n wedloop tussen `BINDER_THREAD_EXIT` en `BC_FREE_BUFFER`, ’n ingebedde `binder_work` vrystel terwyl die uitgaande draad se opruimpad dit steeds gebruik het.<sup>[[15]](#references)</sup>
+’n Nuttige sjabloon vir ’n leeftydrenloop is om een kliënt ’n objek te laat oordra, draad- of prosesopruiming te begin, en terselfdertyd die ontvangende kliënt die transaksiebuffer te laat vrystel. In die CVE-2020-0423-voorbeeld kon ’n `BINDER_TYPE_WEAK_BINDER`-oordrag, gevolg deur `BINDER_THREAD_EXIT` wat met `BC_FREE_BUFFER` meeding, ’n ingebedde `binder_work` vrymaak terwyl die opruimingspad van die uittredende draad dit nog gebruik het.<sup>[[15]](#references)</sup>
 
-#### Reintroduce controlled interleavings in a userspace kernel
+#### Herstel beheerde interleavings in ’n userspace-kernel
 
-[Linux Kernel Library (LKL)](https://github.com/lkl/linux) skakel die werklike kernel-kode in ’n gebruikersruimte-harnas in en stel sy syscall-koppelvlak via `lkl_syscall` bloot. Dit maak dit maklik om protobuf-toestand, coverage en KASAN in een proses te koördineer. LKL laat normaalweg egter nie toe dat ’n ander kernel-draad ’n syscall onderbreek nie. Vir wedloopveldtogte, voeg `schedule()`-punte by rondom geselekteerde grendel-/ontgrendel- en lewensduurgrense, en laat die harnas dan lukraak die volgende kliënt by elke skeduleringspunt kies. Hou hierdie punte doelgerig, want elkeen vermenigvuldig die skeduleringssoekruimte. Die gerandomiseerde skeduleerder wat die navorsers beskryf, is **nie** deel van die stroomop-Binder-fuzzer nie.<sup>[[15]](#references)</sup>
+[Linux Kernel Library (LKL)](https://github.com/lkl/linux) koppel die werklike kernelkode aan ’n userspace-harnas en stel sy syscall-koppelvlak via `lkl_syscall` beskikbaar. Dit maak protobuf-toestand, coverage en KASAN maklik om in een proses te koördineer. LKL voer normaalweg ’n syscall uit sonder dat ’n ander kerneldraad dit onderbreek. Voeg vir renloopveldtogte `schedule()`-punte rondom geselekteerde sluit-/ontsluit- en leeftydgrense in, en laat die harnas dan by elke oorhandiging lukraak die volgende kliënt kies. Hou hierdie punte doelgerig, want elkeen vergroot die skeduleringssoekruimte. Die ewekansige skeduleerder wat deur die navorsers beskryf word, is **nie** deel van die stroomop Binder-fuzzer nie.<sup>[[15]](#references)</sup>
 
-#### Build and replay serialized regression seeds
+#### Bou en herspeel geserialiseerde regressie-seeds
 
-Die stroomop-harnas pen ’n versoenbare `libprotobuf-mutator`-weergawe vas, aktiveer LKL-fuzzing-instrumentering en KASAN met `LKL_FUZZING=1`, en aktiveer `CONFIG_MMU` vir Binder met `MMU=1`.<sup>[[16]](#references)</sup>
+Die stroomop-harnas pen ’n versoenbare `libprotobuf-mutator`-weergawe vas, aktiveer LKL-fuzzing-instrumentasie en KASAN met `LKL_FUZZING=1`, en aktiveer `CONFIG_MMU` vir Binder met `MMU=1`.<sup>[[16]](#references)</sup>
 
 ```bash
 PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
@@ -169,29 +173,29 @@ make -C tools/lkl LKL_FUZZING=1 MMU=1 \
   clean-conf fuzzers -j"$(nproc)"
 ```
 
-Nadat jy ’n doelbewus kwesbare weergawe uitgecheck het of die terugrolpleisters toegepas het wat stroomop gedokumenteer is, kan ’n geserialiseerde saad die hele toestandsoorgang tussen verskeie kliënte reproduseer sonder om dit in ’n ad hoc C-bewys-van-konsep te rekonstrueer:<sup>[[16]](#references)</sup>
+Nadat jy ’n doelbewus kwesbare weergawe uitgecheck het of die rollback patches toegepas het wat stroomop gedokumenteer is, kan ’n geserialiseerde seed die volledige multi-client-toestandsoorgang reproduseer sonder om dit in ’n ad hoc C proof of concept te rekonstrueer:<sup>[[16]](#references)</sup>
 
 ```bash
 tools/lkl/fuzzers/binder/binder-fuzzer \
   tools/lkl/fuzzers/binder/seeds/CVE-2023-20938
 ```
 
-Behandel die resulterende KASAN use-after-free as bevestiging dat die seed die kwesbare lifetime-pad bereik het. Dit demonstreer **nie** die latere primitives wat nodig is vir kernel code execution of privilege escalation nie.<sup>[[16]](#references)</sup>
+Behandel die KASAN use-after-free wat hieruit voortkom as bevestiging dat die seed die kwesbare lewensduurpad bereik het. Dit demonstreer **nie** die latere primitives wat nodig is vir kode-uitvoering in die kernel of privilege escalation nie.<sup>[[16]](#references)</sup>
 
-## Diversiteitstruuk op ’n enkele masjien (Jackalope-styl)
+## Diversiteitstruuk op een masjien (Jackalope-styl)
 
-’n Praktiese manier om **generatiewe nuutheid** met **hergebruik van dekking** te kombineer, is om **kortlewende workers** teen ’n persistente server te herbegin. Elke worker begin met ’n leë corpus, sinkroniseer ná `T` sekondes, loop nog `T` sekondes op die gekombineerde corpus, sinkroniseer weer en sluit dan af. Dit lewer **vars strukture met elke generasie**, terwyl opgehoopte dekking steeds benut word.<sup>[[1]](#references)[[2]](#references)</sup>
+’n Praktiese manier om **generatiewe nuwigheid** met **hergebruik van coverage** te kombineer, is om **kortstondige workers** teen ’n persistente bediener te herbegin. Elke worker begin met ’n leë corpus, sinkroniseer ná `T` sekondes, loop nog `T` sekondes met die gekombineerde corpus, sinkroniseer weer en sluit dan af. Dit lewer **vars strukture met elke generasie**, terwyl dit steeds opgehoopte coverage benut.<sup>[[1]](#references)[[2]](#references)</sup>
 
-**Server:**
+**Bediener:**
 
 ```bash
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
 
-**Opeenvolgende workers (voorbeeldlus):**
+**Opeenvolgende werkers (voorbeeldlus):**
 
 <details>
-<summary>Jackalope worker-herbeginlus</summary>
+<summary>Jackalope-werker-herbeginlus</summary>
 
 ```python
 import subprocess
@@ -224,40 +228,40 @@ while True:
 
 **Notas:**
 
-- `-in empty` dwing ’n **vars corpus** vir elke generering af.
-- `-server_update_interval T` benader **vertraagde sync** (eers nuwigheid, later hergebruik).
-- In grammar fuzzing-modus word **aanvanklike server-sync by verstek oorgeslaan** (geen behoefte aan `-skip_initial_server_sync` nie).
+- `-in empty` dwing ’n **vars corpus** af met elke generering.
+- `-server_update_interval T` benader **vertraagde sync** (eers nuutheid, later hergebruik).
+- In grammar fuzzing-modus word **aanvanklike serversync by verstek oorgeslaan** (geen behoefte aan `-skip_initial_server_sync` nie).
 - Die optimale `T` is **teikenafhanklik**; dit werk gewoonlik die beste om oor te skakel nadat die worker die meeste “maklike” coverage gevind het.
 
-## Snapshot Fuzzing Vir Teikens Wat Moeilik Is Om Te Harness
+## Snapshot Fuzzing vir teikens wat moeilik is om te harness
 
-Wanneer die kode wat jy wil toets eers bereikbaar word **ná ’n groot opstelkoste** (’n VM selflaai, ’n aanmelding voltooi, ’n packet ontvang, ’n container ontleed of ’n diens inisialiseer), is **snapshot fuzzing** ’n nuttige alternatief: neem ’n snapshot van die gereed proses- of VM-toestand, voer elke testcase in via die teiken se invoerpad, voer uit totdat ’n crash/timeout voorkom, en herstel die snapshot. Dit vermy die herhaling van inisialisering of protokolvoorvoegsels en is nuttig vir **netwerkdienste**, **firmware**, **aanvaloppervlakke ná verifikasie** en **slegs-binêre teikens**.<sup>[[9]](#references)[[10]](#references)</sup>
+Wanneer die kode wat jy wil toets eers bereikbaar word **ná ’n groot opstelkoste** (’n VM selflaai, ’n aanmelding voltooi, ’n pakkie ontvang, ’n container ontleed of ’n diens inisialiseer), is **snapshot fuzzing** ’n nuttige alternatief: neem die gereed-proses- of VM-toestand vas, voer elke toetsgeval in die teiken se invoerpad in, voer uit totdat ’n crash/timeout plaasvind en herstel die snapshot. Dit voorkom dat inisialisering of protokolvoorvoegsels herhaal moet word, en is nuttig vir **netwerkdienste**, **firmware**, **aanvaloppervlakke ná verifikasie** en **slegs-binêre teikens**.<sup>[[9]](#references)[[10]](#references)</sup>
 
 1. Laat die teiken loop totdat die interessante toestand gereed is.
-2. Neem op daardie punt ’n snapshot van **geheue + registers**.
-3. Skryf vir elke testcase die gemuteerde invoer direk na die toepaslike gasheer-/prosesbuffer.
-4. Voer uit totdat ’n crash/timeout/reset voorkom.
-5. Herstel die snapshot; vir VM-teikens, herstel slegs die **dirty pages** waar dit ondersteun word, en herhaal dan.
+2. Neem **geheue + registers** op daardie punt as ’n snapshot.
+3. Skryf vir elke toetsgeval die gemuteerde invoer direk na die relevante gasheer-/prosesbuffer.
+4. Voer uit totdat ’n crash/timeout/reset plaasvind.
+5. Herstel die snapshot; vir VM-teikens, herstel slegs die **dirty pages** wanneer dit ondersteun word, en herhaal dan.
 
-Plaas die snapshot so na as prakties moontlik aan die eerste duur parse-/dispatch-stap, byvoorbeeld ná ’n `recv`/`read` of ’n punt waar packets gedeserialiseer word, en teken die invoerbuffer aan wat die teiken gebruik. Dit volg die beginsel van aanpasbare plasing: skuif die snapshot dieper in die invoerverwerking in om herhaling van werk te vermy.<sup>[[11]](#references)</sup>
+Plaas die snapshot so na as wat prakties moontlik is aan die eerste duur ontleed-/versendingstap, soos ná ’n `recv`/`read` of ’n punt waar pakkies gedeserialiseer word, en teken die invoerbuffer aan wat die teiken gebruik. Dit volg die beginsel van aanpasbare plasing: skuif die snapshot dieper in die invoerverwerking in om herhaalde werk te vermy.<sup>[[11]](#references)</sup>
 
 ### Inkrementele snapshots vir protokoltoestande
 
-’n Vaste snapshot vermy opstelkoste, maar verken nie op sigself oorgange wat verskeie geldige boodskappe vereis nie. ’n LibAFL-Qemu-harness kan skrywes na ’n protokoltoestandveld dophou en ’n nuwe snapshot stoor wanneer die toestand verander. In die [libslirp TCP-harness](https://github.com/quarkslab/slirp_snapshots_stateful) hou dit `tcpcb.t_state` dop, hash dit die toestand en antwoordvlae om snapshots te dedupliseer, en stoor dit dirty pages relatief tot ’n ouer. Voordat die volgende gestruktureerde boodskap gemuteer word, herstel dit die geselekteerde snapshot deur die ouerketting. Die testcase hou ’n `SnapshotId` en gegenereerde invoergrepe (`gen_bytes`) by; die snapshotbestuurder hou die ouerverwantskap by wat vir herhaling nodig is.<sup>[[27]](#references)[[28]](#references)</sup>
+’n Vaste snapshot vermy opstelkoste, maar verken nie vanself oorgange wat verskeie geldige boodskappe vereis nie. ’n LibAFL-Qemu-harness kan skrywes na ’n protokoltoestandveld dophou en ’n nuwe snapshot stoor wanneer die toestand verander. In die [libslirp TCP-harness](https://github.com/quarkslab/slirp_snapshots_stateful) hou dit `tcpcb.t_state` dop, hash dit die toestand en responsvlae om duplikaatsnapshots te voorkom, en stoor dirty pages relatief tot ’n ouersnapshot. Voordat die volgende gestruktureerde boodskap gemuteer word, herstel dit die geselekteerde snapshot via sy ouerketting. Die toetsgeval bevat ’n `SnapshotId` en gegenereerde invoergrepe (`gen_bytes`); die snapshotbestuurder hou die ouerverwantskap by wat vir terugspeel nodig is.<sup>[[27]](#references)[[28]](#references)</sup>
 
-LibAFL-Qemu se user-mode `SnapshotModule` stoor mappings en teikengeheue, maar nie CPU-registers nie; bewaar dit afsonderlik waar nodig. Die beskryfde bestuurder ondersteun een wortelsnapshotboom en kan nie snapshot-ID’s tussen workers deel nie. Sy multi-snapshot-modus kan ook nie QASAN-shadowtoestand direk hergebruik nie. Vir vanlyn triage, rekonstrueer die invoerketting in ’n afsonderlike geïnstrumenteerde proses. Wanneer `AsanHostModule` en `DrCovModule` gebruik word, voer `fuzzer.evaluate_input` die vereiste `pre_exec`/`post_exec`-terugroepe uit; `qemu.run` alleen doen dit nie.<sup>[[27]](#references)[[28]](#references)</sup>
+LibAFL-Qemu se gebruikersmodus-`SnapshotModule` stoor mappings en teikengeheue, maar nie CPU-registers nie; bewaar dit afsonderlik wanneer nodig. Die beskryfde bestuurder ondersteun een wortelsnapshotboom en kan nie snapshot-ID’s tussen workers deel nie. Sy multi-snapshot-modus kan ook nie QASAN-shadow state direk hergebruik nie. Vir vanlyn triage, rekonstrueer die invoerketting in ’n afsonderlike geïnstrumenteerde proses. Wanneer `AsanHostModule` en `DrCovModule` gebruik word, voer `fuzzer.evaluate_input` die vereiste `pre_exec`/`post_exec`-callbacks uit; `qemu.run` alleen doen dit nie.<sup>[[27]](#references)[[28]](#references)</sup>
 
 ### Bespeur logiese oorlesings van ringbuffers
 
-’n Lees buite ’n buffer se *geldige datatelling* kan binne sy gasheertoewysing bly en gewone ASAN ontglip. Die [libslirp-voorbeeld met urgent data](../binary-exploitation/qemu-kvm-vm-escape-chains.md#tcp-urgent-pointer-vs-valid-ring-buffer-bytes) onderloop ook ’n ongetekende greeptelling. As die bron beskikbaar is, kan instrumentasie vir oorloop van getekende/ontekende heelgetalle daardie newe-effek opspoor; onderskei doelbewuste TCP-volgnommer-omloop voordat verslae onderdruk word. ’n Sterker voorgestelde oracle is om die pasgemaakte ringtoewysing te vergiftig, slegs geldige reekse te ontvergiftig soos die interne allocator vorder, en vrygestelde reekse weer te vergiftig. LibAFL-Qemu stel ’n ASAN-vergiftigings-API beskikbaar vir teikens waar broninstrumentasie onprakties is.<sup>[[27]](#references)</sup>
+’n Lees buite ’n buffer se *geldige-datatelling* kan binne sy gasheertoekenning bly en gewone ASAN ontduik. Die [libslirp-voorbeeld met urgent data](../binary-exploitation/qemu-kvm-vm-escape-chains.md#tcp-urgent-pointer-vs-valid-ring-buffer-bytes) laat ook ’n unsigned grepetelling onderloop. Wanneer bronkode beskikbaar is, kan instrumentasie vir signed/unsigned integer-oorloop daardie newe-effek bespeur; onderskei doelbewuste TCP-volgnommeromvou voordat verslae onderdruk word. ’n Sterker voorgestelde oracle is om die pasgemaakte ringtoekenning te poison, slegs geldige reekse te unpoison soos die interne allocator vorder, en vrygestelde reekse weer te poison. LibAFL-Qemu bied ’n ASAN-poisoning-API vir teikens waar broninstrumentasie onprakties is.<sup>[[27]](#references)</sup>
 
-## Linux Kernel Race-verkenning Met MAccConc
+## Verkenning van Linux-kernelaanwedywings met MAccConc
 
-[MAccConc](https://github.com/googleprojectzero/MAccConc) verander tydsensitiewe Linux-kernel-races in herhaalbare geheuetoegangskedules. Dit kan twee-konteks-**A-B-A**-uitvoerings outomaties opsom, of ’n ontleder toelaat om volgordebeperkings in ’n terminale UI/GUI op te lê. Dit is eksperimentele navorsingshulpmiddel eerder as ’n volledige concurrency-fuzzer: dit vereis tans LLVM 23+ en die projek se gepatchte kernel, die command-line-gereedskap ondersteun twee toetsdrade, en die voorgestelde fuzzing-laag vir userspace is nie geïmplementeer nie.<sup>[[17]](#references)[[18]](#references)</sup>
+[MAccConc](https://github.com/googleprojectzero/MAccConc) verander tydsensitiewe Linux-kernelaanwedywings in herhaalbare geheuetoegangskedules. Dit kan twee-konteks-**A-B-A**-uitvoerings outomaties opsom, of ’n ontleder toelaat om volgordebeperkings in ’n terminale UI/GUI af te dwing. Dit is eksperimentele navorsingsnutsmiddels, nie ’n volledige concurrency fuzzer nie: tans vereis dit LLVM 23+ en die projek se gepatchte kernel, die opdragreëlnutsmiddels ondersteun twee toetsdrade, en die voorgestelde fuzzing-laag vir gebruikersruimte is nie geïmplementeer nie.<sup>[[17]](#references)[[18]](#references)</sup>
 
 ### Versamel kommunikasiepunte tussen kontekste
 
-Bou die geïnstrumenteerde kernel met KASAN-outline-terugroepe en die gepatchte KCOV-geheuerekordondersteuning. Die projek se README beveel ook aan dat sibling-call-optimering afgeskakel word sodat oproepstapels bruikbaar bly.<sup>[[17]](#references)[[18]](#references)</sup>
+Bou die geïnstrumenteerde kernel met KASAN outline-callbacks en die gepatchte KCOV-geheuerekordondersteuning. Die projek se README beveel ook aan om sibling-call-optimalisering te deaktiveer sodat oproepstapels bruikbaar bly.<sup>[[17]](#references)[[18]](#references)</sup>
 
 ```text
 CONFIG_KASAN=y
@@ -275,27 +279,27 @@ CONFIG_RANDOMIZE_BASE=n
 export KCFLAGS="-fno-optimize-sibling-calls -mllvm -sanitizer-coverage-prune-blocks=false"
 ```
 
-KASAN-outlinemodus (`asan-instrumentation-with-call-threshold=0`) omskep geïnstrumenteerde toegangspunte in helper-oproepe. Die MAccConc-kernpleisters deaktiveer `asan-opt-same-temp` sodat opeenvolgende toegangspunte nie saamgevoeg word nie; deaktiveer ook die `asan-opt-globals`-optimalisering wanneer globale-veranderlike-resies sigbaar moet wees. KCOV stuur die resulterende rekords na gebruikersruimte. Vergelyk toegangspunte uit verskillende uitvoeringskontekste en behou pare waarvan die greepreekse oorvleuel en waar minstens een kant skryf; modelleer `kfree()` as ’n skryfhandeling sodat lewensduur-oorgange ook kandidate word.<sup>[[17]](#references)</sup>
+KASAN outline mode (`asan-instrumentation-with-call-threshold=0`) omskep geïstrumenteerde toegangspunte in helper calls. Die MAccConc-kernelpatches deaktiveer `asan-opt-same-temp` sodat opeenvolgende toegangspunte nie saamgevoeg word nie; deaktiveer ook die `asan-opt-globals`-optimering wanneer rasse op globale veranderlikes sigbaar moet wees. KCOV dra die resulterende rekords na userspace oor. Vergelyk toegangspunte uit verskillende uitvoeringskontekste en behou pare waarvan die grepe-omvang oorvleuel en waar minstens een kant skryf; modelleer `kfree()` as ’n skrywing sodat lewensduur-oorgange ook kandidate word.<sup>[[17]](#references)</sup>
 
-Vir werk wat buite die aanvangstaak plaasvind, soos pakkieverwerking of RCU-terugroepe, moet die substelsel ’n KCOV-afgeleëdekkinghandvatsel deurgee. Stroomop se afgeleë KCOV is opsioneel en is nie outomaties vir willekeurige agtergrondwerk beskikbaar nie, dus kan ontbrekende deurgee ’n werklike interaksie onsigbaar maak.<sup>[[17]](#references)[[19]](#references)</sup>
+Vir werk wat buite die inisierende taak voortgaan, soos pakkieverwerking of RCU-terugroepe, moet die substelsel ’n KCOV remote-coverage handle oordra. Upstream remote KCOV is opt-in en is nie outomaties beskikbaar vir arbitrêre agtergrondwerk nie, dus kan ontbrekende oordrag ’n werklike interaksie onsigbaar maak.<sup>[[17]](#references)[[19]](#references)</sup>
 
-### Identifiseer dieselfde dinamiese toegang by elke uitvoering
+### Identifiseer dieselfde dinamiese toegangspunt by elke uitvoering
 
-Moenie ’n herhaling op ’n konkrete heap-adres uitvoer nie, aangesien dit ná elke toekenning kan verander, of net op ’n instruksie-adres nie, aangesien dit dubbelsinnig is binne helpers soos `memcpy()` en `spin_lock()`. MAccConc gebruik ’n **telverrykte stapelspoor**: elke raam identifiseer ’n callee plus die aanroeptelling binne sy caller, en die laaste element identifiseer die geheuetoegangsinstruksie. SanitizerCoverage-funksie-inskrywing-/uittreerekords stel gebruikersruimte in staat om hierdie dinamiese identifiseerder te rekonstrueer, wat stabiel bly ondanks adresveranderinge en onverwante beheervloei-geraas.<sup>[[17]](#references)</sup>
+Moenie herhaal met ’n konkrete heap-adres nie, aangesien dit ná elke toekenning kan verander, of net met ’n instruksie-adres nie, aangesien dit dubbelsinnig is binne helpers soos `memcpy()` en `spin_lock()`. MAccConc gebruik ’n **count-augmented stack trace**: elke raam identifiseer ’n callee plus die aanroepingtelling binne sy caller, en die laaste element identifiseer die geheuetoegangsinstruksie. SanitizerCoverage-funksie-intree-/uittree-rekords stel userspace in staat om hierdie dinamiese identifiseerder te rekonstrueer, wat stabiel bly ondanks adresveranderinge en onverwante beheer-vloei-geraas.<sup>[[17]](#references)</sup>
 
 ### Skakel kandidaatpare om in afgedwonge skedules
 
-Die gelapte `KCOV_SET_DI`-ioctl koppel ’n telverrykte toegangsidentifiseerder aan ’n gedeelde-vlag-aksie.<sup>[[17]](#references)</sup>
+Die gelapte `KCOV_SET_DI` ioctl koppel ’n count-augmented toegangspuntidentifiseerder aan ’n shared-flag-aksie.<sup>[[17]](#references)</sup>
 
 | Aksie | Semantiek |
 | --- | --- |
-| `DI_STACK_WAKE_PRE` | Stel vlag *N* onmiddellik voor die geselekteerde toegang in. |
-| `DI_STACK_WAIT` | Wag voor die geselekteerde toegang deur te spin totdat vlag *N* ingestel is of die gekonfigureerde limiet verstryk. |
-| `DI_STACK_WAKE_POST` | Stel vlag *N* onmiddellik ná die geselekteerde toegang in. |
+| `DI_STACK_WAKE_PRE` | Stel vlag *N* onmiddellik voor die gekose toegangspunt. |
+| `DI_STACK_WAIT` | Spin voor die gekose toegangspunt totdat vlag *N* gestel is of die ingestelde limiet verstryk. |
+| `DI_STACK_WAKE_POST` | Stel vlag *N* onmiddellik ná die gekose toegangspunt. |
 
-Vir ’n gedeeltelike **A-happens-before-B**-beperking, koppel `DI_STACK_WAKE_POST` aan A en `DI_STACK_WAIT` aan B met dieselfde vlag. Vir ’n volledig gespesifiseerde skedule met twee kontekste, begin B geblokkeer; laat A dan B wakker maak en wag by die eerste oordragpunt. B voer die omgekeerde bewerking by die volgende oordrag uit. Dit tree op soos deterministiese konteksskakeling en is wat die outomatiese A-B-A-verkenner gebruik.<sup>[[17]](#references)</sup>
+Vir ’n gedeeltelike **A-happens-before-B**-beperking, koppel `DI_STACK_WAKE_POST` aan A en `DI_STACK_WAIT` aan B met dieselfde vlag. Vir ’n volledig gespesifiseerde tweekonteksskedule, begin B geblokkeer, laat A dan B wakker maak en wag by die eerste oordragpunt; B voer die omgekeerde handeling by die volgende oordrag uit. Laasgenoemde tree op soos deterministiese kontekswisseling en is wat die outomatiese A-B-A-verkenner gebruik.<sup>[[17]](#references)</sup>
 
-’n Minimale veldtog is om die vier-haaktoetsgeval (`test_setup`, twee draadd funksies en `test_end`) as ’n gedeelde biblioteek te kompileer, ’n onbeperkte spoor te versamel en dan A-B-A-kandidate op te som of handmatige beperkings rondom verdagte toegangspunte by te voeg.<sup>[[18]](#references)</sup>
+’n Minimale veldtog is om die viertakhaak-toetsgeval (`test_setup`, twee thread-funksies en `test_end`) as ’n gedeelde biblioteek te kompileer, ’n onbeperkte spoor in te samel en dan A-B-A-kandidate te lys of handmatige beperkings rondom verdagte toegangspunte by te voeg.<sup>[[18]](#references)</sup>
 
 ```bash
 cc -shared -fPIC -o testcase.so testcase.c
@@ -304,72 +308,72 @@ cc -shared -fPIC -o testcase.so testcase.c
 ./kcov-terminal ./testcase.so
 ```
 
-Interpreteer time-outs apart van suksesvolle herrangskikkings: ’n aangevraagde volgorde kan onmoontlik wees omdat ’n slot- of ’n initialiserings-/publiseringsafhanklikheid die tweede konteks verhinder om sy inspuitingspunt te bereik. Hou ook KASAN se blinde kolle in gedagte: direkte stapeltoegange word gewoonlik nie gehook nie, tensy hulle moontlik buite die grense val; globale veranderlikes word met die verstekoptimering weggelaat; en huidige samestellers kan nie ASAN- en TSAN-hooks gelyktydig genereer nie. Laastens verloor die prototipe sy KCOV-buffer wanneer ’n gaspaniek plaasvind, dus moet jy ’n onafhanklike crash-konsole/orakel behou.<sup>[[17]](#references)</sup>
+Interpreteer time-outs apart van suksesvolle herrangskikkings: ’n aangevraagde volgorde kan onmoontlik wees omdat ’n lock of ’n afhanklikheid van initialisering/publisering verhoed dat die tweede konteks sy injection point bereik. Hou ook KASAN se blinde kolle in gedagte: direkte stack-toegange word gewoonlik nie gehook nie, tensy hulle moontlik buite die grense val; globals word met die verstekoptimering weggelaat; en huidige kompileerders kan nie ASAN- en TSAN-hooks gelyktydig genereer nie. Laastens verloor die prototipe sy KCOV-buffer wanneer ’n gasheer paniekerig raak, dus moet jy ’n onafhanklike crashkonsole/orakel behou.<sup>[[17]](#references)</sup>
 
-Vir toekomstige concurrency-guided fuzzing, teken geheuetoegangopsommings per invoer of syscall aan, koppel bewerkings wat kruis-konteks-kommunikasiepunte sou vorm, en verken dan slegs daardie kombinasies. VM-snapshots stabiliseer globale toestand en adresse; sonder snapshots kan metadata van allokasiepunte voorwerpe oor lopies heen abstraheer. Dit is ’n voorgestelde uitbreiding, nie ’n kenmerk van die huidige MAccConc-userspace-gereedskap nie.<sup>[[17]](#references)</sup>
+Vir toekomstige concurrency-begeleide fuzzing, teken geheuetoegangopsommings per invoer of per syscall aan, koppel bewerkings wat kommunikasiepunte tussen kontekste sou vorm, en verken dan slegs daardie kombinasies. VM-snapshots stabiliseer globale toestand en adresse; sonder snapshots kan metadata oor allokasieliggings voorwerpe oor lopies heen abstraheer. Dit is ’n voorgestelde uitbreiding, nie ’n kenmerk van die huidige MAccConc-userspace-gereedskap nie.<sup>[[17]](#references)</sup>
 
 ## Harness-introspeksie: Vind vlak fuzzers vroeg
 
-Wanneer ’n veldtog stagneer, is die probleem dikwels nie die mutator nie, maar die **harness**. Gebruik **bereikbaarheids-/dekkingsintrospeksie** om funksies te vind wat staties vanaf jou fuzz-teiken bereikbaar is, maar dinamies selde of nooit gedek word nie. Daardie funksies dui gewoonlik op een van drie probleme.<sup>[[12]](#references)</sup>
+Wanneer ’n veldtog stilstaan, is die probleem dikwels nie die mutator nie, maar die **harness**. Gebruik **introspeksie van bereikbaarheid/dekking** om funksies te vind wat staties vanaf jou fuzz-teiken bereikbaar is, maar dinamies selde of nooit gedek word nie. Daardie funksies dui gewoonlik op een van drie probleme.<sup>[[12]](#references)</sup>
 
-- Die harness bereik die teiken te laat of te vroeg.
-- Die saadkorpus bevat nie ’n hele kenmerkgroep nie.
-- Die teiken benodig eintlik ’n **tweede harness** in plaas van een oorgroot “doen-alles”-harness.
+- Die harness betree die teiken te laat of te vroeg.
+- Die saadkorpus mis ’n hele kenmerkgroep.
+- Die teiken het werklik ’n **tweede harness** nodig in plaas van een oorgroot “doen-alles”-harness.
 
-As jy OSS-Fuzz- / ClusterFuzz-styl-werkvloeie gebruik, kan Fuzz Introspector statiese bereikbaarheid met looptyddeking vergelyk en verslae genereer vanaf ’n tydgebonde lopie of ’n publieke korpus.<sup>[[12]](#references)</sup>
+As jy OSS-Fuzz / ClusterFuzz-styl werkvloeie gebruik, kan Fuzz Introspector statiese bereikbaarheid met looptyddekking vergelyk en verslae uit ’n tydbeperkte lopie of openbare korpus genereer.<sup>[[12]](#references)</sup>
 
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
 
-Gebruik die verslag om te besluit of jy ’n nuwe harness vir ’n ongetoetste parser-pad moet byvoeg, die corpus vir ’n spesifieke kenmerk moet uitbrei, of ’n monolitiese harness in kleiner toegangspunte moet verdeel.
+Gebruik die verslag om te besluit of ’n nuwe harness vir ’n ongetoetste parser-pad bygevoeg moet word, die corpus vir ’n spesifieke kenmerk uitgebrei moet word, of ’n monolitiese harness in kleiner toegangspunte verdeel moet word.
 
-## Grafiek-eerste keuse van fuzz-teikens en mutasie-triage
+## Fuzz-teikenseleksie met die grafiek eerste en mutasie-triage
 
-As jy reeds **statiese-ontledingsbevindinge**, **mutasietoetsing-oorlewendes** en **dekkingsverslae** het, moenie hulle as afsonderlike lyste triageer nie. Bou eers ’n **oproepgrafiek**, annoteer nodusse met **siklomatiese kompleksiteit**, **bereikbaarheid vanaf toegangspunte/onbetroubare invoer** en enige eksterne bevindinge, en stel dan vrae oor die grafiek.<sup>[[5]](#references)[[6]](#references)</sup>
+As jy reeds **statiese-analise-bevindinge**, **mutasietoetsing-oorlewendes** en **dekkingsverslae** het, moenie hulle as afsonderlike lyste triageer nie. Bou eers ’n **oproepgrafiek**, annoteer nodusse met **siklomatiese kompleksiteit**, **bereikbaarheid vanaf toegangspunte/onbetroubare insette** en enige eksterne bevindinge, en stel dan grafiekverwante vrae.<sup>[[5]](#references)[[6]](#references)</sup>
 
-- Watter funksies met hoë kompleksiteit is bereikbaar vanaf onbetroubare invoer?
+- Watter funksies met hoë kompleksiteit is bereikbaar vanaf onbetroubare insette?
 - Watter mutasie-oorlewendes lê op paaie van parsers/handlers na sekuriteitskritieke kode?
-- Watter funksies is argitektoniese knelpunte met ’n buitengewoon groot **blast radius**?
+- Watter funksies is argitektoniese knelpunte met ’n buitengewoon groot **ontploffingsradius**?
 
-Dit lewer gewoonlik beter fuzz-teikens op as om net die "laagste dekking" te kies. ’n Parser/decoder met **hoë kompleksiteit** en bevestigde **eksterne bereikbaarheid** is ’n sterker kandidaat vir ’n harness as ’n geïsoleerde interne helper met swak dekking, maar sonder ’n pad wat deur ’n aanvaller beheer word.
+Dit lewer gewoonlik beter fuzz-teikens op as bloot “laagste dekking”. ’n Parser/decoder met **hoë kompleksiteit** en bevestigde **eksterne bereikbaarheid** is ’n sterker kandidaat vir ’n harness as ’n geïsoleerde interne helper met swak dekking, maar sonder ’n aanvallerbeheerde pad.
 
 ### Praktiese triage-werkvloei
 
-1. Bou ’n **kodegrafiek** uit die kodebasis en onttrek kompleksiteit-/vertakkingsmetrieke per funksie.
-2. Lys **toegangspunte** wat invoer aanvaar wat deur ’n aanvaller beheer word: versoekhandlers, decoders, importers, protokolparsers, CLI-/lêerlesers.
-3. Voer **padnavrae** vanaf daardie toegangspunte na kandidaatfunksies uit om bereikbare aanvaloppervlak van dooie/slegs-interne kode te onderskei.
+1. Bou ’n **kodegrafiek** uit die kodebasis en haal kompleksiteits-/vertakkingsmaatstawwe per funksie uit.
+2. Lys **toegangspunte** wat aanvallerbeheerde insette aanvaar: versoekhandlers, decoders, invoerders, protokolparsers, CLI-/lêerlesers.
+3. Voer **padnavrae** vanaf daardie toegangspunte na kandidaatfunksies uit om bereikbare aanvalsoppervlak van dooie/slegs-interne kode te onderskei.
 4. Prioritiseer nodusse wat die volgende kombineer:
    - hoë **siklomatiese kompleksiteit**
-   - bevestigde **bereikbaarheid vanaf onbetroubare invoer**
-   - groot **blast radius** of baie afhanklikes stroomaf
+   - bevestigde **bereikbaarheid vanaf onbetroubare insette**
+   - groot **ontploffingsradius** of baie afhanklike nodusse stroomaf
    - stawende bewyse soos **SARIF**-bevindinge, ouditnotas of mutasie-oorlewendes
-5. Skryf eers gefokusde harnesses vir die nodusse met die hoogste telling, veral **parsers/codecs** soos hex/Base64/IP/boodskapdecoders.
+5. Skryf eerste gefokusde harnesses vir die nodusse met die hoogste telling, veral **parsers/codecs** soos hex-/Base64-/IP-/boodskapdecoders.
 
-### Mutasie-oorlewendes: ekwivalent teenoor bruikbaar
+### Mutasie-oorlewendes: ekwivalent teenoor uitvoerbaar
 
 Mutasietoetsing lewer dikwels ’n raserige lys oorlewendes op. Voordat jy elke oorlewende as ’n sekuriteitsgaping beskou, gebruik die grafiek om te vra:
 
-- Is die gemuteerde funksie bereikbaar vanaf ’n toegangspunt wat deur ’n aanvaller beheer word?
+- Is die gemuteerde funksie bereikbaar vanaf ’n aanvallerbeheerde toegangspunt?
 - Word alle oproeppaaie deur sterker invariantes as die gemuteerde kontrole beperk?
-- Lê die nodus in dooie kode, formateringslogika alleen, of ’n hoë-impak rekenkundige/parser-pad?
+- Lê die nodus in dooie kode, slegs in formateringslogika, of in ’n hoë-impak rekenkundige/parser-pad?
 
-Oorlewendes wat onbereikbaar bly of struktureel beperk word, is dikwels **ekwivalente mutante**. Oorlewendes wat **bereikbaar** bly en **grensgevalle**, **oorloop-/oordragpaaie** of **sekuriteitskritieke rekenkunde/parsing** raak, moet bevorder word tot:
+Oorlewendes wat onbereikbaar bly of struktureel beperk word, is dikwels **ekwivalente mutante**. Oorlewendes wat **bereikbaar** bly en **grensgevalle**, **oorloop-/oordragpaaie** of **sekuriteitskritieke rekenkunde/parsing** raak, moet bevorder word na:
 
 - nuwe fuzz-harnesses
-- direkte eienskap-/invariantoetse
-- geteikende randgevalvektore
+- direkte property-/invarianttoetse
+- doelgerigte grensgevalvektore
 
 ### Korreleer eksterne bevindinge met die grafiek
 
-As jou SAST-pyplyn **SARIF** uitvoer, karteer bevindinge volgens **lêer + lynreeks** op grafieknodusse en gebruik die grafiek om die impak uit te brei.<sup>[[6]](#references)</sup>
+As jou SAST-pyplyn **SARIF** uitvoer, karteer bevindinge op grafieknodusse volgens **lêer + lynreeks** en gebruik die grafiek om die impak uit te brei.<sup>[[6]](#references)</sup>
 
-- bereken die **blast radius** van die gemerkte funksie
+- bereken die **ontploffingsradius** van die gemerkte funksie
 - kyk of die bevinding op enige pad vanaf ’n toegangspunt lê
-- groepeer nabygeleë bevindinge wat na dieselfde knelpunt herlei kan word
+- groepeer nabygeleë bevindinge wat op dieselfde knelpunt uitkom
 
-Dit is nuttig wanneer jy besluit of jy fuzzing-tyd aan ’n spesifieke funksie moet bestee: ’n nodus wat **bereikbaar**, **kompleks** is en reeds **SAST-treffers** het, is dikwels ’n beter teiken as ’n bloot komplekse nodus sonder ’n aanvallerpad.
+Dit is nuttig wanneer jy besluit of jy fuzz-tyd aan ’n spesifieke funksie moet bestee: ’n nodus wat **bereikbaar**, **kompleks** is en reeds **SAST-treffers** het, is dikwels ’n beter teiken as ’n bloot komplekse nodus sonder ’n aanvallerpad.
 
 Voorbeeldwerkvloei met Trailmark.<sup>[[6]](#references)</sup>
 
@@ -387,47 +391,47 @@ engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
 
-Die belangrike metodologie is die kruising: **kompleksiteit x blootstelling x impak**. Gebruik die grafiek om fuzz-teikens met die hoogste verwagte sekuriteitswaarde te kies, en gebruik mutasie-oorlewendes om te bepaal watter grense en invariantes jou harness moet stres.<sup>[[5]](#references)</sup>
+Die belangrike metodologie is die kruising van: **kompleksiteit x blootstelling x impak**. Gebruik die grafiek om fuzz-teikens met die hoogste verwagte sekuriteitswaarde te kies, en gebruik dan mutasie-oorlewendes om te bepaal watter grense en invariantia jou harness moet stres.<sup>[[5]](#references)</sup>
 
-## Differensiële fuzzing van kriptografiese sleutel-enkoderings
+## Differensiële fuzzing van kriptografiese sleutelkoderings
 
-Begin met geldige geserialiseerde sleutels of standaardtoetsvektore. Verander geënkodeerde velde sonder om die lengte en struktuur te beskadig wat nodig is om die invoer- en bewerkingspaaie te bereik, en dien dan dieselfde grepe by onafhanklike implementasies in. Vergelyk aanvaarding en foute. Gerandomiseerde handtekeninge en syferteks vereis korrektheidsorakels, nie ’n greep-vir-greep-vergelyking nie: verifieer handtekeninge of vergelyk die gedeelde geheime van ’n inkapseling-/ontkapselingsrondte. Toetsvektore bevestig voldoening vir bekende gevalle; differensiële mutasie toets wanvormde enkoderings buite daardie gevalle.<sup>[[23]](#references)[[26]](#references)</sup>
+Begin met geldige geserialiseerde sleutels of standaardtoetsvektore. Mutateer geënkodeerde velde sonder om die lengte en struktuur te breek wat nodig is om die invoer- en bewerkingspaaie te bereik, en dien dan dieselfde grepe by onafhanklike implementerings in. Vergelyk aanvaarding en foute. Gerandomiseerde handtekeninge en syferskrifte benodig korrektheidsorakels, nie byte-vir-byte-vergelyking nie: verifieer handtekeninge of vergelyk die gedeelde geheime van ’n inkapselings-/ontkapselingsrondrit. Toetsvektore stel konformiteit vir bekende gevalle vas; differensiële mutasie toets misvormde enkoderings wat verder strek as dié gevalle.<sup>[[23]](#references)[[26]](#references)</sup>
 
-Gebruik formaatspesifieke orakels vir hierdie sleutel-formate:<sup>[[24]](#references)[[25]](#references)[[26]](#references)</sup>
+Gebruik formaatafhanklike orakels vir hierdie sleutelformate:<sup>[[24]](#references)[[25]](#references)[[26]](#references)</sup>
 
-- **ML-DSA-uitgebreide ondertekeningsleutels:** verander gepakte `s1`- of `s2`-koëffisiënte sodat hulle buite `[-η, η]` val, terwyl die sleutel ontleedbaar bly. Kontroleer of invoer of ondertekening dit verwerp en of enige gevolglike handtekening verifieer. Verskille in aanvaarding alleen is nie standaardoortredings nie, omdat FIPS 204 nie bykomende kontroles op private sleutels vereis nie. Sien die [voorwaardelike lekmeganisme](../crypto/public-key/#malformed-ml-dsa-signing-keys-and-rejection-sampling-leakage).
-- **ML-KEM-sleutelpaar:** onderskei die vereiste kontroles op die inkapselingsleutel en ontkapselingsinvoer van die opsionele parewyse-konsekwentheidskontrole (PCT) op ’n ingevoerde paar. Inkapsuleer met die publieke sleutel, ontkapsuleer met die private sleutel en vergelyk die gedeelde geheime; ’n wanpassing kan geënkripteerde kommunikasie breek, selfs wanneer individuele sleutels die invoerkontroles slaag. Kontroleer of die API insette tydens die bewerking of deur ’n afsonderlike oproep valideer; libcrux stel `validate_public_key(pk)` en `validate_private_key(sk, ct)` beskikbaar, maar dit vervang nie ’n PCT nie.
-- **XMSS/XMSSMT-rou sleutels:** toets rondreise vir geserialiseerde **ondertekenings- en verifikasie**sleutels oor parameterstelle heen, nie net bewerkings met sleutels in die geheue nie. XMSS en XMSSMT het afsonderlike OID-naamruimtes van vier grepe, so ’n OID-ontleder wat eers XMSS probeer, kan ’n botsende XMSSMT-sleutel verkeerd klassifiseer en die invoer daarvan verwerp. Die gerapporteerde RustCrypto-ontleder illustreer ’n interoperabiliteits-/beskikbaarheidsfout, nie ’n vervalsing van ’n handtekening nie.
+- **ML-DSA-uitgebreide ondertekeningsleutels:** verander gepakte `s1`- of `s2`-koëffisiënte sodat hulle buite `[-η, η]` val, terwyl die sleutel ontleedbaar bly. Kyk of invoer of ondertekening dit verwerp en of enige gevolglike handtekening geverifieer word. Verskille in aanvaarding alleen is nie standaardoortredings nie, want FIPS 204 vereis nie bykomende privatesleutelnasien nie. Sien die [meganisme vir voorwaardelike lek](../crypto/public-key/#malformed-ml-dsa-signing-keys-and-rejection-sampling-leakage).
+- **ML-KEM-sleutelpare:** onderskei die vereiste kontroles van die inkapselingsleutel en ontkapselingsinvoer van die opsionele paargewyse konsekwentheidskontrole (PCT) op ’n ingevoerde paar. Inkapsuleer met die publieke sleutel, ontkapsuleer met die private sleutel en vergelyk die gedeelde geheime; ’n wanpassing kan geënkripteerde kommunikasie breek, selfs wanneer individuele sleutels die invoerkontroles slaag. Kyk of die API insette tydens die bewerking of met ’n afsonderlike oproep valideer; libcrux stel `validate_public_key(pk)` en `validate_private_key(sk, ct)` beskikbaar, maar dié vervang nie ’n PCT nie.
+- **XMSS/XMSSMT-rou sleutels:** toets rondritte van geserialiseerde **ondertekenings- en verifikasiesleutels** oor parameterstelle, nie net bewerkings met sleutels in die geheue nie. XMSS en XMSSMT het afsonderlike viergreep-OID-naamruimtes, dus kan ’n OID-alleen-ontleder wat XMSS eerste probeer, ’n XMSSMT-sleutel met ’n botsende OID verkeerd klassifiseer en invoer verwerp. Die gerapporteerde RustCrypto-ontleder illustreer ’n interoperabiliteits-/beskikbaarheidsfout, nie ’n vervalsing van ’n handtekening nie.
 
 ## Go-fuzzing met gosentry: sterker enjin, getipeerde insette en differensiële kontroles
 
-As ’n Go-teiken reeds ’n inheemse `testing.F`-harness het, is ’n praktiese opgraderingspad om dieselfde harness met [gosentry](https://github.com/trailofbits/gosentry) te laat loop, ’n gevurkte Go-gereedskapstel wat `go test -fuzz` behou, maar die backend na **LibAFL** omskakel.<sup>[[7]](#references)[[8]](#references)</sup>
+As ’n Go-teiken reeds ’n inheemse `testing.F`-harness het, is ’n praktiese opgraderingspad om dieselfde harness met [gosentry](https://github.com/trailofbits/gosentry) te laat loop, ’n gevurkte Go-toolchain wat `go test -fuzz` behou, maar die backend na **LibAFL** omskakel.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
 
-Dit is nuttig wanneer die inheemse Go-fuzzer vashaak op **moeilike vergelykings**, **getikte invoere** of **parser-swaar formate**. Die metodologie bly dieselfde:
+This is nuttig wanneer die native Go-fuzzer vashaak by **moeilike vergelykings**, **getipeerde invoere** of **parser-swaar formate**. Die metodologie bly dieselfde:
 
-- Gebruik steeds `f.Add(...)` vir saadwaardes en `f.Fuzz(...)` vir die callback.
-- Hergebruik dieselfde harness, maar voer dit met gosentry se `go`-binêre lêer uit in plaas van die standaard-toolchain.
-- Behandel die veldtog wat hieruit volg as ’n gewone dekkinggeleide lopie, maar met LibAFL-skedulering/-mutasie en beter omliggende detektors.
+- Gebruik steeds `f.Add(...)` vir seeds en `f.Fuzz(...)` vir die callback.
+- Hergebruik dieselfde harness, maar voer dit met gosentry se `go`-binary uit in plaas van die standaard toolchain.
+- Behandel die resulterende veldtog as ’n normale coverage-guided run, maar met LibAFL-skedulering/mutasie en beter omringende detectors.
 
-### Verander stille mislukkings in fuzz-bevindings
+### Verander stille mislukkings in fuzz-bevindinge
 
-’n Herhalende probleem in Go-assesserings is dat gevaarlike gedrag dikwels nie by verstek ’n crash veroorsaak nie. Met gosentry kan jy verskeie klasse “slegte maar stille” toestande in bevindinge omskep.<sup>[[7]](#references)[[8]](#references)</sup>
+’n Terugkerende probleem in Go-assesserings is dat gevaarlike gedrag dikwels nie by verstek ’n crash veroorsaak nie. Met gosentry kan jy verskeie klasse “sleg maar stil”-toestande in bevindinge omskep.<sup>[[7]](#references)[[8]](#references)</sup>
 
-- `--panic-on=pkg.Func,...` om geselekteerde logging-/foutpaaie soos crashes te laat optree (nuttig vir `log.Fatal`-agtige kodepaaie wat andersins net log en voortgaan).
-- `--catch-races=true` om nuut ontdekte tou-inskrywings met die Go race detector weer af te speel.
-- `--catch-leaks=true` om nuwe tou-inskrywings met `goleak` weer af te speel en by goroutine-lekkasies te stop.
-- LibAFL-hanghantering om **oneindige lusse / baie stadige invoere** as fuzz-bevindings te behou, eerder as om dit as tydverstreke te laat verdwyn.
+- `--panic-on=pkg.Func,...` om geselekteerde logging-/error-paaie soos crashes te laat optree (nuttig vir `log.Fatal`-agtige kodepaaie wat andersins net log en voortgaan).
+- `--catch-races=true` om nuut ontdekte touinskrywings met die Go race detector te herspeel.
+- `--catch-leaks=true` om nuwe touinskrywings met `goleak` te herspeel en by goroutine-lekkasies te stop.
+- LibAFL se hang-hantering om **oneindige lusse / baie stadige invoere** as fuzz-bevindinge te behou, eerder as om dit as timeouts te laat verdwyn.
 - Ingeboude rekenkundige oorloopkontroles by verstek, plus opsionele afkappingskontroles deur go-panikint-styl-instrumentasie.
 
-Dit is veral waardevol vir teikens waar die sekuriteitsimpak ’n **parser-mislukking sonder ’n panic**, ’n **gelyktydigheidsfout** of ’n **hang wat slegs ’n DoS veroorsaak** is, eerder as geheuekorrupsie.
+Dit is veral waardevol vir teikens waar die sekuriteitsimpak ’n **parser-mislukking sonder ’n panic**, ’n **concurrency-bug** of ’n **hang wat net DoS veroorsaak** is, eerder as geheuekorrupsie.
 
-### Struct-bewuste fuzzing vir getikte Go-API's
+### Struct-aware fuzzing vir getipeerde Go-API’s
 
-Inheemse Go-fuzzing verwag hoofsaaklik skalare soos `[]byte`, `string` en getalle. As die kode wat getoets word getikte objekte verbruik, kan gosentry saamgestelde waardes (structs, slices, arrays, pointers) direk fuzz, terwyl dit steeds die onderliggende bytes muteer.<sup>[[7]](#references)[[8]](#references)</sup>
+Native Go-fuzzing verwag hoofsaaklik scalars soos `[]byte`, `string` en getalle. As die kode wat getoets word getipeerde objekte verbruik, kan gosentry **saamgestelde waardes** direk fuzz (structs, slices, arrays, pointers), terwyl bytes steeds onderliggend gemuteer word.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 type Input struct {
@@ -444,9 +448,9 @@ func FuzzStructInput(f *testing.F) {
 }
 ```
 
-Gebruik dit wanneer die bou van ’n vals wire format net vir fuzzing logikafoute agter parsing-kode wat slegs in die harness voorkom, sou verberg. Vir differential- of grammatika-gebaseerde veldtogte, hou die harness-invoer as ’n enkele `[]byte` of `string` en parseer eerder binne die callback.
+Gebruik dit wanneer die bou van ’n vals wire format net vir fuzzing logikafoute agter parsing-kode wat net in die harness gebruik word, sou versteek. Hou vir differential- of grammatika-gebaseerde veldtogte die harness-invoer as ’n enkele `[]byte` of `string`, en parse dit eerder binne die callback.
 
-### Grammatika-gebaseerde fuzzing vir parsers en protokolinvoer
+### Grammatika-gebaseerde fuzzing vir parsers en protokol-invoer
 
 Vir parsers, formate en invoertale kan gosentry **Nautilus grammar fuzzing** bo-op LibAFL uitvoer. Die grammatika is ’n JSON-skikking van produksiereëls, en die harness behoort gewoonlik ’n enkele `[]byte`- of `string`-argument te neem.<sup>[[7]](#references)[[8]](#references)</sup>
 
@@ -456,14 +460,14 @@ Vir parsers, formate en invoertale kan gosentry **Nautilus grammar fuzzing** bo-
 
 Metodologienotas:
 
-- Gebruik grammar mode wanneer bytevlak-mutasies meestal tydens vroeë sintakskontroles faal.
+- Gebruik grammar mode wanneer byte-vlak-mutasies meestal tydens vroeë sintakskontroles faal.
 - Hou die grammar gefokus op die **sekuriteitsrelevante subset** van die taal/protokol, eerder as om die volledige spesifikasie te modelleer.
-- Gebruik groot grenswaardes in terminals/nonterminals om integer-, lengte- en staatsmasjienrande te stres.
-- Grammar mode hou insette grammar-geldig, maar die teiken ontvang steeds **bytes/strings**, dus bly ontleding en semantiese kontroles binne die geharnaste kode.
+- Gebruik groot grenswaardes in terminals/nonterminals om integer-, lengte- en toestandsmasjiengrense te toets.
+- Grammar mode hou die insette grammar-geldig, maar die teiken ontvang steeds **bytes/strings**, dus bly ontleding en semantiese kontroles binne die geharnaste code.
 
-### Differential fuzzing: vergelyk implementerings, nie net crashes nie
+### Differensiële fuzzing: vergelyk implementasies, nie net crashes nie
 
-’n Sterk patroon vir Go-ekosisteme is **grammar-gebaseerde differential fuzzing**: genereer geldige gestruktureerde insette en voer hulle aan twee parsers, kliënte of staats-oorgangsenjins.<sup>[[7]](#references)[[8]](#references)</sup>
+’n Sterk patroon vir Go-ekosisteme is **grammar-gebaseerde differensiële fuzzing**: genereer geldige gestruktureerde insette en voer dit aan twee parsers, clients of toestandoorgang-enjins.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
@@ -477,20 +481,20 @@ f.Fuzz(func(t *testing.T, data []byte) {
 })
 ```
 
-Hanteer die volgende as bevindings:
+Behandel die volgende as bevindinge:
 
-- een implementering panikeer terwyl die ander die invoer netjies verwerp
-- verskille in watter invoer aanvaar of verwerp word
+- een implementering veroorsaak ’n panic terwyl die ander dit netjies afwys
+- verskille in aanvaarbare/afgekeurde invoer
 - verskillende parse-bome of gedekodeerde objekte
-- uiteenlopende toestandoorgange, nonces, saldo’s of toestandswortels
+- uiteenlopende toestandsoorgange, nonces, balances of state roots
 
-Dit is ’n praktiese manier om **konsensusverskille**, **parser-dubbelsinnigheid** en **afwykings tussen spesifikasie en implementering** te vind wat suiwer crash fuzzing dikwels mis.
+Dit is ’n praktiese manier om **konsensuswanpassings**, **parser-dubbelsinnigheid** en **afwykings tussen spesifikasie en implementering** te vind wat suiwer crash-fuzzing dikwels mis.
 
 {{#ref}}
 proof-assistant-formal-verification-security.md
 {{#endref}}
 
-### Hergebruik die veldtogkorpus vir dekkingverslagdoening
+### Hergebruik die veldtogkorpus vir dekkingsverslagdoening
 
 Speel ná ’n veldtog die gestoorde toukorpus weer af om ’n Go-dekkingsverslag te genereer sonder om ’n aparte korpus handmatig uit te voer.<sup>[[7]](#references)[[8]](#references)</sup>
 
@@ -498,36 +502,37 @@ Speel ná ’n veldtog die gestoorde toukorpus weer af om ’n Go-dekkingsversla
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
 
-Voer die opdrag vanuit dieselfde pakket uit en met dieselfde `-fuzz`-teiken sodat gosentry die korrekte gekaste veldtogtoestand vind.
+Voer die opdrag uit vanuit dieselfde pakket en met dieselfde `-fuzz`-teiken sodat gosentry die korrekte kasveldtogtoestand oplos.
 
 ## References
 
-- [1] [Mutasionele grammatika-fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
+- [1] [Mutasionele grammatikafuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
 - [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
-- [3] [AFL++ Fuzzing in diepte](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [4] [AFLNet Vyf jaar later: Oor dekkinggeleide protokol-fuzzing](https://arxiv.org/abs/2412.20324)
+- [3] [AFL++-fuzzing in diepte](https://aflplus.plus/docs/fuzzing_in_depth/)
+- [4] [AFLNet vyf jaar later: Oor protokolfuzzing gelei deur dekking](https://arxiv.org/abs/2412.20324)
 - [5] [Trailmark verander kode in grafieke](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
 - [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
-- [7] [Go-fuzzing het die helfte van die gereedskapstel ontbreek. Ons het die toolchain gevurk om dit reg te stel.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
+- [7] [Go-fuzzing het die helfte van die gereedskapstel ontbreek. Ons het die toolchain gefork om dit reg te stel.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
 - [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
-- [9] [SNPSFuzzer: 'n Vinnige greybox-fuzzer vir toestandvolle netwerkprotokolle met behulp van snapshots](https://arxiv.org/abs/2202.03643)
-- [10] [Geen grammatika, geen probleem: Op pad na fuzzing van die Linux-kernel sonder stelseloproepbeskrywings](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
+- [9] [SNPSFuzzer: ’n Vinnige greybox-fuzzer vir stateful-netwerkprotokolle wat snapshots gebruik](https://arxiv.org/abs/2202.03643)
+- [10] [Geen grammatika, geen probleem: Na fuzzing van die Linux-kern sonder stelseloproepbeskrywings](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
 - [11] [Snappy: Doeltreffende fuzzing met aanpasbare en veranderbare snapshots](https://project-theseus.nl/publication/2022/snappy/)
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
-- [13] [AFL++ LLVM-instrumentering: pad- en oproeperdekking](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
+- [13] [AFL++ LLVM-instrumentasie: pad- en oproeperdekking](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
 - [14] [Voorspellende konteksensitiewe fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
-- [15] [Android Offensive Security Blog - Binder-fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
-- [16] [LKL Android Binder-fuzzer - bou- en regressie-seed-dokumentasie](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
-- [17] [MAccConc: Verkenning van Linux-kernel-rastoestande met beheerde geheuetoegangvervlegtings](https://projectzero.google/2026/09/maccconc-race-condition.html)
+- [15] [Android Offensive Security-blog - Binder-fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
+- [16] [LKL Android Binder-fuzzer - dokumentasie vir bou en regressie-seeds](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [17] [MAccConc: Verkenning van Linux-kernrastoestande met beheerde geheuetoegang-interleavings](https://projectzero.google/2026/09/maccconc-race-condition.html)
 - [18] [googleprojectzero/MAccConc](https://github.com/googleprojectzero/MAccConc)
-- [19] [KCOV: kodebedekking vir fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
+- [19] [KCOV: Kodedekking vir fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
 - [20] [CFITSIO-uitgebreide lêernaamsintaksis](https://heasarc.gsfc.nasa.gov/docs/software/fitsio/filters.html)
 - [21] [Doyensec-advies: CFITSIO Q4 2025](https://www.doyensec.com/resources/Doyensec_Advisory_CFITSIO_Q42025.pdf)
-- [22] [Fuzzing van CFITSIO-uitgebreide lêernaamsintaksis: 16 geheuevailigheidskwesbaarhede en Codex-ondersteunde triage](https://blog.doyensec.com/2026/04/20/cfitsio-fuzzing.html)
+- [22] [Fuzzing van CFITSIO se uitgebreide lêernaamsintaksis: 16 geheueveiligheidskwesbaarhede en Codex-ondersteunde triage](https://blog.doyensec.com/2026/04/20/cfitsio-fuzzing.html)
 - [23] [Differensiële fuzzing vir kriptografie](https://blog.quarkslab.com/differential-fuzzing-for-cryptography.html)
-- [24] [NIST FIPS 203: Standaard vir 'n sleutelinkapselingsmeganisme gebaseer op module-roosters](https://doi.org/10.6028/NIST.FIPS.203)
-- [25] [XMSSMT-OID-ontleedfout - RustCrypto-kwessie #1442](https://github.com/RustCrypto/signatures/issues/1442)
-- [26] [Stand van sake met implementerings van post-kwantumkriptografie](http://blog.quarkslab.com/state-of-post-quantum-cryptography-implementations.html)
-- [27] [Hoe snapshotting ons na CVE-2026-9539 gelei het](http://blog.quarkslab.com/snapshotting-our-way-to-cve-2026-9539.html)
+- [24] [NIST FIPS 203: Standaard vir ’n sleutelinkapselingsmeganisme gebaseer op ’n module-rooster](https://doi.org/10.6028/NIST.FIPS.203)
+- [25] [XMSSMT OID-ontledingsfout - RustCrypto-kwessie #1442](https://github.com/RustCrypto/signatures/issues/1442)
+- [26] [Stand van implementerings van post-kwantumkriptografie](http://blog.quarkslab.com/state-of-post-quantum-cryptography-implementations.html)
+- [27] [Hoe snapshotting ons tot CVE-2026-9539 gelei het](http://blog.quarkslab.com/snapshotting-our-way-to-cve-2026-9539.html)
 - [28] [Quarkslab slirp_snapshots_stateful](https://github.com/quarkslab/slirp_snapshots_stateful)
+- [29] [Project Zero - Fuzzers teenoor KI: Vergelyking van Fuzzilli en BigSleep op JavaScript-enjins](https://projectzero.google/2026/10/fuzzing-v-AI.html)
 {{#include ../banners/hacktricks-training.md}}
