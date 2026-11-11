@@ -124,13 +124,19 @@ for value in map.values() {
 
 ### Recursive Box
 
+A recursive enum needs indirection so its size is known at compile time; storing `List` directly inside `List` does not compile.<sup>[[10]](#references)</sup>
+
 ```rust
 enum List {
-    Cons(i32, List),
+    Cons(i32, Box<List>),
     Nil,
 }
 
-let list = Cons(1, Cons(2, Cons(3, Nil)));
+use List::{Cons, Nil};
+
+fn main() {
+    let _list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}
 ```
 
 ### Conditionals
@@ -258,9 +264,11 @@ for name in names.iter_mut() {
 
 #### if let
 
+Match `Some` to bind its inner value; a plain variable pattern matches both `Some` and `None`, so the `else` branch would never run.<sup>[[11]](#references)</sup>
+
 ```rust
 let optional_word = Some(String::from("rustlings"));
-if let word = optional_word {
+if let Some(word) = optional_word {
     println!("The word is: {}", word);
 } else {
     println!("The optional word doesn't contain anything");
@@ -362,15 +370,21 @@ fn main() {
 
 ### Security Essentials
 
-Rust provides strong memory-safety guarantees by default, but you can still introduce critical vulnerabilities through `unsafe` code, dependency issues or logic mistakes. The following mini-cheatsheet gathers the primitives you will most commonly touch during offensive or defensive security reviews of Rust software.
+Rust provides strong memory-safety guarantees by default, but you can still introduce critical vulnerabilities through `unsafe` code, dependency issues or logic mistakes. The following mini-cheatsheet gathers the primitives you will most commonly touch during offensive or defensive security reviews of Rust software. For other language-specific tooling, see [Code Review Tools](../network-services-pentesting/pentesting-web/code-review-tools.md#rust).
 
 #### Unsafe code & memory safety
 
-`unsafe` blocks opt-out of the compiler’s aliasing and bounds checks, so **all traditional memory-corruption bugs (OOB, use-after-free, double free, etc.) can appear again**. A quick audit checklist:
+`unsafe` permits operations whose safety contracts the compiler cannot prove; it does **not** turn off ordinary borrow or bounds checks. Memory corruption becomes possible when an unsafe operation violates its contract, including inside a function exposed as a safe API.<sup>[[3]](#references)</sup>
 
-* Look for `unsafe` blocks, `extern "C"` functions, calls to `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers or `ffi` modules.
-* Validate every pointer arithmetic and length argument passed to low-level functions.
-* Prefer `#![forbid(unsafe_code)]` (crate-wide) or `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) to fail compilation when someone re-introduces `unsafe`.
+For a source review, find the unchecked operations and trace attacker-controlled pointers and lengths from their public callers:<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+
+```bash
+rg -n 'unsafe|from_raw_parts|set_len|copy_nonoverlapping|transmute|unsafe impl|extern "C"' src
+```
+
+* For `slice::from_raw_parts`, prove the pointer is non-null and aligned, the **whole** initialized range is in one live allocation, and the returned slice cannot outlive it. Even a zero-length slice cannot use a null pointer.
+* For `Vec::set_len`, prove the new length fits the actual capacity and every newly exposed element was initialized. Trace both the allocation size and any copy count; `with_capacity` does not initialize elements.
+* Check every `unsafe impl` of `Send` or `Sync` and each FFI signature against the invariants promised to safe callers. `#![forbid(unsafe_code)]` rejects unsafe code in a crate; `#![deny(unsafe_op_in_unsafe_fn)]` instead requires explicit unsafe blocks **inside** unsafe functions, not a ban on unsafe code. The latter lint warns by default in Rust 2024.<sup>[[3]](#references)[[7]](#references)[[12]](#references)</sup>
 
 Example overflow created with raw pointers:
 ```rust
@@ -386,10 +400,11 @@ fn vuln_copy(src: &[u8]) -> Vec<u8> {
     dst
 }
 ```
-Running Miri is an inexpensive way to detect UB at test time:
+An input longer than `dst.capacity()` violates both the copy bound and the `set_len` contract in the example above. Add a test with an oversized input for the target allocator, then run it under Miri. Miri checks executed paths for undefined behavior, but unsupported foreign calls may prevent it from exercising an FFI boundary.<sup>[[5]](#references)[[6]](#references)</sup>
+
 ```bash
-rustup component add miri
-cargo miri test  # hunts for OOB / UAF during unit tests
+rustup +nightly component add miri
+cargo +nightly miri test
 ```
 
 #### Auditing dependencies with RustSec / cargo-audit
@@ -413,29 +428,42 @@ cargo tarpaulin              # no options are required, if no root directory is 
 ```
 On Linux, Tarpaulin's default tracing backend is still Ptrace and will only work on x86_64 processors. This can be changed to the llvm coverage instrumentation with `--engine llvm`. For Mac and Windows, this is the default collection method.
 
-#### Supply-chain verification with cargo-vet (2024)
+#### Supply-chain verification with cargo-vet
 
-`cargo vet` records a review hash for every crate you import and prevents unnoticed upgrades:
+`cargo vet` checks dependencies against configured audit criteria using local audits, trusted imports, or explicit exemptions. `cargo vet init` creates `supply-chain/` metadata and exempts existing unaudited dependencies, so an initially passing check does **not** mean every crate has been reviewed. Examine exemptions and use `cargo vet suggest` to work through them; `--locked` avoids refreshing imported audit sets.<sup>[[8]](#references)</sup>
+
 ```bash
 cargo install cargo-vet
-cargo vet init      # generates vet.toml
-cargo vet --locked  # verifies packages referenced in Cargo.lock
+cargo vet init
+cargo vet suggest
+cargo vet --locked
 ```
-The tool is being adopted by the Rust project infrastructure and a growing number of orgs to mitigate poisoned-package attacks.<sup>[[2]](#references)</sup>
 
 #### Fuzzing your API surface (cargo-fuzz)
 
-Fuzz tests easily catch panics, integer overflows and logic bugs that might become DoS or side-channel issues:
+Fuzz targets exercise the API with generated inputs and can expose panics and memory-safety faults. The generated target lives under `fuzz/fuzz_targets/`; replace its default body with a call to the API under review before running it.<sup>[[9]](#references)</sup>
 ```bash
 cargo install cargo-fuzz
-cargo fuzz init              # creates fuzz_targets/
+cargo fuzz init              # creates fuzz/fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
 Add the fuzz target to your repo and run it in your pipeline.
+
+
 
 ## References
 
 - [1] [RustSec Advisory Database](https://rustsec.org)
 - [2] [Cargo-vet: "Auditing your Rust Dependencies"](https://mozilla.github.io/cargo-vet/)
+- [3] [The Rust Programming Language: Unsafe Rust](https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html)
+- [4] [Rust std: slice::from_raw_parts](https://doc.rust-lang.org/std/slice/fn.from_raw_parts.html)
+- [5] [Rust std: Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html)
+- [6] [Miri README](https://github.com/rust-lang/miri/blob/master/README.md)
+- [7] [Rust 2024: unsafe_op_in_unsafe_fn warning](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html)
+- [8] [Cargo Vet commands](https://mozilla.github.io/cargo-vet/commands.html)
+- [9] [Rust Fuzz Book: cargo-fuzz tutorial](https://rust-fuzz.github.io/book/cargo-fuzz/tutorial.html)
+- [10] [The Rust Programming Language: Box and recursive types](https://doc.rust-lang.org/book/ch15-01-box.html)
+- [11] [The Rust Programming Language: if let](https://doc.rust-lang.org/book/ch06-03-if-let.html)
 
+- [12] [Rust 2024: Unsafe extern blocks](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-extern.html)
 {{#include ../banners/hacktricks-training.md}}
