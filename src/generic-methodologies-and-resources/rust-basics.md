@@ -8,7 +8,7 @@
 
 1. Rust 中的每个值都有一个称为其所有者的变量。
 2. 同一时间只能有一个所有者。
-3. 所有者离开作用域时，该值将被丢弃。
+3. 所有者超出作用域时，该值将被丢弃。
 
 ```rust
 fn main() {
@@ -24,7 +24,7 @@ fn main() {
 
 
 
-### 泛型类型
+### 泛型
 
 创建一个结构体，其中一个值可以是任意类型。
 
@@ -45,7 +45,7 @@ Wrapper::new("Foo").value, "Foo"
 
 ### Option, Some & None
 
-Option 类型意味着该值可能是 Some（表示有值），也可能是 None：
+Option 类型表示该值可能是 Some（有值）或 None：
 
 ```rust
 pub enum Option<T> {
@@ -54,7 +54,7 @@ pub enum Option<T> {
 }
 ```
 
-你可以使用 `is_some()` 或 `is_none()` 等函数来检查 Option 的值。
+You 可以使用 `is_some()` 或 `is_none()` 等函数来检查 Option 的值。
 
 
 ### Result, Ok & Err
@@ -68,15 +68,15 @@ pub enum Result<T, E> {
 }
 ```
 
-你可以使用 `is_ok()` 或 `is_err()` 等函数检查结果的值
+你可以使用 `is_ok()` 或 `is_err()` 等函数来检查结果的值
 
-当某个值可能不存在（即为 `None`）时，应使用 `Option` 枚举。
-当你执行的操作可能出错时，应使用 `Result` 枚举。
+在值可能不存在（即为 `None`）时，应使用 `Option` 枚举。
+在你执行的操作可能出错时，应使用 `Result` 枚举。
 
 
 ### 宏
 
-宏比函数更强大，因为它们会展开并生成比你手动编写的代码更多的代码。例如，函数签名必须声明函数参数的数量和类型。而宏则可以接受数量可变的参数：我们可以调用 `println!("hello")` 并传入一个参数，也可以调用 `println!("hello {}", name)` 并传入两个参数。此外，宏会在编译器解释代码含义之前展开，因此宏可以在给定类型上实现 trait。函数则无法做到这一点，因为函数在运行时才会被调用，而 trait 必须在编译时实现。
+宏比函数更强大，因为它们会展开并生成比你手动编写的代码更多的代码。例如，函数签名必须声明函数参数的数量和类型。而宏则可以接受数量可变的参数：我们可以用一个参数调用 `println!("hello")`，也可以用两个参数调用 `println!("hello {}", name)`。此外，宏会在编译器解释代码含义之前展开，因此宏可以在给定类型上实现 trait。函数做不到这一点，因为函数是在运行时调用的，而 trait 必须在编译时实现。
 
 ```rust
 macro_rules! my_macro {
@@ -124,13 +124,19 @@ for value in map.values() {
 
 ### 递归 Box
 
+递归枚举需要间接引用，以便在编译时确定其大小；直接在 `List` 中存储 `List` 无法通过编译。<sup>[[10]](#references)</sup>
+
 ```rust
 enum List {
-    Cons(i32, List),
+    Cons(i32, Box<List>),
     Nil,
 }
 
-let list = Cons(1, Cons(2, Cons(3, Nil)));
+use List::{Cons, Nil};
+
+fn main() {
+    let _list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}
 ```
 
 ### 条件语句
@@ -173,7 +179,7 @@ let binary = match boolean {
 };
 ```
 
-#### 循环（无限）
+#### loop（无限循环）
 
 ```rust
 loop {
@@ -258,9 +264,11 @@ for name in names.iter_mut() {
 
 #### if let
 
+匹配 `Some` 以绑定其内部值；普通变量模式会同时匹配 `Some` 和 `None`，因此 `else` 分支永远不会执行。<sup>[[11]](#references)</sup>
+
 ```rust
 let optional_word = Some(String::from("rustlings"));
-if let word = optional_word {
+if let Some(word) = optional_word {
     println!("The word is: {}", word);
 } else {
     println!("The optional word doesn't contain anything");
@@ -288,7 +296,7 @@ while let Some(i) = optional {
 
 ### 特征
 
-为某个类型创建一个新方法
+为某个类型创建新方法
 
 ```rust
 trait AppendBar {
@@ -324,7 +332,7 @@ mod tests {
 
 #### Arc
 
-Arc 可以使用 Clone 创建更多指向对象的引用，并将它们传递给线程。当指向某个值的最后一个引用指针超出作用域时，该变量就会被丢弃。
+Arc 可以使用 Clone 创建对象的更多引用，并将它们传递给线程。当指向某个值的最后一个引用指针超出作用域时，该变量就会被丢弃。
 
 ```rust
 use std::sync::Arc;
@@ -362,17 +370,23 @@ fn main() {
 
 ### 安全要点
 
-Rust 默认提供强大的内存安全保证，但你仍可能通过 `unsafe` 代码、依赖项问题或逻辑错误引入严重漏洞。以下迷你速查表汇总了在对 Rust 软件进行攻防安全审查时最常用到的基础要素。
+Rust 默认提供强大的内存安全保证，但你仍可能通过 `unsafe` 代码、依赖项问题或逻辑错误引入严重漏洞。以下迷你速查表汇总了在对 Rust 软件进行攻防安全审查时最常用到的基础功能。有关其他语言专用工具，请参阅 [Code Review Tools](../network-services-pentesting/pentesting-web/code-review-tools.md#rust)。
 
-#### Unsafe 代码与内存安全
+#### 不安全代码与内存安全
 
-`unsafe` 代码块会绕过编译器的别名检查和边界检查，因此**所有传统的内存破坏漏洞（OOB、use-after-free、double free 等）都可能再次出现**。快速审计清单：
+`unsafe` 允许执行编译器无法证明其安全契约的操作；它**不会**关闭常规的借用检查或边界检查。如果不安全操作违反了其契约，就可能导致内存破坏，包括在作为安全 API 暴露的函数内部。<sup>[[3]](#references)</sup>
 
-* 查找 `unsafe` 代码块、`extern "C"` 函数、对 `ptr::copy*` 和 `std::mem::transmute` 的调用、`MaybeUninit`、裸指针或 `ffi` 模块。
-* 验证传递给底层函数的每个指针算术操作和长度参数。
-* 优先使用 `#![forbid(unsafe_code)]`（整个 crate 范围）或 `#[deny(unsafe_op_in_unsafe_fn)]`（1.68+），以便在有人重新引入 `unsafe` 时让编译失败。
+进行源码审查时，请找出未经检查的操作，并追踪攻击者可控的指针和长度如何从公开调用者传入：<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-使用裸指针产生溢出的示例：
+```bash
+rg -n 'unsafe|from_raw_parts|set_len|copy_nonoverlapping|transmute|unsafe impl|extern "C"' src
+```
+
+* 对于 `slice::from_raw_parts`，证明指针非空且对齐，**整个**已初始化范围都位于同一个有效分配中，并且返回的 slice 不会比该分配存活得更久。即使长度为零，slice 也不能使用空指针。
+* 对于 `Vec::set_len`，证明新长度不超过实际容量，并且每个新暴露的元素都已初始化。追踪分配大小和任何复制数量；`with_capacity` 不会初始化元素。
+* 检查每个 `Send` 或 `Sync` 的 `unsafe impl`，以及每个 FFI 函数签名是否符合对安全调用者所承诺的不变量。`#![forbid(unsafe_code)]` 会拒绝 crate 中的 unsafe 代码；`#![deny(unsafe_op_in_unsafe_fn)]` 则要求在 unsafe 函数**内部**显式使用 unsafe 块，而不是禁止 unsafe 代码。后一个 lint 在 Rust 2024 中默认会发出警告。<sup>[[3]](#references)[[7]](#references)[[12]](#references)</sup>
+
+使用 raw pointers 导致的溢出示例：
 ```rust
 use std::ptr;
 
@@ -386,10 +400,11 @@ fn vuln_copy(src: &[u8]) -> Vec<u8> {
     dst
 }
 ```
-运行 Miri 是一种在测试时检测 UB 的低成本方法：
+长度超过 `dst.capacity()` 的输入会违反上例中的复制边界和 `set_len` 契约。为目标 allocator 添加一个输入超长的测试，然后在 Miri 下运行。Miri 会检查已执行路径中的未定义行为，但不受支持的外部调用可能导致它无法测试 FFI 边界。<sup>[[5]](#references)[[6]](#references)</sup>
+
 ```bash
-rustup component add miri
-cargo miri test  # hunts for OOB / UAF during unit tests
+rustup +nightly component add miri
+cargo +nightly miri test
 ```
 
 #### 使用 RustSec / cargo-audit 审计依赖项
@@ -399,42 +414,53 @@ cargo miri test  # hunts for OOB / UAF during unit tests
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-将其集成到 CI 中，并在出现 `--deny warnings` 时让构建失败。
+将其集成到 CI 中，并在出现 `--deny warnings` 时使构建失败。
 
-`cargo deny check advisories` 提供类似功能，还会检查许可证和禁止列表。
+`cargo deny check advisories` 提供类似功能，还可检查许可证和禁用列表。
 
 #### 使用 cargo-tarpaulin 进行代码覆盖率检查
 
-`cargo tarpaulin` 是 Cargo 构建系统的代码覆盖率报告工具。
+`cargo tarpaulin` 是 Cargo 构建系统的代码覆盖率报告工具.
 
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-在 Linux 上，Tarpaulin 的默认 tracing 后端仍然是 Ptrace，且仅适用于 x86_64 处理器。可以通过 `--engine llvm` 将其切换为 llvm coverage instrumentation。对于 Mac 和 Windows，这是默认的收集方法。
+在 Linux 上，Tarpaulin 默认的 tracing 后端仍是 Ptrace，且仅适用于 x86_64 处理器。可以通过 `--engine llvm` 将其切换为 llvm coverage instrumentation。对于 Mac 和 Windows，这是默认的收集方式。
 
-#### 使用 cargo-vet 进行供应链验证（2024）
+#### 使用 cargo-vet 验证供应链
 
-`cargo vet` 会为你导入的每个 crate 记录一个审查哈希，并防止未察觉的升级：
+`cargo vet` 会根据配置的审计标准，使用本地审计、受信任的导入或显式豁免来检查依赖项。`cargo vet init` 会创建 `supply-chain/` 元数据，并豁免现有的、未经审计的依赖项，因此，初次检查通过**并不**意味着每个 crate 都经过了审查。检查这些豁免项，并使用 `cargo vet suggest` 逐一处理；`--locked` 可避免刷新导入的审计集。<sup>[[8]](#references)</sup>
+
 ```bash
 cargo install cargo-vet
-cargo vet init      # generates vet.toml
-cargo vet --locked  # verifies packages referenced in Cargo.lock
+cargo vet init
+cargo vet suggest
+cargo vet --locked
 ```
-该工具正被 Rust 项目基础设施和越来越多的组织采用，以缓解软件包投毒攻击。<sup>[[2]](#references)</sup>
 
-#### 对你的 API 接口面进行 Fuzzing（cargo-fuzz）
+#### 对 API surface 进行 Fuzzing（cargo-fuzz）
 
-Fuzz 测试可以轻松发现 panic、整数溢出和逻辑错误，这些问题可能导致 DoS 或侧信道问题：
+Fuzz target 使用生成的输入测试 API，可暴露 panic 和内存安全故障。生成的 target 位于 `fuzz/fuzz_targets/`；运行前，将其默认主体替换为对待审查 API 的调用。<sup>[[9]](#references)</sup>
 ```bash
 cargo install cargo-fuzz
-cargo fuzz init              # creates fuzz_targets/
+cargo fuzz init              # creates fuzz/fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
 将 fuzz target 添加到你的仓库，并在流水线中运行它。
 
 ## References
 
-- [1] [RustSec 安全公告数据库](https://rustsec.org)
+- [1] [RustSec Advisory Database](https://rustsec.org)
 - [2] [Cargo-vet：“审计你的 Rust 依赖项”](https://mozilla.github.io/cargo-vet/)
+- [3] [The Rust Programming Language：不安全 Rust](https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html)
+- [4] [Rust std：slice::from_raw_parts](https://doc.rust-lang.org/std/slice/fn.from_raw_parts.html)
+- [5] [Rust std：Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html)
+- [6] [Miri README](https://github.com/rust-lang/miri/blob/master/README.md)
+- [7] [Rust 2024：unsafe_op_in_unsafe_fn 警告](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html)
+- [8] [Cargo Vet 命令](https://mozilla.github.io/cargo-vet/commands.html)
+- [9] [Rust Fuzz Book：cargo-fuzz 教程](https://rust-fuzz.github.io/book/cargo-fuzz/tutorial.html)
+- [10] [The Rust Programming Language：Box 和递归类型](https://doc.rust-lang.org/book/ch15-01-box.html)
+- [11] [The Rust Programming Language：if let](https://doc.rust-lang.org/book/ch06-03-if-let.html)
+- [12] [Rust 2024：不安全 extern 块](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-extern.html)
 {{#include ../banners/hacktricks-training.md}}
