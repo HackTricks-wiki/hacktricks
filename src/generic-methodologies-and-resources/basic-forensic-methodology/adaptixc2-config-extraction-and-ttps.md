@@ -18,7 +18,7 @@ AdaptixC2 supports three primary beacon types:<sup>[[1]](#references)</sup>
 
 These are the beacon layouts publicly documented in early Adaptix analyses and they are still the most common starting point for sample-side extraction.<sup>[[1]](#references)</sup> However, current upstream builds also ship `BeaconDNS` and Gopher extenders on the server side, so do not assume every live Adaptix deployment exposes only HTTP/SMB/TCP infrastructure.<sup>[[2]](#references)</sup>
 
-Typical profile fields observed in HTTP beacon configs (after decryption):<sup>[[1]](#references)</sup>
+The following field summary and JSON samples describe the HTTP format analyzed in 2025; they are not a parser specification for newer upstream builds. Typical fields in those samples (after decryption):<sup>[[1]](#references)[[11]](#references)</sup>
 - agent_type (u32)
 - use_ssl (bool)
 - servers_count (u32), servers (array of strings), ports (array of u32)
@@ -83,7 +83,7 @@ Observed malicious HTTP profile (real attack):<sup>[[1]](#references)</sup>
 
 ## Encrypted configuration packing and load path
 
-When the operator clicks Create in the builder, AdaptixC2 embeds the encrypted profile as a tail blob in the beacon. The format is:<sup>[[1]](#references)</sup>
+When the operator clicks Create in the builder, AdaptixC2 compiles the encrypted profile into the beacon. Do not assume it is at the end of the PE or shellcode: locate the profile bytes by section scan or by following `getProfile()` in the sample. The packed format is:<sup>[[1]](#references)[[11]](#references)[[12]](#references)</sup>
 - 4 bytes: configuration size (uint32, little‑endian)
 - N bytes: RC4‑encrypted configuration data
 - 16 bytes: RC4 key
@@ -103,6 +103,8 @@ Practical implications:<sup>[[1]](#references)</sup>
 
 ## Configuration extraction workflow (defenders)
 
+For general sample triage before carving the beacon, see [Malware Analysis](malware-analysis.md).
+
 Write an extractor that mimics the beacon logic:<sup>[[1]](#references)</sup>
 1) Locate the blob inside the PE (commonly .rdata). A pragmatic approach is to scan .rdata for a plausible [size|ciphertext|16‑byte key] layout and attempt RC4.
 2) Read first 4 bytes → size (uint32 LE).
@@ -113,7 +115,7 @@ Write an extractor that mimics the beacon logic:<sup>[[1]](#references)</sup>
    - length‑prefixed strings (u32 length followed by bytes; trailing NUL can be present)
    - arrays: servers_count followed by that many [string, u32 port] pairs
 
-Minimal Python proof‑of‑concept (standalone, no external deps) that works with a pre‑extracted blob:
+Legacy HTTP Python proof‑of‑concept (standalone, no external deps) for a pre‑extracted blob in the 2025 field order. Use the current-schema parser below for recent stock builds:<sup>[[1]](#references)[[11]](#references)</sup>
 
 ```python
 import struct
@@ -180,6 +182,58 @@ def parse_http_cfg(plain: bytes) -> dict:
 # pt   = rc4(key, ct)
 # cfg  = parse_http_cfg(pt)
 ```
+
+### Parse current stock HTTP and DNS profiles
+
+Current upstream packs six little-endian `u32` values first: agent watermark/type, kill date, working time, sleep, jitter, and listener watermark/type. The HTTP-specific data then starts with a one-byte SSL flag. Unlike the legacy example, it has counted URI, user-agent, and Host-header lists followed by rotation mode and proxy settings. Thus the legacy parser starts reading the SSL flag from the kill-date field and produces false results on these builds. String lengths and integer values in this profile use little-endian encoding; packed strings include a trailing NUL when nonempty.<sup>[[11]](#references)[[12]](#references)[[14]](#references)</sup>
+
+With the `P` and `rc4` helpers above, use this parser on decrypted **stock HTTP** plaintext. Keep the RC4 key out of public reports: the HTTP profile may contain a proxy username and password.<sup>[[11]](#references)[[12]](#references)</sup>
+
+<details>
+<summary>Parse a current stock HTTP plaintext profile</summary>
+
+```python
+def parse_current_http_cfg(plain: bytes) -> dict:
+    p = P(plain)
+    keys = ('agent_type', 'kill_date', 'working_time',
+            'sleep_delay', 'jitter_delay', 'listener_type')
+    cfg = {key: p.u32() for key in keys}
+    cfg['use_ssl'] = bool(p.u8())
+    count = p.u32()
+    if not 0 < count <= 128:
+        raise ValueError('implausible server count')
+    cfg['servers'] = []
+    cfg['ports'] = []
+    for _ in range(count):
+        cfg['servers'].append(p.s())
+        cfg['ports'].append(p.u32())
+    cfg['http_method'] = p.s()
+    def strings():
+        n = p.u32()
+        if n > 128:
+            raise ValueError('implausible string count')
+        return [p.s() for _ in range(n)]
+    cfg['uris'] = strings()
+    cfg['parameter'] = p.s()
+    cfg['user_agents'] = strings()
+    cfg['http_headers'] = p.s()
+    cfg['ans_pre_size'] = p.u32()
+    cfg['ans_size'] = p.u32() + cfg['ans_pre_size']
+    cfg['host_headers'] = strings()
+    cfg['rotation_mode'] = p.u32()  # 0=sequential, 1=random
+    cfg['proxy_type'] = p.u32()     # 0=none, 1=HTTP, 2=HTTPS
+    cfg['proxy_host'] = p.s()
+    cfg['proxy_port'] = p.u32()
+    cfg['proxy_username'] = p.s()
+    cfg['proxy_password'] = p.s()
+    if p.o != len(plain):
+        raise ValueError('unexpected trailing bytes or wrong schema')
+    return cfg
+```
+
+</details>
+
+For a stock DNS beacon, read the same six common `u32` fields, then the length-prefixed `domain`, `resolvers`, `doh_resolvers`, and `qtype` strings. Read `pkt_size`, `label_size`, `ttl`, `burst_enabled`, `burst_sleep`, `burst_jitter`, and `dns_mode` as `u32`, then the length-prefixed DoH user-agent string. `dns_mode` distinguishes UDP, DoH, and the two fallback directions. This is a separate layout: do not force DNS plaintext through the HTTP parser.<sup>[[12]](#references)[[13]](#references)</sup>
 
 Tips:
 - When automating, use a PE parser to read .rdata then apply a sliding window: for each offset o, try size = u32(.rdata[o:o+4]), ct = .rdata[o+4:o+4+size], candidate key = next 16 bytes; RC4‑decrypt and check that string fields decode as UTF‑8 and lengths are sane.
@@ -285,6 +339,8 @@ These fields can be used for clustering and to explain observed quiet periods.
 
 Unit 42 published basic YARA for beacons (C/C++ and Go) and loader API‑hashing constants.<sup>[[1]](#references)</sup> Consider complementing with rules that look for the [size|ciphertext|16‑byte‑key] layout near PE .rdata end, the default HTTP profile strings, and newer server/listener markers such as `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open`, and `ipinfo.io`.<sup>[[4]](#references)[[5]](#references)</sup>
 
+
+
 ## References
 
 - [1] [AdaptixC2: A New Open-Source Framework Leveraged in Real-World Attacks (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
@@ -297,5 +353,8 @@ Unit 42 published basic YARA for beacons (C/C++ and Go) and loader API‑hashing
 - [8] [Memory protection constants – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/memory/memory-protection-constants)
 - [9] [Invoke-RestMethod – PowerShell](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-restmethod)
 - [10] [MITRE ATT&CK T1547.001 – Registry Run Keys/Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
-
+- [11] [AdaptixC2 profile generation (pl_main.go)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/pl_main.go)
+- [12] [AdaptixC2 beacon profile parser (AgentConfig.cpp)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/src_beacon/beacon/AgentConfig.cpp)
+- [13] [AdaptixC2 DNS profile generation (pl_utils.go)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/pl_utils.go)
+- [14] [AdaptixC2 profile packing (pl_packer.go)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/pl_packer.go)
 {{#include ../../banners/hacktricks-training.md}}
