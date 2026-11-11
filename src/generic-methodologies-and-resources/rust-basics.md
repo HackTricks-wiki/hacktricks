@@ -4,11 +4,11 @@
 
 ### Vlasništvo nad promenljivama
 
-Memorijom se upravlja pomoću sistema vlasništva, koji se zasniva na sledećim pravilima koja kompajler proverava tokom kompajliranja:
+Memorijom se upravlja pomoću sistema vlasništva, čija pravila kompajler proverava tokom kompajliranja:
 
-1. Svaka vrednost u Rust-u ima promenljivu koja se naziva njenim vlasnikom.
-2. U datom trenutku može postojati samo jedan vlasnik.
-3. Kada vlasnik izađe iz opsega važenja, vrednost se odbacuje.
+1. Svaka vrednost u Rust-u ima promenljivu koja se naziva njen vlasnik.
+2. U jednom trenutku može postojati samo jedan vlasnik.
+3. Kada vlasnik izađe iz opsega, vrednost se odbacuje.
 
 ```rust
 fn main() {
@@ -26,7 +26,7 @@ fn main() {
 
 ### Generički tipovi
 
-Napravite strukturu u kojoj jedna od vrednosti može biti bilo kog tipa
+Napravite strukturu čija jedna vrednost može biti bilo kog tipa.
 
 ```rust
 struct Wrapper<T> {
@@ -45,7 +45,7 @@ Wrapper::new("Foo").value, "Foo"
 
 ### Option, Some & None
 
-Tip Option znači da vrednost može biti tipa Some (nešto postoji) ili None:
+Tip Option znači da vrednost može biti tipa Some (postoji nešto) ili None:
 
 ```rust
 pub enum Option<T> {
@@ -54,7 +54,7 @@ pub enum Option<T> {
 }
 ```
 
-Možete koristiti funkcije kao što su `is_some()` ili `is_none()` da proverite vrednost tipa `Option`.
+Možete koristiti funkcije kao što su `is_some()` ili `is_none()` da biste proverili vrednost tipa Option.
 
 
 ### Result, Ok & Err
@@ -68,15 +68,14 @@ pub enum Result<T, E> {
 }
 ```
 
-Možete koristiti funkcije kao što su `is_ok()` ili `is_err()` da proverite vrednost rezultata
+Možete da koristite funkcije kao što su `is_ok()` ili `is_err()` da proverite vrednost rezultata.
 
-`Option` enum treba koristiti u situacijama kada neka vrednost možda ne postoji (tj. kada je `None`).
-`Result` enum treba koristiti u situacijama kada radite nešto što može poći po zlu
-
+Enum `Option` treba koristiti u situacijama kada neka vrednost možda ne postoji (odnosno kada je `None`).
+Enum `Result` treba koristiti u situacijama kada radite nešto što može poći po zlu.
 
 ### Makroi
 
-Makroi su moćniji od funkcija jer se proširuju i stvaraju više koda nego što biste ručno napisali. Na primer, potpis funkcije mora da navede broj i tip parametara koje funkcija ima. Makroi, s druge strane, mogu da primaju promenljiv broj parametara: možemo pozvati `println!("hello")` sa jednim argumentom ili `println!("hello {}", name)` sa dva argumenta. Takođe, makroi se proširuju pre nego što kompajler protumači značenje koda, pa makro, na primer, može da implementira trait za dati tip. Funkcija to ne može, jer se poziva tokom izvršavanja, a trait mora da se implementira tokom kompilacije.
+Makroi su moćniji od funkcija jer se proširuju i generišu više koda nego što ste ručno napisali. Na primer, potpis funkcije mora da navede broj i tip parametara koje funkcija ima. Makroi, s druge strane, mogu da primaju promenljiv broj parametara: možemo pozvati `println!("hello")` sa jednim argumentom ili `println!("hello {}", name)` sa dva argumenta. Takođe, makroi se proširuju pre nego što kompajler protumači značenje koda, pa makro može, na primer, da implementira trait za određeni tip. Funkcija to ne može, jer se poziva tokom izvršavanja, a trait mora da se implementira tokom kompajliranja.
 
 ```rust
 macro_rules! my_macro {
@@ -103,7 +102,7 @@ mod macros {
 }
 ```
 
-### Iteracija
+### Iteriranje
 
 ```rust
 // Iterate through a vector
@@ -124,16 +123,22 @@ for value in map.values() {
 
 ### Rekurzivni Box
 
+Rekurzivnom enum-u je potrebna indirekcija kako bi njegova veličina bila poznata u vreme kompajliranja; direktno čuvanje `List` unutar `List` ne može da se kompajlira.<sup>[[10]](#references)</sup>
+
 ```rust
 enum List {
-    Cons(i32, List),
+    Cons(i32, Box<List>),
     Nil,
 }
 
-let list = Cons(1, Cons(2, Cons(3, Nil)));
+use List::{Cons, Nil};
+
+fn main() {
+    let _list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}
 ```
 
-### Uslovni izrazi
+### Uslovne naredbe
 
 #### if
 
@@ -173,7 +178,7 @@ let binary = match boolean {
 };
 ```
 
-#### loop (beskonačna petlja)
+#### petlja (beskonačna)
 
 ```rust
 loop {
@@ -258,9 +263,11 @@ for name in names.iter_mut() {
 
 #### if let
 
+Upari `Some` da bi vezao njegovu unutrašnju vrednost; običan obrazac promenljive poklapa se i sa `Some` i sa `None`, pa se grana `else` nikada ne bi izvršila.<sup>[[11]](#references)</sup>
+
 ```rust
 let optional_word = Some(String::from("rustlings"));
-if let word = optional_word {
+if let Some(word) = optional_word {
     println!("The word is: {}", word);
 } else {
     println!("The optional word doesn't contain anything");
@@ -320,11 +327,11 @@ mod tests {
 }
 ```
 
-### Threading
+### Rad sa nitima
 
 #### Arc
 
-Arc može da koristi Clone za kreiranje dodatnih referenci na objekat koje se prosleđuju nitima. Kada poslednji pokazivač reference na vrednost izađe iz opsega, promenljiva se odbacuje.
+Arc može da koristi Clone za kreiranje dodatnih referenci na objekat koje se prosleđuju nitima. Kada poslednji pokazivač reference na vrednost izađe iz opsega važenja, promenljiva se odbacuje.
 
 ```rust
 use std::sync::Arc;
@@ -362,17 +369,23 @@ fn main() {
 
 ### Osnove bezbednosti
 
-Rust podrazumevano pruža snažne garancije bezbednosti memorije, ali i dalje možete da uvedete kritične ranjivosti pomoću koda `unsafe`, problema sa zavisnostima ili logičkih grešaka. Sledeći mini-podsetnik okuplja primitive na koje ćete najčešće nailaziti tokom ofanzivnih ili defanzivnih bezbednosnih pregleda Rust softvera.
+Rust podrazumevano pruža snažne garancije bezbednosti memorije, ali i dalje možete uneti kritične ranjivosti pomoću `unsafe` koda, problema sa zavisnostima ili logičkih grešaka. Ovaj kratki podsetnik obuhvata primitive koje ćete najčešće koristiti tokom ofanzivnih ili defanzivnih bezbednosnih pregleda Rust softvera. Za alate specifične za druge jezike pogledajte [Alati za pregled koda](../network-services-pentesting/pentesting-web/code-review-tools.md#rust).
 
-#### Nebezbedan kod i bezbednost memorije
+#### `unsafe` kod i bezbednost memorije
 
-Blokovi `unsafe` isključuju provere aliasinga i granica koje obavlja compiler, pa **sve tradicionalne greške koje dovode do oštećenja memorije (OOB, use-after-free, double free itd.) mogu ponovo da se pojave**. Brza kontrolna lista za audit:
+`unsafe` dozvoljava operacije čije bezbednosne uslove kompajler ne može da dokaže; **ne** isključuje uobičajene provere pozajmljivanja niti provere granica. Do korupcije memorije može doći kada `unsafe` operacija prekrši svoje uslove, uključujući i slučajeve unutar funkcije izložene kao bezbedan API.<sup>[[3]](#references)</sup>
 
-* Potražite blokove `unsafe`, funkcije `extern "C"`, pozive `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, sirove pokazivače ili `ffi` module.
-* Proverite svaku aritmetičku operaciju nad pokazivačima i argument dužine koji se prosleđuju funkcijama niskog nivoa.
-* Dajte prednost opciji `#![forbid(unsafe_code)]` (za ceo crate) ili `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) kako bi se kompajliranje prekinulo ako neko ponovo uvede `unsafe`.
+Prilikom pregleda izvornog koda pronađite neproverene operacije i pratite pokazivače i dužine pod kontrolom napadača od njihovih javnih pozivalaca:<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Primer prekoračenja koje nastaje upotrebom sirovih pokazivača:
+```bash
+rg -n 'unsafe|from_raw_parts|set_len|copy_nonoverlapping|transmute|unsafe impl|extern "C"' src
+```
+
+* Za `slice::from_raw_parts` dokažite da pokazivač nije null i da je poravnat, da se **ceo** inicijalizovani opseg nalazi unutar jedne žive alokacije i da vraćeni slice ne može da nadživi tu alokaciju. Čak ni slice dužine nula ne može da koristi null pokazivač.
+* Za `Vec::set_len` dokažite da nova dužina ne prelazi stvarni kapacitet i da je svaki novootkriveni element inicijalizovan. Pratite veličinu alokacije i broj kopiranja; `with_capacity` ne inicijalizuje elemente.
+* Proverite svaki `unsafe impl` za `Send` ili `Sync` i svaki FFI potpis u odnosu na invarijante koje su obećane bezbednim pozivaocima. `#![forbid(unsafe_code)]` odbacuje unsafe kod u crate-u; `#![deny(unsafe_op_in_unsafe_fn)]` umesto toga zahteva eksplicitne unsafe blokove **unutar** unsafe funkcija, ali ne zabranjuje unsafe kod. Ovaj lint podrazumevano izdaje upozorenje u Rust 2024.<sup>[[3]](#references)[[7]](#references)[[12]](#references)</sup>
+
+Primer overflow-a izazvanog sirovim pokazivačima:
 ```rust
 use std::ptr;
 
@@ -386,55 +399,67 @@ fn vuln_copy(src: &[u8]) -> Vec<u8> {
     dst
 }
 ```
-Pokretanje Miri-ja je jeftin način za otkrivanje UB-a tokom testiranja:
+Ulaz duži od `dst.capacity()` krši i granicu kopiranja i ugovor za `set_len` u gornjem primeru. Dodajte test sa predugačkim ulazom za ciljni alokator, pa ga pokrenite pod Miri-jem. Miri proverava izvršene putanje na neodređeno ponašanje, ali nepodržani strani pozivi mogu da ga spreče da testira FFI granicu.<sup>[[5]](#references)[[6]](#references)</sup>
+
 ```bash
-rustup component add miri
-cargo miri test  # hunts for OOB / UAF during unit tests
+rustup +nightly component add miri
+cargo +nightly miri test
 ```
 
 #### Provera zavisnosti pomoću RustSec / cargo-audit
 
-Većina ranjivosti u Rustu iz stvarnog sveta nalazi se u crate-ovima trećih strana. Baza bezbednosnih upozorenja RustSec (koju održava zajednica) može se lokalno pretraživati:<sup>[[1]](#references)</sup>
+Većina ranjivosti u Rustu iz stvarnog sveta nalazi se u paketima nezavisnih autora. Baza bezbednosnih upozorenja RustSec (koju održava zajednica) može se lokalno pretraživati:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Integrišite ga u CI i prekinite izvršavanje ako se pojavi upozorenje pomoću opcije `--deny warnings`.
+Integrate ga u CI i neka CI padne na `--deny warnings`.
 
-`cargo deny check advisories` nudi sličnu funkcionalnost, uz provere licenci i ban-lista.
+`cargo deny check advisories` nudi sličnu funkcionalnost, uz provere licenci i liste zabranjenih paketa.
 
 #### Pokrivenost koda pomoću cargo-tarpaulin
 
-`cargo tarpaulin` je alat za izveštavanje o pokrivenosti koda za Cargo sistem za izgradnju.
+`cargo tarpaulin` je alat za izveštavanje o pokrivenosti koda u Cargo sistemu za izgradnju.
 
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Na Linuxu, podrazumevani backend za praćenje u Tarpaulin-u je i dalje Ptrace i radi samo na x86_64 procesorima. Može se promeniti na llvm coverage instrumentation pomoću `--engine llvm`. Za Mac i Windows, ovo je podrazumevani metod prikupljanja podataka.
+Na Linuxu, Tarpaulin-ov podrazumevani tracing backend je i dalje Ptrace i radiće samo na x86_64 procesorima. Može se promeniti u llvm coverage instrumentation pomoću `--engine llvm`. Za Mac i Windows, ovo je podrazumevani način prikupljanja.
 
-#### Provera lanca snabdevanja pomoću cargo-vet (2024)
+#### Provera lanca snabdevanja pomoću cargo-vet
 
-`cargo vet` beleži hash pregleda za svaki crate koji uvezete i sprečava neprimećene nadogradnje:
+`cargo vet` proverava zavisnosti prema konfigurisanim kriterijumima za audit, koristeći lokalne audite, pouzdane uvoze ili eksplicitna izuzeća. `cargo vet init` kreira metapodatke u `supply-chain/` i izuzima postojeće zavisnosti koje nisu prošle audit, tako da početna uspešna provera **ne** znači da je svaki crate pregledan. Pregledajte izuzeća i koristite `cargo vet suggest` da biste ih obradili; `--locked` sprečava osvežavanje uvezenih skupova audita.<sup>[[8]](#references)</sup>
+
 ```bash
 cargo install cargo-vet
-cargo vet init      # generates vet.toml
-cargo vet --locked  # verifies packages referenced in Cargo.lock
+cargo vet init
+cargo vet suggest
+cargo vet --locked
 ```
-Ovaj alat usvaja infrastruktura Rust projekta, kao i sve veći broj organizacija, radi ublažavanja napada trovanjem paketa.<sup>[[2]](#references)</sup>
 
-#### Fuzzing vaše API površine (cargo-fuzz)
+#### Fuzzing površine vašeg API-ja (cargo-fuzz)
 
-Fuzz testovi lako otkrivaju panic greške, prekoračenja celobrojnih vrednosti i logičke greške koje mogu dovesti do DoS-a ili problema sa bočnim kanalima:
+Fuzz targets testiraju API pomoću generisanih ulaza i mogu da otkriju panike i greške bezbednosti memorije. Generisani target nalazi se u `fuzz/fuzz_targets/`; zamenite njegovo podrazumevano telo pozivom API-ja koji proveravate pre pokretanja.<sup>[[9]](#references)</sup>
 ```bash
 cargo install cargo-fuzz
-cargo fuzz init              # creates fuzz_targets/
+cargo fuzz init              # creates fuzz/fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-Dodajte fuzz target u svoj repo i pokrenite ga u svom pipeline-u.
+Dodajte fuzz target u svoj repozitorijum i pokrenite ga u svom pipeline-u.
 
 ## References
 
-- [1] [RustSec baza bezbednosnih saveta](https://rustsec.org)
-- [2] [Cargo-vet: „Provera vaših Rust zavisnosti”](https://mozilla.github.io/cargo-vet/)
+- [1] [Baza podataka RustSec bezbednosnih saveta](https://rustsec.org)
+- [2] [Cargo-vet: „Revizija Rust zavisnosti“](https://mozilla.github.io/cargo-vet/)
+- [3] [Programski jezik Rust: Unsafe Rust](https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html)
+- [4] [Rust std: slice::from_raw_parts](https://doc.rust-lang.org/std/slice/fn.from_raw_parts.html)
+- [5] [Rust std: Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html)
+- [6] [Miri README](https://github.com/rust-lang/miri/blob/master/README.md)
+- [7] [Rust 2024: upozorenje unsafe_op_in_unsafe_fn](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html)
+- [8] [Cargo Vet komande](https://mozilla.github.io/cargo-vet/commands.html)
+- [9] [Rust Fuzz Book: vodič za cargo-fuzz](https://rust-fuzz.github.io/book/cargo-fuzz/tutorial.html)
+- [10] [Programski jezik Rust: Box i rekurzivni tipovi](https://doc.rust-lang.org/book/ch15-01-box.html)
+- [11] [Programski jezik Rust: if let](https://doc.rust-lang.org/book/ch06-03-if-let.html)
+- [12] [Rust 2024: Unsafe extern blokovi](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-extern.html)
 {{#include ../banners/hacktricks-training.md}}
