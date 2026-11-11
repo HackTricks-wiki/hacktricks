@@ -23,7 +23,7 @@ A practical corpus rule for mutational fuzzing is: **prefer a small set of struc
 
 ## Large generated programs and timeout bias
 
-For compiler and interpreter fuzzing, an input may need to cross a **generated-code size threshold** rather than a new parser branch. In the V8 [exception-handler offset example](../binary-exploitation/chrome-exploiting.md#exception-handler-offsets-narrower-than-maximum-bytecode-size), a valid testcase needed over 256 MiB of bytecode before the truncated handler offset mattered. Repeated `yield*` constructs could reach that boundary, but compiling the testcase took seconds on a debug build. Small-input preferences and short execution timeouts therefore systematically disfavor this class even when grammar coverage is high. Treat size thresholds and timeout policy as separate campaign dimensions when auditing packed offsets or other length-sensitive metadata. The separate-campaign recommendation is an inference from the reported failure mode.<sup>[[29]](#references)</sup>
+For compiler and interpreter fuzzing, an input may need to cross a **generated-code size threshold** rather than a new parser branch. In the V8 [exception-handler offset example](../binary-exploitation/chrome-exploiting.md#exception-handler-offsets-narrower-than-maximum-bytecode-size), a valid testcase needed over 256 MiB of bytecode before the truncated handler offset mattered. Repeated `yield*` constructs could reach that boundary, but compiling the testcase took seconds on a debug build. Small-input preferences and short execution timeouts can disfavor this class even when grammar coverage is high. When auditing packed offsets or other length-sensitive metadata, consider size thresholds and timeout policy separately; this campaign advice is an inference from the reported failure mode.<sup>[[29]](#references)</sup>
 
 ## Comparison-Aware Mutation For Magic Values
 
@@ -534,6 +534,6 @@ Run the command from the **same package** and with the **same `-fuzz` target** s
 - [26] [State of Post-Quantum Cryptography Implementations](http://blog.quarkslab.com/state-of-post-quantum-cryptography-implementations.html)
 - [27] [Snapshotting Our Way to CVE-2026-9539](http://blog.quarkslab.com/snapshotting-our-way-to-cve-2026-9539.html)
 - [28] [Quarkslab slirp_snapshots_stateful](https://github.com/quarkslab/slirp_snapshots_stateful)
-- [29] [Project Zero - Fuzzing vs. AI: Comparing Fuzzilli and BigSleep on V8 Vulnerability Discovery](https://projectzero.google/2026/10/fuzzing-v-AI.html)
+- [29] [Project Zero - Fuzzers vs. AI: Comparing Fuzzilli and BigSleep on JavaScript Engines](https://projectzero.google/2026/10/fuzzing-v-AI.html)
 
 {{#include ../banners/hacktricks-training.md}}
