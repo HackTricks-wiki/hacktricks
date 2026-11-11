@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Umiliki wa vigeu
+### Umiliki wa vigezo
 
-Kumbukumbu husimamiwa kupitia mfumo wa umiliki wenye kanuni zifuatazo ambazo compiler hukagua wakati wa compilation:
+Kumbukumbu hudhibitiwa kupitia mfumo wa umiliki wenye kanuni zifuatazo, ambazo compiler hukagua wakati wa compilation:
 
-1. Kila thamani katika Rust ina kigeu kinachoitwa mmiliki wake.
+1. Kila thamani katika Rust ina kigezo kinachoitwa mmiliki wake.
 2. Kunaweza kuwa na mmiliki mmoja tu kwa wakati mmoja.
-3. Mmiliki anapotoka kwenye scope, thamani itaondolewa.
+3. Mmiliki anapotoka nje ya scope, thamani itafutwa.
 
 ```rust
 fn main() {
@@ -26,7 +26,7 @@ fn main() {
 
 ### Aina za Jumla
 
-Unda struct ambayo mojawapo ya thamani zake inaweza kuwa ya aina yoyote
+Unda struct ambayo thamani yake moja inaweza kuwa ya aina yoyote
 
 ```rust
 struct Wrapper<T> {
@@ -45,7 +45,7 @@ Wrapper::new("Foo").value, "Foo"
 
 ### Option, Some & None
 
-Aina ya Option inamaanisha kuwa thamani inaweza kuwa Some (kuna kitu) au None:
+Aina ya Option inamaanisha kuwa thamani inaweza kuwa ya aina ya Some (kuna kitu) au None:
 
 ```rust
 pub enum Option<T> {
@@ -59,7 +59,7 @@ Unaweza kutumia functions kama `is_some()` au `is_none()` kuangalia thamani ya O
 
 ### Result, Ok & Err
 
-Hutumika kurudisha na kusambaza makosa.
+Hutumika kurejesha na kupitisha makosa.
 
 ```rust
 pub enum Result<T, E> {
@@ -70,13 +70,13 @@ pub enum Result<T, E> {
 
 Unaweza kutumia functions kama `is_ok()` au `is_err()` kuangalia thamani ya matokeo.
 
-Enum ya `Option` inapaswa kutumiwa katika hali ambapo thamani huenda isiwepo (ikawa `None`).
-Enum ya `Result` inapaswa kutumiwa katika hali ambapo unafanya jambo ambalo huenda likashindikana.
+Enum ya `Option` inapaswa kutumiwa katika hali ambapo huenda thamani isiwepo (iwe `None`).
+Enum ya `Result` inapaswa kutumiwa katika hali ambapo unafanya jambo ambalo huenda likakosea.
 
 
 ### Macros
 
-Macros zina nguvu zaidi kuliko functions kwa sababu hupanuka na kutoa code zaidi ya uliyoandika mwenyewe. Kwa mfano, signature ya function lazima itangaze idadi na aina ya parameters ambazo function hiyo ina. Kwa upande mwingine, macros zinaweza kupokea idadi tofauti ya parameters: tunaweza kuita `println!("hello")` kwa argument moja au `println!("hello {}", name)` kwa arguments mbili. Pia, macros hupanuliwa kabla compiler haijatafsiri maana ya code, kwa hiyo macro inaweza, kwa mfano, kutekeleza trait kwenye aina fulani. Function haiwezi kufanya hivyo, kwa sababu huitwa wakati wa runtime, ilhali trait lazima itekelezwe wakati wa compile.
+Macros zina nguvu zaidi kuliko functions kwa sababu hupanuka na kutoa code zaidi kuliko uliyoandika mwenyewe. Kwa mfano, sahihi ya function lazima itangaze idadi na aina za vigezo vya function hiyo. Kwa upande mwingine, macros zinaweza kupokea idadi tofauti ya vigezo: tunaweza kuita `println!("hello")` kwa hoja moja au `println!("hello {}", name)` kwa hoja mbili. Pia, macros hupanuliwa kabla compiler haijatafsiri maana ya code, kwa hivyo macro inaweza, kwa mfano, kutekeleza trait kwenye aina fulani. Function haiwezi kufanya hivyo, kwa sababu huitwa wakati wa runtime na trait inahitaji kutekelezwa wakati wa compile.
 
 ```rust
 macro_rules! my_macro {
@@ -122,15 +122,21 @@ for key in map.keys() {
 for value in map.values() {
 ```
 
-### Box ya Kujirudia
+### Recursive Box
+
+Enum ya recursive inahitaji indirection ili ukubwa wake ujulikane wakati wa compile; kuhifadhi `List` moja kwa moja ndani ya `List` hakukompili.<sup>[[10]](#references)</sup>
 
 ```rust
 enum List {
-    Cons(i32, List),
+    Cons(i32, Box<List>),
     Nil,
 }
 
-let list = Cons(1, Cons(2, Cons(3, Nil)));
+use List::{Cons, Nil};
+
+fn main() {
+    let _list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}
 ```
 
 ### Masharti
@@ -258,9 +264,11 @@ for name in names.iter_mut() {
 
 #### if let
 
+Linganisha `Some` ili kufunga thamani yake ya ndani; kigezo cha kawaida cha variable hulingana na `Some` na `None`, kwa hiyo tawi la `else` halitatekelezwa kamwe.<sup>[[11]](#references)</sup>
+
 ```rust
 let optional_word = Some(String::from("rustlings"));
-if let word = optional_word {
+if let Some(word) = optional_word {
     println!("The word is: {}", word);
 } else {
     println!("The optional word doesn't contain anything");
@@ -288,7 +296,7 @@ while let Some(i) = optional {
 
 ### Traits
 
-Unda method mpya ya type
+Unda method mpya kwa aina fulani
 
 ```rust
 trait AppendBar {
@@ -320,11 +328,11 @@ mod tests {
 }
 ```
 
-### Uendeshaji wa threads
+### Threading
 
 #### Arc
 
-Arc inaweza kutumia Clone kuunda marejeleo zaidi ya object ili kuyapitisha kwa threads. Pointer ya mwisho ya marejeleo ya value inapotoka kwenye scope, variable huondolewa.
+Arc inaweza kutumia Clone kuunda marejeleo zaidi ya kitu hicho na kuyapitisha kwenye threads. Kielekezi cha mwisho cha marejeleo ya thamani kinapotoka nje ya scope, variable hutupwa.
 
 ```rust
 use std::sync::Arc;
@@ -339,7 +347,7 @@ for _ in 0..10 {
 
 #### Threads
 
-Katika hali hii tutapitisha variable kwenye thread ambayo itaweza kuibadilisha.
+Katika hali hii tutakabidhi thread kigezo ambacho itaweza kukirekebisha.
 
 ```rust
 fn main() {
@@ -362,17 +370,23 @@ fn main() {
 
 ### Misingi ya Usalama
 
-Rust hutoa dhamana thabiti za usalama wa kumbukumbu kwa chaguo-msingi, lakini bado unaweza kusababisha udhaifu mkubwa kupitia code ya `unsafe`, matatizo ya dependencies au makosa ya mantiki. Muhtasari huu mfupi unakusanya primitives utakazokutana nazo mara nyingi zaidi unapokagua usalama wa software ya Rust kwa mtazamo wa kushambulia au kujilinda.
+Rust hutoa dhamana thabiti za usalama wa kumbukumbu kwa chaguomsingi, lakini bado unaweza kusababisha udhaifu mkubwa kupitia code ya `unsafe`, matatizo ya dependencies au makosa ya mantiki. Cheatsheet hii fupi inakusanya primitives utakazotumia mara nyingi zaidi wakati wa ukaguzi wa usalama wa Rust, wa kiudhalilishaji au wa kiulinzi. Kwa zana nyingine mahususi za lugha, angalia [Zana za Ukaguzi wa Code](../network-services-pentesting/pentesting-web/code-review-tools.md#rust).
 
-#### Code ya `unsafe` na usalama wa kumbukumbu
+#### Code ya unsafe na usalama wa kumbukumbu
 
-Bloku za `unsafe` huzima ukaguzi wa compiler wa aliasing na mipaka, kwa hiyo **hitilafu zote za kawaida za uharibifu wa kumbukumbu (OOB, use-after-free, double free, n.k.) zinaweza kutokea tena**. Orodha fupi ya ukaguzi:
+`unsafe` huruhusu shughuli ambazo masharti yake ya usalama hayawezi kuthibitishwa na compiler; **haizimi** ukaguzi wa kawaida wa borrow au mipaka. Uharibifu wa kumbukumbu unaweza kutokea pale shughuli ya unsafe inapokiuka masharti yake, ikiwemo ndani ya function inayotolewa kama API salama.<sup>[[3]](#references)</sup>
 
-* Tafuta bloku za `unsafe`, functions za `extern "C"`, miito ya `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers au modules za `ffi`.
-* Thibitisha kila hesabu ya pointer na kila hoja ya urefu inayopitishwa kwa functions za kiwango cha chini.
-* Pendelea `#![forbid(unsafe_code)]` (kwa crate nzima) au `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) ili compilation ishindwe mtu anapoweka tena `unsafe`.
+Katika ukaguzi wa source code, tafuta shughuli zisizokaguliwa na ufuatilie pointers na urefu unaodhibitiwa na mshambuliaji kutoka kwa callers zake za umma:<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Mfano wa overflow unaosababishwa na raw pointers:
+```bash
+rg -n 'unsafe|from_raw_parts|set_len|copy_nonoverlapping|transmute|unsafe impl|extern "C"' src
+```
+
+* Kwa `slice::from_raw_parts`, thibitisha kuwa pointer si null na imepangiliwa ipasavyo, kwamba **range nzima** iliyoanzishwa iko ndani ya allocation moja hai, na kwamba slice inayorejeshwa haiwezi kuishi muda mrefu kuliko allocation hiyo. Hata slice yenye urefu wa sifuri haiwezi kutumia pointer ya null.
+* Kwa `Vec::set_len`, thibitisha kuwa urefu mpya hauzidi capacity halisi na kwamba kila element inayofichuliwa upya ilikuwa imeanzishwa. Fuatilia ukubwa wa allocation na idadi ya nakala; `with_capacity` haianzishi elements.
+* Kagua kila `unsafe impl` ya `Send` au `Sync` na kila saini ya FFI ili kuhakikisha zinatimiza invariants zilizoahidiwa kwa callers salama. `#![forbid(unsafe_code)]` hukataa code isiyo salama ndani ya crate; `#![deny(unsafe_op_in_unsafe_fn)]` badala yake huhitaji blocks za unsafe zilizo wazi **ndani ya** functions za unsafe, bali haikatazi code isiyo salama. Lint hii huonya kwa chaguomsingi katika Rust 2024.<sup>[[3]](#references)[[7]](#references)[[12]](#references)</sup>
+
+Mfano wa overflow uliosababishwa na raw pointers:
 ```rust
 use std::ptr;
 
@@ -386,49 +400,51 @@ fn vuln_copy(src: &[u8]) -> Vec<u8> {
     dst
 }
 ```
-Kuendesha Miri ni njia ya gharama nafuu ya kugundua UB wakati wa majaribio:
+Ingizo refu kuliko `dst.capacity()` linakiuka kikomo cha kunakili na mkataba wa `set_len` katika mfano ulio hapo juu. Ongeza jaribio lenye ingizo kubwa kupita kiasi kwa allocator lengwa, kisha liendeshe chini ya Miri. Miri hukagua njia zilizotekelezwa ili kubaini tabia isiyobainishwa, lakini huenda simu za kigeni zisizotumika zikazuia Miri kufikia mpaka wa FFI.<sup>[[5]](#references)[[6]](#references)</sup>
+
 ```bash
-rustup component add miri
-cargo miri test  # hunts for OOB / UAF during unit tests
+rustup +nightly component add miri
+cargo +nightly miri test
 ```
 
-#### Kukagua dependencies kwa RustSec / cargo-audit
+#### Kukagua dependencies kwa kutumia RustSec / cargo-audit
 
-Vulnerabilities nyingi za Rust katika mazingira halisi hupatikana kwenye crates za wahusika wengine. Hifadhidata ya ushauri ya RustSec (inayoendeshwa na jamii) inaweza kuulizwa moja kwa moja:<sup>[[1]](#references)</sup>
+Vulnerabilities nyingi za Rust katika mazingira halisi hupatikana kwenye crates za wahusika wengine. DB ya ushauri ya RustSec (inayoendeshwa na jamii) inaweza kukaguliwa locally:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Iunganishe kwenye CI na ushindwe ikiwa `--deny warnings`.
+Ijumuishe kwenye CI na ufanye ukaguzi ushindwe kwa `--deny warnings`.
 
-`cargo deny check advisories` hutoa utendaji unaofanana, pamoja na ukaguzi wa leseni na orodha ya marufuku.
+`cargo deny check advisories` hutoa utendaji unaofanana pamoja na ukaguzi wa leseni na orodha ya vilivyopigwa marufuku.
 
 #### Code coverage with cargo-tarpaulin
 
-`cargo tarpaulin` ni zana ya kuripoti code coverage kwa mfumo wa build wa Cargo
+`cargo tarpaulin` ni zana ya kuripoti code coverage kwa mfumo wa build wa Cargo.
 
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Kwenye Linux, backend ya tracing ya default ya Tarpaulin bado ni Ptrace na itafanya kazi tu kwenye vichakataji vya x86_64. Hili linaweza kubadilishwa kuwa instrumentation ya coverage ya llvm kwa kutumia `--engine llvm`. Kwa Mac na Windows, hii ndiyo njia ya default ya kukusanya.
+Kwenye Linux, backend chaguomsingi ya tracing ya Tarpaulin bado ni Ptrace na itafanya kazi tu kwenye vichakataji vya x86_64. Hili linaweza kubadilishwa kuwa instrumentation ya llvm coverage kwa kutumia `--engine llvm`. Kwa Mac na Windows, hii ndiyo njia chaguomsingi ya ukusanyaji.
 
-#### Uthibitishaji wa supply chain kwa cargo-vet (2024)
+#### Uhakiki wa supply-chain kwa kutumia cargo-vet
 
-`cargo vet` huhifadhi hash ya ukaguzi kwa kila crate unayoingiza na kuzuia masasisho yasiyotambuliwa:
+`cargo vet` hukagua dependencies dhidi ya vigezo vya ukaguzi vilivyosanidiwa kwa kutumia ukaguzi wa ndani, imports zinazoaminika, au misamaha iliyoainishwa wazi. `cargo vet init` huunda metadata ya `supply-chain/` na kutoa misamaha kwa dependencies zilizopo ambazo hazijakaguliwa, kwa hiyo ukaguzi kufaulu mwanzoni **haimaanishi** kwamba kila crate imekaguliwa. Chunguza misamaha na utumie `cargo vet suggest` ili kuishughulikia; `--locked` huzuia kusasisha seti za ukaguzi zilizoagizwa.<sup>[[8]](#references)</sup>
+
 ```bash
 cargo install cargo-vet
-cargo vet init      # generates vet.toml
-cargo vet --locked  # verifies packages referenced in Cargo.lock
+cargo vet init
+cargo vet suggest
+cargo vet --locked
 ```
-Zana hii inakubaliwa na miundombinu ya mradi wa Rust na mashirika mengi yanayoendelea kujiunga ili kupunguza mashambulizi ya vifurushi vilivyotiwa sumu.<sup>[[2]](#references)</sup>
 
-#### Kufanya fuzzing kwenye API yako (cargo-fuzz)
+#### Fuzzing your API surface (cargo-fuzz)
 
-Fuzz tests hutambua kwa urahisi panics, integer overflows na logic bugs zinazoweza kusababisha DoS au matatizo ya side-channel:
+Fuzz targets hujaribu API kwa kutumia inputs zinazozalishwa na zinaweza kufichua panics na hitilafu za usalama wa kumbukumbu. Target inayozalishwa hupatikana chini ya `fuzz/fuzz_targets/`; badilisha body yake ya default iwe mwito wa API inayokaguliwa kabla ya kuiendesha.<sup>[[9]](#references)</sup>
 ```bash
 cargo install cargo-fuzz
-cargo fuzz init              # creates fuzz_targets/
+cargo fuzz init              # creates fuzz/fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
 Ongeza fuzz target kwenye repo yako na uiendeshe kwenye pipeline yako.
@@ -436,5 +452,15 @@ Ongeza fuzz target kwenye repo yako na uiendeshe kwenye pipeline yako.
 ## References
 
 - [1] [Hifadhidata ya Ushauri ya RustSec](https://rustsec.org)
-- [2] [Cargo-vet: "Kukagua Dependencies Zako za Rust"](https://mozilla.github.io/cargo-vet/)
+- [2] [Cargo-vet: "Kukagua Dependencies zako za Rust"](https://mozilla.github.io/cargo-vet/)
+- [3] [Lugha ya Rust ya Programu: Rust Isiyo Salama](https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html)
+- [4] [Rust std: slice::from_raw_parts](https://doc.rust-lang.org/std/slice/fn.from_raw_parts.html)
+- [5] [Rust std: Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html)
+- [6] [README ya Miri](https://github.com/rust-lang/miri/blob/master/README.md)
+- [7] [Rust 2024: onyo la unsafe_op_in_unsafe_fn](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html)
+- [8] [Amri za Cargo Vet](https://mozilla.github.io/cargo-vet/commands.html)
+- [9] [Kitabu cha Rust Fuzz: mafunzo ya cargo-fuzz](https://rust-fuzz.github.io/book/cargo-fuzz/tutorial.html)
+- [10] [Lugha ya Rust ya Programu: Box na aina za kujirejelea](https://doc.rust-lang.org/book/ch15-01-box.html)
+- [11] [Lugha ya Rust ya Programu: if let](https://doc.rust-lang.org/book/ch06-03-if-let.html)
+- [12] [Rust 2024: Unsafe extern blocks](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-extern.html)
 {{#include ../banners/hacktricks-training.md}}
