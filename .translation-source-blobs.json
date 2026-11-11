@@ -850,7 +850,7 @@
     "src/pentesting-web/dangling-markup-html-scriptless-injection/ss-leaks.md": "6e61df2d323670503b0ff002546ee5a9f02b4dba",
     "src/pentesting-web/dapps-DecentralizedApplications.md": "a90b40f85283129206885bfad3e725fb3dfa99a1",
     "src/pentesting-web/dependency-confusion.md": "320c6117b365385ade5a9fd1c80ee6fa0c08a288",
-    "src/pentesting-web/deserialization/README.md": "64809a5a198ebd35b64cd9d375c88a8315903c80",
+    "src/pentesting-web/deserialization/README.md": "9a25da1ff3887c69721dc0b2d18a545f2711abc7",
     "src/pentesting-web/deserialization/basic-.net-deserialization-objectdataprovider-gadgets-expandedwrapper-and-json.net.md": "9c0687be4f5ed790857b8ad014a3cec1443caffb",
     "src/pentesting-web/deserialization/basic-java-deserialization-objectinputstream-readobject.md": "f35e892b66c46b5f905e3f6d67e865db570a90dd",
     "src/pentesting-web/deserialization/exploiting-__viewstate-knowing-the-secret.md": "5abebc6bfa7b82d1209fe7ecfe96794a22770af1",
