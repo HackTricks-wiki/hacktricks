@@ -1,31 +1,35 @@
-# Fuzzing Methodology
+# Fuzzing Metodolojisi
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Mutational Grammar Fuzzing: Coverage ve Semantics
+## Mutasyonel Grammar Fuzzing: Coverage ve Semantik
 
-**Mutational grammar fuzzing** yönteminde input’lar **grammar’a uygun** kalacak şekilde mutate edilir. Coverage-guided modda, yalnızca **yeni coverage** sağlayan örnekler corpus seed’i olarak kaydedilir. **Dil hedeflerinde** (parser’lar, interpreter’lar, engine’ler) bu yöntem, bir yapının çıktısının başka bir yapının girdisi hâline geldiği **semantik/dataflow zincirleri** gerektiren bug’ları gözden kaçırabilir.<sup>[[1]](#references)</sup>
+**Mutasyonel grammar fuzzing** sırasında girdiler, **grammar'a uygun** kalacak şekilde mutate edilir. Coverage-guided modda yalnızca **yeni coverage** tetikleyen örnekler corpus seed'leri olarak kaydedilir. **Dil hedeflerinde** (parser'lar, interpreter'lar, engine'ler) bu yaklaşım, bir yapının çıktısının diğerinin girdisi hâline geldiği **semantik/dataflow zincirleri** gerektiren bug'ları kaçırabilir.<sup>[[1]](#references)</sup>
 
-**Hata biçimi:** fuzzer, `document()` ve `generate-id()` (veya benzer primitive’ler) işlevlerini ayrı ayrı çalıştıran seed’ler bulur ancak **zincirlenmiş dataflow’u koruyamaz**. Böylece “bug’a daha yakın” örnek, coverage’ı artırmadığı için elenir. **3+ bağımlı adımda** rastgele yeniden birleştirme maliyetli hâle gelir ve coverage feedback aramaya yön vermez.<sup>[[1]](#references)</sup>
+**Başarısızlık biçimi:** fuzzer, ayrı ayrı `document()` ve `generate-id()` (veya benzeri primitive'ler) çalıştıran seed'ler bulur, ancak **zincirlenmiş dataflow'u koruyamaz**; bu nedenle “bug'a daha yakın” örnek, coverage'ı artırmadığı için elenir. **3 veya daha fazla bağımlı adımda**, rastgele yeniden birleştirme maliyetli hâle gelir ve coverage feedback aramaya yön vermez.<sup>[[1]](#references)</sup>
 
-**Çıkarım:** bağımlılığı yüksek grammar’lar için **mutational ve generative aşamaları hibrit hâle getirmeyi** veya üretimi yalnızca coverage’a değil, **function chaining** kalıplarına da yöneltmeyi değerlendirin.<sup>[[1]](#references)</sup>
+**Çıkarım:** bağımlılığın yoğun olduğu grammar'larda, **mutasyonel ve generative aşamaları hibritleştirmeyi** veya üretimi yalnızca coverage'a göre değil, **function chaining** kalıplarına göre de yönlendirmeyi değerlendirin.<sup>[[1]](#references)</sup>
 
 ## Corpus Çeşitliliğiyle İlgili Tuzaklar
 
-Coverage-guided mutation **greedy** çalışır: yeni coverage sağlayan bir örnek, çoğu zaman değişmeden kalan büyük bölümleriyle birlikte hemen kaydedilir. Zamanla corpus’lar, yapısal çeşitliliği düşük **neredeyse yinelenen örneklerle** dolar. Aşırı minimization faydalı bağlamı silebilir. Bu nedenle pratik bir çözüm, **grammar-aware minimization** uygulayıp **minimum token eşiğine ulaşıldığında durmaktır** (gürültüyü azaltırken mutate etmeye elverişli olacak kadar çevre yapısını korumak).<sup>[[1]](#references)</sup>
+Coverage-guided mutation **açgözlüdür**: yeni coverage sağlayan bir örnek hemen kaydedilir ve çoğu zaman büyük, değişmemiş bölgelerini korur. Zamanla corpus'lar, yapısal çeşitliliği düşük **neredeyse kopyalarla** dolar. Aşırı minimizasyon yararlı bağlamı ortadan kaldırabilir; bu nedenle pratik bir uzlaşma, **minimum token eşiğine ulaşıldığında duran** grammar-aware minimizasyondur (gürültüyü azaltırken mutation'a elverişli kalması için yeterli çevre yapısını korumak).<sup>[[1]](#references)</sup>
 
-Mutational fuzzing için pratik corpus kuralı: çok sayıda neredeyse yinelenen örnek yerine, **coverage’ı en üst düzeye çıkaran, yapısal açıdan farklı az sayıda seed’i tercih edin**. Uygulamada bu genellikle şunları ifade eder.<sup>[[1]](#references)[[3]](#references)</sup>
+Mutasyonel fuzzing için pratik bir corpus kuralı şudur: büyük bir neredeyse-kopya yığını yerine, **coverage'ı en üst düzeye çıkaran ve yapısal olarak farklı az sayıda seed'i tercih edin**. Uygulamada bu genellikle şunları ifade eder.<sup>[[1]](#references)[[3]](#references)</sup>
 
-- **Gerçek dünya örnekleriyle** başlayın (public corpus’lar, crawling, yakalanmış trafik, hedef ekosistemden dosya kümeleri).
-- Geçerli her örneği saklamak yerine **coverage-based corpus minimization** ile örnekleri damıtın.
-- Mutasyonların çoğu döngüyü ilgisiz byte’larda harcamaması ve anlamlı alanlara denk gelmesi için seed’leri **yeterince küçük tutun**.
-- Harness veya instrumentation’da önemli değişiklikler yaptıktan sonra corpus minimization’ı yeniden çalıştırın; çünkü reachability değişince “en iyi” corpus da değişir.
+- **Gerçek dünya örnekleriyle** başlayın (herkese açık corpus'lar, crawling, yakalanmış trafik, hedef ekosistemden dosya kümeleri).
+- Her geçerli örneği saklamak yerine **coverage tabanlı corpus minimizasyonu** uygulayın.
+- Mutasyonların çoğu çevrimini ilgisiz byte'lara harcamak yerine anlamlı alanlara denk gelmesi için seed'leri **yeterince küçük** tutun.
+- Önemli harness/instrumentation değişikliklerinden sonra corpus minimizasyonunu yeniden çalıştırın; çünkü erişilebilirlik değiştiğinde “en iyi” corpus da değişir.
 
-## Magic Values İçin Comparison-Aware Mutation
+## Büyük Üretilmiş Programlar ve Timeout Yanlılığı
 
-Fuzzer’ların ilerlemesinin durmasının yaygın bir nedeni syntax değil, **katı karşılaştırmalardır**: magic byte’lar, uzunluk kontrolleri, enum string’leri, checksum’lar veya `memcmp`, switch table’ları ya da art arda yapılan karşılaştırmalarla korunan parser dispatch değerleri. Tamamen rastgele mutation, bu değerleri byte byte tahmin etmeye çalışırken döngüleri boşa harcar.
+Compiler ve interpreter fuzzing'de bir girdinin yeni bir parser dalına ulaşması değil, **üretilen kod boyutu eşiğini** aşması gerekebilir. V8 [exception-handler offset örneğinde](../binary-exploitation/chrome-exploiting.md#exception-handler-offsets-narrower-than-maximum-bytecode-size), kesilmiş handler offset'inin önem kazanması için geçerli bir testcase'in 256 MiB'tan fazla bytecode içermesi gerekiyordu. Tekrarlanan `yield*` yapıları bu sınıra ulaşabiliyordu, ancak testcase'i derlemek debug build'de saniyeler sürüyordu. Küçük girdileri tercih etmek ve kısa execution timeout'ları belirlemek, grammar coverage yüksek olsa bile bu sınıftaki girdileri dezavantajlı hâle getirebilir. Packed offset'leri veya uzunluğa duyarlı diğer metadata'yı denetlerken boyut eşiklerini ve timeout politikasını ayrı ayrı değerlendirin; bu campaign önerisi, raporlanan başarısızlık biçiminden çıkarılmıştır.<sup>[[29]](#references)</sup>
 
-Bu hedeflerde, fuzzer’ın başarısız karşılaştırmaların operand’larını gözlemleyebilmesi ve mutation’ları bu karşılaştırmaları geçecek değerlere yönlendirebilmesi için **comparison tracing** (örneğin AFL++ `CMPLOG` / Redqueen tarzı workflow’lar) kullanın.<sup>[[3]](#references)</sup>
+## Magic Value'lar İçin Comparison-Aware Mutation
+
+Fuzzer'ların ilerlemesinin durmasının yaygın bir nedeni sözdizimi değil, **katı karşılaştırmalardır**: magic byte'lar, uzunluk kontrolleri, enum string'leri, checksum'lar veya `memcmp`, switch table'ları ya da art arda yapılan karşılaştırmalarla korunan parser dispatch değerleri. Tamamen rastgele mutation, bu değerleri byte byte tahmin etmeye çalışırken çevrimleri boşa harcar.
+
+Bu hedeflerde **comparison tracing** kullanın (örneğin AFL++ `CMPLOG` / Redqueen tarzı iş akışları). Böylece fuzzer, başarısız karşılaştırmalardaki operand'ları gözlemleyebilir ve mutation'ları bu karşılaştırmaları karşılayan değerlere yönlendirebilir.<sup>[[3]](#references)</sup>
 
 ```bash
 ./configure --cc=afl-clang-fast
@@ -42,55 +46,55 @@ afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 
 **Pratik notlar:**
 
-- Bu, hedef derin mantığı **dosya imzalarının**, **protokol fiillerinin**, **tür etiketlerinin** veya **sürüme bağlı özellik bitlerinin** arkasında tuttuğunda özellikle kullanışlıdır.
-- Bunu gerçek örneklerden, protokol spesifikasyonlarından veya debug günlüklerinden çıkarılan **sözlüklerle** birlikte kullanın. Dilbilgisi belirteçleri, parça adları, fiiller ve ayraçlar içeren küçük bir sözlük, çoğu zaman devasa ve genel bir kelime listesinden daha değerlidir.
-- Hedef art arda birçok kontrol yapıyorsa, önce en baştaki “magic” karşılaştırmalarını çözün; ardından sonraki aşamaların zaten geçerli öneklerle başlaması için elde edilen corpus'u yeniden küçültün.
+- Bu, özellikle hedef derin mantığı **file signatures**, **protocol verbs**, **type tags** veya **version-dependent feature bits** arkasında tuttuğunda işe yarar.
+- Gerçek örneklerden, protokol belirtimlerinden veya debug loglarından çıkarılan **dictionaries** ile birlikte kullanın. Grammar token’ları, chunk adları, fiiller ve ayraçlar içeren küçük bir dictionary, çoğu zaman devasa ve genel bir wordlist’ten daha değerlidir.
+- Hedef art arda birçok kontrol yapıyorsa, önce en baştaki “magic” karşılaştırmalarını çözün; ardından sonraki aşamaların zaten geçerli öneklerle başlaması için ortaya çıkan corpus’u yeniden minimize edin.
 
-## Dosya Adı Dili Gizleyen Dosya API'lerini Fuzzing
+## Dosya API’lerinde Gizli Bir Dosya Adı Dilini Fuzzing Etme
 
-`filename`, `path` veya `URL` adlı bir parametre, doğrudan dosya araması yapmak yerine yorumlayıcı için bir giriş noktası olabilir. Örneğin CFITSIO Extended Filename Syntax (EFS), açılan nesneyi döndürmeden önce köşeli parantez içindeki seçicileri, satır/piksel ifadelerini, hesaplanmış sütunları, histogramları ve dönüşümleri değerlendirir; bazı biçimler ayrıca geçici kopyalar oluşturur. Saldırı yüzeyini haritalarken her açma/içe aktarma API'sini **literal-path** veya **interpreted-path** olarak sınıflandırın, ardından uygulamaların gerçekten çağırdığı üretim giriş noktasını fuzzing işlemine tabi tutun.<sup>[[20]](#references)[[22]](#references)</sup>
+`filename`, `path` veya `URL` adlı bir parametre, doğrudan dosya aramak yerine bir interpreter giriş noktası olabilir. Örneğin CFITSIO Extended Filename Syntax (EFS), açılan nesneyi döndürmeden önce köşeli parantez içindeki seçicileri, satır/piksel ifadelerini, hesaplanan sütunları, histogramları ve dönüşümleri değerlendirir; bazı biçimler geçici kopyalar da oluşturur. Attack surface haritalaması sırasında her open/import API’sini **literal-path** veya **interpreted-path** olarak sınıflandırın ve uygulamaların gerçekten çağırdığı production entry point’i fuzzing’e tabi tutun.<sup>[[20]](#references)[[22]](#references)</sup>
 
-Ortaya çıkan SSRF, dosya kopyalama ve protokol işleyicisi primitive'leri ile daha güvenli literal-path API'leri için bkz. [SSRF/dosya primitive'leri olarak dosya adı mini dilleri](../pentesting-web/ssrf-server-side-request-forgery/index.html#filename-mini-languages-as-ssrffile-primitives-cfitsio-efs).<sup>[[20]](#references)</sup>
+Ortaya çıkan SSRF, dosya kopyalama ve protocol handler primitive’leri ile daha güvenli literal-path API’leri için bkz. [Filename mini-languages as SSRF/file primitives](../pentesting-web/ssrf-server-side-request-forgery/index.html#filename-mini-languages-as-ssrffile-primitives-cfitsio-efs).<sup>[[20]](#references)</sup>
 
-### Destek nesnesini fuzzing yapılan programdan ayrı tutun
+### Temel nesneyi fuzz edilen programdan ayrı tutun
 
-Dilbilgisi dosya adı sonekinde bulunuyorsa, yalnızca başvurulan dosyanın baytlarını değiştirmek parser'ı gözden kaçırır. Bunun yerine küçük bir harness, her testcase'i bir dize olarak okuyup yorumlanan açma API'sine aktarabilir; CFITSIO kampanyası salt okunur modda `fits_open_file()` çağırarak EFS parser'larının ve değerlendiricilerinin çoğuna ulaştı. Mutasyonların temel yolu sürekli bozmak yerine seçici/ifade diline odaklanabilmesi için geçerli destek dosyalarını ayrı olarak hazır bulundurun.<sup>[[22]](#references)</sup>
+Grammar bir dosya adı sonekinde bulunuyorsa, yalnızca başvurulan dosyanın baytlarını değiştirmek parser’ı hedeflemez. Bunun yerine küçük bir harness, her testcase’i string olarak okuyup interpreted open API’ye aktarabilir; CFITSIO kampanyası, `fits_open_file()` işlevini salt okunur modda çağırarak EFS parser’larının ve değerlendiricilerinin çoğuna ulaştı. Değişikliklerin temel yolu sürekli bozmak yerine seçici/ifade diline odaklanabilmesi için geçerli temel dosyaları ayrı olarak hazır bulundurun.<sup>[[22]](#references)</sup>
 
-Her biri farklı bir dilbilgisi ailesine ulaşan seed'ler kullanın; ardından hem spesifikasyondan hem de lexer/parser kaynak kodundan derli toplu bir sözlük oluşturun. Girdiler tekrar tekrar aynı söz dizimi hatası yolunda başarısız olurken coverage artışı duraklıyorsa, yalnızca rastgele mutasyon süresini artırmak yerine geçerli önekleri koruyun ve ayraçlar, operatörler, anahtar sözcükler, işlev adları ve örnek alan adları ekleyin.<sup>[[22]](#references)</sup>
+Her biri farklı bir grammar ailesine ulaşan seed’ler kullanın; ardından hem belirtimden hem de lexer/parser kaynak kodundan kompakt bir dictionary oluşturun. Coverage aynı sözdizimi hatası yolunda tekrar tekrar başarısız olan girdiler nedeniyle duraklarsa, yalnızca random-mutation süresini artırmak yerine geçerli önekleri koruyup ayraçlar, operatörler, anahtar sözcükler, işlev adları ve örnek alan adları ekleyin.<sup>[[22]](#references)</sup>
 
-Harness'ı, örneğin dilbilgisi sözlüğüyle çalıştırın:<sup>[[3]](#references)[[22]](#references)</sup>
+Örneğin grammar dictionary ile harness’i çalıştırın:<sup>[[3]](#references)[[22]](#references)</sup>
 
 ```bash
 afl-fuzz -i filename-seeds -o out -x filename-language.dict -- ./filename-harness @@
 ```
 
-### "read-only" harness yan etkilerini sınırlama
+### "read-only" harness yan etkilerini kontrol altına alma
 
-Bir kütüphanenin read-only flag'i, testcase'in yan etkisiz olacağını garanti etmez: filename dili girdiyi yeniden yazabilir, output files oluşturabilir veya geçici nesneleri belleğe alabilir. CFITSIO campaign'i başlangıçta seed files'ı yok etti ve dosya sistemi genelinde beklenmedik dosyalar bıraktı; bu nedenle cleanup ve izolasyon gerekti.<sup>[[22]](#references)</sup>
+Bir kütüphane için read-only bayrağı, testcase'in yan etkisiz olacağını garanti etmez: dosya adı dili girdiyi yeniden yazabilir, çıktı dosyaları oluşturabilir veya geçici nesneleri belleğe alabilir. CFITSIO kampanyası başlangıçta seed dosyalarını yok etti ve dosya sisteminde beklenmedik dosyalar bıraktı; bu nedenle temizlik ve izolasyon gerekti.<sup>[[22]](#references)</sup>
 
-- Her worker'a kullan-at bir çalışma dizini ve özel bir geçici dizin verin.
-- Canonical backing files'ın kopyalarını sunun; target'ın corpus'taki tek kopyayı değiştirmesine asla izin vermeyin.
-- Remote backend'ler hedeflenmiyorsa network erişimini devre dışı bırakın ve yazılabilir yolları bir container, mount namespace veya eşdeğer bir sandbox ile sınırlandırın.
-- Her execution veya worker batch'inden sonra dizini sıfırlayın ve beklenmeyen dosya sistemi değişikliklerini ek bulgular olarak değerlendirin.
+- Her worker'a geçici bir çalışma dizini ve özel bir geçici dizin verin.
+- Kanonik backing dosyalarının kopyalarını sunun; hedefin corpus'taki tek kopyayı değiştirmesine asla izin vermeyin.
+- Uzak back-end'ler hedeflenmiyorsa ağ erişimini devre dışı bırakın ve yazılabilir yolları bir container, mount namespace veya eşdeğer bir sandbox ile kısıtlayın.
+- Her çalıştırmadan veya worker grubundan sonra dizini sıfırlayın ve beklenmedik dosya sistemi değişikliklerini ek bulgular olarak değerlendirin.
 
 ### Crash-to-patch-to-fuzz döngüsü
 
-Binlerce artifact'ın binlerce patch görevine dönüşmesini önlemek için düzeltme yapmadan önce crash'leri kümelendirin. CFITSIO değerlendirmesinde AFLTriage, ilk crash set'ini birkaç kök nedene indirdi; ortaya çıkan advisory'de hatalı destination-size kontrolleri, `realloc()` sonrasında stale pointer'lar, aritmetik hatalar ve güvensiz parser cleanup yolları dahil olmak üzere farklı arızalar gösteriliyor.<sup>[[21]](#references)[[22]](#references)</sup>
+Onarım yapmadan önce crash'leri kümelendirin; binlerce artifact'in binlerce patch görevine dönüşmesini önleyin. CFITSIO değerlendirmesinde AFLTriage, başlangıçtaki crash kümesini birkaç kök nedene indirdi; ortaya çıkan advisory, hatalı hedef boyutu kontrolleri, `realloc()` sonrasında stale pointer'lar, aritmetik hatalar ve güvenli olmayan parser temizleme yolları dahil olmak üzere farklı hataları gösteriyor.<sup>[[21]](#references)[[22]](#references)</sup>
 
-1. Her küme için temsili bir input'u küçültün ve AddressSanitizer altında yeniden üretin.
-2. Invariant'ı geçersiz kılan tam erişimi, kaynak konumunu, allocation/free geçmişini ve parser state'ini kaydedin.
-3. Tek ve dar kapsamlı bir aday patch uygulayın; aynı coverage ve sanitizer instrumentation ile yeniden build edin.
-4. Orijinal reproducer'ı **ve kümesindeki her input'u** yeniden çalıştırın; bir memory-safety fix'i hata yolundaki sahipliği bozabileceğinden leak detection'ı da etkinleştirin.
-5. Gerçek files ile functional test'leri çalıştırın, ardından birikmiş queue'dan devam edin (veya engine binary değiştikten sonra yeni bir output directory gerektiriyorsa bu queue'yu yeniden import edin).
-6. Tekrarlayın: ilk yüzeysel crash'i ortadan kaldırmak, mevcut seed'lerin daha derin bir parser state'ine ilerlemesini sağlayabilir.
+1. Her küme için temsili bir girdiyi küçültün ve AddressSanitizer altında yeniden üretin.
+2. Hatanın oluştuğu erişimi, kaynak konumunu, allocation/free geçmişini ve invariant'ı geçersiz kılan parser durumunu kaydedin.
+3. Dar kapsamlı tek bir aday patch uygulayın ve aynı coverage ve sanitizer enstrümantasyonuyla yeniden derleyin.
+4. Orijinal reproducer'ı **ve kümesindeki her girdiyi** yeniden oynatın; ayrıca leak detection'ı etkinleştirin, çünkü bir memory-safety düzeltmesi hata yolundaki sahipliği bozabilir.
+5. Gerçek dosyalarla işlevsel testleri çalıştırın, ardından birikmiş queue'dan devam edin (veya binary değiştikten sonra engine yeni bir çıktı dizini gerektiriyorsa bu queue'yu yeniden içe aktarın).
+6. Döngüyü tekrarlayın: ilk yüzeysel crash'i kaldırmak, mevcut seed'lerin daha derin bir parser durumuna ilerlemesini sağlayabilir.
 
-Bir LLM'ye çöken input, sanitizer raporu, harness ve ilgili kaynak verildiğinde 2. adımı hızlandırabilir ve 3. adım için taslak hazırlayabilir; ancak patch'ine güvenilmemelidir. Onarımın kabul edilip edilmeyeceğine modelin açıklaması değil, sanitizer ile yeniden çalıştırma ve regression kapıları karar verir.<sup>[[22]](#references)</sup>
+Bir LLM, crashing input, sanitizer raporu, harness ve ilgili kaynak kodu verildiğinde 2. adımı hızlandırabilir ve 3. adım için taslak hazırlayabilir; ancak önerdiği patch güvenilir kabul edilmemelidir. Onarımın kabul edilip edilmeyeceğine modelin açıklaması değil, sanitizer ile yeniden oynatma ve regresyon kontrolleri karar verir.<sup>[[22]](#references)</sup>
 
-## Edge Coverage Farklı Yolları Birleştirdiğinde Daha Zengin Geri Bildirim
+## Edge Coverage Farklı Yolları Birbirinden Ayıramadığında Daha Zengin Geri Bildirim
 
-Normal edge coverage, aynı helper'dan geçen iki execution'ı farklı caller'lar üzerinden geldiklerinde veya bir function içindeki farklı branch kombinasyonlarını izlediklerinde ayırt edemez. Bu durum, **route**'un canlı state'i belirlediği paylaşılan decoder'larda, protocol dispatcher'larda ve interpreter helper'larında önemlidir. Her calling context'i safça izlemek de tehlikelidir: coverage map ve queue aşırı büyüyebilir. Bu nedenle context-sensitive fuzzing araştırmaları, tüm call graph'ı context-sensitive kabul etmek yerine yalnızca umut vadeden context'leri ayrıntılandırmayı önerir.<sup>[[14]](#references)</sup>
+Normal edge coverage, aynı helper üzerinden geçen iki çalıştırmanın farklı caller'lar kullandığını veya bir fonksiyon içindeki farklı branch kombinasyonlarını izlediğini ayıramaz. Bu durum, bir edge'e giden **yolun** etkin durumu belirlediği paylaşılan decoder'larda, protocol dispatcher'larda ve interpreter helper'larında önemlidir. Her calling context'i gelişigüzel izlemek de tehlikelidir: coverage map ve queue kontrolden çıkabilir. Bu nedenle context-sensitive fuzzing araştırmaları, tüm call graph'ı context-sensitive kabul etmek yerine yalnızca umut vadeden context'leri ayrıntılandırmayı önerir.<sup>[[14]](#references)</sup>
 
-Güncel AFL++ build'leri normal edge coverage'a ek olarak **Ball-Larus per-function path coverage** sağlar. Bir function içindeki her acyclic path'e bir feature atar; loop back-edge'leri kaldırılır, bu nedenle bu feedback branch kombinasyonlarını ayırt eder ancak **loop iteration sayılarını ayırt etmez**. Önce gevşek seviye `1` ile başlayın, ardından path sayısı üstel olarak artabileceğinden daha katı modları şüpheli parser/state-machine koduyla sınırlandırın.<sup>[[13]](#references)</sup>
+AFL++'ın yeni sürümleri, normal edge coverage'a ek olarak **fonksiyon başına Ball-Larus path coverage** sağlar. Her fonksiyon içindeki her çevrimsiz yola bir feature atar; loop back-edge'ler kaldırılır, dolayısıyla bu geri bildirim branch kombinasyonlarını ayırt eder ancak **loop iterasyon sayılarını ayırt etmez**. Gevşek `1` seviyesiyle başlayın; yol sayısı üstel olarak artabileceğinden daha katı kipleri şüpheli parser/state-machine koduyla sınırlayın.<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -102,7 +106,7 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-Birçok güvenlik açısından önemli noktadan çağrılan bir yardımcı işlev için LTO modu, her işlev yolunu doğrudan çağrı noktasıyla birleştirebilir:<sup>[[13]](#references)</sup>
+Birçok güvenlik açısından önemli noktadan çağrılan bir yardımcı için LTO modu, her işlev yolunu doğrudan çağrı noktasıyla birleştirebilir:<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -115,50 +119,50 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-**Campaign guidance:** daha zengin feedback'i temkinli uygulayın ve coverage-map/queue maliyetini izleyin.<sup>[[13]](#references)[[14]](#references)</sup>
+**Kampanya yönergesi:** Daha zengin geri bildirimi temkinli biçimde uygulayın ve kapsama haritası/kuyruk maliyetini izleyin.<sup>[[13]](#references)[[14]](#references)</sup>
 
-- Paralelde sıradan bir edge-coverage örneği çalıştırın; daha zengin feedback, yalnızca ek queue/map maliyeti saniyedeki execution sayısını düşürmüyorsa faydalıdır.
-- Büyük, template ağırlıklı kütüphaneler veya genel amaçlı yardımcı kodlar map'e hâkimse, path/caller instrumentation'ı kısıtlamak için `AFL_LLVM_ALLOWLIST` kullanın.
-- Aşırı sayıda acyclic path içeren işlevler AFL++ tarafından atlanabilir; derleme sırasındaki uyarılar, hedefin allowlisting'e veya daha az katı bir seviyeye ihtiyaç duyduğunun göstergesidir.
-- Caller + path coverage yalnızca tek bir caller derinliğini destekler. Bunu daha derin context stack'leriyle birlikte kullanmayın.
-- Path ID'leri LLVM'nin ana sürümleri arasında değişebilir. Bir campaign boyunca toolchain'i sabit tutun ve PATH tabanlı corpus'ları, feature ID'leri derlemeler arasında kararlıymış gibi senkronize etmeyin.
-- Bu feedback, `CMPLOG`'u tamamlar: comparison tracing, bir guard'dan **hangi değerin geçtiğini** bulurken path/caller feedback, **hangi rota ve branch kombinasyonunun oraya ulaştığını** korur.
+- Sıradan bir edge-coverage örneğini paralel çalıştırın; daha zengin geri bildirim, yalnızca ek kuyruk/harita maliyeti saniyedeki çalıştırma sayısını düşürmüyorsa faydalıdır.
+- Büyük şablon ağırlıklı kitaplıklar veya genel amaçlı yardımcı kod haritaya hâkim olduğunda, path/caller enstrümantasyonunu kısıtlamak için `AFL_LLVM_ALLOWLIST` kullanın.
+- Aşırı sayıda döngüsüz yola sahip işlevler AFL++ tarafından atlanabilir; derleme sırasındaki uyarılar, hedefin allowlisting'e veya daha az katı bir düzeye ihtiyaç duyduğunu gösterir.
+- Caller + path coverage yalnızca tek bir caller derinliğini destekler. Bunu daha derin context stack'leriyle birleştirmeyin.
+- Path ID'leri LLVM ana sürümleri arasında değişebilir. Bir kampanya boyunca araç zincirini sabit tutun ve özellik ID'leri derlemeler arasında kararlıymış gibi PATH tabanlı corpus'ları senkronize etmeyin.
+- Bu geri bildirim `CMPLOG`'u tamamlar: karşılaştırma izleme, **bir guard'dan hangi değerin geçtiğini** çözerken path/caller geri bildirimi **hangi rota ve dal birleşiminin o noktaya ulaştığını** korur.
 
 ## Stateful Fuzzing: Diziler Seed'dir
 
-**Protokoller**, **kimlik doğrulamalı iş akışları** ve **çok aşamalı parser'lar** için ilgi çekici birim çoğu zaman tek bir blob değil, bir **mesaj dizisidir**. Tüm transcript'i tek bir dosyada birleştirip gelişigüzel mutate etmek genellikle verimsizdir; çünkü fuzzer, yalnızca sonraki mesaj hassas duruma ulaşırken bile her adımı eşit şekilde mutate eder.<sup>[[4]](#references)</sup>
+**Protokoller**, **kimlik doğrulamalı iş akışları** ve **çok aşamalı parser'lar** için ilgi çekici birim genellikle tek bir blob değil, bir **mesaj dizisidir**. Tüm dökümü tek bir dosyada birleştirip gelişigüzel mutasyona uğratmak genellikle verimsizdir; çünkü fuzzer her adımı eşit biçimde mutasyona uğratır, oysa kırılgan duruma yalnızca sonraki mesaj ulaşıyor olabilir.<sup>[[4]](#references)</sup>
 
-Daha etkili bir yaklaşım, **dizinin kendisini seed** olarak ele almak ve ek feedback olarak **gözlemlenebilir durumu** (yanıt kodları, protokol durumları, parser aşamaları, döndürülen nesne türleri) kullanmaktır.<sup>[[4]](#references)</sup>
+Daha etkili bir yaklaşım, **dizinin kendisini seed** olarak ele almak ve **gözlemlenebilir durumu** (yanıt kodları, protokol durumları, parser aşamaları, döndürülen nesne türleri) ek geri bildirim olarak kullanmaktır.<sup>[[4]](#references)</sup>
 
-- **Geçerli önek mesajları** sabit tutun ve mutasyonları **durum geçişini sağlayan** mesaja odaklayın.
-- Sonraki adım önceki yanıtlara bağlıysa, önceki yanıtlardan gelen tanımlayıcıları ve sunucunun ürettiği değerleri önbelleğe alın.
-- Serileştirilmiş transcript'in tamamını opak bir blob olarak mutate etmek yerine mesaj başına mutasyon/splicing yöntemini tercih edin.
-- Protokol anlamlı yanıt kodları sunuyorsa, daha derine ilerleyen dizilere öncelik vermek için bunları **düşük maliyetli bir durum oracle'ı** olarak kullanın.
+- **Geçerli önek mesajlarını** sabit tutun ve mutasyonları **geçişi sağlayan** mesaja odaklayın.
+- Sonraki adımın önceki yanıtlara bağlı olduğu durumlarda, tanımlayıcıları ve sunucu tarafından üretilen değerleri önbelleğe alın.
+- Serileştirilmiş dökümün tamamını opak bir blob olarak mutasyona uğratmak yerine, mesaj başına mutasyon/birleştirme yöntemini tercih edin.
+- Protokol anlamlı yanıt kodları sunuyorsa, daha derine ilerleyen dizilere öncelik vermek için bunları **ucuz bir durum oracle'ı** olarak kullanın.
 
-Kimlik doğrulamalı bug'ların, gizli geçişlerin veya “yalnızca handshake sonrasında” ortaya çıkan parser bug'larının vanilla file-style fuzzing ile sıkça gözden kaçmasının nedeni de budur: fuzzer yalnızca yapıyı değil, **sırayı, durumu ve bağımlılıkları** korumalıdır.<sup>[[4]](#references)</sup>
+Kimlik doğrulamalı hataların, gizli geçişlerin veya “yalnızca el sıkışmasından sonra” ortaya çıkan parser hatalarının vanilla dosya tarzı fuzzing ile sıklıkla gözden kaçmasının nedeni de budur: fuzzer yalnızca yapıyı değil, **sıralamayı, durumu ve bağımlılıkları** da korumalıdır.<sup>[[4]](#references)</sup>
 
 ### Android Binder: çok istemcili driver fuzzing
 
-Yüksek edge coverage, IPC-driver bug'larını yine de gözden kaçırabilir; çünkü coverage, **nesne sahipliğini, referans sayılarını, bekleyen mesajları, temizleme sırasını veya thread interleaving'lerini** göstermez. [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) sayfasında driver nesne modeli ele alınır; bu örnek ise fuzzer harness'ine odaklanır. Android Binder faydalı bir modeldir: fuzzer birden fazla sürecin aynı kernel nesnesi üzerinde gereken sırayla çalışmasını sağlayamıyorsa, allocation ve free path'lerine ulaşmak yeterli olmaz.<sup>[[15]](#references)</sup>
+Yüksek edge coverage bile IPC driver hatalarını gözden kaçırabilir; çünkü coverage **nesne sahipliğini, referans sayaçlarını, bekleyen mesajları, temizleme sırasını veya iş parçacığı zamanlamalarını** açıklamaz. [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) sayfasında driver nesne modeli ele alınır; bu örnek ise fuzzer harness'ine odaklanır. Android Binder yararlı bir modeldir: fuzzer birden fazla sürecin aynı kernel nesnesi üzerinde gereken sırayla işlem yapmasını sağlayamıyorsa, ayırma ve serbest bırakma yollarının ikisine de ulaşmak yeterli değildir.<sup>[[15]](#references)</sup>
 
 #### Yalıtılmış `ioctl` buffer'ları yerine protokolü modelleyin
 
-Bir test case'i **istemci kimliği + işlem + yapılandırılmış argümanlardan** oluşan sıralı bir grammar olarak temsil edin. Binder LKL fuzzer'ı protobuf ve `libprotobuf-mutator` kullanır; bir persistent context-manager istemcisi ve iki sıradan istemci içerir. Ardından semantic harness, gelişigüzel byte mutasyonunun yok edeceği ilişkileri korur.<sup>[[15]](#references)</sup>
+Bir test örneğini **istemci kimliği + işlem + yapılandırılmış argümanlardan** oluşan sıralı bir gramer olarak temsil edin. Binder LKL fuzzer'ı, bir kalıcı context-manager istemcisi ve iki sıradan istemciyle birlikte protobuf ve `libprotobuf-mutator` kullanır. Ardından anlamsal bir harness, kör bayt mutasyonunun bozacağı ilişkileri korur.<sup>[[15]](#references)</sup>
 
-- Önceki işlemlerin döndürdüğü değerleri önbelleğe alın. Örneğin, `BC_FREE_BUFFER` önceki bir `ioctl` tarafından döndürülen transaction-buffer pointer'ını yeniden kullanmalıdır.
-- Synchronous transaction'ların tamamlanıp sonraki işlemlerin erişilebilir kalması için geçerli varsayılan yanıtlar üretin.
-- Kendi kendine transaction veya aynı hedefe yönelik birden fazla bekleyen transaction gibi olanaksız geçişleri reddedin.
-- Singleton bootstrap durumunu input başına yapılan reset'in dışında tutun. Binder, her boot için yalnızca bir `BINDER_SET_CONTEXT_MGR` kaydına izin verir; bu nedenle o istemciyi tekrar tekrar yok edip yeniden oluşturmak sonraki input'ları geçersiz kılar.
+- Önceki işlemlerin döndürdüğü değerleri önbelleğe alın. Örneğin `BC_FREE_BUFFER`, önceki bir `ioctl` tarafından döndürülen işlem arabelleği işaretçisini yeniden kullanmalıdır.
+- Eşzamanlı işlemlerin tamamlanmasını ve sonraki işlemlere erişilebilmesini sağlamak için geçerli varsayılan yanıtlar üretin.
+- Kendi kendine işlem veya aynı hedefe yönelik birden fazla bekleyen işlem gibi imkânsız geçişleri reddedin.
+- Tekil başlangıç durumunu girdi başına sıfırlamanın dışında tutun. Binder, her açılışta yalnızca bir `BINDER_SET_CONTEXT_MGR` kaydına izin verir; bu nedenle istemciyi tekrar tekrar yok edip yeniden oluşturmak sonraki girdileri geçersiz kılar.
 
-Yararlı bir lifetime-race şablonu; bir istemcinin nesneyi aktarmasını, thread veya process temizliğini başlatmasını ve alıcı istemcinin transaction buffer'ını eşzamanlı olarak serbest bırakmasını sağlamaktır. CVE-2020-0423 örneğinde, `BINDER_TYPE_WEAK_BINDER` aktarımının ardından `BINDER_THREAD_EXIT` ile `BC_FREE_BUFFER` arasındaki yarış, çıkan thread'in cleanup path'i hâlâ kullanırken gömülü bir `binder_work` nesnesini serbest bırakabiliyordu.<sup>[[15]](#references)</sup>
+Yararlı bir ömür yarışı şablonunda, bir istemciye nesne aktartın, iş parçacığı veya süreç temizliğini başlatın ve alıcı istemcinin işlem arabelleğini serbest bırakmasını eşzamanlı olarak sağlayın. CVE-2020-0423 örneğinde, `BINDER_TYPE_WEAK_BINDER` aktarımının ardından `BINDER_THREAD_EXIT` işleminin `BC_FREE_BUFFER` ile yarışması, çıkan iş parçacığının temizleme yolu hâlâ kullanırken gömülü bir `binder_work` nesnesini serbest bırakabiliyordu.<sup>[[15]](#references)</sup>
 
-#### Kontrollü interleaving'leri bir userspace kernel'de yeniden oluşturun
+#### Userspace kernel'de kontrollü zamanlamaları yeniden oluşturun
 
-[Linux Kernel Library (LKL)](https://github.com/lkl/linux), gerçek kernel kodunu bir userspace harness'ine bağlar ve syscall arayüzünü `lkl_syscall` üzerinden sunar. Bu sayede protobuf durumu, coverage ve KASAN tek bir process içinde kolayca koordine edilebilir. Ancak LKL, normalde bir syscall'ı başka bir kernel thread'i tarafından kesintiye uğratılmadan çalıştırır. Race campaign'leri için seçilen lock/unlock ve lifetime sınırlarının çevresine `schedule()` noktaları ekleyin, ardından harness'in her yield noktasında sıradaki istemciyi rastgele seçmesini sağlayın. Her nokta scheduling arama alanını genişlettiğinden bu noktaları hedefli seçin. Araştırmacıların açıkladığı randomized scheduler, upstream Binder fuzzer'ının bir parçası **değildir**.<sup>[[15]](#references)</sup>
+[Linux Kernel Library (LKL)](https://github.com/lkl/linux), gerçek kernel kodunu bir userspace harness'ine bağlar ve syscall arayüzünü `lkl_syscall` üzerinden sunar. Bu sayede protobuf durumu, coverage ve KASAN tek bir süreçte kolayca koordine edilebilir. Ancak LKL, normalde bir syscall'ı başka bir kernel iş parçacığının kesintisine uğratmadan çalıştırır. Yarış kampanyaları için belirli kilitleme/kilidi açma ve ömür sınırlarının çevresine `schedule()` noktaları ekleyin; ardından her yield noktasında sıradaki istemciyi harness'in rastgele seçmesini sağlayın. Bu noktaları hedefli tutun; çünkü her biri zamanlama arama uzayını çarpar. Araştırmacıların tanımladığı rastgele zamanlayıcı, upstream Binder fuzzer'ının **parçası değildir**.<sup>[[15]](#references)</sup>
 
-#### Serileştirilmiş regression seed'lerini derleyip yeniden oynatın
+#### Serileştirilmiş regresyon seed'leri oluşturun ve yeniden oynatın
 
-Upstream harness, uyumlu bir `libprotobuf-mutator` sürümünü sabitler, `LKL_FUZZING=1` ile LKL fuzzing instrumentation ve KASAN'ı etkinleştirir, Binder için de `MMU=1` ile `CONFIG_MMU`'yu açar.<sup>[[16]](#references)</sup>
+Upstream harness, uyumlu bir `libprotobuf-mutator` sürümünü sabitler, `LKL_FUZZING=1` ile LKL fuzzing enstrümantasyonunu ve KASAN'ı etkinleştirir, ayrıca Binder için `MMU=1` ile `CONFIG_MMU`'yu etkinleştirir.<sup>[[16]](#references)</sup>
 
 ```bash
 PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
@@ -169,26 +173,26 @@ make -C tools/lkl LKL_FUZZING=1 MMU=1 \
   clean-conf fuzzers -j"$(nproc)"
 ```
 
-Upstream'de belgelenen rollback yamalarını uyguladıktan veya kasıtlı olarak savunmasız bir revizyonu kontrol ettikten sonra, serileştirilmiş bir seed, tüm çok istemcili durum geçişini geçici bir C proof of concept içinde yeniden oluşturmadan tekrar üretebilir:<sup>[[16]](#references)</sup>
+Upstream'de belgelenen rollback yamalarını uyguladıktan veya bilerek güvenlik açığı bulunan bir revizyonu kontrol ettikten sonra, serileştirilmiş bir seed, durumu geçici bir C proof of concept içinde baştan oluşturmaya gerek kalmadan çok istemcili durum geçişinin tamamını yeniden üretebilir:<sup>[[16]](#references)</sup>
 
 ```bash
 tools/lkl/fuzzers/binder/binder-fuzzer \
   tools/lkl/fuzzers/binder/seeds/CVE-2023-20938
 ```
 
-Ortaya çıkan KASAN use-after-free hatasını, seed’in savunmasız yaşam süresi yoluna ulaştığının doğrulanması olarak değerlendirin. Bu, kernel code execution veya privilege escalation için gereken sonraki primitive’leri göstermez.<sup>[[16]](#references)</sup>
+Ortaya çıkan KASAN use-after-free, seed'in savunmasız lifetime path'e ulaştığını doğrular. Ancak bu, kernel'de kod yürütme veya ayrıcalık yükseltme için gereken sonraki primitive'leri göstermez.<sup>[[16]](#references)</sup>
 
-## Tek Makineli Çeşitlilik Hilesi (Jackalope Tarzı)
+## Tek Makineli Çeşitlilik Hilesi (Jackalope-Style)
 
-**Generative novelty** ile **coverage reuse** yöntemlerini hibritleştirmenin pratik bir yolu, kalıcı bir sunucuya karşı kısa ömürlü worker’ları **yeniden başlatmaktır**. Her worker boş bir corpus ile başlar, `T` saniye sonra senkronize olur, birleştirilmiş corpus üzerinde `T` saniye daha çalışır, tekrar senkronize olur ve ardından çıkar. Böylece biriken coverage’dan yararlanırken her nesilde **yeni yapılar** elde edilir.<sup>[[1]](#references)[[2]](#references)</sup>
+**Generative novelty** ile **coverage reuse** yöntemlerini hibritleştirmenin pratik bir yolu, kalıcı bir server'a karşı kısa ömürlü worker'ları yeniden başlatmaktır. Her worker boş bir corpus ile başlar, `T` saniye sonra senkronize olur, birleştirilmiş corpus üzerinde `T` saniye daha çalışır, yeniden senkronize olur ve ardından çıkar. Böylece biriken coverage'dan yararlanırken her nesilde **yeni yapılar** elde edilir.<sup>[[1]](#references)[[2]](#references)</sup>
 
-**Sunucu:**
+**Server:**
 
 ```bash
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
 
-**Ardışık worker'lar (örnek döngü):**
+**Sıralı worker'lar (örnek döngü):**
 
 <details>
 <summary>Jackalope worker yeniden başlatma döngüsü</summary>
@@ -224,40 +228,40 @@ while True:
 
 **Notlar:**
 
-- `-in empty`, her üretimde **yeni bir corpus** kullanılmasını sağlar.
-- `-server_update_interval T`, **gecikmeli eşitlemeyi** (önce yenilik, sonra yeniden kullanım) yaklaşık olarak sağlar.
-- Grammar fuzzing modunda **ilk server eşitlemesi varsayılan olarak atlanır** (`-skip_initial_server_sync` kullanmaya gerek yoktur).
+- `-in empty` her üretimde **yeni bir corpus** oluşturur.
+- `-server_update_interval T`, yaklaşık olarak **gecikmeli senkronizasyonu** sağlar (önce yenilik, sonra yeniden kullanım).
+- Grammar fuzzing modunda **başlangıç sunucu senkronizasyonu varsayılan olarak atlanır** (`-skip_initial_server_sync` gerekmez).
 - En uygun `T` **hedefe bağlıdır**; worker “kolay” coverage'ın çoğunu bulduktan sonra geçiş yapmak genellikle en iyi sonucu verir.
 
-## Harness Edilmesi Zor Hedefler İçin Snapshot Fuzzing
+## Zor Harness Edilen Hedefler İçin Snapshot Fuzzing
 
-Test etmek istediğiniz koda ancak **yüksek maliyetli bir hazırlık sürecinden sonra** (VM'yi başlatma, oturum açma işlemini tamamlama, paket alma, container'ı ayrıştırma, hizmeti başlatma) erişilebiliyorsa, yararlı bir alternatif **snapshot fuzzing**'dir: hazır süreç veya VM durumunu yakalayın, her test case'i hedefin giriş yoluna enjekte edin, crash/timeout gerçekleşene kadar çalıştırın ve snapshot'ı geri yükleyin. Bu yöntem, başlatma işlemlerini veya protokol öneklerini tekrar etme ihtiyacını ortadan kaldırır; **network services**, **firmware**, **post-auth attack surfaces** ve **binary-only targets** için kullanışlıdır.<sup>[[9]](#references)[[10]](#references)</sup>
+Test etmek istediğiniz koda ancak **yüksek maliyetli bir hazırlık adımından sonra** (VM başlatma, giriş yapma, paket alma, container ayrıştırma, servis başlatma) erişilebiliyorsa, kullanışlı bir alternatif **snapshot fuzzing** yöntemidir: hazır süreç veya VM durumunu kaydedin, her test case'i hedefin input yoluna enjekte edin, crash/timeout gerçekleşene kadar çalıştırın ve snapshot'ı geri yükleyin. Bu yöntem, başlatma veya protokol öneklerini tekrar etmeyi önler; **network servisleri**, **firmware**, **kimlik doğrulama sonrası saldırı yüzeyleri** ve **yalnızca binary olarak sunulan hedefler** için kullanışlıdır.<sup>[[9]](#references)[[10]](#references)</sup>
 
 1. İlgi çekici durum hazır olana kadar hedefi çalıştırın.
-2. Bu noktada **belleği + register'ları** snapshot olarak kaydedin.
-3. Her test case için, değiştirilmiş girdiyi doğrudan ilgili guest/process buffer'ına yazın.
+2. O noktadaki **bellek + register** durumunun snapshot'ını alın.
+3. Her test case için mutate edilmiş input'u doğrudan ilgili guest/process buffer'ına yazın.
 4. Crash/timeout/reset gerçekleşene kadar çalıştırın.
-5. Snapshot'ı geri yükleyin; VM hedeflerinde, destekleniyorsa yalnızca **dirty pages**'i geri yükleyip işlemi tekrarlayın.
+5. Snapshot'ı geri yükleyin; VM hedeflerinde destekleniyorsa yalnızca **değişmiş sayfaları** geri yükleyin ve tekrarlayın.
 
-Snapshot'ı, `recv`/`read` sonrasındaki veya paket deserialization noktasındaki gibi, mümkün olduğunca ilk maliyetli parse/dispatch adımına yakın bir yere koyun ve hedefin kullandığı input buffer'ı kaydedin. Bu yaklaşım, tekrarlanan işlemleri önlemek için snapshot'ı input işleme sürecinin daha derinlerine taşıyan adaptif yerleştirme ilkesini izler.<sup>[[11]](#references)</sup>
+Snapshot'ı mümkün olduğunca ilk maliyetli parse/dispatch adımına yakın bir noktaya, örneğin `recv`/`read` işleminden veya paket serileştirmesinin çözüldüğü noktadan sonraya yerleştirin ve hedefin kullandığı input buffer'ını kaydedin. Bu, tekrarlanan işi önlemek için snapshot'ı input işleme sürecinin daha ilerisine taşıma yönündeki uyarlanabilir yerleştirme ilkesini izler.<sup>[[11]](#references)</sup>
 
 ### Protokol durumları için artımlı snapshot'lar
 
-Sabit bir snapshot hazırlık maliyetini ortadan kaldırır, ancak birden fazla geçerli mesaj gerektiren geçişleri tek başına keşfedemez. LibAFL-Qemu harness'i, bir protokol durumu alanına yapılan yazmaları izleyebilir ve durum değiştiğinde yeni bir snapshot kaydedebilir. [libslirp TCP harness](https://github.com/quarkslab/slirp_snapshots_stateful), `tcpcb.t_state` alanını izler, snapshot'ları tekilleştirmek için durum ve yanıt flag'lerini hash'ler ve dirty pages'i bir parent'a göre saklar. Sonraki yapılandırılmış mesaj değiştirilmeden önce, seçilen snapshot parent zinciri üzerinden geri yüklenir. Test case, bir `SnapshotId` ve üretilen input byte'larını (`gen_bytes`) tutar; snapshot manager ise replay için gereken parent ilişkisini izler.<sup>[[27]](#references)[[28]](#references)</sup>
+Sabit bir snapshot hazırlık maliyetini önler, ancak birden fazla geçerli mesaj gerektiren geçişleri kendi başına keşfetmez. LibAFL-Qemu harness'i, protokol durumu alanına yapılan yazmaları izleyip durum değiştiğinde yeni bir snapshot kaydedebilir. [libslirp TCP harness'inde](https://github.com/quarkslab/slirp_snapshots_stateful), `tcpcb.t_state` izlenir; snapshot'ları tekilleştirmek için durum ve yanıt flag'leri hash'lenir ve değişmiş sayfalar bir üst snapshot'a göre saklanır. Sonraki yapılandırılmış mesaj mutate edilmeden önce seçilen snapshot, üst snapshot zinciri üzerinden geri yüklenir. Test case, bir `SnapshotId` ve üretilen input baytlarını (`gen_bytes`) tutar; snapshot yöneticisi ise replay için gereken üst-alt ilişkisini izler.<sup>[[27]](#references)[[28]](#references)</sup>
 
-LibAFL-Qemu'nun user-mode `SnapshotModule` bileşeni mapping'leri ve hedef belleğini kaydeder, ancak CPU register'larını kaydetmez; gerektiğinde bunları ayrıca koruyun. Açıklanan manager tek bir root snapshot tree'ini destekler ve snapshot ID'lerini worker'lar arasında paylaşamaz. Multi-snapshot modu da QASAN shadow state'ini doğrudan yeniden kullanamaz. Offline triage için input zincirini ayrı bir instrumented process'te yeniden oluşturun. `AsanHostModule` ve `DrCovModule` kullanırken, `fuzzer.evaluate_input` gerekli `pre_exec`/`post_exec` callback'lerini çalıştırır; yalnızca `qemu.run` bunları çalıştırmaz.<sup>[[27]](#references)[[28]](#references)</sup>
+LibAFL-Qemu'nun user-mode `SnapshotModule`'ü mapping'leri ve hedef belleğini kaydeder, ancak CPU register'larını kaydetmez; gerektiğinde bunları ayrıca koruyun. Açıklanan yönetici tek bir kök snapshot ağacını destekler ve snapshot ID'lerini worker'lar arasında paylaşamaz. Ayrıca multi-snapshot modu, QASAN shadow state'ini doğrudan yeniden kullanamaz. Offline triage için input zincirini ayrı bir instrumented süreçte yeniden oluşturun. `AsanHostModule` ve `DrCovModule` kullanılırken, `fuzzer.evaluate_input` gerekli `pre_exec`/`post_exec` callback'lerini çalıştırır; tek başına `qemu.run` bunu yapmaz.<sup>[[27]](#references)[[28]](#references)</sup>
 
-### Mantıksal ring-buffer taşmalarını yakalama
+### Mantıksal ring buffer overread'lerini yakalama
 
-Bir buffer'ın *geçerli veri sayısının* ötesine yapılan bir okuma, host allocation sınırları içinde kalabilir ve standart ASAN'dan kaçabilir. [libslirp urgent-data örneği](../binary-exploitation/qemu-kvm-vm-escape-chains.md#tcp-urgent-pointer-vs-valid-ring-buffer-bytes) ayrıca işaretsiz bir byte sayacının underflow olmasına yol açar. Kaynak kodu mevcutsa, signed/unsigned integer-overflow instrumentation bu yan etkiyi algılayabilir; raporları susturmadan önce kasıtlı TCP sequence-number wrap durumlarını ayırt edin. Daha güçlü bir oracle önerisi, özel ring allocation'ını poison'lamak, dahili allocator ilerledikçe yalnızca geçerli aralıkların poison'unu kaldırmak ve serbest bırakılan aralıkları yeniden poison'lamaktır. LibAFL-Qemu, source instrumentation uygulamanın pratik olmadığı hedefler için bir ASAN poisoning API sunar.<sup>[[27]](#references)</sup>
+Bir buffer'ın *geçerli veri sayısını* aşan bir okuma, host allocation sınırları içinde kalıp sıradan ASAN'den kaçabilir. [libslirp urgent-data örneği](../binary-exploitation/qemu-kvm-vm-escape-chains.md#tcp-urgent-pointer-vs-valid-ring-buffer-bytes) ayrıca işaretsiz bir byte sayacının underflow'una neden olur. Kaynak kodu mevcutsa, signed/unsigned integer overflow instrumentation bu yan etkiyi tespit edebilir; raporları bastırmadan önce kasıtlı TCP sequence-number wrap durumlarını ayırt edin. Daha güçlü, önerilen bir oracle; custom ring allocation'ı poison etmek, dahili allocator ilerledikçe yalnızca geçerli aralıkların poison'unu kaldırmak ve serbest bırakılan aralıkları yeniden poison etmektir. LibAFL-Qemu, kaynak kodu instrumentation'ının pratik olmadığı hedefler için bir ASAN poisoning API'si sunar.<sup>[[27]](#references)</sup>
 
 ## MAccConc ile Linux Kernel Race Keşfi
 
-[MAccConc](https://github.com/googleprojectzero/MAccConc), zamana duyarlı Linux-kernel race'lerini tekrarlanabilir memory-access schedule'larına dönüştürür. İki context'li **A-B-A** yürütmelerini otomatik olarak sıralayabilir veya analistin terminal UI/GUI üzerinden sıralama kısıtları belirlemesine olanak tanır. Bu araç, tamamlanmış bir concurrency fuzzer değil, deneysel bir araştırma aracıdır: şu anda LLVM 23+ ve projenin yamalanmış kernel'ini gerektirir; command-line araçları iki test thread'ini destekler ve önerilen userspace fuzzing katmanı henüz uygulanmamıştır.<sup>[[17]](#references)[[18]](#references)</sup>
+[MAccConc](https://github.com/googleprojectzero/MAccConc), zamanlamaya duyarlı Linux kernel race durumlarını tekrarlanabilir bellek erişimi sıralamalarına dönüştürür. İki context içeren **A-B-A** yürütmelerini otomatik olarak sıralayabilir veya analistin terminal UI/GUI üzerinden sıralama kısıtları belirlemesine olanak tanır. Bu, eksiksiz bir concurrency fuzzer'dan ziyade deneysel bir araştırma aracıdır: şu anda LLVM 23+ ve projenin yamalanmış kernel'ini gerektirir, command-line araçları iki test thread'ini destekler ve önerilen userspace fuzzing katmanı henüz uygulanmamıştır.<sup>[[17]](#references)[[18]](#references)</sup>
 
 ### Context'ler arası iletişim noktalarını toplama
 
-Instrumented kernel'i KASAN outline callback'leri ve yamalanmış KCOV memory-record desteğiyle derleyin. Projenin README dosyası, call stack'lerin kullanılabilir kalması için sibling-call optimization'ı devre dışı bırakmayı da önerir.<sup>[[17]](#references)[[18]](#references)</sup>
+Instrumented kernel'i KASAN outline callback'leri ve yamalanmış KCOV memory-record desteğiyle derleyin. Projenin README dosyası ayrıca, call stack'lerin kullanılabilir kalması için sibling-call optimization'ın devre dışı bırakılmasını önerir.<sup>[[17]](#references)[[18]](#references)</sup>
 
 ```text
 CONFIG_KASAN=y
@@ -275,15 +279,15 @@ CONFIG_RANDOMIZE_BASE=n
 export KCFLAGS="-fno-optimize-sibling-calls -mllvm -sanitizer-coverage-prune-blocks=false"
 ```
 
-KASAN outline mode (`asan-instrumentation-with-call-threshold=0`), instrument edilmiş erişimleri helper çağrılarına dönüştürür. MAccConc kernel yamaları, ardışık erişimlerin birleştirilmemesi için `asan-opt-same-temp` seçeneğini devre dışı bırakır; global değişken yarışlarının görünür olması gerektiğinde `asan-opt-globals` optimizasyonunu da devre dışı bırakın. KCOV, ortaya çıkan kayıtları userspace'e taşır. Farklı yürütme bağlamlarındaki erişimleri karşılaştırın ve byte aralıkları örtüşen, en az bir tarafı yazma işlemi olan çiftleri tutun; yaşam döngüsü geçişlerinin de aday olması için `kfree()` işlevini yazma işlemi olarak modelleyin.<sup>[[17]](#references)</sup>
+KASAN outline mode (`asan-instrumentation-with-call-threshold=0`), instrumented erişimleri helper çağrılarına dönüştürür. MAccConc kernel yamaları, ardışık erişimlerin birleştirilmemesi için `asan-opt-same-temp` özelliğini devre dışı bırakır; global değişken yarışlarının görünür olması gerektiğinde `asan-opt-globals` optimizasyonunu da devre dışı bırakın. KCOV, ortaya çıkan kayıtları userspace'e taşır. Farklı yürütme bağlamlarındaki erişimleri karşılaştırın ve bayt aralıkları çakışan, en az bir tarafı yazma yapan çiftleri tutun; yaşam süresi geçişlerini de aday hâline getirmek için `kfree()` işlemini yazma olarak modelleyin.<sup>[[17]](#references)</sup>
 
-Başlatan görevden bağımsız çalışan işler (ör. paket işleme veya RCU callback'leri) için alt sistemin bir KCOV remote-coverage handle'ı iletmesi gerekir. Upstream remote KCOV isteğe bağlıdır ve rastgele arka plan işleri için otomatik olarak kullanılamaz; bu nedenle iletimin yapılmaması gerçek bir etkileşimin görünmez kalmasına yol açabilir.<sup>[[17]](#references)[[19]](#references)</sup>
+Başlatan task'tan çıkan işler (ör. paket işleme veya RCU callback'leri) için alt sistem, bir KCOV remote-coverage handle'ını iletmelidir. Upstream remote KCOV varsayılan olarak etkin değildir ve isteğe bağlıdır; keyfî arka plan işleri için otomatik olarak kullanılamaz. Bu nedenle iletimin yapılmaması, gerçek bir etkileşimin görünmez kalmasına yol açabilir.<sup>[[17]](#references)[[19]](#references)</sup>
 
-### Her çalıştırmada aynı dinamik erişimi belirleyin
+### Her çalıştırmada aynı dinamik erişimi belirleme
 
-Her ayırmadan sonra değişebilecek somut bir heap adresine ya da yalnızca bir komut adresine göre tekrar oynatmayın; ikincisi `memcpy()` ve `spin_lock()` gibi helper'ların içinde belirsizdir. MAccConc, **count-augmented stack trace** kullanır: her frame, bir callee'yi ve çağıranındaki çağrılma sayısını tanımlar; son öğe ise bellek erişimi komutunu tanımlar. SanitizerCoverage function-entry/exit kayıtları userspace'in bu dinamik tanımlayıcıyı yeniden oluşturmasını sağlar; tanımlayıcı, adres değişikliklerine ve ilgisiz kontrol akışı gürültüsüne rağmen sabit kalır.<sup>[[17]](#references)</sup>
+Her tahsisten sonra değişebilen somut bir heap adresine veya `memcpy()` ve `spin_lock()` gibi helper'ların içinde belirsiz olan yalnızca bir instruction adresine göre yeniden oynatmayın. MAccConc, **count-augmented stack trace** kullanır: her frame, bir callee'yi ve caller'ı içindeki çağrılma sayısını tanımlar; son öğe ise bellek erişimi instruction'ını tanımlar. SanitizerCoverage function-entry/exit kayıtları, userspace'in bu dinamik tanımlayıcıyı yeniden oluşturmasını sağlar. Tanımlayıcı, adres değişikliklerine ve ilgisiz control-flow gürültüsüne rağmen sabit kalır.<sup>[[17]](#references)</sup>
 
-### Aday çiftleri zorlanmış zamanlamalara dönüştürün
+### Aday çiftleri zorunlu schedule'lara dönüştürme
 
 Yamalanmış `KCOV_SET_DI` ioctl'ı, count-augmented erişim tanımlayıcısını bir shared-flag eylemiyle ilişkilendirir.<sup>[[17]](#references)</sup>
 
@@ -293,9 +297,9 @@ Yamalanmış `KCOV_SET_DI` ioctl'ı, count-augmented erişim tanımlayıcısın�
 | `DI_STACK_WAIT` | Seçilen erişimden önce, *N* bayrağı ayarlanana veya yapılandırılmış limit dolana kadar bekler. |
 | `DI_STACK_WAKE_POST` | Seçilen erişimden hemen sonra *N* bayrağını ayarlar. |
 
-Kısmi bir **A-happens-before-B** kısıtı için aynı bayrağı kullanarak A'ya `DI_STACK_WAKE_POST`, B'ye `DI_STACK_WAIT` atayın. Tam olarak tanımlanmış iki bağlamlı bir zamanlama için B'yi engellenmiş durumda başlatın; ardından A, ilk aktarım noktasında B'yi uyandırsın ve beklesin. B, sonraki aktarım noktasında bunun tersini yapsın. İkinci yöntem deterministik bağlam değiştirme gibi çalışır ve otomatik A-B-A gezgininin kullandığı yöntemdir.<sup>[[17]](#references)</sup>
+Kısmi bir **A-happens-before-B** kısıtı için A'ya `DI_STACK_WAKE_POST`, B'ye ise aynı bayrağı kullanarak `DI_STACK_WAIT` ekleyin. Tam olarak belirtilmiş iki bağlamlı bir schedule için B'yi önce bloklayın; ardından A, ilk aktarım noktasında B'yi uyandırsın ve beklesin. B, bir sonraki aktarım noktasında işlemin tersini yapsın. Bu yöntem deterministik context switching gibi çalışır ve otomatik A-B-A gezgininin kullandığı yöntemdir.<sup>[[17]](#references)</sup>
 
-Asgari bir kampanya için dört hook'lu test senaryosunu (`test_setup`, iki thread işlevi ve `test_end`) paylaşılan bir kitaplık olarak derleyin, kısıtlanmamış bir iz toplayın ve ardından A-B-A adaylarını sıralayın ya da şüpheli erişimlerin çevresine elle kısıtlar ekleyin.<sup>[[18]](#references)</sup>
+En basit kampanyada, dört hook'lu test senaryosunu (`test_setup`, iki thread function ve `test_end`) shared library olarak derleyin, kısıtlanmamış bir trace toplayın ve ardından A-B-A adaylarını sıralayın ya da şüpheli erişimlerin çevresine manuel kısıtlar ekleyin.<sup>[[18]](#references)</sup>
 
 ```bash
 cc -shared -fPIC -o testcase.so testcase.c
@@ -304,72 +308,72 @@ cc -shared -fPIC -o testcase.so testcase.c
 ./kcov-terminal ./testcase.so
 ```
 
-Zaman aşımlarını başarılı yeniden sıralamalardan ayrı değerlendirin: bir kilit veya başlatma/yayımlama bağımlılığı, ikinci bağlamın enjeksiyon noktasına ulaşmasını engellediğinden istenen sıra mümkün olmayabilir. Ayrıca KASAN'ın kör noktalarını göz önünde bulundurun: doğrudan yığın erişimleri, sınırların dışına çıkma ihtimali yoksa genellikle hook'lanmaz; varsayılan optimizasyonla global değişkenler kapsam dışında kalır ve mevcut derleyiciler ASAN ve TSAN hook'larını aynı anda ekleyemez. Son olarak prototip, konuk panic verdiğinde KCOV arabelleğini kaybeder; bu nedenle bağımsız bir crash konsolu/oracle bulundurun.<sup>[[17]](#references)</sup>
+Timeout'ları başarılı yeniden sıralamalardan ayrı değerlendirin: İstenen bir sıra, bir kilit veya başlatma/yayımlama bağımlılığı ikinci bağlamın injection noktasına ulaşmasını engellediği için mümkün olmayabilir. KASAN'ın kör noktalarını da göz önünde bulundurun: doğrudan stack erişimleri, out of bounds olma ihtimali yoksa genellikle hook'lanmaz; varsayılan optimizasyonla globals kapsam dışı kalır ve mevcut derleyiciler ASAN ile TSAN hook'larını aynı anda üretemez. Ayrıca prototip, guest panic yaptığında KCOV buffer'ını kaybeder; bu nedenle bağımsız bir crash console/oracle bulundurun.<sup>[[17]](#references)</sup>
 
-Gelecekte concurrency-guided fuzzing için her girdi veya syscall bazında bellek erişimi özetlerini kaydedin, bağlamlar arası iletişim noktaları oluşturabilecek işlemleri eşleştirin ve ardından yalnızca bu kombinasyonları keşfedin. VM snapshot'ları global durumu ve adresleri sabitler; snapshot olmadan, allocation-site metadata nesneleri çalıştırmalar arasında soyutlayabilir. Bu, mevcut MAccConc userspace araçlarının bir özelliği değil, önerilen bir genişletmedir.<sup>[[17]](#references)</sup>
+Gelecekteki concurrency-guided fuzzing için her input veya syscall için memory-access özetleri kaydedin, cross-context communication point oluşturabilecek işlemleri eşleştirin ve ardından yalnızca bu kombinasyonları keşfedin. VM snapshot'ları global state'i ve adresleri sabitler; snapshot yoksa allocation-site metadata, çalıştırmalar arasındaki nesneleri soyutlayabilir. Bu, mevcut MAccConc userspace araçlarının bir özelliği değil, önerilen bir genişletmedir.<sup>[[17]](#references)</sup>
 
-## Harness İçgörüsü: Sığ Fuzzer'ları Erken Bulun
+## Harness Introspection: Sığ Fuzzer'ları Erken Bulun
 
-Bir kampanya durduğunda sorun çoğunlukla mutator değil, **harness**'tır. Fuzz hedefinizden statik olarak erişilebilen ancak dinamik olarak nadiren veya hiç kapsanmayan işlevleri bulmak için **erişilebilirlik/kapsama içgörüsünden** yararlanın. Bu işlevler genellikle üç sorundan birine işaret eder.<sup>[[12]](#references)</sup>
+Bir campaign durakladığında sorun çoğu zaman mutator değil, **harness**'tır. Fuzz target'ınızdan statik olarak erişilebilen ancak dinamik olarak nadiren veya hiç kapsanmayan işlevleri bulmak için **erişilebilirlik/kapsama içgörüsünden** yararlanın. Bu işlevler genellikle üç sorundan birine işaret eder.<sup>[[12]](#references)</sup>
 
-- Harness hedefe çok geç veya çok erken giriyor.
-- Seed corpus'ta bütün bir özellik ailesi eksik.
-- Hedef için, her şeyi yapan tek ve aşırı büyük bir harness yerine gerçekten **ikinci bir harness** gerekiyor.
+- Harness, target'a çok geç veya çok erken giriyordur.
+- Seed corpus'ta bütün bir özellik ailesi eksiktir.
+- Target için, aşırı büyük ve “her şeyi yapan” tek bir harness yerine gerçekten **ikinci bir harness** gerekiyordur.
 
-OSS-Fuzz / ClusterFuzz tarzı iş akışları kullanıyorsanız Fuzz Introspector, statik erişilebilirliği çalışma zamanı kapsamıyla karşılaştırabilir ve zaman sınırlı bir çalıştırmadan veya herkese açık bir corpus'tan raporlar oluşturabilir.<sup>[[12]](#references)</sup>
+OSS-Fuzz / ClusterFuzz tarzı iş akışları kullanıyorsanız Fuzz Introspector, statik erişilebilirliği çalışma zamanı kapsamıyla karşılaştırabilir ve zaman sınırlı bir çalıştırmadan veya herkese açık corpus'tan raporlar oluşturabilir.<sup>[[12]](#references)</sup>
 
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
 
-Raporu kullanarak test edilmemiş bir parser yolu için yeni bir harness eklemeye, belirli bir özellik için corpus'u genişletmeye veya monolitik bir harness'i daha küçük giriş noktalarına ayırmaya karar verin.
+Raporu kullanarak, test edilmemiş bir parser yolu için yeni bir harness eklemeye, belirli bir özellik için corpus'u genişletmeye veya monolitik bir harness'i daha küçük giriş noktalarına bölmeye karar verin.
 
 ## Graph-First Fuzz Target Selection And Mutation Triage
 
-Elinizde **static-analysis bulguları**, **mutation-testing sağ kalanları** ve **coverage raporları** varsa bunları birbirinden bağımsız listeler olarak değerlendirmeyin. Önce bir **call graph** oluşturun; düğümlere **cyclomatic complexity**, **entrypoint/untrusted-input erişilebilirliği** ve harici bulguları ek açıklama olarak ekleyin, ardından graph hakkında sorular sorun.<sup>[[5]](#references)[[6]](#references)</sup>
+Elinizde **statik analiz bulguları**, **mutasyon testi sonuçları** ve **coverage raporları** varsa, bunları birbirinden bağımsız listeler olarak değerlendirmeyin. Önce bir **call graph** oluşturun; düğümleri **cyclomatic complexity**, **entrypoint/denetimsiz girdiye erişilebilirlik** ve harici bulgularla etiketleyin, ardından graph üzerinden sorular sorun.<sup>[[5]](#references)[[6]](#references)</sup>
 
-- Hangi yüksek karmaşıklıktaki fonksiyonlara untrusted input üzerinden erişilebiliyor?
-- Hangi mutation survivor'ları parser/handler'lardan security-critical koda giden yollar üzerinde bulunuyor?
-- Hangi fonksiyonlar, alışılmadık derecede büyük **blast radius**'a sahip mimari darboğaz noktaları?
+- Denetimsiz girdiden erişilebilen, karmaşıklığı yüksek fonksiyonlar hangileri?
+- Hangi mutasyon testinden sağ çıkanlar, parser/handler'lardan güvenlik açısından kritik koda giden yollar üzerinde bulunuyor?
+- Hangi fonksiyonlar mimari darboğazlar ve olağan dışı derecede yüksek **blast radius** değerine sahip?
 
-Bu yaklaşım genellikle "en düşük coverage" ölçütünden daha iyi fuzz target'lar ortaya çıkarır. **Yüksek karmaşıklığa** ve doğrulanmış **harici erişilebilirliğe** sahip bir parser/decoder, saldırganın kontrolündeki bir yol üzerinde olmayan, coverage'ı düşük izole bir dahili yardımcı fonksiyondan daha güçlü bir harness adayıdır.
+Bu yaklaşım genellikle "en düşük coverage" ölçütünden daha iyi fuzz target'lar ortaya çıkarır. **Yüksek karmaşıklığa** ve doğrulanmış **harici erişilebilirliğe** sahip bir parser/decoder, zayıf coverage'a sahip ancak saldırgan denetimindeki bir yoldan erişilemeyen yalıtılmış bir dahili yardımcı fonksiyondan daha iyi bir harness adayıdır.
 
-### Pratik triage iş akışı
+### Pratik önceliklendirme iş akışı
 
 1. Codebase'den bir **code graph** oluşturun ve fonksiyon başına karmaşıklık/dal metriklerini çıkarın.
-2. Saldırganın kontrolündeki input'u kabul eden **entrypoint**'leri belirleyin: request handler'lar, decoder'lar, importer'lar, protocol parser'ları, CLI/file reader'lar.
-3. Erişilebilir saldırı yüzeyini yalnızca ölü/dahili koddan ayırmak için bu entrypoint'lerden aday fonksiyonlara **path query**'leri çalıştırın.
-4. Şu özellikleri bir arada taşıyan düğümlere öncelik verin:
+2. Saldırgan denetimindeki girdileri kabul eden **entrypoint**'leri belirleyin: request handler'lar, decoder'lar, importer'lar, protocol parser'ları, CLI/file reader'ları.
+3. Erişilebilir saldırı yüzeyini ölü/dahili koddan ayırmak için bu entrypoint'lerden aday fonksiyonlara giden **path query**'leri çalıştırın.
+4. Aşağıdaki özellikleri bir arada taşıyan düğümlere öncelik verin:
    - yüksek **cyclomatic complexity**
-   - untrusted input'tan doğrulanmış **erişilebilirlik**
-   - yüksek **blast radius** veya çok sayıda aşağı akış bağımlısı
-   - **SARIF** bulguları, audit notları veya mutation survivor'ları gibi destekleyici kanıtlar
-5. Özellikle hex/Base64/IP/message decoder'lar gibi **parser/codec**'ler için, en yüksek puanlı düğümlere odaklanan harness'leri önce yazın.
+   - denetimsiz girdiden doğrulanmış **erişilebilirlik**
+   - yüksek **blast radius** veya çok sayıda bağımlı düğüm
+   - **SARIF** bulguları, audit notları veya mutasyon testi sonuçları gibi destekleyici kanıtlar
+5. Önce en yüksek puan alan düğümler için, özellikle hex/Base64/IP/message decoder'ları gibi **parser/codec**'ler için odaklı harness'ler yazın.
 
-### Mutation survivor'ları: eşdeğer mi, eyleme geçirilebilir mi?
+### Mutasyon testinden sağ çıkanlar: eşdeğer mi, eyleme geçirilebilir mi?
 
-Mutation testing genellikle gürültülü bir survivor listesi üretir. Her survivor'ı bir security gap olarak değerlendirmeden önce graph'i kullanarak şunları sorun:
+Mutasyon testi genellikle gürültülü bir sağ kalanlar listesi üretir. Her sağ kalanı bir güvenlik açığı olarak değerlendirmeden önce graph'ı kullanarak şunları sorun:
 
-- Mutasyona uğratılan fonksiyona saldırganın kontrolündeki bir entrypoint'ten erişilebiliyor mu?
+- Mutasyona uğratılan fonksiyona saldırgan denetimindeki bir entrypoint'ten erişilebiliyor mu?
 - Tüm çağrı yolları, mutasyona uğratılan kontrolden daha güçlü invariant'larla kısıtlanıyor mu?
-- Düğüm ölü kodda, yalnızca biçimlendirme yapan mantıkta mı, yoksa yüksek etkili bir aritmetik/parser yolunda mı bulunuyor?
+- Düğüm ölü kodda, yalnızca biçimlendirme yapan mantıkta mı, yoksa etkisi yüksek bir aritmetik/parser yolunda mı bulunuyor?
 
-Erişilemez kalan veya yapısal olarak kısıtlanan survivor'lar çoğu zaman **eşdeğer mutant**'lardır. **Erişilebilir** kalan ve **sınır koşullarına**, **taşma/elde yollarına** veya **security-critical aritmetik/parsing** işlemlerine dokunan survivor'lar şunlara dönüştürülmelidir:
+Erişilemez veya yapısal olarak kısıtlanmış kalan sağ kalanlar genellikle **eşdeğer mutant**'lardır. **Erişilebilir** kalan ve **sınır koşullarına**, **overflow/carry yollarına** ya da güvenlik açısından kritik **aritmetik/parsing** işlemlerine dokunan sağ kalanlar şu çalışmalara dahil edilmelidir:
 
 - yeni fuzz harness'leri
-- doğrudan property/invariant test'leri
+- doğrudan property/invariant testleri
 - hedefli edge-case vektörleri
 
-### Harici bulguları graph ile ilişkilendirin
+### Harici bulguları graph üzerinde ilişkilendirin
 
-SAST pipeline'ınız **SARIF** dışa aktarıyorsa, bulguları **dosya + satır aralığı** üzerinden graph düğümlerine yansıtın ve etkiyi genişletmek için graph'i kullanın.<sup>[[6]](#references)</sup>
+SAST pipeline'ınız **SARIF** dışa aktarıyorsa, bulguları **dosya + satır aralığı** üzerinden graph düğümlerine eşleyin ve etkinin kapsamını genişletmek için graph'ı kullanın.<sup>[[6]](#references)</sup>
 
-- işaretlenen fonksiyonun **blast radius**'unu hesaplayın
-- bulgunun bir entrypoint'ten geçen herhangi bir yol üzerinde olup olmadığını kontrol edin
-- aynı darboğaz noktasında birleşen yakındaki bulguları gruplandırın
+- işaretlenen fonksiyonun **blast radius** değerini hesaplayın
+- bulgunun herhangi bir entrypoint yolunda bulunup bulunmadığını kontrol edin
+- aynı darboğazda birleşen yakındaki bulguları kümelendirin
 
-Bu, belirli bir fonksiyona fuzzing zamanı ayırmaya karar verirken işe yarar: **erişilebilir**, **karmaşık** ve zaten **SAST bulguları** olan bir düğüm, saldırganın izlediği bir yol olmadan yalnızca karmaşık olan bir düğümden genellikle daha iyi bir hedeftir.
+Bu yaklaşım, belirli bir fonksiyona fuzzing zamanı ayırıp ayırmamaya karar verirken yararlıdır: **erişilebilir**, **karmaşık** ve zaten **SAST bulguları** bulunan bir düğüm, saldırgan yolu olmayan yalnızca karmaşık bir düğümden genellikle daha iyi bir hedeftir.
 
 Trailmark ile örnek iş akışı.<sup>[[6]](#references)</sup>
 
@@ -387,47 +391,47 @@ engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
 
-Önemli metodoloji, şu üç unsurun kesişimidir: **karmaşıklık x maruziyet x etki**. En yüksek beklenen güvenlik değerine sahip fuzz hedeflerini seçmek için grafiği kullanın; ardından harness'inizin hangi sınırları ve invariant'ları zorlaması gerektiğine karar vermek için mutasyonlardan sağ çıkan girdileri kullanın.<sup>[[5]](#references)</sup>
+Önemli metodoloji kesişimdir: **karmaşıklık x maruziyet x etki**. En yüksek beklenen güvenlik değerine sahip fuzz hedeflerini seçmek için grafiği kullanın; ardından harness'inizin hangi sınırları ve değişmezleri zorlaması gerektiğine karar vermek için mutasyondan sağ çıkan girdileri inceleyin.<sup>[[5]](#references)</sup>
 
 ## Kriptografik anahtar kodlamalarında differential fuzzing
 
-Geçerli serileştirilmiş anahtarlardan veya standart test vektörlerinden başlayın. Import ve işlem yollarına ulaşmak için gereken uzunluk ve yapıyı bozmadan kodlanmış alanları mutate edin, ardından aynı baytları bağımsız implementasyonlara gönderin. Kabul durumlarını ve hataları karşılaştırın. Rastgeleleştirilmiş imzalar ve ciphertext'ler için bayt bayt karşılaştırma değil, doğruluk oracle'ları gerekir: imzaları doğrulayın veya bir encapsulation/decapsulation round trip'inden elde edilen paylaşılan sırları karşılaştırın. Test vektörleri bilinen durumlar için uygunluğu belirler; differential mutation ise bunların ötesindeki hatalı kodlamaları araştırır.<sup>[[23]](#references)[[26]](#references)</sup>
+Geçerli serileştirilmiş anahtarlardan veya standart test vektörlerinden başlayın. Import ve işlem yollarına ulaşmak için gerekli uzunluk ve yapıyı bozmadan kodlanmış alanları mutasyona uğratın, ardından aynı baytları birbirinden bağımsız implementasyonlara gönderin. Kabul durumlarını ve hataları karşılaştırın. Rastgeleleştirilmiş imzalar ve şifreli metinler için bayt bayt karşılaştırma değil, doğruluk oracle'ları gerekir: imzaları doğrulayın veya encapsulation/decapsulation gidiş dönüşündeki paylaşılan sırları karşılaştırın. Test vektörleri bilinen durumlar için uygunluğu gösterir; differential mutation ise bunların ötesindeki hatalı kodlamaları sınar.<sup>[[23]](#references)[[26]](#references)</sup>
 
 Bu anahtar biçimleri için biçime özgü oracle'lar kullanın:<sup>[[24]](#references)[[25]](#references)[[26]](#references)</sup>
 
-- **ML-DSA expanded signing keys:** Anahtar parse edilebilir durumda kalırken paketlenmiş `s1` veya `s2` katsayılarını `[-η, η]` aralığının dışına çıkaracak şekilde değiştirin. Import veya imzalama işleminin bunları reddedip reddetmediğini ve ortaya çıkan herhangi bir imzanın doğrulanıp doğrulanmadığını kontrol edin. Yalnızca kabul durumlarındaki farklılıklar standart ihlali değildir; çünkü FIPS 204 ek private-key kontrollerini zorunlu kılmaz. Bkz. [koşullu leakage mekanizması](../crypto/public-key/#malformed-ml-dsa-signing-keys-and-rejection-sampling-leakage).
-- **ML-KEM key pairs:** Zorunlu encapsulation-key ve decapsulation-input kontrollerini, import edilen bir çift üzerinde yapılan isteğe bağlı pairwise-consistency check'ten (PCT) ayırın. Public key ile encapsulate edin, private key ile decapsulate edin ve paylaşılan sırları karşılaştırın; uyuşmazlık, tek tek anahtarlar girdi kontrollerinden geçse bile şifreli iletişimi bozabilir. API'nin girdileri işlem sırasında mı yoksa ayrı bir çağrıyla mı doğruladığını kontrol edin; libcrux, PCT'nin yerini tutmayan `validate_public_key(pk)` ve `validate_private_key(sk, ct)` işlevlerini sunar.
-- **XMSS/XMSSMT raw keys:** Yalnızca bellekteki anahtarlarla işlem yapmak yerine, parametre kümeleri arasında serileştirilmiş **imzalama ve doğrulama** anahtarlarının round trip işlemlerini test edin. XMSS ve XMSSMT ayrı dört baytlık OID namespace'lerine sahiptir; bu nedenle önce XMSS'i deneyen, yalnızca OID kullanan bir parser çakışan bir XMSSMT anahtarını yanlış sınıflandırıp import işlemini reddedebilir. Bildirilen RustCrypto parser'ı, imza sahteciliğini değil birlikte çalışabilirlik/kullanılabilirlik hatasını örnekler.
+- **ML-DSA genişletilmiş imzalama anahtarları:** Anahtarın parse edilebilirliğini koruyarak paketlenmiş `s1` veya `s2` katsayılarını `[-η, η]` aralığının dışına çıkaracak şekilde değiştirin. Import veya imzalama işleminin bunu reddedip reddetmediğini ve ortaya çıkan imzalardan herhangi birinin doğrulanıp doğrulanmadığını kontrol edin. Yalnızca kabul farklılıkları standart ihlali sayılmaz; çünkü FIPS 204 ek özel anahtar kontrollerini zorunlu kılmaz. Bkz. [koşullu sızıntı mekanizması](../crypto/public-key/#malformed-ml-dsa-signing-keys-and-rejection-sampling-leakage).
+- **ML-KEM anahtar çiftleri:** Encapsulation anahtarı ve decapsulation girdisi için gereken kontrolleri, içe aktarılan bir çift üzerindeki isteğe bağlı çift tutarlılığı kontrolünden (PCT) ayırın. Açık anahtarıyla encapsulate edin, özel anahtarıyla decapsulate edin ve paylaşılan sırları karşılaştırın; uyuşmazlık, tek tek anahtarlar girdi kontrollerinden geçse bile şifreli iletişimi bozabilir. API'nin girdileri işlem sırasında mı yoksa ayrı bir çağrıyla mı doğruladığını kontrol edin; libcrux `validate_public_key(pk)` ve `validate_private_key(sk, ct)` işlevlerini sunar, ancak bunlar PCT'nin yerini almaz.
+- **XMSS/XMSSMT ham anahtarları:** Yalnızca bellekteki anahtarlarla yapılan işlemleri değil, parametre kümeleri arasında serileştirilmiş **imzalama ve doğrulama** anahtarlarının gidiş dönüşünü de sınayın. XMSS ve XMSSMT'nin dört baytlık OID ad alanları ayrıdır; bu nedenle önce XMSS'yi deneyen, yalnızca OID'ye bakan bir parser, çakışan bir XMSSMT anahtarını yanlış sınıflandırıp içe aktarmayı reddedebilir. Bildirilen RustCrypto parser sorunu, imza sahteciliğini değil, birlikte çalışabilirlik/kullanılabilirlik hatasını örnekler.
 
-## gosentry ile Go Fuzzing: Daha Güçlü Engine, Typed Inputs ve Differential Checks
+## gosentry ile Go Fuzzing: Daha Güçlü Motor, Tipli Girdiler ve Differential Checks
 
-Bir Go hedefinde zaten yerel bir `testing.F` harness'i varsa, pratik bir yükseltme yolu aynı harness'i [gosentry](https://github.com/trailofbits/gosentry) ile çalıştırmaktır. gosentry, `go test -fuzz` özelliğini koruyan ancak backend'i **LibAFL** ile değiştiren, fork edilmiş bir Go toolchain'dir.<sup>[[7]](#references)[[8]](#references)</sup>
+Bir Go hedefinde yerel `testing.F` harness'i zaten varsa, pratik bir yükseltme yolu aynı harness'i [gosentry](https://github.com/trailofbits/gosentry) ile çalıştırmaktır. gosentry, `go test -fuzz` desteğini koruyan ancak arka ucu **LibAFL** ile değiştiren, çatallanmış bir Go toolchain'dir.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
 
-Bu, native Go fuzzer **zor karşılaştırmalarda**, **typed input'larda** veya **parser ağırlıklı formatlarda** takıldığında kullanışlıdır. Yöntem aynı kalır:
+Bu, native Go fuzzer **zor karşılaştırmalarda**, **tipli girdilerde** veya **ayrıştırıcı ağırlıklı biçimlerde** takıldığında kullanışlıdır. Metodoloji aynı kalır:
 
 - Seed'ler için `f.Add(...)`, callback için `f.Fuzz(...)` kullanmaya devam edin.
-- Aynı harness'ı kullanın, ancak stock toolchain yerine gosentry'nin `go` binary'siyle çalıştırın.
-- Ortaya çıkan campaign'i normal bir coverage-guided run olarak değerlendirin; ancak LibAFL scheduling/mutation ve daha iyi çevresel detector'lar kullanın.
+- Aynı harness'i yeniden kullanın, ancak stock toolchain yerine gosentry'nin `go` binary'siyle çalıştırın.
+- Ortaya çıkan campaign'i normal bir coverage-guided çalışma olarak ele alın; ancak LibAFL scheduling/mutation ve daha iyi çevresel detector'lar kullanın.
 
-### Sessiz hataları fuzz bulgularına dönüştürme
+### Sessiz hataları fuzzing bulgularına dönüştürün
 
-Go değerlendirmelerinde sık karşılaşılan bir sorun, tehlikeli davranışların varsayılan olarak **crash** etmemesidir. gosentry ile çeşitli “kötü ama sessiz” durumları bulguya dönüştürebilirsiniz.<sup>[[7]](#references)[[8]](#references)</sup>
+Go değerlendirmelerinde sık karşılaşılan bir sorun, tehlikeli davranışların çoğu zaman varsayılan olarak **crash** oluşturmamasıdır. gosentry ile çeşitli “kötü ama sessiz” durumları bulguya dönüştürebilirsiniz.<sup>[[7]](#references)[[8]](#references)</sup>
 
-- `--panic-on=pkg.Func,...` seçili logging/error yollarının crash gibi davranmasını sağlar (aksi hâlde yalnızca log yazıp devam eden `log.Fatal` tarzı kod yolları için kullanışlıdır).
-- `--catch-races=true` yeni keşfedilen queue entry'lerini Go race detector ile yeniden oynatır.
-- `--catch-leaks=true` yeni queue entry'lerini `goleak` ile yeniden oynatır ve goroutine leak'lerinde durur.
-- LibAFL hang işleme özelliği, **sonsuz döngüleri / çok yavaş input'ları** timeout olarak kaybolmalarına izin vermek yerine fuzz bulguları olarak tutar.
-- Varsayılan olarak yerleşik arithmetic overflow kontrolleri ve go-panikint tarzı instrumentation aracılığıyla isteğe bağlı truncation kontrolleri.
+- `--panic-on=pkg.Func,...` seçili logging/error yollarını crash gibi davranacak şekilde ayarlar (aksi durumda yalnızca log yazıp devam eden `log.Fatal` tarzı kod yolları için kullanışlıdır).
+- `--catch-races=true` yeni keşfedilen queue entry'lerini Go race detector ile yeniden çalıştırır.
+- `--catch-leaks=true` yeni queue entry'lerini `goleak` ile yeniden çalıştırır ve goroutine leak'lerinde durur.
+- LibAFL hang işleme özelliği, **sonsuz döngüleri / çok yavaş girdileri** timeout olarak kaybolmalarına izin vermek yerine fuzzing bulgusu olarak tutar.
+- Varsayılan olarak yerleşik aritmetik taşma kontrolleri ve go-panikint tarzı enstrümantasyon aracılığıyla isteğe bağlı truncation kontrolleri.
 
-Bu, özellikle güvenlik etkisinin memory corruption yerine **panic oluşturmayan bir parser hatası**, **concurrency bug'ı** veya yalnızca DoS'a yol açan bir **hang** olduğu hedeflerde değerlidir.
+Bu, güvenlik etkisinin bellek bozulmasından ziyade **panic oluşturmayan bir ayrıştırıcı hatası**, **eşzamanlılık hatası** veya yalnızca **DoS'a yol açan bir takılma** olduğu hedefler için özellikle değerlidir.
 
-### Typed Go API'leri için struct-aware fuzzing
+### Tipli Go API'leri için struct-aware fuzzing
 
-Native Go fuzzing çoğunlukla `[]byte`, `string` ve sayılar gibi scalar'ları bekler. Test edilen kod typed object'ler tüketiyorsa gosentry, alttaki byte'ları mutate etmeye devam ederken doğrudan **composite value'ları** (struct'lar, slice'lar, array'ler, pointer'lar) fuzz edebilir.<sup>[[7]](#references)[[8]](#references)</sup>
+Native Go fuzzing temel olarak `[]byte`, `string` ve sayılar gibi scalar'ları bekler. Test edilen kod tipli nesneler kullanıyorsa gosentry, alttaki byte'ları mutasyona uğratırken **bileşik değerleri** (struct'lar, slice'lar, array'ler, pointer'lar) doğrudan fuzz edebilir.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 type Input struct {
@@ -444,11 +448,11 @@ func FuzzStructInput(f *testing.F) {
 }
 ```
 
-Bunu, yalnızca fuzzing için sahte bir wire format oluştururken kullanmak, mantık hatalarını yalnızca harness'te bulunan ayrıştırma kodunun arkasında gizler. Differential veya grammar-based kampanyalarda harness girdisini tek bir `[]byte` ya da `string` olarak tutun ve bunun yerine callback içinde ayrıştırın.
+Bunu yalnızca fuzzing için sahte bir wire formatı oluştururken kullanmak, mantık hatalarını yalnızca harness'te bulunan ayrıştırma kodunun arkasında gizler. Differential veya grammar-based kampanyalar için harness girdisini tek bir `[]byte` veya `string` olarak tutun ve bunun yerine callback içinde ayrıştırın.
 
 ### Parser'lar ve protokol girdileri için grammar-based fuzzing
 
-Parser'lar, formatlar ve girdi dilleri için gosentry, LibAFL üzerine **Nautilus grammar fuzzing** çalıştırabilir. Grammar, üretim kurallarından oluşan bir JSON dizisidir ve harness genellikle tek bir `[]byte` veya `string` argümanı almalıdır.<sup>[[7]](#references)[[8]](#references)</sup>
+Parser'lar, formatlar ve girdi dilleri için gosentry, LibAFL üzerinde **Nautilus grammar fuzzing** çalıştırabilir. Grammar, üretim kurallarından oluşan bir JSON dizisidir ve harness genellikle tek bir `[]byte` veya `string` argümanı almalıdır.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
@@ -456,14 +460,14 @@ Parser'lar, formatlar ve girdi dilleri için gosentry, LibAFL üzerine **Nautilu
 
 Metodoloji notları:
 
-- Bayt düzeyindeki mutasyonlar çoğunlukla erken sözdizimi denetimlerinde başarısız oluyorsa grammar mode kullanın.
-- Grameri, dilin/protokolün tüm belirtimini modellemek yerine **güvenlikle ilgili alt kümesine** odaklı tutun.
+- Byte-level mutations çoğunlukla erken sözdizimi denetimlerinde başarısız oluyorsa grammar mode kullanın.
+- Grammar'ı, dilin/protokolün tamamını modellemek yerine **güvenlikle ilgili alt kümesine** odaklı tutun.
 - Tamsayı, uzunluk ve durum makinesi sınırlarını zorlamak için terminallerde/terminal olmayanlarda büyük sınır değerleri kullanın.
-- Grammar mode girdileri gramer açısından geçerli tutar, ancak hedef yine de **baytlar/dizeler** alır; dolayısıyla ayrıştırma ve anlamsal denetimler hâlâ harness kapsamındaki kodda gerçekleşir.
+- Grammar mode girdileri grammar'a uygun tutar, ancak hedef yine de **byte/string** alır; bu nedenle ayrıştırma ve semantik denetimler harness edilen kod içinde kalır.
 
-### Differential fuzzing: yalnızca çökmeleri değil, uygulamaları karşılaştırın
+### Differential fuzzing: yalnızca çökmeleri değil, implementasyonları karşılaştırın
 
-Go ekosistemleri için güçlü bir yaklaşım **gramer tabanlı differential fuzzing** yöntemidir: geçerli yapılandırılmış girdiler üretin ve bunları iki parser'a, istemciye veya durum geçişi motoruna verin.<sup>[[7]](#references)[[8]](#references)</sup>
+Go ekosistemlerinde etkili bir yöntem, **grammar-based differential fuzzing** kullanmaktır: geçerli yapılandırılmış girdiler üretip bunları iki parser'a, istemciye veya durum geçişi motoruna göndermek.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
@@ -479,55 +483,56 @@ f.Fuzz(func(t *testing.T, data []byte) {
 
 Bunları bulgu olarak değerlendirin:
 
-- bir implementasyon panic verirken diğeri girdiyi sorunsuz biçimde reddediyor
-- kabul edilen/reddedilen girdiler arasında uyuşmazlıklar
-- farklı parse ağaçları veya decode edilmiş nesneler
-- farklı state geçişleri, nonce değerleri, bakiyeler veya state root’ları
+- bir uygulama panic verirken diğeri girdiyi düzgün şekilde reddediyor
+- kabul edilen/reddedilen girdiler uyuşmuyor
+- ayrıştırma ağaçları veya çözümlenen nesneler farklı
+- durum geçişleri, nonce'lar, bakiyeler veya durum kökleri farklılaşıyor
 
-Bu, saf crash fuzzing’in sıklıkla gözden kaçırdığı **consensus uyuşmazlıklarını**, **parser belirsizliğini** ve **spec ile implementasyon arasındaki sapmaları** bulmanın pratik bir yoludur.
+Bu, saf crash fuzzing'in çoğunlukla gözden kaçırdığı **consensus uyuşmazlıklarını**, **parser belirsizliğini** ve **spec ile uygulama arasındaki sapmaları** bulmanın pratik bir yoludur.
 
 {{#ref}}
 proof-assistant-formal-verification-security.md
 {{#endref}}
 
-### Coverage raporlaması için campaign corpus’unu yeniden kullanın
+### Kapsam raporlaması için campaign corpus'u yeniden kullanın
 
-Bir campaign’den sonra, ayrı bir corpus’u manuel olarak dışa aktarmadan Go coverage raporu oluşturmak için kaydedilmiş queue corpus’unu yeniden oynatın.<sup>[[7]](#references)[[8]](#references)</sup>
+Bir campaign'den sonra, ayrı bir corpus'u manuel olarak dışa aktarmadan Go kapsam raporu oluşturmak için kaydedilmiş kuyruk corpus'unu yeniden oynatın.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
 
-Komutu aynı paketten ve aynı `-fuzz` hedefiyle çalıştırın; böylece gosentry doğru önbelleğe alınmış kampanya durumunu çözümler.
+Aynı package içinden ve aynı `-fuzz` hedefiyle komutu çalıştırın; böylece gosentry doğru önbelleğe alınmış campaign state'i çözümler.
 
 ## References
 
 - [1] [Mutasyonel grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
 - [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
-- [3] [AFL++ Fuzzing'e Derinlemesine Bakış](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [4] [AFLNet, Beş Yıl Sonra: Coverage-Guided Protocol Fuzzing Üzerine](https://arxiv.org/abs/2412.20324)
-- [5] [Trailmark kodu grafiklere dönüştürüyor](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
+- [3] [AFL++ Fuzzing Derinlemesine](https://aflplus.plus/docs/fuzzing_in_depth/)
+- [4] [Beş Yıl Sonra AFLNet: Coverage-Guided Protocol Fuzzing Üzerine](https://arxiv.org/abs/2412.20324)
+- [5] [Trailmark kodu graflara dönüştürüyor](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
 - [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
-- [7] [Go fuzzing araç setinin yarısından yoksundu. Bunu düzeltmek için toolchain'i fork ettik.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
+- [7] [Go fuzzing araç takımının yarısından yoksundu. Düzeltmek için toolchain'i fork ettik.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
 - [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
-- [9] [SNPSFuzzer: Snapshot'lar Kullanarak Stateful Network Protocols için Hızlı bir Greybox Fuzzer](https://arxiv.org/abs/2202.03643)
-- [10] [Grammar Yok, Sorun Yok: System-Call Açıklamaları Olmadan Linux Kernel Fuzzing](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
+- [9] [SNPSFuzzer: Snapshot'lar Kullanarak Stateful Network Protocols için Hızlı Bir Greybox Fuzzer](https://arxiv.org/abs/2202.03643)
+- [10] [Grammar Yoksa Sorun Değil: System-Call Tanımları Olmadan Linux Kernel Fuzzing'e Doğru](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
 - [11] [Snappy: Uyarlanabilir ve Değiştirilebilir Snapshot'larla Verimli Fuzzing](https://project-theseus.nl/publication/2022/snappy/)
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
 - [13] [AFL++ LLVM instrumentation: path ve caller coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
-- [14] [Öngörülü Context-Sensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
+- [14] [Öngörülü Context-sensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
 - [15] [Android Offensive Security Blog - Binder Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
-- [16] [LKL Android Binder fuzzer - derleme ve regression-seed belgeleri](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
-- [17] [MAccConc: Kontrollü Memory-Access Interleaving'leriyle Linux Kernel Race Condition'larını İnceleme](https://projectzero.google/2026/09/maccconc-race-condition.html)
+- [16] [LKL Android Binder fuzzer - build ve regression-seed belgeleri](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [17] [MAccConc: Kontrollü Memory-Access Interleavings ile Linux Kernel Race Condition'larını İncelemek](https://projectzero.google/2026/09/maccconc-race-condition.html)
 - [18] [googleprojectzero/MAccConc](https://github.com/googleprojectzero/MAccConc)
 - [19] [KCOV: fuzzing için code coverage](https://docs.kernel.org/dev-tools/kcov.html)
-- [20] [CFITSIO Extended Filename Syntax](https://heasarc.gsfc.nasa.gov/docs/software/fitsio/filters.html)
-- [21] [Doyensec Advisory: CFITSIO Q4 2025](https://www.doyensec.com/resources/Doyensec_Advisory_CFITSIO_Q42025.pdf)
-- [22] [CFITSIO Extended Filename Syntax'ı Fuzzing: 16 Memory-Safety Açığı ve Codex Destekli Triyaj](https://blog.doyensec.com/2026/04/20/cfitsio-fuzzing.html)
+- [20] [CFITSIO Genişletilmiş Dosya Adı Sözdizimi](https://heasarc.gsfc.nasa.gov/docs/software/fitsio/filters.html)
+- [21] [Doyensec Danışma Bülteni: CFITSIO Q4 2025](https://www.doyensec.com/resources/Doyensec_Advisory_CFITSIO_Q42025.pdf)
+- [22] [CFITSIO Genişletilmiş Dosya Adı Sözdiziminin Fuzzing'i: 16 Memory-Safety Vulnerability ve Codex Destekli Triyaj](https://blog.doyensec.com/2026/04/20/cfitsio-fuzzing.html)
 - [23] [Kriptografi için Differential Fuzzing](https://blog.quarkslab.com/differential-fuzzing-for-cryptography.html)
 - [24] [NIST FIPS 203: Module-Lattice-Based Key-Encapsulation Mechanism Standard](https://doi.org/10.6028/NIST.FIPS.203)
 - [25] [XMSSMT OID ayrıştırma hatası - RustCrypto issue #1442](https://github.com/RustCrypto/signatures/issues/1442)
 - [26] [Post-Quantum Cryptography Uygulamalarının Durumu](http://blog.quarkslab.com/state-of-post-quantum-cryptography-implementations.html)
 - [27] [Snapshot Alma Yöntemiyle CVE-2026-9539'a Ulaşmak](http://blog.quarkslab.com/snapshotting-our-way-to-cve-2026-9539.html)
 - [28] [Quarkslab slirp_snapshots_stateful](https://github.com/quarkslab/slirp_snapshots_stateful)
+- [29] [Project Zero - Fuzzer'lar ve AI: JavaScript Engine'lerinde Fuzzilli ve BigSleep Karşılaştırması](https://projectzero.google/2026/10/fuzzing-v-AI.html)
 {{#include ../banners/hacktricks-training.md}}
