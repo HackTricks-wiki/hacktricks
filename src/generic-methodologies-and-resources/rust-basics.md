@@ -4,11 +4,11 @@
 
 ### Quyền sở hữu biến
 
-Bộ nhớ được quản lý thông qua hệ thống quyền sở hữu với các quy tắc sau, được trình biên dịch kiểm tra tại thời điểm biên dịch:
+Bộ nhớ được quản lý thông qua hệ thống quyền sở hữu với các quy tắc sau, được compiler kiểm tra tại thời điểm biên dịch:
 
-1. Mỗi giá trị trong Rust có một biến được gọi là chủ sở hữu của nó.
+1. Mỗi giá trị trong Rust có một biến được gọi là chủ sở hữu của giá trị đó.
 2. Tại một thời điểm chỉ có thể có một chủ sở hữu.
-3. Khi chủ sở hữu ra khỏi phạm vi, giá trị sẽ bị hủy.
+3. Khi chủ sở hữu ra khỏi phạm vi, giá trị sẽ bị loại bỏ.
 
 ```rust
 fn main() {
@@ -24,9 +24,9 @@ fn main() {
 
 
 
-### Generic Types
+### Kiểu tổng quát
 
-Tạo một struct trong đó một giá trị có thể thuộc bất kỳ kiểu nào.
+Tạo một struct trong đó một trong các giá trị có thể thuộc bất kỳ kiểu nào.
 
 ```rust
 struct Wrapper<T> {
@@ -45,7 +45,7 @@ Wrapper::new("Foo").value, "Foo"
 
 ### Option, Some & None
 
-Kiểu Option có nghĩa là giá trị có thể thuộc kiểu Some (có giá trị) hoặc None (không có giá trị):
+Kiểu Option có nghĩa là giá trị có thể thuộc kiểu Some (có thứ gì đó) hoặc None:
 
 ```rust
 pub enum Option<T> {
@@ -54,12 +54,12 @@ pub enum Option<T> {
 }
 ```
 
-Bạn có thể dùng các hàm như `is_some()` hoặc `is_none()` để kiểm tra giá trị của Option.
+Bạn có thể dùng các hàm như `is_some()` hoặc `is_none()` để kiểm tra giá trị của `Option`.
 
 
 ### Result, Ok & Err
 
-Dùng để trả về và lan truyền lỗi
+Dùng để trả về và truyền tiếp lỗi
 
 ```rust
 pub enum Result<T, E> {
@@ -68,15 +68,15 @@ pub enum Result<T, E> {
 }
 ```
 
-Bạn có thể dùng các hàm như `is_ok()` hoặc `is_err()` để kiểm tra giá trị của kết quả.
+Bạn có thể dùng các hàm như `is_ok()` hoặc `is_err()` để kiểm tra giá trị của kết quả
 
-Enum `Option` nên được dùng trong những trường hợp một giá trị có thể không tồn tại (là `None`).
-Enum `Result` nên được dùng trong những trường hợp bạn thực hiện việc gì đó có thể gặp lỗi.
+Nên dùng enum `Option` trong các trường hợp một giá trị có thể không tồn tại (là `None`).
+Nên dùng enum `Result` trong các trường hợp bạn thực hiện việc gì đó có thể xảy ra lỗi
 
 
 ### Macros
 
-Macros mạnh hơn functions vì chúng mở rộng để tạo ra nhiều mã hơn phần mã bạn viết thủ công. Ví dụ, chữ ký của function phải khai báo số lượng và kiểu của các tham số. Mặt khác, macros có thể nhận số lượng tham số thay đổi: ta có thể gọi `println!("hello")` với một đối số hoặc `println!("hello {}", name)` với hai đối số. Ngoài ra, macros được mở rộng trước khi compiler diễn giải ý nghĩa của mã, vì vậy macro có thể, chẳng hạn, triển khai một trait cho một kiểu nhất định. Function không thể làm được điều này, vì nó được gọi tại runtime còn trait cần được triển khai tại compile time.
+Macros mạnh hơn functions vì chúng mở rộng để tạo ra nhiều code hơn so với phần code bạn viết thủ công. Ví dụ, chữ ký của một function phải khai báo số lượng và kiểu của các tham số mà function nhận. Mặt khác, macros có thể nhận số lượng tham số thay đổi: ta có thể gọi `println!("hello")` với một đối số hoặc `println!("hello {}", name)` với hai đối số. Ngoài ra, macros được mở rộng trước khi compiler diễn giải ý nghĩa của code, vì vậy macro có thể, chẳng hạn, triển khai một trait cho một kiểu dữ liệu nhất định. Function không thể làm vậy vì nó được gọi tại runtime, còn trait cần được triển khai tại compile time.
 
 ```rust
 macro_rules! my_macro {
@@ -103,7 +103,7 @@ mod macros {
 }
 ```
 
-### Lặp lại
+### Lặp
 
 ```rust
 // Iterate through a vector
@@ -122,15 +122,21 @@ for key in map.keys() {
 for value in map.values() {
 ```
 
-### Hộp đệ quy
+### Box đệ quy
+
+Một enum đệ quy cần có lớp gián tiếp để kích thước của nó được xác định tại thời điểm biên dịch; lưu trực tiếp `List` bên trong `List` sẽ không biên dịch được.<sup>[[10]](#references)</sup>
 
 ```rust
 enum List {
-    Cons(i32, List),
+    Cons(i32, Box<List>),
     Nil,
 }
 
-let list = Cons(1, Cons(2, Cons(3, Nil)));
+use List::{Cons, Nil};
+
+fn main() {
+    let _list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}
 ```
 
 ### Câu lệnh điều kiện
@@ -258,9 +264,11 @@ for name in names.iter_mut() {
 
 #### if let
 
+Match `Some` để bind giá trị bên trong; một mẫu biến thông thường khớp cả `Some` và `None`, vì vậy nhánh `else` sẽ không bao giờ chạy.<sup>[[11]](#references)</sup>
+
 ```rust
 let optional_word = Some(String::from("rustlings"));
-if let word = optional_word {
+if let Some(word) = optional_word {
     println!("The word is: {}", word);
 } else {
     println!("The optional word doesn't contain anything");
@@ -288,7 +296,7 @@ while let Some(i) = optional {
 
 ### Traits
 
-Tạo một phương thức mới cho một kiểu
+Tạo một phương thức mới cho một kiểu dữ liệu
 
 ```rust
 trait AppendBar {
@@ -320,11 +328,11 @@ mod tests {
 }
 ```
 
-### Đa luồng
+### Threading
 
 #### Arc
 
-Arc có thể dùng Clone để tạo thêm các tham chiếu đến đối tượng, rồi truyền chúng cho các luồng. Khi con trỏ tham chiếu cuối cùng đến một giá trị ra khỏi phạm vi, biến sẽ bị hủy.
+Arc có thể dùng Clone để tạo thêm các tham chiếu đến đối tượng và truyền chúng cho các thread. Khi con trỏ tham chiếu cuối cùng đến một giá trị nằm ngoài phạm vi, biến sẽ bị giải phóng.
 
 ```rust
 use std::sync::Arc;
@@ -337,9 +345,9 @@ for _ in 0..10 {
 }
 ```
 
-#### Luồng
+#### Threads
 
-Trong trường hợp này, chúng ta sẽ truyền cho luồng một biến mà nó có thể sửa đổi.
+Trong trường hợp này, chúng ta sẽ truyền cho thread một biến mà nó có thể sửa đổi.
 
 ```rust
 fn main() {
@@ -360,19 +368,25 @@ fn main() {
 ```
 
 
-### Những điều cốt yếu về bảo mật
+### Những nguyên tắc bảo mật cốt lõi
 
-Rust mặc định cung cấp các đảm bảo mạnh mẽ về an toàn bộ nhớ, nhưng bạn vẫn có thể tạo ra các lỗ hổng nghiêm trọng thông qua mã `unsafe`, vấn đề về dependency hoặc sai sót logic. Cheatsheet ngắn sau đây tập hợp các primitive mà bạn thường gặp nhất khi rà soát bảo mật phần mềm Rust theo hướng tấn công hoặc phòng thủ.
+Rust mặc định cung cấp các đảm bảo mạnh về an toàn bộ nhớ, nhưng bạn vẫn có thể tạo ra lỗ hổng nghiêm trọng thông qua mã `unsafe`, vấn đề về dependency hoặc sai sót logic. Bảng tóm tắt ngắn sau đây tập hợp các cấu trúc bạn thường gặp nhất khi đánh giá bảo mật phần mềm Rust theo hướng tấn công hoặc phòng thủ. Để xem các công cụ dành riêng cho từng ngôn ngữ khác, hãy tham khảo [Code Review Tools](../network-services-pentesting/pentesting-web/code-review-tools.md#rust).
 
-#### Mã unsafe & an toàn bộ nhớ
+#### Mã `unsafe` và an toàn bộ nhớ
 
-Các khối `unsafe` bỏ qua những bước kiểm tra aliasing và giới hạn của compiler, vì vậy **mọi lỗi gây hỏng bộ nhớ truyền thống (OOB, use-after-free, double free, v.v.) đều có thể xuất hiện trở lại**. Danh sách kiểm tra nhanh:
+`unsafe` cho phép thực hiện những thao tác mà compiler không thể chứng minh là an toàn; nó **không** tắt các kiểm tra borrow hoặc giới hạn thông thường. Hỏng bộ nhớ có thể xảy ra khi thao tác `unsafe` vi phạm hợp đồng an toàn, kể cả bên trong một hàm được cung cấp dưới dạng API an toàn.<sup>[[3]](#references)</sup>
 
-* Tìm các khối `unsafe`, hàm `extern "C"`, lời gọi `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointer hoặc module `ffi`.
-* Xác thực mọi phép tính số học trên pointer và đối số độ dài được truyền cho các hàm cấp thấp.
-* Ưu tiên `#![forbid(unsafe_code)]` (toàn crate) hoặc `#[deny(unsafe_op_in_unsafe_fn)]` (từ phiên bản 1.68 trở lên) để khiến quá trình biên dịch thất bại nếu ai đó thêm lại `unsafe`.
+Khi rà soát mã nguồn, hãy tìm các thao tác không kiểm tra và lần theo con trỏ cùng độ dài do kẻ tấn công kiểm soát từ các hàm gọi công khai:<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Ví dụ về lỗi tràn được tạo bằng raw pointer:
+```bash
+rg -n 'unsafe|from_raw_parts|set_len|copy_nonoverlapping|transmute|unsafe impl|extern "C"' src
+```
+
+* Với `slice::from_raw_parts`, hãy chứng minh con trỏ không null và được căn chỉnh, toàn bộ vùng đã khởi tạo nằm trong một allocation còn hiệu lực, và slice trả về không thể tồn tại lâu hơn vùng đó. Ngay cả slice có độ dài bằng 0 cũng không thể dùng con trỏ null.
+* Với `Vec::set_len`, hãy chứng minh độ dài mới không vượt quá capacity thực tế và mọi phần tử mới được đưa vào phạm vi đều đã được khởi tạo. Kiểm tra cả kích thước allocation lẫn số lượng bản sao; `with_capacity` không khởi tạo phần tử.
+* Kiểm tra mọi `unsafe impl` của `Send` hoặc `Sync` và từng chữ ký FFI để bảo đảm chúng tuân thủ các bất biến được cam kết với bên gọi an toàn. `#![forbid(unsafe_code)]` từ chối unsafe code trong một crate; thay vào đó, `#![deny(unsafe_op_in_unsafe_fn)]` yêu cầu các unsafe block tường minh **bên trong** các hàm unsafe, chứ không cấm unsafe code. Lint sau được cảnh báo mặc định trong Rust 2024.<sup>[[3]](#references)[[7]](#references)[[12]](#references)</sup>
+
+Ví dụ về tràn số được tạo bằng raw pointers:
 ```rust
 use std::ptr;
 
@@ -386,55 +400,69 @@ fn vuln_copy(src: &[u8]) -> Vec<u8> {
     dst
 }
 ```
-Chạy Miri là một cách ít tốn kém để phát hiện UB khi chạy kiểm thử:
+Đầu vào dài hơn `dst.capacity()` vi phạm cả giới hạn sao chép lẫn hợp đồng `set_len` trong ví dụ trên. Hãy thêm một bài kiểm thử với đầu vào quá dài cho allocator mục tiêu, rồi chạy bài kiểm thử đó bằng Miri. Miri kiểm tra các đường dẫn đã thực thi để phát hiện hành vi không xác định, nhưng các lời gọi ngoại lai không được hỗ trợ có thể khiến Miri không kiểm tra được ranh giới FFI.<sup>[[5]](#references)[[6]](#references)</sup>
+
 ```bash
-rustup component add miri
-cargo miri test  # hunts for OOB / UAF during unit tests
+rustup +nightly component add miri
+cargo +nightly miri test
 ```
 
-#### Kiểm tra dependency bằng RustSec / cargo-audit
+#### Kiểm tra các dependency bằng RustSec / cargo-audit
 
-Phần lớn lỗ hổng Rust trong thực tế nằm trong các crate của bên thứ ba. Có thể truy vấn RustSec advisory DB (do cộng đồng đóng góp) trên máy cục bộ:<sup>[[1]](#references)</sup>
+Phần lớn lỗ hổng Rust trong thực tế nằm trong các crate của bên thứ ba. Có thể truy vấn RustSec advisory DB (do cộng đồng duy trì) ngay trên máy cục bộ:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Tích hợp vào CI và làm cho quy trình thất bại khi dùng `--deny warnings`.
+Tích hợp nó vào CI và cho quy trình thất bại với `--deny warnings`.
 
-`cargo deny check advisories` cung cấp chức năng tương tự, cùng với các kiểm tra giấy phép và danh sách cấm.
+`cargo deny check advisories` cung cấp chức năng tương tự, đồng thời kiểm tra giấy phép và danh sách cấm.
 
 #### Độ bao phủ mã với cargo-tarpaulin
 
-`cargo tarpaulin` là công cụ báo cáo độ bao phủ mã dành cho hệ thống build Cargo.
+`cargo tarpaulin` là công cụ báo cáo độ bao phủ mã cho hệ thống build Cargo.
 
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Trên Linux, backend tracing mặc định của Tarpaulin vẫn là Ptrace và chỉ hoạt động trên các bộ xử lý x86_64. Có thể chuyển sang instrumentation coverage của llvm bằng `--engine llvm`. Đây là phương thức thu thập mặc định trên Mac và Windows.
+Trên Linux, backend tracing mặc định của Tarpaulin vẫn là Ptrace và chỉ hoạt động trên bộ xử lý x86_64. Có thể đổi sang instrumentation coverage của llvm bằng `--engine llvm`. Đây là phương thức thu thập mặc định trên Mac và Windows.
 
-#### Xác minh chuỗi cung ứng bằng cargo-vet (2024)
+#### Xác minh chuỗi cung ứng bằng cargo-vet
 
-`cargo vet` ghi lại hash đánh giá cho mọi crate bạn import và ngăn các lần nâng cấp không được chú ý:
+`cargo vet` kiểm tra các dependency theo tiêu chí audit đã cấu hình, sử dụng các audit cục bộ, các import đáng tin cậy hoặc các ngoại lệ được chỉ định rõ ràng. `cargo vet init` tạo metadata trong `supply-chain/` và miễn audit cho các dependency hiện có chưa được audit, vì vậy một lượt kiểm tra ban đầu thành công **không** có nghĩa là mọi crate đều đã được xem xét. Kiểm tra các ngoại lệ và dùng `cargo vet suggest` để xử lý chúng; `--locked` tránh làm mới các tập audit đã import.<sup>[[8]](#references)</sup>
+
 ```bash
 cargo install cargo-vet
-cargo vet init      # generates vet.toml
-cargo vet --locked  # verifies packages referenced in Cargo.lock
+cargo vet init
+cargo vet suggest
+cargo vet --locked
 ```
-Công cụ này đang được hạ tầng của dự án Rust và ngày càng nhiều tổ chức áp dụng để giảm thiểu các cuộc tấn công bằng package bị đầu độc.<sup>[[2]](#references)</sup>
 
 #### Fuzzing bề mặt API của bạn (cargo-fuzz)
 
-Các bài kiểm thử fuzz dễ dàng phát hiện panic, tràn số nguyên và lỗi logic có thể dẫn đến DoS hoặc vấn đề side-channel:
+Các fuzz target kiểm thử API bằng các đầu vào được tạo tự động và có thể phát hiện panic cùng các lỗi an toàn bộ nhớ. Target được tạo nằm trong `fuzz/fuzz_targets/`; hãy thay phần thân mặc định bằng lời gọi đến API cần xem xét trước khi chạy target đó.<sup>[[9]](#references)</sup>
 ```bash
 cargo install cargo-fuzz
-cargo fuzz init              # creates fuzz_targets/
+cargo fuzz init              # creates fuzz/fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-Thêm fuzz target vào repo của bạn và chạy nó trong pipeline.
+Thêm fuzz target vào repo và chạy nó trong pipeline.
+
+
 
 ## References
 
-- [1] [Cơ sở dữ liệu khuyến cáo RustSec](https://rustsec.org)
+- [1] [Cơ sở dữ liệu tư vấn RustSec](https://rustsec.org)
 - [2] [Cargo-vet: "Kiểm tra các dependency Rust của bạn"](https://mozilla.github.io/cargo-vet/)
+- [3] [Ngôn ngữ lập trình Rust: Rust không an toàn](https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html)
+- [4] [Rust std: slice::from_raw_parts](https://doc.rust-lang.org/std/slice/fn.from_raw_parts.html)
+- [5] [Rust std: Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html)
+- [6] [README của Miri](https://github.com/rust-lang/miri/blob/master/README.md)
+- [7] [Rust 2024: cảnh báo unsafe_op_in_unsafe_fn](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html)
+- [8] [Các lệnh Cargo Vet](https://mozilla.github.io/cargo-vet/commands.html)
+- [9] [Sách Rust Fuzz: hướng dẫn cargo-fuzz](https://rust-fuzz.github.io/book/cargo-fuzz/tutorial.html)
+- [10] [Ngôn ngữ lập trình Rust: Box và kiểu đệ quy](https://doc.rust-lang.org/book/ch15-01-box.html)
+- [11] [Ngôn ngữ lập trình Rust: if let](https://doc.rust-lang.org/book/ch06-03-if-let.html)
+- [12] [Rust 2024: các khối extern không an toàn](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-extern.html)
 {{#include ../banners/hacktricks-training.md}}
