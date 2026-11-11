@@ -241,6 +241,16 @@ When the code you want to test only becomes reachable **after a large setup cost
 
 Place the snapshot as close as practical to the first expensive parse/dispatch step, such as after a `recv`/`read` or packet-deserialization point, and record the input buffer used by the target. This follows the adaptive-placement principle of moving the snapshot deeper into input processing to avoid repeating work.<sup>[[11]](#references)</sup>
 
+### Incremental snapshots for protocol states
+
+A fixed snapshot avoids setup cost but does not by itself explore transitions requiring several valid messages. A LibAFL-Qemu harness can watch writes to a protocol-state field and save a new snapshot when the state changes. In the [libslirp TCP harness](https://github.com/quarkslab/slirp_snapshots_stateful), it watches `tcpcb.t_state`, hashes state and response flags to deduplicate snapshots, and stores dirty pages relative to a parent. Before mutating the next structured message, it restores the selected snapshot through its parent chain. The testcase keeps a `SnapshotId` and generated input bytes (`gen_bytes`); the snapshot manager tracks the parent relationship needed for replay.<sup>[[27]](#references)[[28]](#references)</sup>
+
+LibAFL-Qemu's user-mode `SnapshotModule` saves mappings and target memory but not CPU registers; preserve those separately when needed. The described manager supports one root snapshot tree and cannot share snapshot IDs across workers. Its multi-snapshot mode also cannot directly reuse QASAN shadow state. For offline triage, reconstruct the input chain in a separate instrumented process. When using `AsanHostModule` and `DrCovModule`, `fuzzer.evaluate_input` runs the required `pre_exec`/`post_exec` callbacks; `qemu.run` alone does not.<sup>[[27]](#references)[[28]](#references)</sup>
+
+### Catch logical ring-buffer overreads
+
+A read beyond a buffer's *valid-data count* can remain inside its host allocation and escape ordinary ASAN. The [libslirp urgent-data example](../binary-exploitation/qemu-kvm-vm-escape-chains.md#tcp-urgent-pointer-vs-valid-ring-buffer-bytes) also underflows an unsigned byte count. With source available, signed/unsigned integer-overflow instrumentation can detect that side effect; distinguish intentional TCP sequence-number wrap before suppressing reports. A stronger proposed oracle is to poison the custom ring allocation, unpoison only valid ranges as its internal allocator advances, and re-poison released ranges. LibAFL-Qemu exposes an ASAN poisoning API for targets where source instrumentation is impractical.<sup>[[27]](#references)</sup>
+
 ## Linux Kernel Race Exploration With MAccConc
 
 [MAccConc](https://github.com/googleprojectzero/MAccConc) turns timing-sensitive Linux-kernel races into repeatable memory-access schedules. It can automatically enumerate two-context **A-B-A** executions or let an analyst impose order constraints in a terminal UI/GUI. This is experimental research tooling rather than a complete concurrency fuzzer: it currently needs LLVM 23+ and the project's patched kernel, the command-line tools support two test threads, and the proposed userspace fuzzing layer is not implemented.<sup>[[17]](#references)[[18]](#references)</sup>
@@ -490,8 +500,6 @@ After a campaign, replay the saved queue corpus to generate a Go coverage report
 
 Run the command from the **same package** and with the **same `-fuzz` target** so gosentry resolves the right cached campaign state.
 
-{{#include ../banners/hacktricks-training.md}}
-
 ## References
 
 - [1] [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
@@ -520,3 +528,7 @@ Run the command from the **same package** and with the **same `-fuzz` target** s
 - [24] [NIST FIPS 203: Module-Lattice-Based Key-Encapsulation Mechanism Standard](https://doi.org/10.6028/NIST.FIPS.203)
 - [25] [XMSSMT OID parsing bug - RustCrypto issue #1442](https://github.com/RustCrypto/signatures/issues/1442)
 - [26] [State of Post-Quantum Cryptography Implementations](http://blog.quarkslab.com/state-of-post-quantum-cryptography-implementations.html)
+- [27] [Snapshotting Our Way to CVE-2026-9539](http://blog.quarkslab.com/snapshotting-our-way-to-cve-2026-9539.html)
+- [28] [Quarkslab slirp_snapshots_stateful](https://github.com/quarkslab/slirp_snapshots_stateful)
+
+{{#include ../banners/hacktricks-training.md}}
