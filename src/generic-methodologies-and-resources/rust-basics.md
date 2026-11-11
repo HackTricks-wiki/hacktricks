@@ -1,14 +1,14 @@
-# Rust की बुनियादी बातें
+# Rust की मूल बातें
 
 {{#include ../banners/hacktricks-training.md}}
 
-### वेरिएबल का स्वामित्व
+### Variables का Ownership
 
-मेमोरी का प्रबंधन स्वामित्व की एक प्रणाली के ज़रिए किया जाता है, जिसके निम्नलिखित नियमों की जाँच compiler, compile time पर करता है:
+Memory को ownership की एक प्रणाली के ज़रिए manage किया जाता है, जिसके निम्नलिखित rules को compiler compile time पर जाँचता है:
 
-1. Rust में हर value का एक वेरिएबल होता है, जिसे उसका owner कहा जाता है।
+1. Rust में हर value का एक variable होता है, जिसे उसका owner कहा जाता है।
 2. एक समय में केवल एक ही owner हो सकता है।
-3. जब owner का scope समाप्त होता है, तो value हटा दी जाती है।
+3. जब owner का scope समाप्त होता है, तो value drop हो जाएगी।
 
 ```rust
 fn main() {
@@ -24,9 +24,9 @@ fn main() {
 
 
 
-### जेनेरिक प्रकार
+### Generic Types
 
-ऐसा struct बनाएँ जिसका एक मान किसी भी प्रकार का हो શકે है.
+ऐसा struct बनाएँ, जिसके एक मान का type कुछ भी हो सकता है.
 
 ```rust
 struct Wrapper<T> {
@@ -43,9 +43,9 @@ Wrapper::new(42).value
 Wrapper::new("Foo").value, "Foo"
 ```
 
-### Option, Some और None
+### Option, Some & None
 
-Option type का मतलब है कि value, Some (कुछ मौजूद है) या None प्रकार की हो सकती है:
+Option टाइप का अर्थ है कि वैल्यू Some (कुछ मौजूद है) या None हो सकती है:
 
 ```rust
 pub enum Option<T> {
@@ -56,10 +56,9 @@ pub enum Option<T> {
 
 आप Option की value जाँचने के लिए `is_some()` या `is_none()` जैसे functions का उपयोग कर सकते हैं।
 
-
 ### Result, Ok & Err
 
-Errors लौटाने और आगे propagate करने के लिए उपयोग किया जाता है
+errors लौटाने और आगे propagate करने के लिए उपयोग किया जाता है
 
 ```rust
 pub enum Result<T, E> {
@@ -68,14 +67,14 @@ pub enum Result<T, E> {
 }
 ```
 
-आप result की वैल्यू जाँचने के लिए `is_ok()` या `is_err()` जैसे फ़ंक्शन इस्तेमाल कर सकते हैं।
+आप result की value जाँचने के लिए `is_ok()` या `is_err()` जैसे functions का उपयोग कर सकते हैं।
 
-`Option` enum का इस्तेमाल उन स्थितियों में करना चाहिए जहाँ कोई वैल्यू मौजूद न भी हो सकती है (`None`)।
-`Result` enum का इस्तेमाल उन स्थितियों में करना चाहिए जहाँ आप कुछ ऐसा करते हैं जो विफल हो सकता है।
+`Option` enum का उपयोग उन स्थितियों में करना चाहिए जहाँ कोई value मौजूद न भी हो सकती है (`None`)।
+`Result` enum का उपयोग उन स्थितियों में करना चाहिए जहाँ आप कुछ ऐसा करते हैं जिसमें गड़बड़ी हो सकती है।
 
 ### Macros
 
-Macros फ़ंक्शन्स से अधिक शक्तिशाली होते हैं, क्योंकि वे आपके हाथ से लिखे गए कोड से अधिक कोड बनाने के लिए expand होते हैं। उदाहरण के लिए, फ़ंक्शन के signature में उसके parameters की संख्या और प्रकार घोषित करने होते हैं। दूसरी ओर, macros में parameters की संख्या बदल सकती है: हम `println!("hello")` को एक argument के साथ या `println!("hello {}", name)` को दो arguments के साथ call कर सकते हैं। साथ ही, compiler द्वारा कोड का अर्थ समझने से पहले ही macros expand हो जाते हैं, इसलिए कोई macro, उदाहरण के लिए, किसी दिए गए type पर trait implement कर सकता है। कोई फ़ंक्शन ऐसा नहीं कर सकता, क्योंकि उसे runtime पर call किया जाता है और trait को compile time पर implement करना ज़रूरी होता है।
+Macros functions से अधिक शक्तिशाली होते हैं, क्योंकि वे आपके मैन्युअल रूप से लिखे गए code से अधिक code उत्पन्न करने के लिए expand होते हैं। उदाहरण के लिए, function signature में function के parameters की संख्या और type घोषित करना आवश्यक है। दूसरी ओर, macros parameters की बदलती संख्या ले सकते हैं: हम `println!("hello")` को एक argument के साथ या `println!("hello {}", name)` को दो arguments के साथ call कर सकते हैं। साथ ही, compiler द्वारा code का अर्थ समझने से पहले macros expand होते हैं, इसलिए कोई macro, उदाहरण के लिए, किसी दिए गए type पर trait implement कर सकता है। कोई function ऐसा नहीं कर सकता, क्योंकि उसे runtime पर call किया जाता है और trait को compile time पर implement करना आवश्यक है।
 
 ```rust
 macro_rules! my_macro {
@@ -102,7 +101,7 @@ mod macros {
 }
 ```
 
-### पुनरावृत्ति
+### इटरेट करें
 
 ```rust
 // Iterate through a vector
@@ -123,13 +122,19 @@ for value in map.values() {
 
 ### रिकर्सिव Box
 
+एक recursive enum को indirection की आवश्यकता होती है, ताकि उसका आकार compile time पर ज्ञात हो; `List` को सीधे `List` के अंदर स्टोर करने पर compilation नहीं होता।<sup>[[10]](#references)</sup>
+
 ```rust
 enum List {
-    Cons(i32, List),
+    Cons(i32, Box<List>),
     Nil,
 }
 
-let list = Cons(1, Cons(2, Cons(3, Nil)));
+use List::{Cons, Nil};
+
+fn main() {
+    let _list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}
 ```
 
 ### शर्तीय कथन
@@ -257,9 +262,11 @@ for name in names.iter_mut() {
 
 #### if let
 
+`Some` से match करके उसकी अंदरूनी value को bind करें; एक सामान्य variable pattern `Some` और `None` दोनों से match करता है, इसलिए `else` branch कभी नहीं चलेगी।<sup>[[11]](#references)</sup>
+
 ```rust
 let optional_word = Some(String::from("rustlings"));
-if let word = optional_word {
+if let Some(word) = optional_word {
     println!("The word is: {}", word);
 } else {
     println!("The optional word doesn't contain anything");
@@ -287,7 +294,7 @@ while let Some(i) = optional {
 
 ### Traits
 
-किसी type के लिए एक नया method बनाएं
+किसी type के लिए एक नया method बनाएँ
 
 ```rust
 trait AppendBar {
@@ -323,7 +330,7 @@ mod tests {
 
 #### Arc
 
-Arc, object के अधिक references बनाने के लिए Clone का उपयोग कर सकता है, ताकि उन्हें threads में पास किया जा सके। जब किसी value का आखिरी reference pointer scope से बाहर हो जाता है, तो variable drop हो जाता है।
+Arc, ऑब्जेक्ट के और references बनाने के लिए Clone का उपयोग कर सकता है, ताकि उन्हें threads में भेजा जा सके। जब किसी value का आखिरी reference pointer scope से बाहर हो जाता है, तो variable drop हो जाता है।
 
 ```rust
 use std::sync::Arc;
@@ -338,7 +345,7 @@ for _ in 0..10 {
 
 #### Threads
 
-इस मामले में, हम thread को एक variable पास करेंगे, जिसे वह संशोधित कर सकेगा.
+इस मामले में, हम thread को एक variable पास करेंगे, जिसे वह बदल सकेगा.
 
 ```rust
 fn main() {
@@ -359,19 +366,25 @@ fn main() {
 ```
 
 
-### सुरक्षा की मूल बातें
+### सुरक्षा संबंधी आवश्यक बातें
 
-Rust डिफ़ॉल्ट रूप से memory-safety की मज़बूत गारंटी देता है, लेकिन `unsafe` code, dependencies की समस्याओं या logic की गलतियों से अब भी गंभीर vulnerabilities आ सकती हैं। यह छोटी cheat sheet उन primitives को एकत्र करती है जिनका Rust software की offensive या defensive security reviews के दौरान आप सबसे ज़्यादा इस्तेमाल करेंगे।
+Rust डिफ़ॉल्ट रूप से memory safety की मजबूत गारंटी देता है, लेकिन `unsafe` code, dependencies से जुड़ी समस्याओं या logic की गलतियों के ज़रिए अब भी गंभीर vulnerabilities आ सकती हैं। इस छोटी cheatsheet में वे primitives दिए गए हैं जिनका Rust software की offensive या defensive security review के दौरान आप सबसे अधिक उपयोग करेंगे। अन्य language-specific tooling के लिए [Code Review Tools](../network-services-pentesting/pentesting-web/code-review-tools.md#rust) देखें।
 
 #### `unsafe` code और memory safety
 
-`unsafe` blocks compiler के aliasing और bounds checks को छोड़ देते हैं, इसलिए **memory-corruption के सभी पारंपरिक bugs (OOB, use-after-free, double free आदि) फिर से सामने आ सकते हैं**। एक त्वरित audit checklist:
+`unsafe` ऐसे operations की अनुमति देता है जिनके safety contracts को compiler साबित नहीं कर सकता; यह सामान्य borrow या bounds checks को **बंद नहीं** करता। जब कोई unsafe operation अपने contract का उल्लंघन करता है, तब memory corruption संभव हो जाता है—इसमें safe API के रूप में उपलब्ध function के भीतर होने वाला उल्लंघन भी शामिल है।<sup>[[3]](#references)</sup>
 
-* `unsafe` blocks, `extern "C"` functions, `ptr::copy*` और `std::mem::transmute` के calls, `MaybeUninit`, raw pointers या `ffi` modules खोजें।
-* Low-level functions में दिए गए हर pointer arithmetic और length argument को validate करें।
-* `#![forbid(unsafe_code)]` (पूरे crate पर) या `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) को प्राथमिकता दें, ताकि कोई `unsafe` दोबारा शामिल करे तो compilation विफल हो जाए।
+Source review के दौरान, unchecked operations खोजें और उनके public callers से attacker-controlled pointers और lengths को trace करें:<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Raw pointers से होने वाले overflow का उदाहरण:
+```bash
+rg -n 'unsafe|from_raw_parts|set_len|copy_nonoverlapping|transmute|unsafe impl|extern "C"' src
+```
+
+* `slice::from_raw_parts` के लिए साबित करें कि pointer non-null और aligned है, पूरी initialized range एक ही live allocation में है, और लौटाई गई slice उस allocation से अधिक समय तक जीवित नहीं रह सकती। zero-length slice के लिए भी null pointer का उपयोग नहीं किया जा सकता।
+* `Vec::set_len` के लिए साबित करें कि नई length वास्तविक capacity के भीतर है और हर नया उजागर किया गया element initialized था। Allocation size और किसी भी copy count—दोनों का पता लगाएँ; `with_capacity` elements को initialize नहीं करता।
+* प्रत्येक `unsafe impl` of `Send` या `Sync` और हर FFI signature को उन invariants के विरुद्ध जाँचें जिनका safe callers से वादा किया गया है। `#![forbid(unsafe_code)]` किसी crate में unsafe code को अस्वीकार करता है; इसके बजाय `#![deny(unsafe_op_in_unsafe_fn)]` unsafe functions **के अंदर** explicit unsafe blocks अनिवार्य करता है, unsafe code पर प्रतिबंध नहीं लगाता। Rust 2024 में बाद वाला lint डिफ़ॉल्ट रूप से चेतावनी देता है।<sup>[[3]](#references)[[7]](#references)[[12]](#references)</sup>
+
+Raw pointers से उत्पन्न overflow का उदाहरण:
 ```rust
 use std::ptr;
 
@@ -385,13 +398,14 @@ fn vuln_copy(src: &[u8]) -> Vec<u8> {
     dst
 }
 ```
-टेस्ट के समय UB का पता लगाने के लिए Miri चलाना एक कम खर्चीला तरीका है:
+ऊपर दिए गए उदाहरण में `dst.capacity()` से लंबा input, copy bound और `set_len` contract—दोनों का उल्लंघन करता है। Target allocator के लिए oversized input वाला एक test जोड़ें, फिर उसे Miri के तहत चलाएँ। Miri निष्पादित paths में undefined behavior की जाँच करता है, लेकिन unsupported foreign calls के कारण वह FFI boundary को exercise नहीं कर पाता।<sup>[[5]](#references)[[6]](#references)</sup>
+
 ```bash
-rustup component add miri
-cargo miri test  # hunts for OOB / UAF during unit tests
+rustup +nightly component add miri
+cargo +nightly miri test
 ```
 
-#### RustSec / cargo-audit से dependencies का audit करना
+#### RustSec / cargo-audit से dependencies का ऑडिट करना
 
 वास्तविक दुनिया की ज़्यादातर Rust vulnerabilities third-party crates में होती हैं। RustSec advisory DB (community-powered) को locally query किया जा सकता है:<sup>[[1]](#references)</sup>
 ```bash
@@ -400,40 +414,51 @@ cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
 इसे CI में integrate करें और `--deny warnings` पर fail करें।
 
-`cargo deny check advisories` समान functionality के साथ licence और ban-list checks भी प्रदान करता है।
+`cargo deny check advisories` समान functionality के साथ-साथ licence और ban-list checks भी प्रदान करता है।
 
-#### cargo-tarpaulin से code coverage
+#### cargo-tarpaulin से Code coverage
 
-`cargo tarpaulin`, Cargo build system के लिए code coverage reporting tool है.
+`cargo tarpaulin` Cargo build system के लिए code coverage reporting tool है.
 
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Linux पर, Tarpaulin का default tracing backend अब भी Ptrace है और यह केवल x86_64 processors पर काम करेगा। इसे `--engine llvm` के साथ llvm coverage instrumentation में बदला जा सकता है। Mac और Windows के लिए, यह default collection method है।
+Linux पर, Tarpaulin का डिफ़ॉल्ट tracing backend अभी भी Ptrace है और यह केवल x86_64 processors पर काम करेगा। इसे `--engine llvm` के साथ llvm coverage instrumentation पर बदला जा सकता है। Mac और Windows के लिए, यह डिफ़ॉल्ट collection method है।
 
-#### cargo-vet के साथ supply-chain verification (2024)
+#### cargo-vet के साथ supply-chain verification
 
-`cargo vet` आपके द्वारा import किए गए हर crate के लिए एक review hash दर्ज करता है और बिना आपकी जानकारी के होने वाले upgrades को रोकता है:
+`cargo vet` configured audit criteria के अनुसार local audits, trusted imports या explicit exemptions का उपयोग करके dependencies की जाँच करता है। `cargo vet init` `supply-chain/` metadata बनाता है और मौजूदा unaudited dependencies को exempt करता है, इसलिए शुरुआत में check का pass होना **यह नहीं दर्शाता** कि हर crate की समीक्षा की गई है। Exemptions की जाँच करें और उन्हें हल करने के लिए `cargo vet suggest` का उपयोग करें; `--locked` imported audit sets को refresh होने से रोकता है।<sup>[[8]](#references)</sup>
+
 ```bash
 cargo install cargo-vet
-cargo vet init      # generates vet.toml
-cargo vet --locked  # verifies packages referenced in Cargo.lock
+cargo vet init
+cargo vet suggest
+cargo vet --locked
 ```
-इस tool को Rust project infrastructure और बढ़ती संख्या में orgs, poisoned-package attacks को कम करने के लिए अपना रहे हैं।<sup>[[2]](#references)</sup>
 
-#### अपने API surface की fuzzing (cargo-fuzz)
+#### अपने API surface की Fuzzing (cargo-fuzz)
 
-Fuzz tests आसानी से panics, integer overflows और logic bugs पकड़ लेते हैं, जो DoS या side-channel issues बन सकते हैं:
+Fuzz targets generated inputs के साथ API को exercise करते हैं और panics तथा memory-safety faults उजागर कर सकते हैं। Generated target `fuzz/fuzz_targets/` के अंतर्गत होता है; इसे चलाने से पहले इसके default body को review की जा रही API के call से बदलें।<sup>[[9]](#references)</sup>
 ```bash
 cargo install cargo-fuzz
-cargo fuzz init              # creates fuzz_targets/
+cargo fuzz init              # creates fuzz/fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-अपने repo में fuzz target जोड़ें और इसे अपने pipeline में चलाएँ।
+अपने repo में fuzz target जोड़ें और उसे अपने pipeline में चलाएँ।
 
 ## References
 
-- [1] [RustSec सुरक्षा सलाह डेटाबेस](https://rustsec.org)
-- [2] [Cargo-vet: "अपनी Rust dependencies का ऑडिट करना"](https://mozilla.github.io/cargo-vet/)
+- [1] [RustSec Advisory Database](https://rustsec.org)
+- [2] [Cargo-vet: "अपनी Rust Dependencies का ऑडिट करना"](https://mozilla.github.io/cargo-vet/)
+- [3] [Rust प्रोग्रामिंग भाषा: Unsafe Rust](https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html)
+- [4] [Rust std: slice::from_raw_parts](https://doc.rust-lang.org/std/slice/fn.from_raw_parts.html)
+- [5] [Rust std: Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html)
+- [6] [Miri README](https://github.com/rust-lang/miri/blob/master/README.md)
+- [7] [Rust 2024: unsafe_op_in_unsafe_fn चेतावनी](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html)
+- [8] [Cargo Vet कमांड](https://mozilla.github.io/cargo-vet/commands.html)
+- [9] [Rust Fuzz Book: cargo-fuzz ट्यूटोरियल](https://rust-fuzz.github.io/book/cargo-fuzz/tutorial.html)
+- [10] [Rust प्रोग्रामिंग भाषा: Box और recursive types](https://doc.rust-lang.org/book/ch15-01-box.html)
+- [11] [Rust प्रोग्रामिंग भाषा: if let](https://doc.rust-lang.org/book/ch06-03-if-let.html)
+- [12] [Rust 2024: Unsafe extern blocks](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-extern.html)
 {{#include ../banners/hacktricks-training.md}}
