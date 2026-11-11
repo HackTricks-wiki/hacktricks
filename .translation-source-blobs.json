@@ -820,7 +820,7 @@
     "src/network-services-pentesting/pentesting-web/zoneminder-motioneye-motion.md": "63db76f864aeadd3f791a71336e2b258db77dfb2",
     "src/pentesting-web/2fa-bypass.md": "0f4eff9d58a43834b69d3c7725b6362b8d25510b",
     "src/pentesting-web/403-and-401-bypasses.md": "a616dc26f1fbc7afd06c389dd123fcd597d1186c",
-    "src/pentesting-web/abusing-hop-by-hop-headers.md": "a253a4a4edfc933b7218ac698c0a9bb4fd3fc1c6",
+    "src/pentesting-web/abusing-hop-by-hop-headers.md": "8b9a1ce4ec14e255a530078557fb447261b359e2",
     "src/pentesting-web/account-takeover.md": "8211fc6e71a9c1559fe5bfc87150f3da0e562ad6",
     "src/pentesting-web/application-layer-dos.md": "22f31adb864152abc8af75e77347e6dbf19b8d1e",
     "src/pentesting-web/browser-extension-pentesting-methodology/README.md": "43295af19470e7fba9efba4c54523afd260c0632",
