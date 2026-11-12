@@ -257,7 +257,7 @@ Practical parser strategy:
 - Good sentinels include `api.github.com`, `/issues?state=open`, HTTP verbs/URIs, named-pipe-style strings, or obviously valid server/port arrays.
 - If the HTTP parser fails but the plaintext contains coherent length-prefixed UTF-8 strings, keep the sample and attempt alternative schemas instead of discarding it as a false positive.
 
-In that campaign the custom listener used GitHub issues as the C2 transport, and the beacon queried `ipinfo.io` to learn its external IP because the GitHub API does not directly reveal the victim source address to the operator.<sup>[[5]](#references)</sup>
+In that campaign the custom listener used GitHub issues as the C2 transport, and the beacon queried `ipinfo.io` to learn its external IP because the GitHub API does not directly reveal the victim source address to the operator.<sup>[[5]](#references)</sup> For a separate issue-plus-repository-file handshake, see [GitHub Issues and Repository Files as a C2 Channel](../github-issues-and-repository-files-c2.md).
 
 ## Network fingerprinting and hunting
 
@@ -357,4 +357,3 @@ Unit 42 published basic YARA for beacons (C/C++ and Go) and loader API‑hashing
 - [12] [AdaptixC2 beacon profile parser (AgentConfig.cpp)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/src_beacon/beacon/AgentConfig.cpp)
 - [13] [AdaptixC2 DNS profile generation (pl_utils.go)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/pl_utils.go)
 - [14] [AdaptixC2 profile packing (pl_packer.go)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/pl_packer.go)
-{{#include ../../banners/hacktricks-training.md}}
