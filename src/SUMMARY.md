@@ -73,6 +73,7 @@
   - [Homograph Attacks](generic-methodologies-and-resources/phishing-methodology/homograph-attacks.md)
   - [Mobile Phishing Malicious Apps](generic-methodologies-and-resources/phishing-methodology/mobile-phishing-malicious-apps.md)
   - [Phishing Files & Documents](generic-methodologies-and-resources/phishing-methodology/phishing-documents.md)
+- [GitHub Issues and Repository Files as a C2 Channel](generic-methodologies-and-resources/github-issues-and-repository-files-c2.md)
 - [Basic Forensic Methodology](generic-methodologies-and-resources/basic-forensic-methodology/README.md)
   - [Adaptixc2 Config Extraction And Ttps](generic-methodologies-and-resources/basic-forensic-methodology/adaptixc2-config-extraction-and-ttps.md)
   - [Baseline Monitoring](generic-methodologies-and-resources/basic-forensic-methodology/file-integrity-monitoring.md)
