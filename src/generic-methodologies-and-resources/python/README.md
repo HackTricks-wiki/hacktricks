@@ -1,17 +1,18 @@
-# Ucieczka z sandboxa Pythona i Pyscript
+# Ucieczka z Python Sandbox i Pyscript
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Warto sprawdzić:**
+**Ciekawe strony do sprawdzenia:**
 
-- [**Triki hakerskie Pyscript**](pyscript.md)
+- [**Sztuczki hackingowe w Pyscript**](pyscript.md)
 - [**Deserializacja w Pythonie**](../../pentesting-web/deserialization/README.md)
-- [**RCE przez deserializację modelu Keras i wyszukiwanie gadgetów**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Sztuczki omijania sandboxów Pythona**](bypass-python-sandboxes/README.md)
-- [**Podstawowa składnia żądań sieciowych w Pythonie**](web-requests.md)
-- [**Podstawowa składnia Pythona i biblioteki**](basic-python.md)
+- [**RCE przez deserializację modelu Keras i wyszukiwanie gadżetów**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Sztuczki pozwalające ominąć sandboxy Pythona**](bypass-python-sandboxes/README.md)
+- [**Test wyrażeń ewaluowanych przez Python**](bypass-python-sandboxes/README.md#python-expression-evaluation-probe)
+- [**Podstawowa składnia żądań webowych w Pythonie**](web-requests.md)
+- [**Podstawowa składnia i biblioteki Pythona**](basic-python.md)
 - [**Środowiska wirtualne Pythona (`venv`) i budowanie wheel**](basic-python.md#virtual-environments-and-wheel-builds-venv)
-- [**Wyszukiwanie sufiksów MD5 dla wybranego wejścia i hashy o wartości zero**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
+- [**Wyszukiwanie sufiksu MD5 dla wybranego wejścia i hashy o wartości zero**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 
