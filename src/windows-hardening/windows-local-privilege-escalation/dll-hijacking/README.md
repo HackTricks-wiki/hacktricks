@@ -138,6 +138,12 @@ Fast hunting pivots:
 advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
+### Binding a side-loaded stage to the service command line
+
+A side-loaded DLL can require more than the expected host EXE and DLL name. In one service-backed chain, a copied legitimate host loaded a neighboring `mscoree.dll`, which exported `LockClrVersion` and decrypted its embedded stage only after deriving an AES-128 key from the service argument and host executable basename. Each input was truncated or NUL-padded to 16 bytes; the bytewise key was `argument XOR embedded_key XOR executable_basename`, then the payload was decrypted with AES-CBC without padding. Renaming the host or launching it without the expected argument changes the key and prevents this stage from decrypting, even if the DLL still loads. Preserve the exact command-line argument and basename when reproducing or analyzing this variant.<sup>[[33]](#references)</sup>
+
+This is a **payload gate layered on ordinary DLL side-loading**, not a new DLL search-order rule or a privilege-escalation primitive by itself. The service's security context determines the resulting privilege level. The [GitHub issue/file C2 workflow](../../../generic-methodologies-and-resources/github-issues-and-repository-files-c2.md) documents the later transport separately.<sup>[[33]](#references)</sup>
+
 ## Finding missing DLLs
 
 The most common way to find missing Dlls inside a system is running [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) from sysinternals, **setting** the **following 2 filters**:
@@ -857,5 +863,6 @@ Defensive pivots
 - [30] [Microsoft Learn – Dynamic-link library search order](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order)
 - [31] [Microsoft Learn – PE format](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format)
 - [32] [FortiGuard Labs – Uncovering a SectopRAT Variant Embedded in Legitimate Software](https://www.fortinet.com/blog/threat-research/uncovering-a-sectoprat-variant-embedded-in-legitimate-software)
+- [33] [Kaspersky Securelist – Operation FlashHole](https://securelist.com/lazarus-operation-flashhole/121541/)
 
 {{#include ../../../banners/hacktricks-training.md}}
