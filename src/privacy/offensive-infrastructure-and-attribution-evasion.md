@@ -148,13 +148,45 @@ The safe lab simulates the routing mismatch on an owned reverse proxy; it does n
 Dynamic resolution decouples a logical service from fixed infrastructure:
 
 - **DDNS:** an authenticated client updates a stable name after its address changes.
-- **DGA:** both endpoint and controller derive candidate domain names from a time/key seed; the operator registers a small subset.
+- **DGA:** the endpoint derives domain names from a seed, often time or a key but sometimes mutable public content; the operator arranges DNS for the active name.<sup>[[17]](#references)</sup>
 - **Fast flux:** a name returns a rapidly changing set of compromised/proxy addresses, often with low TTLs.
 - **Double flux:** both service addresses and authoritative name-server addresses rotate, hiding the control layer too.
 
 Fast flux is a load-distribution pattern used adversarially, not merely “many DNS answers.” Stronger evidence combines low TTL, high unique-address count, wide ASN/geography dispersion, short node lifetime, repeated application behavior and suspicious registration history. CDNs legitimately share several of those properties. MITRE recommends correlating DNS behavior with the process and subsequent connections.<sup>[[5]](#references)</sup>
 
 A DGA can be detected through lexical entropy, consonant/digit patterns, NXDOMAIN bursts, synchronized first-seen domains and process context. Wordlist DGAs and generative models defeat simple entropy rules, making fleet-wide temporal clustering and endpoint lineage more important.
+
+### Mutable image seed for a wordlist DGA
+
+A DGA need not depend on time. One loader fetches a public Telegram channel page, reads the `src` of its `tgme_page_photo_image` element, downloads that profile image, and hashes its **last 50 file bytes** rather than its decoded pixels. Four hash seeds select an adjective, noun, verb and number. Changing the image changes the derived DNS name without shipping a new client. Keep the exact downloaded image bytes and the same word-list order on both sides; re-encoding the image or reordering a list produces different names.<sup>[[17]](#references)</sup>
+
+With the word lists recovered from the client, this reproduces the name-selection step. The source's byte-wise hash uses a 64-bit accumulator, multiplier `0x1000193`, and separate seeds for each component:<sup>[[17]](#references)</sup>
+
+<details>
+<summary>Reproduce the image-seeded wordlist name selection</summary>
+
+```python
+def wordlist_domain(image: bytes, adjectives: list[str], nouns: list[str], verbs: list[str], suffix: str) -> str:
+    if len(image) < 50:
+        raise ValueError("Image must contain at least 50 bytes")
+    tail = image[-50:]
+    def hashed(seed: int) -> int:
+        value = seed
+        for byte in tail:
+            value = ((value ^ byte) * 0x1000193) & 0xFFFFFFFFFFFFFFFF
+        return value
+    a = adjectives[hashed(0x811C9DC5) % len(adjectives)]
+    n = nouns[hashed(0xAF0154A5) % len(nouns)]
+    v = verbs[hashed(0xFE5439E4) % len(verbs)]
+    digit = hashed(0xFFA7471A) % 1000
+    return f"{a}-{n}-{v}-{digit}.{suffix}"
+```
+
+</details>
+
+Unlike a [dead-drop resolver](#web-services-and-dead-drop-resolvers) that publishes the endpoint itself, the public object here only supplies a mutable seed; the client derives the endpoint locally.
+
+The generated name is then queried for a DNS TXT record through `https://dns.google/resolve?name=<domain>&type=TXT`. The client Base64-decodes the JSON response's `data` field, verifies an Ed25519 signature with its embedded public key, and only then AES-ECB-decrypts the command. The observed plaintext begins with a method selector and a URL for an encrypted payload. The signature check means a resolvable TXT record alone cannot supply accepted tasking.<sup>[[17]](#references)</sup>
 
 ## Compromised domains and domain shadowing
 
@@ -281,5 +313,6 @@ If one ordinary provider can fill every column, the architecture provides concea
 - [14] [Unit 42 — The Shadow Campaigns: Uncovering Global Espionage](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
 - [15] [Unit 42 - Blinder Tunnel Campaign Targets Iraqi Infrastructure](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 - [16] [RemControl: AI Built the Overlays. Victims Lose their PINs](https://www.group-ib.com/blog/remcontrol-android-banking-trojan/)
+- [17] [Check Point Research — Tricks from the Past Deployed via Signed ChatGPT and Claude Binaries](https://research.checkpoint.com/2026/tricks-from-the-past-deployed-via-signed-chatgpt-and-claude-binaries/)
 
 {{#include ../banners/hacktricks-training.md}}
