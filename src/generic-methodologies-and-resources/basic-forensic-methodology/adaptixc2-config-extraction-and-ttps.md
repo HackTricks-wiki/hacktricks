@@ -357,4 +357,3 @@ Unit 42 published basic YARA for beacons (C/C++ and Go) and loader API‑hashing
 - [12] [AdaptixC2 beacon profile parser (AgentConfig.cpp)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/src_beacon/beacon/AgentConfig.cpp)
 - [13] [AdaptixC2 DNS profile generation (pl_utils.go)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/pl_utils.go)
 - [14] [AdaptixC2 profile packing (pl_packer.go)](https://github.com/Adaptix-Framework/AdaptixC2/blob/main/AdaptixServer/extenders/beacon_agent/pl_packer.go)
-{{#include ../../banners/hacktricks-training.md}}

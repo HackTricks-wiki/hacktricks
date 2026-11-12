@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-A private repository can separate **session state** from **payload transfer**: issues record each host and its handshake state, while repository files carry encrypted data in both directions. This is more than simply polling an issue body for commands. The observed implementation uses a GitHub personal access token (PAT) to access both APIs.<sup>[[1]](#references)</sup> The token needs the relevant issue and repository-contents permissions; anyone who obtains it can access the same channel.<sup>[[2]](#references)[[3]](#references)</sup>
+A private repository can separate **session state** from **payload transfer**: issues record each host and its handshake state, while repository files carry encrypted data in both directions. This is more than simply polling an issue body for commands. The observed implementation uses a GitHub personal access token (PAT) to access both APIs.<sup>[[1]](#references)</sup> For a fine-grained PAT, creating or updating issues needs Issues write permission, and uploading files needs Contents write permission. A classic PAT instead needs the `repo` scope. Anyone who obtains a sufficiently privileged token can access the same channel.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## Issue and file handshake
 
@@ -13,7 +13,7 @@ One observed workflow uses a short hexadecimal host ID and the following state m
 3. Derive the subsequent IV by XORing the embedded IV with that session key. For each exchanged file, use its filename's random 16-byte key to AES-encrypt or decrypt the contents. Prefix `2` denotes server-to-host data; prefix `1` denotes host-to-server data. Thus the filename carries routing and per-file key material, while the issue carries state.
 4. Read the next `2`-prefixed file and require its decrypted contents to equal `hel`. Upload encrypted host information, then change the issue body to `hey` with `PATCH /repos/{owner}/{repo}/issues/{issue_number}`. Only then start command polling.
 
-GitHub's Contents API reads a file through `GET /repos/{owner}/{repo}/contents/{path}` and creates or replaces one through `PUT` at that path. The read response exposes Base64-encoded file content. The upload body needs a commit message and Base64-encoded file contents; replacing an existing file also needs its current blob SHA. Those API details are distinct from the encryption protocol above.<sup>[[2]](#references)[[3]](#references)</sup>
+GitHub's Contents API reads a file through `GET /repos/{owner}/{repo}/contents/{path}` and creates or replaces one through `PUT` at that path. For files of at most 1 MB, the default JSON response includes Base64-encoded content; files between 1 and 100 MB need the raw media type to retrieve their contents. The upload body needs a commit message and Base64-encoded file contents; replacing an existing file also needs its current blob SHA. Those API details are distinct from the encryption protocol above.<sup>[[2]](#references)[[3]](#references)</sup>
 
 For an authorized test repository, the issue-control portion can be exercised with the REST API (substitute a test repository and test PAT). Do not place a live token in the URL, issue body or committed file.<sup>[[2]](#references)</sup>
 
@@ -26,12 +26,10 @@ curl -fsS -X PATCH -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/
   "$base/issues/$issue_number" -d '{"body":"hey"}'
 ```
 
-The mechanism does **not** require the issue title, `hel`/`hey` markers or the particular cipher choices shown here; those identify one implementation. The reusable idea is to split mutable host state from bidirectional encrypted objects, and to bind both to a host ID.<sup>[[1]](#references)</sup> For another GitHub-issue transport, see the [AdaptixC2 custom listener notes](basic-forensic-methodology/adaptixc2-config-extraction-and-ttps.md#custom-listener-profiles-dont-hard-code-only-the-classic-http-schema).
+The mechanism does **not** require the issue title, `hel`/`hey` markers or the particular cipher choices shown here; those identify one implementation. The reusable idea is to split mutable host state from bidirectional encrypted objects, and to bind both to a host ID.<sup>[[1]](#references)</sup> For another GitHub-issue transport, see the [AdaptixC2 custom listener notes](basic-forensic-methodology/adaptixc2-config-extraction-and-ttps.md#custom-listener-profiles-dont-hard-code-only-the-classic-http-schema). For an issue-comment fallback that rotates repository credentials rather than carrying session state, see [Web services and dead-drop resolvers](../privacy/offensive-infrastructure-and-attribution-evasion.md#web-services-and-dead-drop-resolvers).
 
 ## References
 
 - [1] [Kaspersky Securelist – Operation FlashHole](https://securelist.com/lazarus-operation-flashhole/121541/)
 - [2] [GitHub Docs – REST API endpoints for issues](https://docs.github.com/en/rest/issues/issues)
 - [3] [GitHub Docs – REST API endpoints for repository contents](https://docs.github.com/en/rest/repos/contents)
-
-{{#include ../banners/hacktricks-training.md}}
