@@ -8,6 +8,7 @@
 - [**Python deserializations**](../../pentesting-web/deserialization/README.md)
 - [**Keras model deserialization RCE and gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
 - [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
+- [**Python expression-evaluation probe**](bypass-python-sandboxes/README.md#python-expression-evaluation-probe)
 - [**Basic python web requests syntax**](web-requests.md)
 - [**Basic python syntax and libraries**](basic-python.md)
 - [**Python virtual environments (`venv`) and wheel builds**](basic-python.md#virtual-environments-and-wheel-builds-venv)

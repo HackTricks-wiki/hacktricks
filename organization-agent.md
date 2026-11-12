@@ -34,6 +34,7 @@
 - Chosen-input MD5 suffix and `0e` numeric-zero searches are headings at `src/crypto/hashes/README.md#chosen-input-md5-hash-searches`, not Python sandbox topics. PHP type-juggling behavior and version caveats stay in `network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling`; both entry points link directly to the relevant explanation.
 - WSGI/uWSGI, Zabbix and CCTV products remain in `network-services-pentesting/pentesting-web/`, nested under 80/443 rather than Kerberos. Web triage and SSRF/Gopher link to WSGI; port/side-service caveats stay with products.
 - AI fuzzing/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source review/mobile/kernel audits → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`. Split by research task, not platform.
+- Python expression-evaluation confirmation (`"+str(True)+"`) → `src/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md#python-expression-evaluation-probe`; HTTP/web entry links directly there, not to a generic Python web-tech stub.
 - Remote MCP testing → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Distinct prerequisites.
 - eSIM/eUICC, Java Card and OTA/APDU → `src/mobile-pentesting/esim-javacard-exploitation.md`; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
 
