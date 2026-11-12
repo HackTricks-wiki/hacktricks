@@ -4,7 +4,7 @@
 
 ## Temel Makine Öğrenimi Algoritmaları
 
-AI hakkında bilgi edinmek için en iyi başlangıç, temel makine öğrenimi algoritmalarının nasıl çalıştığını anlamaktır. Bu, AI’ın nasıl çalıştığını, nasıl kullanılacağını ve ona nasıl saldırılacağını anlamanıza yardımcı olur:
+AI hakkında bilgi edinmek için en iyi başlangıç, temel makine öğrenimi algoritmalarının nasıl çalıştığını anlamaktır. Bu, AI'nin nasıl çalıştığını, nasıl kullanılacağını ve nasıl saldırıya uğratılacağını anlamanıza yardımcı olur:
 
 
 {{#ref}}
@@ -26,9 +26,13 @@ AI hakkında bilgi edinmek için en iyi başlangıç, temel makine öğrenimi al
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### LLM Mimarisi
+### Model verilerinin hazırlanması ve değerlendirilmesi
 
-Aşağıdaki sayfada, transformer kullanarak temel bir LLM oluşturmak için gereken her bileşenin temellerini bulabilirsiniz:
+Veri kümesi bölümleri, klasik metrikler ve LLM tabanlı değerlendirmeye yönelik yanıt tarafı saldırıları için bkz. [model verilerinin hazırlanması ve değerlendirilmesi](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
+
+### LLM mimarisi
+
+Aşağıdaki sayfada, transformers kullanarak temel bir LLM oluşturmak için her bileşenin temellerini bulabilirsiniz:
 
 
 {{#ref}}
@@ -41,7 +45,7 @@ Modelleri çalıştırmak, fine-tune etmek, sunmak veya denemek için [AI model 
 
 ## AI Güvenliği
 
-### LLM Gateway Güven Sınırları
+### LLM Gateway Güven sınırları
 
 Gateway güvenliği için bkz.:
 
@@ -57,7 +61,7 @@ AI-Agent-Security-Methodology.md
 
 ### AI Risk Çerçeveleri
 
-AI sistemi riskini değerlendirmek için yararlı iki başlangıç çerçevesi OWASP Machine Learning Security Top 10 ve Google Secure AI Framework (SAIF)’tir. Bunlar, AI risk çerçevelerinin kapsamlı bir listesini sunmaktan ziyade birbirini tamamlar.<sup>[[1]](#references)[[2]](#references)</sup>
+AI sistemlerinin risklerini değerlendirmek için yararlı iki başlangıç çerçevesi, OWASP Machine Learning Security Top 10 ve Google'ın Secure AI Framework (SAIF) çerçevesidir. Bunlar, AI risk çerçevelerinin kapsamlı bir listesi olmaktan ziyade birbirini tamamlar.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -72,7 +76,7 @@ AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 
 ### AI Prompt Güvenliği
 
-LLM’ler son yıllarda AI kullanımını büyük ölçüde artırdı; ancak kusursuz değiller ve adversarial prompt’larla kandırılabilirler. Bu konu, AI’ı güvenli bir şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak açısından çok önemlidir:
+LLM'ler son yıllarda AI kullanımını büyük ölçüde artırdı, ancak kusursuz değiller ve adversarial prompt'larla kandırılabilirler. Bu konu, AI'yi güvenli şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak açısından çok önemlidir:
 
 
 {{#ref}}
@@ -81,7 +85,7 @@ AI-Prompts.md
 
 ### AI Modellerinde RCE
 
-Geliştiricilerin ve şirketlerin internetten indirdikleri modelleri çalıştırması oldukça yaygındır; ancak yalnızca bir modeli yüklemek bile sistemde rastgele kod çalıştırmak için yeterli olabilir. Bu konu, AI’ı güvenli bir şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak açısından çok önemlidir:
+Geliştiricilerin ve şirketlerin internetten indirilen modelleri çalıştırması oldukça yaygındır; ancak yalnızca bir modeli yüklemek, sistemde keyfi kod çalıştırmak için yeterli olabilir. Bu konu, AI'yi güvenli şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak açısından çok önemlidir:
 
 
 {{#ref}}
@@ -99,39 +103,39 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol), AI uygulamalarını araçlara ve veri kaynaklarına bağlamak için kullanılan açık bir protokoldür. MCP sunucuları verilere ve eylemlere erişim sağlayabildiğinden, değerlendirmeler yetkilendirmeyi, izni, araç girdisi doğrulamasını ve güven sınırlarının incelenmesini içermelidir.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol), AI uygulamalarını araçlara ve veri kaynaklarına bağlamak için kullanılan açık bir protokoldür. MCP sunucuları verileri ve eylemleri açığa çıkarabileceğinden, değerlendirmeler yetkilendirme, rıza, araç girdilerinin doğrulanması ve güven sınırlarının incelenmesini kapsamalıdır.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI Agent’lar Arası (A2A) Protokolü
+### AI Agent'lar Arası (A2A) Protokolü
 
-A2A, agent’ların bir agent card aracılığıyla birbirlerini keşfetmelerini ve HTTP üzerinden birbirlerine görev göndermelerini sağlar. Agent card’ları, görev yetkilendirmesini, push bildirim webhook’larını ve genişletilmiş card’ları test edin:
+A2A, agent'ların bir agent card aracılığıyla birbirlerini keşfetmesine ve HTTP üzerinden birbirlerine görev göndermesine olanak tanır. Agent card'ları, görev yetkilendirmesini, push-notification webhook'larını ve genişletilmiş card'ları test edin:
 
 {{#ref}}
 AI-A2A-Protocol.md
 {{#endref}}
 
-### İnternete Açık, Kendi Sunucusunda Barındırılan AI Hizmetleri
+### İnternete Açık, Self-Hosted AI Hizmetleri
 
-Kimlik doğrulama olmadan çalışan ve internete açık model çalıştırıcılarını, agent oluşturucularını, ML demo arayüzlerini, işlem kümelerini ve vektör veritabanlarını parmak izinden tanıma ve test etme:
+Kimlik doğrulaması olmadan çalışan ve internete açık model çalıştırıcılarını, agent oluşturucularını, ML demo arayüzlerini, hesaplama kümelerini ve vektör veritabanlarını parmak izine tabi tutma ve test etme:
 
 {{#ref}}
 AI-Exposed-Self-Hosted-AI-Services.md
 {{#endref}}
 
-### AI Destekli Fuzzing ve Otomatik Güvenlik Açığı Keşfi
+### AI Destekli Fuzzing ve Otomatik Zafiyet Keşfi
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### AI Destekli Kaynak Kodu İncelemesi ve Güvenlik Açığı Doğrulaması
+### AI Destekli Kaynak Kodu İncelemesi ve Zafiyet Doğrulaması
 
-Kaynak/hedef incelemesi, mobil giriş noktası görev akışları, kernel kalıp denetimleri ve kanıta dayalı doğrulama için:
+Kaynak/hedef incelemesi, mobil giriş noktası görev akışları, kernel örüntü denetimleri ve kanıta dayalı doğrulama için:
 
 {{#ref}}
 AI-Assisted-Source-Review-and-Vulnerability-Validation.md
@@ -139,16 +143,18 @@ AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 
 ### AI Destekli Tersine Mühendislik
 
-[Partial lifting, invariant MBA tespiti, ortama bağlı çözümleme ve otomatik çıkarıcı doğrulaması](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Kısmi lifting, invariant MBA tespiti, ortama bağlı kod çözme ve otomatik çıkarıcı doğrulaması](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Web Black-Box AI Pentester Bot’ları
+### Web Black-Box AI Pentester Botları
 
-LLM destekli agent’lar; gözlemlenebilirlik, orkestrasyon, kimliği doğrulanmış oturum yönetimi ve adversarial doğrulama desteğiyle uzun süre çalışan black-box web pentesting iş akışlarını otomatikleştirebilir:
+LLM destekli agent'lar; gözlemlenebilirlik, orkestrasyon, kimliği doğrulanmış oturum yönetimi ve adversarial doğrulamayla desteklendiklerinde uzun süreli black-box web pentesting iş akışlarını otomatikleştirebilir:
 
 
 {{#ref}}
 Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
+
+
 
 ## References
 
