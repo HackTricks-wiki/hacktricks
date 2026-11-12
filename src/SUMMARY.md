@@ -932,6 +932,7 @@
   - [PDF Injection](pentesting-web/xss-cross-site-scripting/pdf-injection.md)
   - [Server Side XSS (Dynamic PDF)](pentesting-web/xss-cross-site-scripting/server-side-xss-dynamic-pdf.md)
   - [Shadow DOM](pentesting-web/xss-cross-site-scripting/shadow-dom.md)
+  - [SVG Sanitizer Bypasses](pentesting-web/xss-cross-site-scripting/svg-sanitizer-bypasses.md)
   - [SOME - Same Origin Method Execution](pentesting-web/xss-cross-site-scripting/some-same-origin-method-execution.md)
   - [XSS Information Exfiltration Payload](pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md)
   - [Wasm Linear Memory Template Overwrite Xss](pentesting-web/xss-cross-site-scripting/wasm-linear-memory-template-overwrite-xss.md)
