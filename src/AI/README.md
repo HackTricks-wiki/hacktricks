@@ -26,6 +26,10 @@ The best starting point to learn about AI is to understand how the main machine 
 ./AI-Deep-Learning.md
 {{#endref}}
 
+### Model data preparation and evaluation
+
+For dataset splits, classical metrics, and answer-side attacks on LLM-based grading, see [model data preparation and evaluation](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
+
 ### LLMs Architecture
 
 In the following page you will find the basics of each component to build a basic LLM using transformers:
@@ -150,10 +154,11 @@ LLM-powered agents can automate long-running black-box web pentesting workflows 
 Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
 
+
+
 ## References
 
 - [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Introduction](https://modelcontextprotocol.io/docs/getting-started/intro)
-
 {{#include ../banners/hacktricks-training.md}}
