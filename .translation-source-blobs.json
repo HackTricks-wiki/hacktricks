@@ -126,7 +126,7 @@
     "src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md": "73cae674af19608fc180024b6572e7d5e7662cac",
     "src/binary-exploitation/linux-kernel-exploitation/qualcomm-kgsl-vbo-bind-race-physical-uaf.md": "5c191286adb835f2ac05c64aa2b68a37a3e0def2",
     "src/binary-exploitation/linux-kernel-exploitation/usb-audio-descriptor-oob-kaslr-leak.md": "6ead49ffefe629aeae4f77169048121503d54d8d",
-    "src/binary-exploitation/php-request-oom-bailout-and-stale-state.md": "224a0e45755d85b37ee0b9b3ca4a5baf2c524c4e",
+    "src/binary-exploitation/php-request-oom-bailout-and-stale-state.md": "c4ed1d149bf320b9ebbb9b02ed46405561ba0824",
     "src/binary-exploitation/qemu-kvm-vm-escape-chains.md": "48451db92f1a6d359b0167f9646719863db58cbc",
     "src/binary-exploitation/rop-return-oriented-programing/README.md": "90e5d36a57b85a73281489be3f74c071d20705c5",
     "src/binary-exploitation/rop-return-oriented-programing/brop-blind-return-oriented-programming.md": "0e28f056e7903d3267fbb3562b2d33c9186dad40",
