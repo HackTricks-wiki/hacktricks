@@ -165,6 +165,16 @@ The final `exec` delegates to the real binary with the original argument vector,
 
 `PATH` is only one consumer-driven primitive. Repository-controlled `BASH_ENV`, `NODE_OPTIONS`, `PYTHONPATH`/`sitecustomize`, `LD_PRELOAD`, or permitted `DYLD_*` variables can wait until the corresponding shell, runtime, import, or loader starts. For example, non-interactive Bash expands `BASH_ENV` and sources the resulting file before the target script; a short denylist is therefore insufficient because any child application can give executable meaning to another environment value.<sup>[[33]](#references)[[35]](#references)</sup>
 
+#### Dev-container initialization on the host
+
+A repository-controlled `.devcontainer/devcontainer.json` can set `initializeCommand`. When a developer opts to open that project in a dev container, this command runs **on the host that holds the source**, before container creation; it may also run on later starts and more than once per session. By contrast, `onCreateCommand` and later setup commands run inside the container. A committed command or referenced script can therefore execute with the developer's host identity without escaping a container. The trigger is using the dev container, not merely cloning the repository.<sup>[[50]](#references)[[51]](#references)</sup>
+
+The project's defanged example makes the execution boundary explicit:<sup>[[51]](#references)</sup>
+
+```json
+{"initializeCommand": "echo 'autorun-audit demo: this line would run on your machine, not in the container'"}
+```
+
 #### Static triage and runtime hunting
 
 Search hidden agent, MCP, editor, workspace, and dev-container configuration, then recursively inspect every referenced file and the exact revision that will execute. The following is a triage query, not proof that a repository is safe:<sup>[[33]](#references)</sup>
@@ -773,6 +783,8 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [47] [How Some Malicious AI Skills Hide Instructions from Reviewers](https://blog.virustotal.com/2026/10/how-some-malicious-ai-skills-hide.html)
 - [48] [Wiz — Off Guard: Breaking LiteLLM from Authentication Bypass to Cloud Compromise](https://wiz.io/blog/off-guard-breaking-litellm-from-authentication-bypass-to-cloud-compromise)
 - [49] [LiteLLM v1.84.0 release notes](https://github.com/BerriAI/litellm-docs/blob/main/release_notes/v1.84.0/index.md)
+- [50] [Development Containers JSON reference — lifecycle commands](https://containers.dev/implementors/json_reference/)
+- [51] [autorun-audit — repository and environment autorun examples](https://github.com/ag3ntsc4rn/autorun-audit)
 
 {{#include ../banners/hacktricks-training.md}}
 
