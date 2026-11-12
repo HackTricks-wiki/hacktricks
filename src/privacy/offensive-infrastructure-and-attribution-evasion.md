@@ -148,7 +148,7 @@ The safe lab simulates the routing mismatch on an owned reverse proxy; it does n
 Dynamic resolution decouples a logical service from fixed infrastructure:
 
 - **DDNS:** an authenticated client updates a stable name after its address changes.
-- **DGA:** both endpoint and controller derive candidate domain names from a time/key seed; the operator registers a small subset.
+- **DGA:** the endpoint derives domain names from a seed, often time or a key but sometimes mutable public content; the operator arranges DNS for the active name.<sup>[[17]](#references)</sup>
 - **Fast flux:** a name returns a rapidly changing set of compromised/proxy addresses, often with low TTLs.
 - **Double flux:** both service addresses and authoritative name-server addresses rotate, hiding the control layer too.
 
@@ -161,6 +161,9 @@ A DGA can be detected through lexical entropy, consonant/digit patterns, NXDOMAI
 A DGA need not depend on time. One loader fetches a public Telegram channel page, reads the `src` of its `tgme_page_photo_image` element, downloads that profile image, and hashes its **last 50 file bytes** rather than its decoded pixels. Four hash seeds select an adjective, noun, verb and number. Changing the image changes the derived DNS name without shipping a new client. Keep the exact downloaded image bytes and the same word-list order on both sides; re-encoding the image or reordering a list produces different names.<sup>[[17]](#references)</sup>
 
 With the word lists recovered from the client, this reproduces the name-selection step. The source's byte-wise hash uses a 64-bit accumulator, multiplier `0x1000193`, and separate seeds for each component:<sup>[[17]](#references)</sup>
+
+<details>
+<summary>Reproduce the image-seeded wordlist name selection</summary>
 
 ```python
 def wordlist_domain(image: bytes, adjectives: list[str], nouns: list[str], verbs: list[str], suffix: str) -> str:
@@ -179,7 +182,11 @@ def wordlist_domain(image: bytes, adjectives: list[str], nouns: list[str], verbs
     return f"{a}-{n}-{v}-{digit}.{suffix}"
 ```
 
+</details>
+
 Unlike a [dead-drop resolver](#web-services-and-dead-drop-resolvers) that publishes the endpoint itself, the public object here only supplies a mutable seed; the client derives the endpoint locally.
+
+The generated name is then queried for a DNS TXT record through `https://dns.google/resolve?name=<domain>&type=TXT`. The client Base64-decodes the JSON response's `data` field, verifies an Ed25519 signature with its embedded public key, and only then AES-ECB-decrypts the command. The observed plaintext begins with a method selector and a URL for an encrypted payload. The signature check means a resolvable TXT record alone cannot supply accepted tasking.<sup>[[17]](#references)</sup>
 
 ## Compromised domains and domain shadowing
 
@@ -194,8 +201,6 @@ A **dead-drop resolver (T1102.001)** stores an encoded pointer to current C2 ins
 One GitHub-specific resolver variation uses the Issues Search API only when an authenticated repository channel fails. The client searches for issues matching the current date, repository and issue type, follows each issue's comments URL, and extracts ciphertext between `<!--` and `-->` markers. After per-host, date-derived decryption, fields such as `Owner`, `LicRepo` and `LicToken` replace the primary repository owner, path and token. This lets the operator rotate credentials and endpoints without replacing the client; the issue comment is a resolver, while the repository files remain the tasking channel.<sup>[[15]](#references)</sup>
 
 An Android variant selects one of two public Telegram pages at startup and extracts ciphertext between two occurrences of a marker embedded in the APK. It Base64URL-decodes the value and decrypts it with AES-128-CBC: the first 16 bytes of `SHA-256(marker)` are the key and the remaining 16 bytes are the IV. The plaintext is the actual C2 base URL, not the Telegram page URL. Preserve the page content and exact marker when reproducing resolution; changing the public page rotates the endpoint without rebuilding the APK.<sup>[[16]](#references)</sup>
-
-A separate tasking variation uses the generated name as a DNS TXT query through `https://dns.google/resolve?name=<domain>&type=TXT`. The client Base64-decodes the JSON answer's `data` value, verifies an Ed25519 signature with an embedded public key, and only then AES-ECB-decrypts the command. The plaintext begins with a method selector followed by a URL for an encrypted payload. This keeps tasking on a public DoH resolver while requiring a valid signature before accepting a command; a resolvable TXT record alone is insufficient.<sup>[[17]](#references)</sup>
 
 This provides resilience and hides back-end C2 from static binary analysis. It also creates stable object, tenant, repository, API and access-pattern identifiers. Defenders should join:
 
