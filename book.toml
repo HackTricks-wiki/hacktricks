@@ -31,6 +31,7 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/network-services-pentesting/pentesting-web/python.html" = "../../generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html"
 "/network-services-pentesting/pentesting-ftp/ftp-bounce-download-2oftp-file.html" = "ftp-bounce-protocol-relay.html"
 "/pentesting-web/file-upload/pdf-upload-xxe-and-cors-bypass.html" = "index.html"
 "/pentesting-web/xs-search/css-injection/css-injection-code.html" = "index.html"
