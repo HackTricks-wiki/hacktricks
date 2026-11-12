@@ -1,17 +1,18 @@
-# Втеча з Python sandbox і Pyscript
+# Python Sandbox Escape & Pyscript
 
 {{#include ../../banners/hacktricks-training.md}}
 
 **Цікаві сторінки для перегляду:**
 
-- [**Хитрощі для hacking у Pyscript**](pyscript.md)
-- [**Десеріалізація в Python**](../../pentesting-web/deserialization/README.md)
-- [**RCE через десеріалізацію моделей Keras і пошук gadget-ів**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Хитрощі для обходу Python sandbox-ів**](bypass-python-sandboxes/README.md)
-- [**Основи синтаксису Python-запитів до вебсайтів**](web-requests.md)
-- [**Основи синтаксису Python і бібліотеки**](basic-python.md)
-- [**Віртуальні середовища Python (`venv`) і збирання wheel-пакетів**](basic-python.md#virtual-environments-and-wheel-builds-venv)
-- [**Пошук суфіксів MD5 для заданих вхідних даних і хешів числового нуля**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
+- [**Трюки хакінгу Pyscript**](pyscript.md)
+- [**Десеріалізація Python**](../../pentesting-web/deserialization/README.md)
+- [**RCE під час десеріалізації моделі Keras і пошук gadget**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Трюки обходу Python sandbox**](bypass-python-sandboxes/README.md)
+- [**Проба для обчислення виразів Python**](bypass-python-sandboxes/README.md#python-expression-evaluation-probe)
+- [**Базовий синтаксис веб-запитів Python**](web-requests.md)
+- [**Базовий синтаксис Python і бібліотеки**](basic-python.md)
+- [**Віртуальні середовища Python (`venv`) і збирання wheel**](basic-python.md#virtual-environments-and-wheel-builds-venv)
+- [**Пошук MD5-суфіксів для заданих даних і хешів із числовим нулем**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 
