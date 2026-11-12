@@ -97,6 +97,18 @@ Reverse.tar (1).gz
 > [!TIP]
 > This package is called `Reverse`. However, it was specially crafted so that when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
 
+## Python expression-evaluation probe
+
+When an input appears to be evaluated as a Python expression, a harmless call to `str()` can help confirm that the result is being executed rather than reflected verbatim. Adapt the surrounding quotes to the injection context:<sup>[[19]](#references)</sup>
+
+```python
+"+str(True)+"  # If True is printed, the expression was evaluated.
+```
+
+Do not treat this probe alone as proof that arbitrary statements or operating-system commands can run; the sink may expose only a restricted expression language.
+
+Related web entry points: [server-side template injection](../../../pentesting-web/ssti-server-side-template-injection/README.md) and [deserialization](../../../pentesting-web/deserialization/README.md).
+
 ## Eval-ing python code
 
 > [!WARNING]
@@ -1252,5 +1264,6 @@ will be bypassed
 - [16] [checkoway.net - Musings - Pickle](https://checkoway.net/musings/pickle)
 - [17] [Breaking the AWS MCP Python Sandbox](https://xplo1t-sec.github.io/posts/breaking-the-aws-mcp-python-sandbox/)
 - [18] [PEP 634 - Structural Pattern Matching: Specification](https://peps.python.org/pep-0634/#class-patterns)
+- [19] [Python documentation - Built-in Functions: `eval()` and `str()`](https://docs.python.org/3/library/functions.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
