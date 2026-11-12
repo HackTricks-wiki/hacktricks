@@ -1,17 +1,18 @@
-# Kutoroka kwenye Python Sandbox & Pyscript
+# Python Sandbox Escape & Pyscript
 
 {{#include ../../banners/hacktricks-training.md}}
 
 **Kurasa za kuvutia za kuangalia:**
 
-- [**Mbinu za hacking za Pyscript**](pyscript.md)
+- [**Pyscript hacking tricks**](pyscript.md)
 - [**Python deserializations**](../../pentesting-web/deserialization/README.md)
-- [**RCE kupitia deserialization ya Keras model na kutafuta gadgets**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Mbinu za kupita Python sandboxes**](bypass-python-sandboxes/README.md)
-- [**Sintaksia ya msingi ya web requests za Python**](web-requests.md)
-- [**Sintaksia na libraries za msingi za Python**](basic-python.md)
-- [**Python virtual environments (`venv`) na wheel builds**](basic-python.md#virtual-environments-and-wheel-builds-venv)
-- [**Utafutaji wa MD5 suffix kwa ingizo lililochaguliwa na wa hash ya sifuri ya nambari**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
+- [**Keras model deserialization RCE and gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
+- [**Python expression-evaluation probe**](bypass-python-sandboxes/README.md#python-expression-evaluation-probe)
+- [**Sintaksia ya msingi ya python web requests**](web-requests.md)
+- [**Sintaksia ya msingi ya python na maktaba**](basic-python.md)
+- [**Python virtual environments (`venv`) and wheel builds**](basic-python.md#virtual-environments-and-wheel-builds-venv)
+- [**Chosen-input MD5 suffix and numeric-zero hash searches**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 
