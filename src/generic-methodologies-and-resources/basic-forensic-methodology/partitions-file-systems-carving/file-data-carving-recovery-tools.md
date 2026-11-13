@@ -50,6 +50,20 @@ sudo apt-get install scalpel
 scalpel file.img -o output
 ```
 
+### Scalpel3 fragmented carving
+
+When metadata-first recovery and contiguous carvers leave split files incomplete, **Scalpel3** can reassemble supported formats using file/block validators. It is a different codebase from the legacy `scalpel` command above. First create its required blockmap with the **same block size** used for carving; use the filesystem cluster size from `fsstat` when known, or establish a defensible value before scanning a partition image. Run only against a verified copy and place output on a separate volume.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+
+```bash
+git clone https://github.com/nolaforensix/scalpel3-release.git
+cd scalpel3-release && ./init_scalpel3.sh && cd src
+./crblockmap -q 4096 /evidence/partition.img /analysis/partition.blockmap
+./scalpel3 -Y cpu -q 4096 -w -b -o /analysis/scalpel3 \
+  /evidence/partition.img /analysis/partition.blockmap
+```
+
+Replace `4096` with the selected block size. `-w` retains **PROMISING** candidates as well as validated ones, and `-b` writes blockvectors to help check reconstructed layouts. A file in PROMISING, or one with a familiar extension, is not proof of complete recovery; validate content before use.<sup>[[13]](#references)[[14]](#references)</sup> To locate deleted partitions or gaps before carving, see [Finding data outside listed partitions](./#finding-data-outside-listed-partitions).
+
 ### Bulk Extractor 2.x   
 
 This tool comes inside kali but you can find it here: <https://github.com/simsong/bulk_extractor>
@@ -171,6 +185,8 @@ You can use the linux command line tool **pdftotext** to transform a pdf into te
 
 
 
+
+
 ## References
 
 - [1] [Autopsy 4.21 release notes](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21.0)
@@ -185,4 +201,7 @@ You can use the linux command line tool **pdftotext** to transform a pdf into te
 - [10] [ext4magic project status](https://sourceforge.net/projects/ext4magic/)
 - [11] [Binwalk v3 README](https://github.com/ReFirmLabs/binwalk/blob/master/README.md)
 - [12] [The Sleuth Kit: tsk_recover manual](https://sleuthkit.org/sleuthkit/man/tsk_recover.html)
+- [13] [Scalpel3 README](https://github.com/nolaforensix/scalpel3-release/blob/main/README.md)
+- [14] [Scalpel3 manual](https://github.com/nolaforensix/scalpel3-release/blob/main/man/scalpel3.1)
+- [15] [Scalpel3 test workflow](https://github.com/nolaforensix/scalpel3-release/blob/main/src/TESTS/cmdline.test)
 {{#include ../../../banners/hacktricks-training.md}}
