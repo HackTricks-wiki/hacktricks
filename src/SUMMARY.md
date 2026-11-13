@@ -599,7 +599,6 @@
   - [Git](network-services-pentesting/pentesting-web/git.md)
   - [GeoNetwork](network-services-pentesting/pentesting-web/geonetwork.md)
   - [Grafana](network-services-pentesting/pentesting-web/grafana.md)
-  - [GraphQL](network-services-pentesting/pentesting-web/graphql.md)
   - [H2 - Java SQL database](network-services-pentesting/pentesting-web/h2-java-sql-database.md)
   - [IIS - Internet Information Services](network-services-pentesting/pentesting-web/iis-internet-information-services.md)
   - [ImageMagick Security](network-services-pentesting/pentesting-web/imagemagick-security.md)
@@ -767,6 +766,7 @@
 
 - [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
 - [Web API Pentesting](pentesting-web/web-api-pentesting.md)
+  - [GraphQL API Security Testing](pentesting-web/graphql.md)
 - [HTTP 401/403 Authorization Bypasses](pentesting-web/403-and-401-bypasses.md)
 - [Special HTTP Headers](pentesting-web/special-http-headers.md)
 - [Sensitive Information Exfiltration from a Web Page](pentesting-web/sensitive-information-exfiltration.md)
