@@ -823,7 +823,7 @@
     "src/pentesting-web/403-and-401-bypasses.md": "a616dc26f1fbc7afd06c389dd123fcd597d1186c",
     "src/pentesting-web/abusing-hop-by-hop-headers.md": "8b9a1ce4ec14e255a530078557fb447261b359e2",
     "src/pentesting-web/account-takeover.md": "8211fc6e71a9c1559fe5bfc87150f3da0e562ad6",
-    "src/pentesting-web/application-layer-dos.md": "22f31adb864152abc8af75e77347e6dbf19b8d1e",
+    "src/pentesting-web/application-layer-dos.md": "803d316f2401cc01ea64149aca6d0da81b1f6eb5",
     "src/pentesting-web/browser-extension-pentesting-methodology/README.md": "43295af19470e7fba9efba4c54523afd260c0632",
     "src/pentesting-web/browser-extension-pentesting-methodology/browext-clickjacking.md": "af9d0b7ad0167523d5169217646430b31171b764",
     "src/pentesting-web/browser-extension-pentesting-methodology/browext-permissions-and-host_permissions.md": "8eb3c9e56fc148b60c7185ae1128a3818ba4379e",
