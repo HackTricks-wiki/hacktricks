@@ -2,55 +2,55 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-このセクションは、ブログシリーズ [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/) に大きく基づいています。目的は、ファイルへの書き込みが後のコード実行につながる場所、その実行を引き起こすイベント、および必要な権限を特定することです。ある場所が存在するからといって、その仕組みが有効であるとは限りません。以下に記載したローカルでの確認は、macOS 26.5.2（2026年10月5日）で実施したものであり、すべての macOS リリースでの動作を示すものではありません。
+このセクションは、ブログシリーズ [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/) を大いに参考にしています。目的は、ファイルへの書き込みが後のコード実行につながる場所、実行のトリガーとなるイベント、および必要な権限を特定することです。ある場所が存在するからといって、その仕組みが有効であるとは限りません。以下に記載したローカルでの確認は、macOS 26.5.2（2026年10月5日）で実施したものであり、すべてのmacOSリリースでの動作を保証するものではありません。
 
 > [!NOTE]
-> 「書き込みによるトリガー」は、必ずしも「書き込み直後に実行される」という意味ではありません。ログイン時、特定のアプリケーションの起動時、またはユーザーが操作を行ったときにのみ読み込まれる場所もあります。すでに設定済みのジョブ内にある書き込み可能なペイロードと、新しいジョブを登録する権限も別のものです。手法を利用する前に、使い捨てのアカウントまたは VM でテストしてください。
+> 「書き込みをトリガーとする」とは、必ずしも「書き込み直後に実行される」という意味ではありません。ログイン時、特定のアプリケーションの起動時、またはユーザーが操作を行ったときにのみ読み込まれる場所もあります。すでに設定済みのジョブ内にある書き込み可能なペイロードと、新しいジョブを登録する権限も別物です。この手法に頼る前に、使い捨てアカウントまたはVMでテストしてください。
 
-## Sandbox Bypass
+## サンドボックス回避
 
 > [!TIP]
-> ここでは、ファイルに何かを書き込んで**待つ**だけで実行できる**sandbox bypass**に役立つ自動起動場所を紹介します。必要なのは、非常に**一般的な操作**、一定の**時間の経過**、または通常であれば sandbox 内から root 権限なしで実行できる**操作**です。
+> ここでは、**ファイルに書き込んで**から**待つ**だけで、非常に**一般的な**操作、決められた**時間**の経過、または通常はroot権限なしでサンドボックス内から実行できる**操作**を利用して、何かを実行できる**サンドボックス回避**に有用な自動起動場所を紹介します。
 
 ### Launchd
 
-- sandbox bypass に有用: [✅](https://emojipedia.org/check-mark-button)
+- サンドボックス回避に有用: [✅](https://emojipedia.org/check-mark-button)
 - TCC Bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
 
 - **`/Library/LaunchAgents`**
   - **トリガー**: ユーザーのログイン（または明示的な登録）
-  - root 権限が必要
+  - root権限が必要
 - **`/Library/LaunchDaemons`**
   - **トリガー**: システム起動（または明示的な登録）
-  - root 権限が必要
+  - root権限が必要
 - **`/System/Library/LaunchAgents`**
-  - **トリガー**: ユーザーのログイン。Apple の保護されたシステム領域
+  - **トリガー**: ユーザーのログイン。Appleの保護されたシステム領域
 - **`/System/Library/LaunchDaemons`**
-  - **トリガー**: システム起動。Apple の保護されたシステム領域
+  - **トリガー**: システム起動。Appleの保護されたシステム領域
 - **`~/Library/LaunchAgents`**
   - **トリガー**: 再ログイン
 
-`launchd` がスキャンする `~/Library/LaunchDaemons` という場所はありません。ユーザー単位のジョブは `~/Library/LaunchAgents` に置き、システムデーモンのディレクトリには `/Library/LaunchDaemons` を使います。[Apple の launchd 起動ガイド](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)には、スキャン対象の場所が記載されています。
+`launchd` がスキャンする `~/Library/LaunchDaemons` という場所はありません。ユーザーごとのジョブは `~/Library/LaunchAgents` に配置します。システムデーモンのディレクトリは `/Library/LaunchDaemons` です。[Appleのlaunchd起動ガイド](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)には、スキャン対象の場所が記載されています。
 
 > [!TIP]
-> 興味深いことに、**`launchd`** には Mach-o セクション `__Text.__config` に埋め込まれた property list があり、launchd が起動しなければならない、よく知られたその他のサービスが含まれています。さらに、これらのサービスには `RequireSuccess`、`RequireRun`、`RebootOnSuccess` が含まれることがあり、これらは実行して正常に完了しなければならないことを意味します。
+> 興味深いことに、**`launchd`** にはMach-Oセクション `__Text.__config` に埋め込みのプロパティリストがあり、launchdが起動する必要のある、よく知られたサービスが含まれています。さらに、これらのサービスには `RequireSuccess`、`RequireRun`、`RebootOnSuccess` を含めることができ、これは実行され、正常に完了しなければならないことを意味します。
 >
-> もちろん、code signing のため変更できません。
+> もちろん、コード署名のため変更できません。
 
-#### 説明と Exploitation
+#### 説明と悪用
 
-**`launchd`** は、起動時に OX S カーネルが実行する**最初の****プロセス**であり、シャットダウン時に終了する最後のプロセスです。常に **PID 1** である必要があります。このプロセスは、以下の **ASEP** **plist** に記載された設定を**読み込み、実行**します。
+**`launchd`** は、OS Xカーネルによって起動時に実行される**最初の****プロセス**であり、シャットダウン時に終了する最後のプロセスです。常に **PID 1** である必要があります。このプロセスは、次の場所にある **ASEP** **plist** で指定された設定を**読み込み、実行**します。
 
-- `/Library/LaunchAgents`: 管理者がインストールしたユーザー単位の agent
-- `/Library/LaunchDaemons`: 管理者がインストールしたシステム全体の daemon
-- `/System/Library/LaunchAgents`: Apple が提供するユーザー単位の agent
-- `/System/Library/LaunchDaemons`: Apple が提供するシステム全体の daemon
+- `/Library/LaunchAgents`: 管理者がインストールしたユーザーごとのエージェント
+- `/Library/LaunchDaemons`: 管理者がインストールしたシステム全体のデーモン
+- `/System/Library/LaunchAgents`: Appleが提供するユーザーごとのエージェント
+- `/System/Library/LaunchDaemons`: Appleが提供するシステム全体のデーモン
 
-ユーザーがログインすると、`launchd` はそのユーザーの `~/Library/LaunchAgents` にある plist を、そのユーザーの権限で読み込みます。ジョブは設定されたキーに従って起動します。plist を読み込んだからといって、プロセスがただちに実行されるとは限りません。
+ユーザーがログインすると、`launchd` はそのユーザーの `~/Library/LaunchAgents` にあるplistを、そのユーザーの権限で読み込みます。ジョブは各キーに従って起動されます。plistを読み込んだだけで、プロセスが直ちに実行されるとは限りません。
 
-**agent と daemon の主な違いは、agent はユーザーのログイン時に読み込まれ、daemon はシステム起動時に読み込まれることです**（ssh など、ユーザーがシステムにアクセスする前に実行する必要があるサービスがあるためです）。また、agent は GUI を使用できますが、daemon はバックグラウンドで実行する必要があります。
+**エージェントとデーモンの主な違いは、エージェントはユーザーのログイン時に読み込まれ、デーモンはシステム起動時に読み込まれることです**（sshのように、ユーザーがシステムにアクセスする前に実行する必要があるサービスがあるためです）。また、エージェントはGUIを使用できますが、デーモンはバックグラウンドで実行する必要があります。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -79,11 +79,11 @@
 
 各 `ProgramArguments` 要素は個別の引数です。`launchd` は単一の文字列をシェルコマンドとして解析しません。上記の修正版は、読み込まずに `plutil -lint /path/to/example.plist` で構文チェックできます。`ProgramArguments`、`RunAtLoad`、`KeepAlive` については、ローカルの `man launchd.plist` を参照してください。
 
-#### 既存ジョブのファイルイベントトリガー
+#### 既存ジョブでのファイルイベントトリガー
 
-**すでに読み込まれている** agent または daemon は、名前付きパスに変更があったときに起動するために `WatchPaths` を使用できます。`QueueDirectories` はディレクトリが空でない間ジョブを起動し、`StartOnMount` はボリュームのマウント時にジョブを起動します。[Apple の launchd ガイド](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html#//apple_ref/doc/uid/10000172i-CH2-SW9) には、`WatchPaths` と `QueueDirectories` の例が掲載されています。監視対象ファイルへの書き込みでトリガーされるのは**すでに設定済みのジョブ**です。書き込みを行う側が、ジョブの実行ファイル、スクリプト、またはジョブが解釈するデータも制御できる場合に限り、任意コード実行につながります。スキャン対象または登録済みの場所の外に新しい plist を書き込んでも、それだけでは読み込まれません。
+**すでに読み込まれている** agent または daemon は、`WatchPaths` を使って、指定したパスが変更されたときに起動できます。`QueueDirectories` はディレクトリが空でない間ジョブを起動し、`StartOnMount` はボリュームのマウント時に起動します。[Appleのlaunchdガイド](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html#//apple_ref/doc/uid/10000172i-CH2-SW9)には、`WatchPaths` と `QueueDirectories` の例があります。監視対象ファイルへの書き込みでトリガーされるのは、**すでに設定されているジョブ**です。任意のコード実行が可能になるのは、書き込みを行うユーザーが、ジョブの実行ファイル、スクリプト、またはジョブが解釈するデータも制御できる場合に限られます。スキャン対象または登録済みの場所の外に新しい plist を書き込むだけでは、それは読み込まれません。
 
-この自己クリーンアップ型 PoC は、固有名の**一時的なユーザー agent**を登録し、自身が監視するファイルだけを変更してから agent を削除します。ログアウトや再起動なしで、macOS 26.5.2 上で正常に動作することを確認しました。
+この自己消去型PoCは、一意の名前を持つ**一時的なユーザーエージェント**を登録し、自身が監視するファイルだけを変更してから、エージェントを削除します。macOS 26.5.2で、ログアウトや再起動なしに正常に実行できました：
 
 ```python
 import os, pathlib, plistlib, subprocess, tempfile, time, uuid
@@ -113,17 +113,17 @@ with tempfile.TemporaryDirectory(prefix="ht-watch-") as root:
         subprocess.run(["launchctl", "bootout", f"{target}/{label}"], check=True)
 ```
 
-ローカルで実行すると `watch fired: True` と表示され、`bootout` は成功しました。ここでは `launchctl bootstrap` は隔離された PoC 内でのみ使用しており、すでにロード済みのジョブには必要ありません。既存のジョブを安全に評価するには、その plist と解決された `ProgramArguments` のパスを読み取り、変更を加えずに、該当する実行ファイルまたはインタープリターで実行されるファイルが書き込み可能かどうかを確認します。
+ローカルで実行すると `watch fired: True` と出力され、`bootout` は成功しました。ここでは、`launchctl bootstrap` は隔離された PoC 内でのみ使用しています。すでにロード済みのジョブには必要ありません。既存のジョブを安全に評価するには、その plist と解決済みの `ProgramArguments` のパスを読み取り、関連する実行ファイルまたはインタープリターで実行されるファイルが、変更を加えずに書き込み可能かどうかを確認します。
 
-ユーザーのログイン前に **agent を実行する必要がある**ケースがあります。これらは **PreLoginAgents** と呼ばれます。たとえば、ログイン時に支援技術を利用できるようにする場合に便利です。これらは `/Library/LaunchAgents` にもあります（例については[**こちら**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents)を参照）。
+**ユーザーのログイン前に実行する必要がある Agent** もあります。これらは **PreLoginAgents** と呼ばれます。たとえば、ログイン時に支援技術を提供する用途に便利です。これらは `/Library/LaunchAgents` にもあります（例は[**こちら**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents)）。
 
 > [!TIP]
-> 新しい Daemon または Agent の設定ファイルは、**次回の再起動後、または** `launchctl load <target.plist>` **を使用するとロードされます**。拡張子のない .plist ファイルも `launchctl -F <file>` でロードできます（ただし、これらの plist ファイルは再起動後に自動ロードされません）。\
-> `launchctl unload <target.plist>` で**アンロード**することもできます（そのファイルが指すプロセスは終了します）。
+> 新しい Daemon または Agent の設定ファイルは、**次回の再起動後、または** `launchctl load <target.plist>` **を実行するとロードされます**。拡張子のない .plist ファイルも `launchctl -F <file>` でロードできます（ただし、これらの plist ファイルは再起動後に自動ロードされません）。\
+> `launchctl unload <target.plist>` で**アンロード**することもできます（そのファイルが指定するプロセスは終了します）。
 >
-> Agent または Daemon の実行を**妨げる**もの（override など）が**ないことを確認する**には、次を実行します: `sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.smdb.plist`
+> Agent または Daemon の**実行を妨げる**もの（override など）が**何もないことを確認する**には、次を実行します。`sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.smdb.plist`
 
-現在のユーザーによってロードされているすべての agent と daemon を一覧表示します:
+現在のユーザーによってロードされているすべての Agent と Daemon を一覧表示します。
 
 ```bash
 launchctl list
@@ -131,12 +131,12 @@ launchctl list
 
 #### 悪意のある LaunchDaemon チェーンの例（パスワードの使い回し）
 
-最近の macOS infostealer は、**窃取した sudo パスワード**を使い、ユーザーエージェントと root の LaunchDaemon を配置しました:<sup>[[1]](#references)</sup>
+最近の macOS infostealer は、**取得した sudo パスワード**を使い回して、user agent と root LaunchDaemon を配置しました:<sup>[[1]](#references)</sup>
 
-- エージェントのループを `~/.agent` に書き込み、実行可能にする。
-- エージェントを指す plist を `/tmp/starter` に生成する。
-- 盗んだパスワードを `sudo -S` で再利用し、plist を `/Library/LaunchDaemons/com.finder.helper.plist` にコピーして、所有者を `root:wheel` に設定し、`launchctl load` で読み込む。
-- `nohup ~/.agent >/dev/null 2>&1 &` でエージェントを出力なしで起動し、プロセスを切り離す。
+- agent のループを `~/.agent` に書き込み、実行可能にします。
+- その agent を指す plist を `/tmp/starter` に生成します。
+- 盗んだパスワードを `sudo -S` で使い回し、`/Library/LaunchDaemons/com.finder.helper.plist` にコピーして、所有者を `root:wheel` に設定し、`launchctl load` で読み込みます。
+- `nohup ~/.agent >/dev/null 2>&1 &` で出力を切り離し、agent をサイレントに起動します。
 
 ```bash
 printf '%s\n' "$pw" | sudo -S cp /tmp/starter /Library/LaunchDaemons/com.finder.helper.plist
@@ -145,74 +145,74 @@ printf '%s\n' "$pw" | sudo -S launchctl load /Library/LaunchDaemons/com.finder.h
 nohup "$HOME/.agent" >/dev/null 2>&1 &
 ```
 > [!WARNING]
-> `/Library/LaunchDaemons` に配置された daemon plist は、ユーザー所有にしても安全にはなりません。`launchd` はシステムジョブに適切な所有権と権限を要求し、安全でない plist を拒否する場合があります。root 所有の daemon は、設定で別のアカウントが指定されていない限り、通常 root として実行されます。ジョブの `UserName`、`GroupName`、所有権、`launchctl` の診断情報を確認してください。plist の所有者名だけから実行ユーザーを推測してはいけません。
+> `/Library/LaunchDaemons` に配置された daemon plist は、ユーザー所有にしても安全にはなりません。`launchd` はシステムジョブに適切な所有権と権限を要求し、安全でない plist を拒否する場合があります。root 所有の daemon は、通常、設定で別のアカウントが指定されていない限り root として実行されます。ジョブの `UserName`、`GroupName`、所有権、`launchctl` の診断情報を確認してください。plist の所有者名だけから実行ユーザーを推測しないでください。
 
 #### launchd の詳細
 
-**`launchd`** は、**kernel** から起動される最初のユーザーモードプロセスです。プロセスの起動は**成功**しなければならず、**終了したりクラッシュしたりすることはできません**。一部の**kill シグナル**からも**保護**されています。
+**`launchd`** は、**kernel** から起動される最初のユーザーモードプロセスです。プロセスの起動は**成功**しなければならず、**終了もクラッシュもできません**。一部の**kill シグナル**からも**保護**されています。
 
 `launchd` が最初に行うことの1つは、次のような**daemon**をすべて**起動**することです。
 
-- **時刻に基づいて実行される Timer daemon**:
-  - macOS 26.5.2 では、`com.apple.atrun.plist` は `StartInterval = 30` 秒で `/usr/libexec/atrun` を起動します。有効状態は、launchd が override を別途保持するため、plist の `Disabled` キーと異なる場合があります。
+- 実行時刻に基づく**タイマー daemon**:
+  - macOS 26.5.2 では、`com.apple.atrun.plist` は `StartInterval = 30` 秒で `/usr/libexec/atrun` を起動します。有効状態は、launchd が overrides を plist の `Disabled` キーとは別に保持するため、そのキーの値と異なる場合があります。
   - `/usr/lib/cron/tabs` にジョブがある場合、`com.vix.cron.plist` は `/usr/sbin/cron` を起動します。`com.apple.systemstats.daily` は別のスケジュールサービスであり、cron daemon ではありません。
-- **ネットワーク daemon**:
-  - `org.cups.cups-lpd`: TCP (`SockType: stream`) の `SockServiceName: printer` で待ち受けます
-    - SockServiceName には、ポートまたは `/etc/services` に登録されたサービスを指定する必要があります
-  - `com.apple.xscertd.plist`: TCP のポート1640で待ち受けます
-- 指定されたパスが変更されたときに実行される **Path daemon**:
+- 次のような**ネットワーク daemon**:
+  - `org.cups.cups-lpd`: TCP（`SockType: stream`）で `SockServiceName: printer` を待ち受けます
+    - SockServiceName には、ポートまたは `/etc/services` に記載されたサービスを指定する必要があります
+  - `com.apple.xscertd.plist`: TCP のポート 1640 で待ち受けます
+- 指定されたパスが変更されたときに実行される**パス daemon**:
   - `com.apple.postfix.master`: パス `/etc/postfix/aliases` を監視します
 - **IOKit 通知 daemon**:
   - `com.apple.xartstorageremoted`: `"com.apple.iokit.matching" => { "com.apple.device-attach" => { "IOMatchLaunchStream" => 1 ...`
 - **Mach port**:
   - `com.apple.xscertd-helper.plist`: `MachServices` エントリで `com.apple.xscertd.helper` という名前を指定しています
 - **UserEventAgent**:
-  - これは上記とは異なります。特定のイベントに応じて、launchd にアプリを起動させます。ただし、この場合に関わるメインバイナリは `launchd` ではなく `/usr/libexec/UserEventAgent` です。SIP で制限されたフォルダ `/System/Library/UserEventPlugins/` からプラグインを読み込みます。各プラグインは、`XPCEventModuleInitializer` キー、または古いプラグインの場合は `Info.plist` 内の `FB86416D-6164-2070-726F-70735C216EC0` キーの下にある `CFPluginFactories` dict で初期化子を指定します。
+  - これは前述のものとは異なります。特定のイベントに応じて、launchd にアプリを起動させます。ただし、この場合に関わるメインバイナリは `launchd` ではなく `/usr/libexec/UserEventAgent` です。SIP によって制限されたフォルダ `/System/Library/UserEventPlugins/` からプラグインを読み込みます。各プラグインは、`XPCEventModuleInitializer` キー、または古いプラグインの場合は `Info.plist` の `FB86416D-6164-2070-726F-70735C216EC0` キーに対応する `CFPluginFactories` dict で初期化関数を指定します。
 
 ### shell 起動ファイル
 
-解説記事: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)<sup>[[2]](#references)</sup>\
-解説記事 (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)<sup>[[2]](#references)</sup>\
+Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
 
 - sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
 - TCC Bypass: [✅](https://emojipedia.org/check-mark-button)
-  - ただし、これらのファイルを読み込む shell を実行する TCC bypass を持つアプリを見つける必要があります
+  - ただし、これらのファイルを読み込む shell を実行する TCC bypass 対応アプリを見つける必要があります
 
 #### 場所
 
-- **`~/.zshenv`** (または新しいコンパイル済みファイル **`~/.zshenv.zwc`**)
-  - **起動条件**: 非対話型の `zsh -c` を含む、通常の zsh の起動時。`zsh -f` はユーザーの起動ファイルをスキップします。
+- **`~/.zshenv`**（または新しいコンパイル済みファイル **`~/.zshenv.zwc`**）
+  - **Trigger**: 非対話型の `zsh -c` を含む、通常の zsh 起動時。`zsh -f` はユーザーの起動ファイルを読み込みません。
 - **`~/.zshrc`**
-  - **起動条件**: 対話型 zsh の起動時。
-- **`~/.zprofile`, `~/.zlogin`**
-  - **起動条件**: ログイン zsh の起動時。それぞれ `.zshrc` の前後に読み込まれます。
-- **`/etc/zshenv`, `/etc/zprofile`, `/etc/zshrc`, `/etc/zlogin`**
-  - **起動条件**: zsh でターミナルを開いたとき
-  - root 権限が必要
+  - **Trigger**: 対話型 zsh の起動時。
+- **`~/.zprofile`、`~/.zlogin`**
+  - **Trigger**: login zsh の起動時。それぞれ `.zshrc` の前後に読み込まれます。
+- **`/etc/zshenv`、`/etc/zprofile`、`/etc/zshrc`、`/etc/zlogin`**
+  - **Trigger**: zsh でターミナルを開いたとき
+  - root が必要
 - **`~/.zlogout`**
-  - **起動条件**: ログイン zsh が正常終了したとき。すべてのターミナルや shell の終了時に実行されるわけではありません。
+  - **Trigger**: login zsh が正常終了したとき。すべてのターミナルや shell の終了時に実行されるわけではありません。
 - **`/etc/zlogout`**
-  - **起動条件**: zsh のターミナルを終了したとき
-  - root 権限が必要
-- ほかにも存在する可能性があります: **`man zsh`**
+  - **Trigger**: zsh でターミナルを終了したとき
+  - root が必要
+- その他については **`man zsh`** を参照
 - **`~/.bashrc`**
-  - **起動条件**: 対話型の**非ログイン** Bash の起動時。対話型のログイン Bash で読み込まれるのは、ログインファイルが明示的に source した場合だけです。
-- **`~/.bash_profile`, `~/.bash_login`, `~/.profile`**
-  - **起動条件**: ログイン Bash の起動時。この順序で最初に読み込み可能なファイルが実行されます。先行するいずれかのファイルが存在する場合、`~/.profile` はスキップされます。
+  - **Trigger**: 対話型の**非 login** Bash を起動したとき。対話型 login Bash は、login ファイルから明示的に読み込まれる場合にのみ実行します。
+- **`~/.bash_profile`、`~/.bash_login`、`~/.profile`**
+  - **Trigger**: login Bash の起動時。順番に、最初に読み込み可能なファイルが実行されます。それより前のファイルが存在する場合、`~/.profile` は読み込まれません。
 - **`/etc/profile`**
-  - **起動条件**: ログイン Bash の起動時。変更には root 権限が必要です。
-- **`~/.tcshrc`**、または存在しない場合は **`~/.cshrc`**
-  - **起動条件**: この Mac では、非対話型の `tcsh -c` を含む `tcsh` の起動時。ユーザーが実際に `tcsh` を起動する必要があります。macOS のデフォルト shell ではありません。
+  - **Trigger**: login Bash の起動時。変更には root が必要です。
+- **`~/.tcshrc`** または、存在しない場合は **`~/.cshrc`**
+  - **Trigger**: この Mac では、非対話型の `tcsh -c` を含む `tcsh` の起動時。ユーザーが実際に `tcsh` を実行する必要があります。macOS のデフォルト shell ではありません。
 - **`~/.login`**
-  - **起動条件**: ログイン `tcsh` の起動時。rc ファイルの後に読み込まれます。
-- `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
-  - **起動条件**: xterm で実行される想定ですが、**インストールされていません**。インストール後も次のエラーが発生します: xterm: `DISPLAY is not set`<sup>[[3]](#references)</sup>
+  - **Trigger**: rc ファイルの読み込み後、login `tcsh` の起動時。
+- `~/.xinitrc`、`~/.xserverrc`、`/opt/X11/etc/X11/xinit/xinitrc.d/`
+  - **Trigger**: xterm で実行されると想定されますが、**インストールされていません**。また、インストール後も次のエラーが発生します: xterm: `DISPLAY is not set`<sup>[[3]](#references)</sup>
 
 #### 説明と Exploitation
 
-`zsh` や `bash` などの shell 環境を起動すると、**特定の起動ファイルが実行されます**。現在の macOS では `/bin/zsh` がデフォルト shell です。Terminal や SSH がログイン shell と対話型 shell のどちらを起動するかは、それぞれの設定によって異なります。すべてのセッションで上記のファイルが実行されると決めつけないでください。macOS には `bash` と `sh` もありますが、使用するには明示的に起動する必要があります。<sup>[[2]](#references)</sup> [zsh 起動ファイルのリファレンス](https://zsh.sourceforge.io/Doc/Release/Files.html)では、読み込み順、`ZDOTDIR` による上書き、`.zwc` のルールが説明されています。
+`zsh` や `bash` などの shell 環境を開始すると、**特定の起動ファイルが実行されます**。現在、macOS のデフォルト shell は `/bin/zsh` です。Terminal や SSH が login shell または対話型 shell を起動するかどうかは、それぞれの設定によります。すべてのセッションで上記のファイルが実行されるとは限りません。macOS には `bash` と `sh` もありますが、使用するには明示的に実行する必要があります。<sup>[[2]](#references)</sup> [zsh 起動ファイルのリファレンス](https://zsh.sourceforge.io/Doc/Release/Files.html)には、読み込み順序、`ZDOTDIR` による上書き、`.zwc` のルールが記載されています。
 
-以下の読み取り専用実験では、macOS 26.5.2 で使い捨ての `ZDOTDIR` を使用しました。実際の shell 起動ファイルは変更せずに、読み込まれたユーザーファイルを示します。
+macOS 26.5.2 で、使い捨ての `ZDOTDIR` を使用して読み取り専用の実験を行いました。この実験では、どのユーザーファイルが読み込まれるかを確認しました。実際の shell 起動ファイルは変更していません。
 
 ```bash
 lab=$(mktemp -d)
@@ -227,36 +227,36 @@ done
 rm -r "$lab"
 ```
 
-観測された順序は `-c`: `zshenv`; `-ic`: `zshenv zshrc`; `-lc`: `zshenv zprofile zlogin`; `-lic`: `zshenv zprofile zshrc zlogin zlogout` でした。`ZDOTDIR` は代替ディレクトリを指すよう、あらかじめ設定されている必要があります。任意のディレクトリにファイルを書くだけでは不十分です。
+観測された順序は `-c`: `zshenv`; `-ic`: `zshenv zshrc`; `-lc`: `zshenv zprofile zlogin`; `-lic`: `zshenv zprofile zshrc zlogin zlogout` でした。`ZDOTDIR` は代替ディレクトリを指すよう、あらかじめ設定されている必要があります。任意のディレクトリにファイルを書き込むだけでは不十分です。
 
-[Bash の起動に関するリファレンス](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)では、ログインシェルと対話型シェルが区別されています。macOS 26.5.2 のテストマシンで、4 つのユーザー起動ファイルをすべて含む隔離された `HOME` を使ったところ、次の結果になりました: `bash -c` → なし、`bash -ic` → `.bashrc`、`bash -lc` および `bash -lic` → `.bash_profile` のみ。`.bash_profile` を削除すると、ログイン Bash は `.bash_login` を読み込み、それも削除すると `.profile` を読み込みました。`BASH_ENV` を使えば、非対話型 Bash にファイルを指定できますが、この環境変数は起動元プロセスですでに設定されている必要があります。また、ログイン Bash から明示的に `exit` すると、`~/.bash_logout` も読み込まれる場合があります。
+[Bash の起動ファイルに関するリファレンス](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)では、login shell と interactive shell が区別されています。macOS 26.5.2 のテストマシンで、4つすべてのユーザー起動ファイルを含む分離された `HOME` を使用したところ、次の結果になりました: `bash -c` → なし、`bash -ic` → `.bashrc`、`bash -lc` と `bash -lic` → `.bash_profile` のみ。`.bash_profile` を削除すると、login Bash は `.bash_login` を読み込み、それも削除すると `.profile` を読み込みました。`BASH_ENV` を設定すると noninteractive Bash にファイルを読み込ませられますが、この環境変数は呼び出し元のプロセスですでに設定されている必要があります。login Bash から明示的に `exit` すると、`~/.bash_logout` も読み込まれることがあります。
 
-ローカルの `tcsh(1)` マニュアルには、独自の起動順序が記載されています。使い捨ての `HOME` を用いた場合、`/bin/tcsh -c :` は `.tcshrc` を読み込み、`.tcshrc` がなければ `.cshrc` を読み込みました。使い捨てのログイン `tcsh` は `.tcshrc` と `.login` を読み込みました。これらの確認では、一時ファイルのみを作成し、削除しました。
+ローカルの `tcsh(1)` のマニュアルには、独自の起動順序が記載されています。使い捨ての `HOME` では、`/bin/tcsh -c :` は `.tcshrc` を読み込み、`.tcshrc` がない場合は `.cshrc` を読み込みました。使い捨ての login `tcsh` は `.tcshrc` と `.login` を読み込みました。これらの確認では、一時ファイルのみを作成・削除しました。
 
-### 再オープンされるアプリケーション
+### 再度開かれるアプリケーション
 
 > [!CAUTION]
-> 指定された exploitation を設定し、ログアウトして再度ログインするか、再起動しても、テストではアプリは実行されませんでした。これらの操作を行う際に、アプリが起動中である必要があるかもしれません。
+> 指定された設定を行ってログアウトして再度ログインしても、あるいは再起動しても、テストではアプリは実行されませんでした。これらの操作を行う際、アプリが起動中である必要があるかもしれません。
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)<sup>[[4]](#references)</sup>
 
-- sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
+- sandbox のバイパスに有効: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
 
 - **`~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`**
-  - **Trigger**: アプリの再オープン時の再起動
+  - **トリガー**: 再起動時にアプリケーションを再度開く
 
-#### 説明と Exploitation
+#### 説明と悪用
 
-再オープンするアプリケーションはすべて、plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist` 内にあります<sup>[[4]](#references)</sup>
+再度開くすべてのアプリケーションは、plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist` 内にあります<sup>[[4]](#references)</sup>
 
-そのため、再オープンされるアプリケーションに自分のアプリを起動させるには、**自分のアプリをリストに追加する**だけです。
+そのため、再度開くアプリケーションに自分のものを起動させるには、**自分のアプリをリストに追加**するだけです。
 
 UUID は、そのディレクトリを一覧表示するか、`ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'` で確認できます。
 
-再オープンされるアプリケーションを確認するには、次のようにします:
+再度開かれるアプリケーションを確認するには、次のようにします:
 
 ```bash
 defaults -currentHost read com.apple.loginwindow TALAppsToRelaunchAtLogin
@@ -264,7 +264,7 @@ defaults -currentHost read com.apple.loginwindow TALAppsToRelaunchAtLogin
 plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
 
-このリストに**アプリケーションを追加する**には、次を使用できます：
+このリストに**アプリケーションを追加するには**、次を使用できます:
 
 ```bash
 # Adding iTerm2
@@ -276,28 +276,28 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
     ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
 
-### Terminal Preferences
+### Terminalの環境設定
 
-解説: [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.github.io/beyond/beyond_0020/)<sup>[[5]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.github.io/beyond/beyond_0020/)<sup>[[5]](#references)</sup>
 
 - sandboxのbypassに有用: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-  - Terminalを使用すると、そのTerminalを使うユーザーのFDA権限が適用される
+  - Terminalを使うと、そのユーザーのFDA権限を利用できる
 
-#### Location
+#### 場所
 
 - **`~/Library/Preferences/com.apple.Terminal.plist`**
-  - **Trigger**: Shell設定に起動コマンドが含まれるプロファイルを使って、新しいTerminalウィンドウまたはタブを開く
+  - **Trigger**: Shell設定に起動コマンドが含まれるprofileを使って、新しいTerminalウィンドウまたはタブを開く
 
-#### Description & Exploitation
+#### 説明と悪用
 
-**`~/Library/Preferences`** には、ユーザーがApplicationsで使う環境設定が保存されています。これらの環境設定の一部には、**他のアプリケーションやスクリプトを実行する**設定を含めることができます。<sup>[[5]](#references)</sup>
+**`~/Library/Preferences`**には、アプリケーションにおけるユーザーの設定が保存されています。これらの設定の一部には、**他のアプリケーションやスクリプトを実行する**構成を保持できるものがあります。<sup>[[5]](#references)</sup>
 
-たとえば、Terminalは起動時にコマンドを実行できます:
+たとえば、Terminalでは起動時にコマンドを実行できます。
 
 <figure><img src="../images/image (1148).png" alt="" width="495"><figcaption></figcaption></figure>
 
-この設定は、**`~/Library/Preferences/com.apple.Terminal.plist`** ファイルに次のように反映されます:
+この設定は、次のようにファイル **`~/Library/Preferences/com.apple.Terminal.plist`** に反映されます。
 
 ```bash
 [...]
@@ -315,9 +315,9 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 [...]
 ```
 
-関連する profile に startup command が含まれており、Terminal がその設定を読み込む場合、その profile を使う新しい session で実行できます。[Apple の現行 Terminal ガイド](https://support.apple.com/guide/terminal/trmlshll/mac)では、profile ごとの **Shell → Startup** command について説明されています。その profile を使う新しい session を開始せずに Terminal を開くだけでは不十分です。以下の設定変更は、調査用 Mac では**実行していません**。
+関連するプロファイルに起動コマンドが設定されていて、Terminal がその設定を読み込む場合、そのプロファイルを使った新しいセッションでコマンドを実行できます。[Apple の最新の Terminal ガイド](https://support.apple.com/guide/terminal/trmlshll/mac)には、プロファイルごとの **Shell → Startup** コマンドが記載されています。そのプロファイルを使った新しいセッションを開始せずに Terminal を開くだけでは不十分です。以下の設定変更は、調査用 Mac では実行していません。
 
-これは CLI から追加できます：
+以下のように cli から追加できます：
 
 ```bash
 # Add
@@ -330,20 +330,20 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 
 ### Terminal Scripts / Other file extensions
 
-- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- サンドボックスのバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-  - Terminalを使用すると、ユーザーのFDA権限を利用できる
+  - Terminal を使うと、ユーザーの FDA 権限を利用できる
 
-#### 場所
+#### Location
 
 - **任意の場所**
-  - **トリガー**: 該当する`.terminal`、`.command`、または`.tool`ファイルを開く
+  - **Trigger**: 該当する `.terminal`、`.command`、または `.tool` ファイルを開く
 
-#### 説明と悪用
+#### Description & Exploitation
 
-ユーザーが**`.terminal`**設定ファイルを開くと、Terminalはそのプロファイルからセッションを作成できます。実行可能な**`.command`**ファイルや**`.tool`**ファイルもTerminalで開けます。これは明示的にファイルを開くことがトリガーであり、Terminalを開いただけでは実行されません。継承されるTCCアクセスは、Terminalに実際に付与されている権限と、試みる操作によって異なります。以下の歴史的な例は、調査用Macでは実行されていません。
+ユーザーが **`.terminal`** 設定ファイルを開くと、Terminal はそのプロファイルからセッションを作成できます。また、実行可能な **`.command`** ファイルや **`.tool`** ファイルも Terminal で開けます。これは明示的にファイルを開くことがトリガーであり、Terminal を開くだけで実行されるわけではありません。継承される TCC アクセスは、Terminal に実際に付与されている権限と、試みる操作によって異なります。以下の過去の例は、調査用 Mac では実行されていません。
 
-次の方法で試してください：
+試すには:
 
 ```bash
 # Prepare the payload
@@ -373,63 +373,63 @@ open /tmp/test.terminal
 rm -f /tmp/test.terminal /tmp/ht-terminal-file-marker
 ```
 
-`.command`、`.tool` 拡張子も使用できます。通常のシェルスクリプトを記述すると、これらも Terminal で開かれます。
+`.command`、`.tool`拡張子も使用できます。通常のシェルスクリプトを記述すれば、これらもTerminalで開かれます。
 
 > [!CAUTION]
-> Terminal に **Full Disk Access** がある場合、この操作を完了できます（実行されたコマンドは Terminal ウィンドウに表示されることに注意してください）。
+> Terminalに**フルディスクアクセス**が許可されている場合、この操作を完了できます（実行されたコマンドはTerminalウィンドウに表示される点に注意してください）。
 
 ### オーディオプラグイン
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)<sup>[[6]](#references)</sup>\
-Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)<sup>[[7]](#references)</sup>
+レポート: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)<sup>[[6]](#references)</sup>\
+レポート: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)<sup>[[7]](#references)</sup>
 
-- sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
+- sandboxのbypassに有用: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
-  - 追加の TCC access を得られる可能性があります
+  - 追加のTCCアクセスを得られる可能性があります
 
 #### 場所
 
 - **`/Library/Audio/Plug-Ins/HAL`**
-  - root が必要
-  - **トリガー**: Core Audio server が互換性のある HAL device plug-in を読み込みます。server の再起動によって再検出される場合があります
+  - root権限が必要
+  - **トリガー**: Core Audio serverが互換性のあるHALデバイスプラグインを読み込みます。serverの再起動によって再検出される場合があります
 - **`/Library/Audio/Plug-ins/Components`**
-  - root が必要
-  - **トリガー**: オーディオホストがインストール済みの Audio Unit を検出し、インスタンス化します
+  - root権限が必要
+  - **トリガー**: オーディオホストがインストール済みのAudio Unitを検出してインスタンス化します
 - **`~/Library/Audio/Plug-ins/Components`**
-  - **トリガー**: オーディオホストがインストール済みの Audio Unit を検出し、インスタンス化します
+  - **トリガー**: オーディオホストがインストール済みのAudio Unitを検出してインスタンス化します
 - **`/System/Library/Components`**
-  - Apple 提供のシステム保護された場所
+  - Apple提供のシステム保護された場所
   - **トリガー**: オーディオホストが一致するシステムコンポーネントをインスタンス化します
 
 #### 説明
 
-以前の writeup によると、**一部のオーディオプラグインをコンパイル**して読み込ませることが可能です。<sup>[[6]](#references)[[7]](#references)</sup>
+先述のレポートによると、一部のオーディオプラグインを**コンパイル**して読み込ませることが可能です。<sup>[[6]](#references)[[7]](#references)</sup>
 
-HAL device plug-in と Audio Unit は、それぞれ異なる読み込み経路を使用します。[Apple の Audio Unit hosting guide](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/CoreAudioOverview/ARoadmaptoCommonTasks/ARoadmaptoCommonTasks.html) によると、ホストはコンポーネントを検出し、インスタンス化する必要があります。スキャンディレクトリに配置したり、`coreaudiod` を再起動したりするだけでは、実行された証拠にはなりません。AUv2 plug-in はホストプロセス内で実行されますが、[Apple の最新の Audio Unit guidance](https://developer.apple.com/documentation/audiotoolbox/incorporating-audio-effects-and-instruments) によると、AUv3 は macOS でデフォルトでは別プロセスで実行されます。署名、sandbox、library validation による制限はホストによって異なります。調査対象の Mac では、オーディオプラグインのインストールや実行は行っていません。
+HALデバイスプラグインとAudio Unitは、異なる読み込み経路を使用します。[AppleのAudio Unitホスティングガイド](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/CoreAudioOverview/ARoadmaptoCommonTasks/ARoadmaptoCommonTasks.html)によると、ホストはコンポーネントを検出してインスタンス化する必要があります。スキャンディレクトリにコピーしたり、`coreaudiod`を再起動したりするだけでは、実行された証拠にはなりません。AUv2プラグインはホストプロセス内で実行されますが、[Appleの最新のAudio Unitガイダンス](https://developer.apple.com/documentation/audiotoolbox/incorporating-audio-effects-and-instruments)によると、macOSではAUv3はデフォルトで別プロセスで実行されます。署名、sandbox、ライブラリ検証の制約はホストによって異なります。調査用Macでは、オーディオプラグインのインストールも実行も行っていません。
 
-### CoreMIDI Drivers (MIDIServer)
+### CoreMIDIドライバ（MIDIServer）
 
-Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
+レポート: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
 
-- sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
-  - コードはアプリの sandbox ではなく、`MIDIServer` プロセス内で実行されます
+- sandboxのbypassに有用: [✅](https://emojipedia.org/check-mark-button)
+  - コードはアプリのsandboxではなく、`MIDIServer`プロセス内で実行されます
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
-  - `MIDIServer` は独自の `seatbelt` sandbox profile で実行されます
+  - `MIDIServer`は独自の`seatbelt` sandboxプロファイルで実行されます
 
 #### 場所
 
 - **`~/Library/Audio/MIDI Drivers/*.plugin`**
-  - root は不要（ユーザーが書き込み可能）
-  - **トリガー**: `MIDIServer` の起動または再起動。いずれかのプロセスが初めて CoreMIDI を使用すると、オンデマンドで起動します（*Audio MIDI Setup*、GarageBand、DAW、または WebMIDI を使用するページを開くなど）
+  - root権限不要（ユーザーが書き込み可能）
+  - **トリガー**: `MIDIServer`の起動または再起動。いずれかのプロセスが初めてCoreMIDIを使用すると、オンデマンドで起動されます（*Audio MIDI設定*、GarageBand、DAW、またはWebMIDIを使用するページを開くなど）
 - **`/Library/Audio/MIDI Drivers/*.plugin`**
-  - root が必要
+  - root権限が必要
   - **トリガー**: 上記と同じ
 
-#### 説明と Exploitation
+#### 説明とExploit
 
-Apple の `MIDIServer`（`/System/Library/Frameworks/CoreMIDI.framework/MIDIServer`）は、`Audio/MIDI Drivers` ディレクトリから MIDI **driver** bundle を読み込みます。このバイナリは Apple による署名済みですが、`com.apple.security.cs.disable-library-validation` entitlement を含んでいるため、**署名なし、または別の team による ad-hoc 署名済み**の bundle を読み込みます。その結果、root 権限なしで、Apple が所有する別プロセス内でコードを実行できます。<sup>[[53]](#references)</sup>
+Appleの`MIDIServer`（`/System/Library/Frameworks/CoreMIDI.framework/MIDIServer`）は、`Audio/MIDI Drivers`ディレクトリからMIDI **ドライバ**バンドルを読み込みます。このバイナリはApple署名済みですが、`com.apple.security.cs.disable-library-validation` entitlementが付与されているため、**未署名または別のチームによるad-hoc署名済み**のバンドルを読み込み、root権限なしでApple所有の別プロセス内でコードを実行できます。<sup>[[53]](#references)</sup>
 
-macOS 26 で検証済み（読み取り専用）：
+macOS 26で読み取り専用で検証済み:
 
 ```bash
 # user-writable, no root needed
@@ -438,20 +438,20 @@ codesign -d --entitlements :- /System/Library/Frameworks/CoreMIDI.framework/MIDI
   | grep disable-library-validation              # -> com.apple.security.cs.disable-library-validation
 ```
 
-Driver は `MIDIDriverInterface` factory をエクスポートする標準 bundle です。payload を factory/constructor に配置すると、`MIDIServer` が driver を列挙した時点で実行されます。ビルドして `~/Library/Audio/MIDI Drivers/Evil.plugin` として配置し、ログアウトや再起動をせずにロードをトリガーします:
+ドライバーは `MIDIDriverInterface` ファクトリーをエクスポートする標準バンドルです。ペイロードをファクトリー／コンストラクターに配置すると、`MIDIServer` がドライバーを列挙した時点で実行されます。ビルドして `~/Library/Audio/MIDI Drivers/Evil.plugin` として配置し、ログアウトや再起動をせずにロードをトリガーします。
 
 ```bash
 # starts MIDIServer, which scans the driver directories
 open -a "Audio MIDI Setup"
 ```
 
-### QuickLookプラグイン
+### QuickLook Plugins
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)<sup>[[8]](#references)</sup>
 
-- sandboxのバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
+- sandbox bypassに有用: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
-  - TCCへの追加アクセスを得られる場合があります
+  - 追加のTCCアクセスを取得できる場合があります
 
 #### 場所
 
@@ -461,13 +461,13 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.g
 - `/Applications/AppNameHere/Contents/Library/QuickLook/`
 - `~/Applications/AppNameHere/Contents/Library/QuickLook/`
 
-#### 説明と悪用
+#### 説明とExploit
 
-QuickLookプラグインは、**ファイルのプレビューを表示したとき**（Finderでファイルを選択してスペースバーを押す）、かつ、そのファイル形式に対応する**プラグインがインストールされている場合**に実行されます。<sup>[[8]](#references)</sup>
+QuickLook pluginsは、**ファイルのプレビューを起動**（Finderでファイルを選択してスペースバーを押す）し、そのファイル形式に対応する**pluginがインストールされている**場合に実行されます。<sup>[[8]](#references)</sup>
 
-独自のQuickLookプラグインをコンパイルし、前述の場所のいずれかに配置して読み込ませた後、対応するファイルを開いてスペースキーを押すことで実行できます。
+独自のQuickLook pluginをコンパイルし、前述の場所のいずれかに配置して読み込ませた後、対応するファイルを開いてスペースキーを押し、実行を起動できます。
 
-これらのパスは、旧式の`.qlgenerator`バンドルを対象としています。[AppleのQuick Lookアーキテクチャガイド](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Articles/QLArchitecture.html)には、検索順序と対応するファイル形式が記載されています。現在のQuick Look **app extensions**はアプリに含まれており、登録方法や実行ルールが異なります。Generatorが存在するだけでは、そのGeneratorがファイル形式の選択で優先されることや、Finder自体でコードが実行されることは保証されません。旧式のGeneratorのパスはドキュメントとディレクトリの存在から確認しましたが、調査対象のMacにはGeneratorはインストールも読み込みもされていませんでした。
+これらのパスは、旧式の`.qlgenerator`バンドルを指します。[AppleのQuick Lookアーキテクチャガイド](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Articles/QLArchitecture.html)には、検索順序と対応するファイル形式が記載されています。現在のQuick Look **app extensions**はアプリにパッケージされており、登録および実行のルールが異なります。generatorが存在しても、ファイル形式の選択で優先されることや、そのコードがFinder自体で実行されることの根拠にはなりません。旧式のgeneratorパスはドキュメントとディレクトリの存在状況から確認しましたが、調査用Macにはgeneratorはインストールも読み込みもされていませんでした。
 
 ### ~~Login/Logout Hooks~~
 
@@ -476,13 +476,13 @@ QuickLookプラグインは、**ファイルのプレビューを表示したと
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)<sup>[[9]](#references)</sup>
 
-- sandboxのバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
+- sandbox bypassに有用: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
 
 - `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`のようなコマンドを実行できる必要があります
-  - `Lo`cated in `~/Library/Preferences/com.apple.loginwindow.plist`
+  - `~/Library/Preferences/com.apple.loginwindow.plist`に格納されています
 
 これらは非推奨ですが、ユーザーのログイン時にコマンドを実行するために使用できます。<sup>[[9]](#references)</sup>
 
@@ -496,7 +496,7 @@ defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh
 defaults write com.apple.loginwindow LogoutHook /Users/$USER/hook.sh
 ```
 
-この設定は `/Users/$USER/Library/Preferences/com.apple.loginwindow.plist` に保存されています。
+この設定は `/Users/$USER/Library/Preferences/com.apple.loginwindow.plist` に保存されます。
 
 ```bash
 defaults read /Users/$USER/Library/Preferences/com.apple.loginwindow.plist
@@ -510,7 +510,7 @@ defaults read /Users/$USER/Library/Preferences/com.apple.loginwindow.plist
 }
 ```
 
-削除するには:
+削除するには：
 
 ```bash
 defaults delete com.apple.loginwindow LoginHook
@@ -519,27 +519,27 @@ defaults delete com.apple.loginwindow LogoutHook
 
 root user のものは **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`** に保存されています
 
-## 条件付き Sandbox Bypass
+## Conditional Sandbox Bypass
 
 > [!TIP]
-> ここでは、**sandbox bypass** に役立つ起動場所を紹介します。これは、何かを**ファイルに書き込み**、特定の**プログラムがインストールされていること、「一般的ではない」ユーザー**の操作や環境など、あまり一般的でない条件を**期待する**だけで実行できる方法です。
+> ここでは、ファイルに何かを書き込み、特定の**プログラムがインストールされていること**や、「一般的ではない」ユーザー操作、環境など、あまり一般的でない条件を想定するだけで実行できる **sandbox bypass** に役立つ起動場所を紹介します。
 
 ### Cron
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)<sup>[[10]](#references)</sup>
+**解説**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)<sup>[[10]](#references)</sup>
 
 - sandbox bypass に有用: [✅](https://emojipedia.org/check-mark-button)
   - ただし、`crontab` binary を実行できる必要があります
   - または root である必要があります
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### 場所
+#### Location
 
 - **`/usr/lib/cron/tabs/`**
   - 直接書き込むには root が必要です。`crontab <file>` を実行できる場合は root は不要です
-  - **トリガー**: インストール済み crontab のスケジュール。`at` と `periodic` は以下で説明する別の仕組みです。
+  - **Trigger**: インストールされた crontab のスケジュール。`at` と `periodic` は以下で説明する別の仕組みです。
 
-#### 説明と Exploitation
+#### Description & Exploitation
 
 **現在のユーザー**の cron jobs を一覧表示するには:
 
@@ -547,14 +547,14 @@ root user のものは **`/private/var/root/Library/Preferences/com.apple.loginw
 crontab -l
 ```
 
-システムの cron デーモンの launchd plist には、`/usr/lib/cron/tabs` を指定する `QueueDirectories` エントリがあります。インストール済みのユーザー crontab はここに保存されています。他のユーザーの crontab を調べるには root 権限が必要です:
+システムの cron デーモンの launchd plist には、`/usr/lib/cron/tabs` を指定する `QueueDirectories` エントリがあります。インストール済みのユーザー crontab はここに保存されます。他のユーザーの crontab を調べるには root 権限が必要です。
 
 ```bash
 plutil -p /System/Library/LaunchDaemons/com.vix.cron.plist
 ls -ld /usr/lib/cron/tabs
 ```
 
-使い捨てのアカウントでは、マーカーだけを含むユーザー cron エントリを `crontab` で登録し、観察後に削除できます。`crontab <file>` を実行すると、アカウントの既存の crontab 全体が**置き換えられる**ため、使い捨てでない場合は保存してから復元してください:<sup>[[10]](#references)</sup>
+使い捨てアカウントでは、マーカーのみのユーザー cron エントリを `crontab` で設定し、確認後に削除できます。`crontab <file>` を実行すると、そのアカウントの既存の crontab 全体が**置き換えられる**ため、使い捨てでない場合は保存してから復元してください:<sup>[[10]](#references)</sup>
 
 ```bash
 lab=$(mktemp -d)
@@ -575,22 +575,22 @@ test -e "$lab/ran" && echo 'cron fired'
 
 解説: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.github.io/beyond/beyond_0002/)<sup>[[11]](#references)</sup>
 
-- sandbox のバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
+- sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-  - iTerm2 には以前、TCC permissions が付与されていました
+  - iTerm2 は以前、TCC permissions が付与されていた
 
 #### Locations
 
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`**
-  - **Trigger**: このフォルダー内にある実行対象の Python API script とともに iTerm2 を起動する
+  - **Trigger**: このフォルダ内の対象となる Python API script とともに iTerm2 を起動する
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`**
-  - **Trigger**: iTerm2 を起動する。AppleScript の startup hook は別途ドキュメント化されています
+  - **Trigger**: iTerm2 を起動する。AppleScript の startup hook については別途ドキュメントに記載されている
 - **`~/Library/Preferences/com.googlecode.iterm2.plist`**
-  - **Trigger**: コマンドまたは初期テキストで payload を呼び出す profile を使って session を作成する
+  - **Trigger**: command または initial text で payload を実行する profile を使って session を作成する
 
 #### Description & Exploitation
 
-[現在の iTerm2 Python API guide](https://iterm2.com/python-api/tutorial/running.html#auto-run-scripts) では、`~/Library/Application Support/iTerm2/Scripts/AutoLaunch` 内の auto-run **Python** scripts について説明されています。このフォルダー内の任意の実行可能な `.sh` file が実行されることを示すものではありません。使い捨てのアカウントで、次の内容を `~/Library/Application Support/iTerm2/Scripts/AutoLaunch/ht-marker.py` として保存します:
+[現行の iTerm2 Python API guide](https://iterm2.com/python-api/tutorial/running.html#auto-run-scripts) には、`~/Library/Application Support/iTerm2/Scripts/AutoLaunch` 内の **Python** script を自動実行する方法が記載されています。このフォルダ内にある任意の実行可能な `.sh` file が実行されるとは述べていません。使い捨ての account で、以下を `~/Library/Application Support/iTerm2/Scripts/AutoLaunch/ht-marker.py` として保存します:
 
 ```python
 import iterm2
@@ -602,21 +602,21 @@ async def main(connection):
 iterm2.run_until_complete(main)
 ```
 
-[現在のiTerm2 AppleScriptガイド](https://iterm2.com/documentation-scripting.html)では、`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`について別途説明されており、新しいフォルダが存在しない場合は、旧形式の`~/Library/Application Support/iTerm/Scripts/AutoLaunch.scpt`が代わりに使用されます。マーカーのみのAppleScriptは次のとおりです。
+[現行の iTerm2 AppleScript ガイド](https://iterm2.com/documentation-scripting.html)では、`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`が別途説明されており、最新のフォルダが存在しない場合は、従来の`~/Library/Application Support/iTerm/Scripts/AutoLaunch.scpt`がフォールバックとして使われます。マーカーのみを設定する AppleScript は次のとおりです。
 
 ```applescript
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
 
-これらのスクリプト例は、アクティブなデスクトップセッションでは実行せず、iTerm2のドキュメントと照合しました。使い捨てアカウントでテストした後、テスト用スクリプトと、該当する場合は`/tmp/ht-iterm-autolaunch-marker`または`/tmp/iterm2-autolaunchscpt`を削除してください。
+これらのスクリプト例は、アクティブなデスクトップセッションでは実行せず、iTerm2のドキュメントに照らして確認しました。使い捨てアカウントでテストした後、それぞれテスト用スクリプトと`/tmp/ht-iterm-autolaunch-marker`または`/tmp/iterm2-autolaunchscpt`を削除してください。
 
-**`~/Library/Preferences/com.googlecode.iterm2.plist`**にあるiTerm2の環境設定では、プロファイルコマンドまたは初期テキストを指定できます。後者はセッションに入力され、実行されるかどうかは、それを解釈するshellに依存します。[iTerm2のプロファイルに関するドキュメント](https://iterm2.com/documentation-preferences-profiles-general.html)では、そのプロファイルで新しいセッションが作成されたときに実行されるコマンドについて説明されています。
+**`~/Library/Preferences/com.googlecode.iterm2.plist`**にあるiTerm2の環境設定では、プロファイルコマンドまたは初期テキストを指定できます。初期テキストはセッションに入力され、実行されるかどうかはシェルがそれを解釈するかによります。[iTerm2のプロファイルに関するドキュメント](https://iterm2.com/documentation-preferences-profiles-general.html)には、そのプロファイルで新しいセッションが作成されたときに実行されるコマンドについて説明されています。
 
 この設定はiTerm2の設定で構成できます。
 
 <figure><img src="../images/image (37).png" alt="" width="563"><figcaption></figcaption></figure>
 
-設定したコマンドは環境設定に反映されます。
+また、コマンドは環境設定にも反映されます。
 
 ```bash
 plutil -p com.googlecode.iterm2.plist
@@ -628,25 +628,25 @@ plutil -p com.googlecode.iterm2.plist
       "Initial Text" => "touch /tmp/iterm-start-command"
 ```
 
-安全な評価を行うには、iTerm2の設定で選択したプロファイルを確認するか、その設定ファイルのコピーを読み取ってください。実行中のプロファイルで`Initial Text`を変更するとユーザーのセッションに影響するため、調査用Macでは設定を変更しませんでした。
+安全に評価するには、iTerm2 の設定で選択したプロファイルを確認するか、その設定ファイルのコピーを読み取ってください。稼働中のプロファイルで `Initial Text` を変更するとユーザーのセッションに影響するため、調査用 Mac では設定を変更していません。
 
 ### xbar
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)<sup>[[12]](#references)</sup>
 
-- sandbox bypassに有用: [✅](https://emojipedia.org/check-mark-button)
-  - ただし、xbarがインストールされている必要があります
+- サンドボックス回避に有用: [✅](https://emojipedia.org/check-mark-button)
+  - ただし、xbar がインストールされている必要があります
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-  - Accessibility権限を要求します
+  - アクセシビリティの権限を要求します
 
-#### Location
+#### 場所
 
 - **`~/Library/Application\ Support/xbar/plugins/`**
-  - **Trigger**: xbarの実行時
+  - **トリガー**: xbar の実行時
 
-#### Description
+#### 説明
 
-人気のプログラム[**xbar**](https://github.com/matryer/xbar)がインストールされている場合、**`~/Library/Application\ Support/xbar/plugins/`**にシェルスクリプトを記述すると、xbarの起動時に実行されます:<sup>[[12]](#references)</sup>
+一般的なプログラム [**xbar**](https://github.com/matryer/xbar) がインストールされている場合、**`~/Library/Application\ Support/xbar/plugins/`** にシェルスクリプトを作成すると、xbar の起動時に実行されます:<sup>[[12]](#references)</sup>
 
 ```bash
 cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
@@ -660,21 +660,21 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)<sup>[[13]](#references)</sup>
 
-- Sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
+- sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
   - ただし、Hammerspoon がインストールされている必要があります
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
   - Accessibility の権限を要求します
 
-#### Location
+#### 場所
 
 - **`~/.hammerspoon/init.lua`**
-  - **Trigger**: hammerspoon の実行時
+  - **トリガー**: Hammerspoon の実行時
 
-#### Description
+#### 説明
 
-[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) は、**macOS** 用の automation platform で、**LUA scripting language** を利用して動作します。特筆すべき点として、AppleScript のコード全体を統合し、shell scripts を実行できるため、スクリプト機能が大幅に強化されます。<sup>[[13]](#references)</sup>
+[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) は、**LUA scripting language** を利用した **macOS** 向けの automation platform です。AppleScript のコード全体を組み込めるほか、shell scripts も実行できるため、スクリプト機能が大幅に強化されます。<sup>[[13]](#references)</sup>
 
-このアプリは単一のファイル `~/.hammerspoon/init.lua` を探し、起動時にそのスクリプトを実行します。
+このアプリは単一のファイル `~/.hammerspoon/init.lua` を検索し、起動時にそのスクリプトを実行します。
 
 ```bash
 mkdir -p "$HOME/.hammerspoon"
@@ -685,36 +685,36 @@ EOF
 
 ### BetterTouchTool
 
-- サンドボックスのバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
-  - ただし、BetterTouchTool がインストールされている必要があります
-- TCC バイパス: [✅](https://emojipedia.org/check-mark-button)
-  - Automation-Shortcuts と Accessibility の権限を要求します
+- sandbox bypassに有用: [✅](https://emojipedia.org/check-mark-button)
+  - ただし、BetterTouchToolがインストールされている必要がある
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  - Automation-ShortcutsとAccessibilityの権限を要求する
 
 #### 場所
 
-- 有効な BetterTouchTool preset から**すでに参照されている**スクリプトファイル、またはその preset の設定ファイル（`~/Library/Application Support/BetterTouchTool/` 内）。正確なスクリプトパスは、preset の設定方法によって異なります。
+- 有効なBetterTouchToolプリセットから**すでに参照されている**スクリプトファイル、またはそのプリセットの設定ファイル（`~/Library/Application Support/BetterTouchTool/` 内）。正確なスクリプトのパスは、プリセットの設定方法によって異なる。
 
-[BetterTouchTool のアクションリファレンス](https://docs.folivora.ai/docs/actions/action-definitions/)には、shell-script アクションと background-command アクションが記載されています。関連する preset が有効な間に、設定済みのキーボード、マウス、タッチ、ウィジェット、その他のイベントが発生する必要があります。[トリガーガイド](https://docs.folivora.ai/docs/configuration/new-trigger/)では、この組み合わせが示されています。application-support ディレクトリ内の無関係なファイルはトリガーではありません。外部の書き込み可能なスクリプトを読み込むようにすでに設定されたアクションは、より限定的な write-to-execution の標的です。コードは BetterTouchTool ユーザーのアカウントとして実行され、実際に付与されている macOS の権限に従います。調査用 Mac では BetterTouchTool が `/Applications` に存在しなかったため、preset の変更や実行は行っていません。
+[BetterTouchToolのアクションリファレンス](https://docs.folivora.ai/docs/actions/action-definitions/)には、シェルスクリプトとバックグラウンドコマンドのアクションが記載されている。関連するプリセットが有効な間に、設定済みのキーボード、マウス、タッチ、ウィジェット、その他のイベントが発生する必要がある。[トリガーのガイド](https://docs.folivora.ai/docs/configuration/new-trigger/)では、この組み合わせが説明されている。Application Supportディレクトリ内の無関係なファイルはトリガーにはならない。外部の書き込み可能なスクリプトを読み込むよう設定済みのアクションは、より限定的なwrite-to-executionの対象となる。コードはBetterTouchToolを使用するユーザーのアカウントで実行され、実際に付与されているmacOSの権限に従う。調査用Macでは`/Applications`にBetterTouchToolがなかったため、ローカルではプリセットの変更や実行は行っていない。
 
 ### Alfred
 
-- サンドボックスのバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
-  - ただし、Alfred がインストールされている必要があります
-- TCC バイパス: [✅](https://emojipedia.org/check-mark-button)
-  - Automation、Accessibility、さらには Full-Disk access の権限を要求します
+- sandbox bypassに有用: [✅](https://emojipedia.org/check-mark-button)
+  - ただし、Alfredがインストールされている必要がある
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  - Automation、Accessibility、さらにはFull-Disk accessの権限を要求する
 
 #### 場所
 
-- インストール済みの Alfred workflow から**すでに参照されている**スクリプトまたはファイル、またはユーザーが設定した `Alfred.alfredpreferences` ディレクトリ内の workflow。設定ディレクトリは同期されている場合があり、固定された共通パスはありません。
+- インストール済みのAlfred workflowから**すでに参照されている**スクリプトまたはファイル、またはユーザーが設定した`Alfred.alfredpreferences`ディレクトリ内のworkflow。設定ディレクトリは同期されている場合があり、誰にとっても共通の固定パスではない。
 
-[Alfred の workflow ガイド](https://www.alfredapp.com/help/workflows/)では、Powerpack が必要であることと、UI からインストールする方法が説明されています。インストール済み workflow の hotkey、keyword、その他の設定済みトリガーが実行される必要があります。[Alfred の hotkey の例](https://www.alfredapp.com/help/workflows/triggers/hotkey/creating-a-hotkey-workflow/)では、script アクションが示されています。[Alfred の環境変数リファレンス](https://www.alfredapp.com/help/workflows/script-environment-variables/)では、選択中の設定パスが `alfred_preferences` として公開されています。未登録の workflow ファイルを任意のディレクトリに置いても、インストールまたは実行されることの証明にはなりません。コードはサインイン中の Alfred ユーザーとして実行され、実際に付与されている macOS の権限に従います。調査用 Mac では Alfred が `/Applications` に存在しなかったため、この方法はドキュメントのみを基に評価しました。
+[Alfredのworkflowガイド](https://www.alfredapp.com/help/workflows/)では、Powerpackが必要なことと、UIからインストールする方法が説明されている。インストール済みworkflowのhotkey、keyword、その他の設定済みトリガーが発火する必要がある。[Alfredのhotkeyの例](https://www.alfredapp.com/help/workflows/triggers/hotkey/creating-a-hotkey-workflow/)では、スクリプトアクションが示されている。[Alfredの環境変数リファレンス](https://www.alfredapp.com/help/workflows/script-environment-variables/)では、選択中の設定パスが`alfred_preferences`として公開される。任意のディレクトリに未登録のworkflowファイルを置いても、インストールまたは実行される根拠にはならない。コードはサインイン中のAlfredユーザーとして実行され、実際に付与されているmacOSの権限に従う。調査用Macでは`/Applications`にAlfredがなかったため、この経路はドキュメントのみをもとに評価した。
 
-### Raycast Script Commands と extension refresh
+### Raycast Script Commandsとextension refresh
 
-- **書き込み先:** Raycast Settings → Script Commands で**すでに追加されている**ディレクトリ内の実行可能スクリプト。Raycast は新たに作成された任意のディレクトリをスキャンしません。[Raycast の Script Commands ガイド](https://manual.raycast.com/script-commands)には、ディレクトリの登録方法が記載されています。
-- **トリガーと実行ユーザー:** ユーザーがインデックス済みコマンドを実行する、設定済みの hotkey または fallback が呼び出す、あるいは Raycast が設定済みの `@raycast.refreshTime` に従って `inline` スクリプトを更新します。スクリプトはインタープリターを介して、サインイン中の Raycast ユーザーとして実行されます。[上流のメタデータリファレンス](https://github.com/raycast/script-commands#metadata)によると、自動更新の対象は inline コマンドに限られます。また、[Raycast の extension manifest](https://github.com/raycast/extensions/blob/main/docs/information/manifest.md)では、インストール済みの `no-view` または `menu-bar` extension コマンドに対して、別途 `interval` がサポートされています。通常の Script Command を追加しただけでは、実行はスケジュールされません。
+- **書き込み先:** Raycast Settings → Script Commandsで**すでに追加されている**ディレクトリ内の実行可能なスクリプト。Raycastは新たに作成された任意のディレクトリをスキャンしない。[RaycastのScript Commandsガイド](https://manual.raycast.com/script-commands)に、ディレクトリの登録方法が記載されている。
+- **トリガーと実行ユーザー:** ユーザーがインデックス化されたコマンドを実行する、設定済みのhotkeyまたはfallbackが呼び出す、あるいは設定された`@raycast.refreshTime`に従ってRaycastが`inline`スクリプトをrefreshする。スクリプトはインタープリターを介して、サインイン中のRaycastユーザーとして実行される。[上流のmetadataリファレンス](https://github.com/raycast/script-commands#metadata)によると、自動refreshの対象はinlineコマンドに限られる。また、[Raycastのextension manifest](https://github.com/raycast/extensions/blob/main/docs/information/manifest.md)では、インストール済みの`no-view`または`menu-bar` extensionコマンドに対して、別途`interval`がサポートされている。通常のScript Commandを追加しただけでは、実行はスケジュールされない。
 
-登録済みのスクリプトディレクトリがある使い捨てアカウントで使用する、マーカーのみの inline スクリプトは次のとおりです:
+登録済みのスクリプトディレクトリがある使い捨てアカウントでは、マーカーのみを出力するinlineスクリプトは次のようになる。
 
 ```bash
 #!/bin/bash
@@ -726,15 +726,15 @@ EOF
 echo ready
 ```
 
-登録済みディレクトリに保存し、実行可能にして、Raycastに更新させます。その後、そのファイルと`/tmp/ht-raycast-refresh-marker`を削除します。調査用Macでは通常の`/Applications`名でRaycastが見つからなかったため、これはドキュメントに基づくもので、ローカルでは実行していません。Accessibility、Automation、ファイルへのアクセス許可には、引き続きmacOSの許可プロンプトが適用されます。
+登録済みディレクトリに保存し、実行可能にしてから、Raycast に更新させます。その後、そのファイルと `/tmp/ht-raycast-refresh-marker` を削除します。調査用 Mac では、通常の `/Applications` 名で Raycast が見つからなかったため、これはドキュメントに基づく説明であり、ローカルでは実行していません。Accessibility、Automation、ファイルへのアクセス許可は、引き続き macOS の許可プロンプトに従います。
 
-### Visual Studio Codeの自動ワークスペースタスク
+### Visual Studio Code の自動ワークスペースタスク
 
-- **書き込み先:** ユーザーが開くワークスペース内の`.vscode/tasks.json`。
-- **トリガー:** VS Codeでそのワークスペースを開いたとき。ただし、フォルダーが信頼されており、かつ自動タスクが許可されている場合に限ります。信頼されていないワークスペースでは自動タスクは実行されません。デフォルト設定では、最初の自動実行の前にユーザーに確認を求めます。[VS Codeのタスクに関するドキュメント](https://code.visualstudio.com/docs/debugtest/tasks#_run-behavior)と[Workspace Trustのドキュメント](https://code.visualstudio.com/docs/editing/workspaces/workspace-trust)では、これら2つの条件について説明されています。
-- **実行時のID:** 設定されたタスクプロセスを介した、VS Codeユーザーのアカウント。これはアプリケーション固有の実行であり、ログイン時の永続化ではありません。
+- **書き込み先:** ユーザーが開くワークスペース内の `.vscode/tasks.json`。
+- **トリガー:** VS Code でそのワークスペースを開いたとき。ただし、フォルダーが信頼済みで、かつ自動タスクが許可されている場合に限ります。信頼されていないワークスペースでは、自動タスクは実行されません。デフォルト設定では、最初の自動実行の前にユーザーへ確認を求めます。[VS Code のタスクに関するドキュメント](https://code.visualstudio.com/docs/debugtest/tasks#_run-behavior) と [Workspace Trust のドキュメント](https://code.visualstudio.com/docs/editing/workspaces/workspace-trust) で、これら両方の条件について説明されています。
+- **実行時のユーザー:** 設定されたタスクプロセスを通じて、VS Code ユーザーのアカウントで実行されます。これはアプリケーション固有の実行であり、ログイン時の永続化ではありません。
 
-**新規の使い捨てワークスペース**に、マーカーのみの次のタスクを`.vscode/tasks.json`に配置します:
+**新しい使い捨てのワークスペース**で、次のマーカーのみを作成するタスクを `.vscode/tasks.json` に配置します。
 
 ```json
 {
@@ -752,15 +752,15 @@ echo ready
 }
 ```
 
-信頼済みの workspace を開いて自動タスクを許可した後、`.autostart-task-ran` を確認してください。クリーンアップするには、タスクのエントリとマーカーを削除します。**これは Microsoft のドキュメントとインストール済みの VS Code 1.139.1 バンドルに照らして検証済みですが、実際に使用中のデスクトップセッションでは実行していません。**
+信頼済みの workspace を開いて自動タスクを許可した後、`.autostart-task-ran` を確認してください。クリーンアップするには、タスクエントリとマーカーを削除します。**これは Microsoft のドキュメントおよびインストール済みの VS Code 1.139.1 バンドルに照らして検証済みですが、アクティブなデスクトップセッションでは実行していません。**
 
 ### Chrome native messaging hosts
 
-- **書き込み先:** 現在のユーザーの場合は `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/<host-name>.json`、全ユーザーの場合は `/Library/Google/Chrome/NativeMessagingHosts/<host-name>.json`（管理者による書き込みが必要）。Chromium と Chrome for Testing ではディレクトリが異なります。[Chrome の現在のパス一覧](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host-location)を参照してください。
-- **トリガー:** `nativeMessaging` 権限を持つインストール済みの Chrome extension が、manifest に記載された正確な host name を使って `chrome.runtime.connectNative()` または `chrome.runtime.sendNativeMessage()` を呼び出します。すると Chrome が host executable を起動します。Chrome を開くだけでは、新しい任意の native host は実行されません。呼び出す extension がなければ、manifest を作成しても何も起きません。このハンドシェイクについては、[Chrome の native messaging ガイド](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging)で説明されています。
-- **実行時のユーザー:** Chrome を使用しているユーザーのアカウントです。manifest には executable の絶対パスを指定し、呼び出し元の extension origin を明示的に許可する必要があります。
+- **書き込み先:** 現在のユーザーの場合は `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/<host-name>.json`、全ユーザーの場合は `/Library/Google/Chrome/NativeMessagingHosts/<host-name>.json`（書き込みには admin 権限が必要）。Chromium と Chrome for Testing ではディレクトリが異なります。[Chrome の現在のパス一覧](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host-location)を参照してください。
+- **トリガー:** `nativeMessaging` 権限を持つインストール済みの Chrome 拡張機能が、manifest に記載された正確なホスト名を使って `chrome.runtime.connectNative()` または `chrome.runtime.sendNativeMessage()` を呼び出します。すると Chrome がホスト実行ファイルを起動します。Chrome を開くだけでは、新しい任意の native host は実行されません。呼び出し元の拡張機能がなければ、manifest を作成しても何も起こりません。[Chrome の native messaging ガイド](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging)では、このハンドシェイクについて説明しています。
+- **実行時の ID:** Chrome ユーザーのアカウント。manifest には実行ファイルの絶対パスを指定し、呼び出し元の拡張機能の origin を明示的に許可する必要があります。
 
-テスト用 extension を使う使い捨てのブラウザーアカウントで、次の 2 つのファイルを組み合わせると、書き込みから実行に至る仕組みを確認できます。manifest のファイル名は `name` と一致させ、`TEST_EXTENSION_ID` はその extension の実際の ID に置き換えてください。
+使い捨てのブラウザーアカウントとテスト用拡張機能を使って、以下の 2 つのファイルで書き込みから実行へのつながりを実証できます。manifest のファイル名は `name` と一致させ、`TEST_EXTENSION_ID` はその拡張機能の実際の ID に置き換える必要があります。
 
 ```json
 {
@@ -772,7 +772,7 @@ echo ready
 }
 ```
 
-この JSON を `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/org.hacktricks.marker.json` として保存します。manifest の `path` に指定された marker-only executable には、次の内容を含められます：
+この JSON を `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/org.hacktricks.marker.json` として保存します。manifest の `path` に指定する marker 専用実行ファイルには、次の内容を含められます。
 
 ```sh
 #!/bin/sh
@@ -780,15 +780,15 @@ echo ready
 exit 0
 ```
 
-テスト用 extension が service worker または extension page から `chrome.runtime.sendNativeMessage('org.hacktricks.marker', {ping: 1})` を呼び出した後、marker によって host が起動したことを確認できます。この最小限の host は Chrome の長さプレフィックス付き応答プロトコルを実装していないため、marker の書き込み後に extension が messaging error を報告する場合があります。後片付けとして、テスト用 manifest、host、marker を削除してください。macOS 26.5.2 では、Chrome アプリと両方の manifest ディレクトリが存在していました。**アクティブな Chrome profile は変更も使用もしていません。**
+テスト用拡張機能が service worker または拡張機能ページから `chrome.runtime.sendNativeMessage('org.hacktricks.marker', {ping: 1})` を呼び出した後、marker によりホストが起動したことを確認できます。この最小限のホストは Chrome の長さプレフィックス付き応答プロトコルを実装していないため、marker の書き込み後に拡張機能でメッセージングエラーが報告される場合があります。クリーンアップするには、テスト用の manifest、ホスト、marker を削除してください。macOS 26.5.2 では Chrome アプリと両方の manifest ディレクトリが存在していました。**アクティブな Chrome プロファイルは変更も使用もしていません。**
 
 ### Karabiner-Elements のキーイベントコマンド
 
-- **書き込み先:** Karabiner-Elements がインストールされ、実行中のアカウントにある `~/.config/karabiner/karabiner.json`。[Karabiner のファイル場所ガイド](https://karabiner-elements.pqrs.org/docs/json/location/)によると、アプリはこのファイルを監視し、書き込み後に再読み込みします。`assets/complex_modifications` 内の JSON ファイルはインポート可能なプリセットにすぎません。そこにファイルを書き込んだだけではルールは有効になりません。
-- **トリガー:** ルールが有効になった後に設定されたキーイベント。[`to.shell_command` のリファレンス](https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-definition/to/shell-command/)には、コマンドの実行方法が記載されています。これはログイン時やファイル書き込みごとにコードを実行するものではありません。
-- **実行時の権限:** Karabiner のユーザープロセスを実行するサインイン中のユーザー。Karabiner 自身に付与された権限や TCC アクセスの有無は、アプリやバージョンによって異なります。
+- **書き込み先:** Karabiner-Elements がインストールされ、実行中のアカウントにある `~/.config/karabiner/karabiner.json`。[Karabiner のファイル保存場所に関するガイド](https://karabiner-elements.pqrs.org/docs/json/location/)によると、アプリはこのファイルを監視し、書き込み後に再読み込みします。`assets/complex_modifications` 内の JSON ファイルはインポート可能なプリセットにすぎません。そこに書き込んだだけではルールは有効になりません。
+- **トリガー:** ルールが有効になった後に設定されたキーイベント。[`to.shell_command` のリファレンス](https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-definition/to/shell-command/)には、コマンドの実行方法が記載されています。これはログイン時やファイル書き込みのたびにコードを実行するものではありません。
+- **実行時のユーザー:** Karabiner のユーザープロセスを実行しているサインイン中のユーザー。アプリ自体に付与された権限と TCC アクセスの有無は、アプリとバージョンによって異なります。
 
-使い捨てのテストアカウントで、`karabiner.json` の選択したプロファイルにある `complex_modifications.rules` 配列へこのルールオブジェクトを追加し、プロファイルの残りの部分はそのまま維持します。F18 を押して無害な marker を作成した後、このルールと marker を削除します。通常の入力キーを置き換えないよう、F18 を選択します:
+使い捨てのテストアカウントで、`karabiner.json` の選択したプロファイルにある `complex_modifications.rules` 配列へこのルールオブジェクトを追加し、そのプロファイルの残りの設定は維持してください。F18 を押して無害な marker を作成し、その後、このルールと marker を削除してください。通常のタイピングキーを置き換えないよう、F18 を選んでいます。
 
 ```json
 {
@@ -805,15 +805,15 @@ exit 0
 }
 ```
 
-Karabiner-Elements は macOS 26.5.2 のテストマシンの `/Applications` にインストールされていなかったため、これはローカルでの実行結果ではなく、ドキュメントに基づく PoC です。
+macOS 26.5.2 のテストマシンには Karabiner-Elements が `/Applications` にインストールされていなかったため、これはローカルでの実行結果ではなく、ドキュメントに基づく PoC です。
 
 ### ローカルリポジトリの Git hooks
 
-- **書き込み先:** `<repo>/.git/hooks/post-checkout` のような実行可能な hook。`core.hooksPath` がすでに設定されている場合は、代わりにその設定済みディレクトリを使用します。通常の追跡対象ソースファイルとしてコミットされた hook は、clone 時に自動的にインストールされません。
-- **トリガー:** 対応する Git 操作。たとえば `post-checkout` は `git checkout` または `git switch` の後に実行され、clone や worktree の作成後にも実行されることがあります。[Git の hook リファレンス](https://git-scm.com/docs/githooks)にはイベントと実行可能ビットの要件が記載されています。[`core.hooksPath`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath) は検索先のディレクトリを変更します。
-- **実行ユーザー:** Git を実行するアカウント。hook を実行できるのは、リポジトリで有効な hooks ディレクトリへの書き込み権限が実行者にあり、後でユーザーが該当する Git 操作を実行した場合に限られます。
+- **書き込み先:** `<repo>/.git/hooks/post-checkout` などの実行可能な hook。`core.hooksPath` がすでに設定されている場合は、代わりに設定済みのディレクトリを使用します。通常の追跡対象ソースファイルとして commit された hook は、clone 先に自動ではインストールされません。
+- **トリガー:** 対応する Git 操作。たとえば `post-checkout` は `git checkout` または `git switch` の後に実行され、clone や worktree の作成後にも実行される場合があります。[Git の hook リファレンス](https://git-scm.com/docs/githooks)にはイベントと実行可能ビットの要件が記載されています。[`core.hooksPath`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath) は hook の検索ディレクトリを変更します。
+- **実行ユーザー:** Git を実行するアカウント。hook が実行されるには、リポジトリで有効な hooks ディレクトリに対して実行者が書き込み可能であり、その後ユーザーが該当する Git 操作を実行する必要があります。
 
-このマーカーのみの PoC は、完全に使い捨て可能なリポジトリを作成し、hook を1つインストールして、ブランチを切り替えます。macOS 26.5.2 上で Apple Git 2.50.1 を使用して正常に実行されました:
+このマーカーのみの PoC は、使い捨てのリポジトリを作成して hook を1つ設定し、ブランチを切り替えます。macOS 26.5.2 上で Apple Git 2.50.1 を使用して正常に実行しました：
 
 ```bash
 lab=$(mktemp -d)
@@ -830,12 +830,12 @@ test -e "$lab/ran" && echo 'post-checkout fired'
 rm -r "$lab"
 ```
 
-### プロジェクト内の npm ライフサイクルスクリプト
+### プロジェクト内の npm lifecycle scripts
 
-- **書き込み先:** 書き込み可能なプロジェクトの `package.json` 内にある `scripts` マップ、またはユーザーがライフサイクルスクリプトを実行するインストール済み依存パッケージ。これは開発ワークフロー用のフックであり、ディレクトリを開いただけでは実行されません。
-- **トリガーと実行ユーザー:** ライフサイクルスクリプトが許可された状態で後から `npm install` または `npm ci` を実行すると、npm を実行したユーザーとして `preinstall`、`install`、`postinstall` が実行されます。通常の `npm run <name>` でも、対応する `pre<name>` と `post<name>` のスクリプトが実行されます。イベントについては [npm のライフサイクルリファレンス](https://docs.npmjs.com/cli/v11/using-npm/scripts)を参照してください。[`ignore-scripts`](https://docs.npmjs.com/cli/v11/commands/npm-install#ignore-scripts) を使うと、インストール時のライフサイクルスクリプトを抑止できます。バージョンやポリシー設定によって許可される動作が変わる場合があるため、対象の npm バージョンを確認してください。
+- **書き込み先:** 書き込み可能なプロジェクトの `package.json` 内の `scripts` マップ、またはユーザーが lifecycle script を実行する、インストール済みの依存パッケージ。これは開発ワークフローの hook であり、ディレクトリを開いただけで実行されるものではありません。
+- **トリガーと実行ユーザー:** lifecycle scripts が許可された状態で後から `npm install` または `npm ci` を実行すると、npm を実行したユーザーとして `preinstall`、`install`、`postinstall` が実行されます。通常の `npm run <name>` でも、対応する `pre<name>` および `post<name>` scripts が実行されます。[npm の lifecycle リファレンス](https://docs.npmjs.com/cli/v11/using-npm/scripts) にイベント一覧があります。`ignore-scripts` を指定すると、インストール時の lifecycle scripts を抑止できます。[`ignore-scripts`](https://docs.npmjs.com/cli/v11/commands/npm-install#ignore-scripts)。許可される内容はバージョンやポリシー設定によって変わる場合があるため、対象の npm バージョンを確認してください。
 
-このマーカーのみの PoC は、使い捨ての空ディレクトリでローカルの npm を使って実行しました。依存関係をダウンロードしたり、ユーザーのプロジェクトを変更したりすることはありません:
+この marker-only PoC は、使い捨ての空ディレクトリでローカルの npm を使って実行しました。依存関係をダウンロードしたり、ユーザーのプロジェクトを変更したりすることはありません:
 
 ```bash
 lab=$(mktemp -d)
@@ -848,15 +848,15 @@ test -e "$lab/marker-preinstall" && test -e "$lab/marker-postinstall" && echo 'b
 rm -r "$lab"
 ```
 
-これは Python インタープリターの起動ファイルとは異なります。npm では該当する install または run アクションを実行する必要がありますが、Python の `site` コードは通常のインタープリター起動時に読み込まれます。同様に、汎用の `Makefile` ターゲットやビルドタスク定義も、ユーザーまたは設定済みのツールがそのターゲットを実行する必要があります。これらは独立した OS の自動起動経路ではありません。
+これは Python インタープリターの起動ファイルとは異なります。npm の場合、該当する install または run アクションを実行する必要がありますが、Python の `site` コードは通常のインタープリター起動時に読み込まれます。同様に、一般的な `Makefile` のターゲットやビルドタスク定義も、ユーザーまたは設定済みのツールがそのターゲットを実行する必要があります。これらは独立した OS の自動起動経路ではありません。
 
-### Vim 起動設定
+### Vim の起動設定
 
-- **書き込み先:** Vim を起動するユーザーの `~/.vimrc`（または Vim の初期化順序で選択される別の起動ファイル）。[Vim の起動に関するリファレンス](https://vimhelp.org/starting.txt.html)では、このファイルと `VIMINIT`/`EXINIT` による上書きが説明されています。
-- **トリガー:** この設定を読み込む、その後の通常の Vim 起動。Vim の `-u NONE` はユーザーの vimrc を無視します。これはエディター固有の実行であり、OS のログイントリガーではありません。
-- **実行ユーザー:** Vim ユーザーのアカウント。
+- **書き込み先:** Vim を起動するユーザーの `~/.vimrc`（または Vim の初期化順序で選択される別の起動ファイル）。[Vim の起動に関するリファレンス](https://vimhelp.org/starting.txt.html)には、このファイルと `VIMINIT`/`EXINIT` による上書きが記載されています。
+- **トリガー:** この設定を読み込む、その後の通常の Vim 起動。Vim の `-u NONE` はユーザーの vimrc を読み込みません。これはエディター固有の実行であり、OS のログイントリガーではありません。
+- **実行時のユーザー:** Vim を起動するユーザーのアカウント。
 
-以下の隔離された PoC は、macOS の `/usr/bin/vim` を対象に実行しました。実際の Vim 設定や開いているドキュメントには書き込みません。
+以下の分離された PoC は macOS の `/usr/bin/vim` で実行しました。実際の Vim 設定や開いているドキュメントには書き込みません。
 
 ```bash
 lab=$(mktemp -d)
@@ -866,15 +866,15 @@ test -e "$lab/marker" && echo 'vimrc fired'
 rm -r "$lab"
 ```
 
-Neovim には独立したユーザー設定パス `$XDG_CONFIG_HOME/nvim/init.lua` または `init.vim` があり、[起動に関するドキュメント](https://neovim.io/doc/user/starting/)に従って、`plugin/` runtime ディレクトリ内のスクリプトも読み込みます。テストマシンの macOS 26.5.2 には Neovim がインストールされていなかったため、このバリエーションは実行していません。
+Neovim には独立したユーザー設定パス `$XDG_CONFIG_HOME/nvim/init.lua` または `init.vim` があり、[startup documentation](https://neovim.io/doc/user/starting/) に従って `plugin/` runtime ディレクトリ内のスクリプトも読み込みます。macOS 26.5.2 のテストマシンには Neovim がインストールされていなかったため、このバリアントはそこで実行していません。
 
-### SSH クライアント設定コマンド
+### SSH client configuration commands
 
-- **書き込み先:** `~/.ssh/config`、またはそのファイルがすでに読み込んでいる別のファイル。これは**クライアント**設定ファイルであり、後述するサーバー側の `~/.ssh/rc` とは別です。
-- **トリガー:** 条件に一致する `ssh` の実行。クライアントが設定を評価する際、接続せずに設定を表示する `ssh -G` の場合でも `Match exec` はローカルコマンドを実行します。`ProxyCommand` はクライアントが条件に一致する接続を確立する際に実行されます。`LocalCommand` は接続成功後にのみ実行され、`PermitLocalCommand yes` が必要です（デフォルトは `no`）。これらは実行タイミングと前提条件が異なるため、書き込んだだけでは実行されません。アップストリームの [OpenSSH `ssh_config(5)`](https://github.com/openssh/openssh-portable/blob/master/ssh_config.5) を参照してください。
-- **実行ユーザー:** `ssh` を実行するローカルユーザー。一致するホスト、適用される設定ファイル、および必要な接続が必要です。`ssh -F` で別の設定ファイルを指定できます。
+- **書き込み先:** `~/.ssh/config`、またはそのファイルからすでに読み込まれている別のファイル。これは**クライアント側**の設定ファイルで、後述するサーバー側の `~/.ssh/rc` とは別です。
+- **トリガー:** 条件に一致する `ssh` の実行。`Match exec` は、接続せずに設定を出力する `ssh -G` の場合も含め、クライアントが設定を評価する際にローカルコマンドを実行します。`ProxyCommand` は、クライアントが条件に一致する接続を確立する際に実行されます。`LocalCommand` は接続に成功した後にのみ実行され、`PermitLocalCommand yes` が必要です（デフォルトは `no`）。これらは実行タイミングと前提条件が異なり、書き込んだだけでは実行されません。OpenSSH の公式 [`ssh_config(5)`](https://github.com/openssh/openssh-portable/blob/master/ssh_config.5) を参照してください。
+- **実行ユーザー:** `ssh` を実行するローカルユーザー。一致するホスト、適用対象の設定ファイル、および必要な接続が必要です。`ssh -F` で別の設定ファイルを指定できます。
 
-このマーカーのみの PoC は、macOS 26.5.2 上で Apple の SSH クライアントを使って実行しました。`-G` はネットワーク接続もユーザーの実際の SSH 設定の読み込みも行わずに `Match exec` を実行します。
+このマーカーのみの PoC は、macOS 26.5.2 上で Apple の SSH client を使って実行しました。`-G` はネットワーク接続を行わず、ユーザーの実際の SSH 設定も読み込まずに `Match exec` を実行します。
 
 ```bash
 lab=$(mktemp -d)
@@ -889,10 +889,10 @@ rm -r "$lab"
 
 ### Debugger 初期化ファイル
 
-- **書き込み先:** `~/.lldbinit` または優先順位の高いアプリケーション固有ファイル（`~/.lldbinit-lldb` など）。LLDB はデバッガーの起動時にいずれか1つを読み込みます。カレントディレクトリの `.lldbinit` はデフォルトでは実行されません。ユーザーが `target.load-cwd-lldbinit` を有効にするか、`--local-lldbinit` を渡す必要があります。[LLDB のマニュアル](https://lldb.llvm.org/man/lldb.html)を参照してください。
+- **書き込み先:** `~/.lldbinit` または優先順位の高いアプリケーション固有ファイル（例: `~/.lldbinit-lldb`）。LLDB はデバッガの起動時にいずれか1つを読み込みます。カレントディレクトリの `.lldbinit` はデフォルトでは実行されません。ユーザーが `target.load-cwd-lldbinit` を有効にするか、`--local-lldbinit` を指定する必要があります。[LLDB manual](https://lldb.llvm.org/man/lldb.html)を参照してください。
 - **トリガーと実行ユーザー:** ユーザーが `--no-lldbinit` を指定せずに LLDB を起動すると、コマンドはそのユーザーとして実行されます。プロジェクトを開いただけでは、プロジェクトの `.lldbinit` が実行されるとは限りません。
 
-以下のマーカーのみを使ったテストは、ホームディレクトリと作業ディレクトリを分離した状態で、macOS 26.5.2 上の LLDB に対して実施しました。
+以下のマーカーのみを使ったテストは、ホームディレクトリと作業ディレクトリを分離した環境で、macOS 26.5.2 の LLDB に対して実行しました。
 
 ```bash
 lab=$(mktemp -d)
@@ -902,16 +902,16 @@ test -e "$lab/marker" && echo 'lldbinit fired'
 rm -r "$lab"
 ```
 
-For **GDB**、[upstream startup documentation](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Startup.html) には、macOS で `$HOME/Library/Preferences/gdb/gdbinit`、続いて `~/.gdbinit` が記載されています。カレントディレクトリの `.gdbinit` は [auto-load safe path](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html) の対象であり、`-nx`/`-nh` は初期化ファイルの読み込みを抑止します。テスト用 Mac には GDB がインストールされていなかったため、このバリエーションはローカルで実行していません。
+For **GDB**、[upstream の起動に関するドキュメント](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Startup.html)には、macOS では `$HOME/Library/Preferences/gdb/gdbinit`、次に `~/.gdbinit` を読み込むと記載されています。カレントディレクトリの `.gdbinit` には[自動読み込みのセーフパス](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html)が適用され、`-nx`/`-nh` は初期化ファイルの読み込みを抑制します。テスト用の Mac には GDB がインストールされていなかったため、このパターンはローカルで実行していません。
 
 ### SSHRC
 
-記事: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)<sup>[[14]](#references)</sup>
+解説: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)<sup>[[14]](#references)</sup>
 
-- sandbox のバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
-  - ただし、ssh が有効化され、使用されている必要があります
+- sandbox の回避に有用: [✅](https://emojipedia.org/check-mark-button)
+  - ただし、ssh が有効化され、使用されている必要がある
 - TCC bypass: [✅](https://emojipedia.org/check-mark-button)
-  - SSH の使用により FDA アクセスを得る
+  - SSH を使用して FDA アクセスを取得
 
 #### 場所
 
@@ -922,7 +922,7 @@ For **GDB**、[upstream startup documentation](https://sourceware.org/gdb/curren
   - **トリガー**: ssh でログイン
 
 > [!CAUTION]
-> ssh を有効にするには Full Disk Access が必要です:
+> ssh を有効にするには Full Disk Access が必要です。
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
@@ -934,24 +934,24 @@ For **GDB**、[upstream startup documentation](https://sourceware.org/gdb/curren
 
 ### **ログイン項目**
 
-解説: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)<sup>[[15]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)<sup>[[15]](#references)</sup>
 
 - sandbox のバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
-  - ただし、引数を指定して `osascript` を実行する必要があります
+  - ただし、引数付きで `osascript` を実行する必要があります
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
 
-- **登録済みログイン項目のヘルパーアプリ:** `<MainApp>.app/Contents/Library/LoginItems/<Helper>.app`（一般的な同梱場所）。
-  - **トリガー:** 登録時にヘルパーが直ちに起動する場合があり、その後は承認の状態に応じて、ユーザーのログイン時に起動します。
-- **登録済みの同梱エージェント／デーモン:** `<MainApp>.app/Contents/Library/LaunchAgents/<name>.plist` または `Contents/Library/LaunchDaemons/<name>.plist`。
-  - **トリガー:** 承認済みのエージェントは登録時およびその後のログイン時に起動する場合があり、承認済みのデーモンは起動時に起動します。デーモンには管理者の承認が必要です。
+- **登録済みログイン項目の helper app:** `<MainApp>.app/Contents/Library/LoginItems/<Helper>.app`（一般的なバンドル内の場所）。
+  - **起動条件:** 登録時に helper がすぐ起動する場合があります。その後は、承認状況に応じて、以降のユーザーログイン時にも起動します。
+- **登録済みバンドル agent/daemon:** `<MainApp>.app/Contents/Library/LaunchAgents/<name>.plist` または `Contents/Library/LaunchDaemons/<name>.plist`。
+  - **起動条件:** 承認済みの agent は登録時および以降のログイン時に起動する場合があります。承認済みの daemon は起動時に起動します。daemon の登録には管理者の承認が必要です。
 
 #### 説明
 
-**システム設定 → 一般 → ログイン項目と機能拡張**では、ログイン項目とバックグラウンド項目を確認できます。macOS 13 以降では、同梱のログイン項目、launch agent、launch daemon を登録するための [`SMAppService`](https://developer.apple.com/documentation/servicemanagement/smappservice) が提供されています。その [`register()` の動作](https://developer.apple.com/documentation/servicemanagement/smappservice/register%28%29)は、項目の種類と承認状態によって異なります。**ヘルパーをアプリバンドルに書き込むだけでは、新しいログイン項目は登録されません。**一方、すでに登録済みのヘルパー実行ファイルに書き込み可能な場合、新たに登録しなくても、その実行ファイルを変更することで次回の起動に影響を与えられます。まず実際のパスとコード署名のチェックを確認してください。
+**システム設定 → 一般 → ログイン項目と機能拡張**では、ログイン項目とバックグラウンド項目を確認できます。macOS 13 以降では、バンドルされたログイン項目、launch agent、launch daemon の登録に [`SMAppService`](https://developer.apple.com/documentation/servicemanagement/smappservice) を使用できます。その [`register()` の動作](https://developer.apple.com/documentation/servicemanagement/smappservice/register%28%29)は、種類と承認状況によって異なります。**helper を app bundle に書き込むだけでは、新しいログイン項目は登録されません。**一方、すでに登録済みの helper 実行ファイルが書き込み可能な場合、新たな登録を行わなくても、その実行ファイルを変更することで次回の起動に影響を与えられます。まず実際のパスと code-signing のチェックを確認してください。
 
-以下は、Mac 上の同梱ヘルパーを探す読み取り専用の方法です。これらを登録したり起動したりすることはありません。
+以下は、Mac 上でバンドルされた helper を調べる読み取り専用の方法です。登録も起動もしません。
 
 ```bash
 find /Applications -path '*/Contents/Library/LoginItems/*.app' -o \
@@ -959,9 +959,9 @@ find /Applications -path '*/Contents/Library/LoginItems/*.app' -o \
   -path '*/Contents/Library/LaunchDaemons/*.plist' 2>/dev/null
 ```
 
-バンドルされた launch plist の場合は、[Apple の Service Management 移行ガイダンス](https://developer.apple.com/documentation/servicemanagement/updating-helper-executables-from-earlier-versions-of-macos)の指定どおり、`BundleProgram` を app bundle のルートからの相対パスとして解決します（例: `Contents/MacOS/Helper`）。調査用 Mac で読み取り専用の `/Applications` インベントリを行ったところ、バンドルされた helper エントリが14件、`BundleProgram` の宣言が5件見つかりました。5件すべてのターゲットが解決され、そのうち2件はユーザーによる書き込み可否のチェックに合格しました。このチェックだけでは、いずれかの helper が登録済み、有効、署名検証後に実行可能、または sandbox から到達可能であることは確認できません。この Mac で `sfltool dumpbtm` は名前付きレコードを150件表示しました。これは調査の補助であり、すべてのレコードが実行中であることを確認するテストではありません。
+バンドルされた launch plist では、`BundleProgram` は app bundle のルートを基準に解決します（例: `Contents/MacOS/Helper`）。これは[Apple の Service Management 移行ガイダンス](https://developer.apple.com/documentation/servicemanagement/updating-helper-executables-from-earlier-versions-of-macos)に記載されています。調査用 Mac の `/Applications` を読み取り専用で調べたところ、バンドルされた helper エントリが14件、`BundleProgram` 宣言が5件見つかりました。5つのターゲットはすべて解決でき、そのうち2つはユーザーによる書き込み可否チェックに合格しました。このチェックだけでは、いずれかの helper が登録済み、有効、署名検証後に実行可能、または sandbox から到達可能であるとは確認できません。この Mac で `sfltool dumpbtm` は名前付きレコードを150件表示しましたが、これは調査補助ツールであり、すべてのレコードが実行中であることを検証するものではありません。
 
-古い login item は Apple events を介して管理することもできます。コマンドラインから一覧表示、追加、削除が可能ですが、追加するとユーザーの永続的な login 設定が変更され、Automation の承認が必要になる場合があります:<sup>[[15]](#references)</sup>
+古い login item も Apple events 経由で管理できます。コマンドラインから一覧表示、追加、削除が可能ですが、追加するとユーザーの永続的な login 設定が変更され、Automation の承認が必要になる場合があります:<sup>[[15]](#references)</sup>
 
 ```bash
 #List all items:
@@ -974,52 +974,52 @@ osascript -e 'tell application "System Events" to make login item at end with pr
 osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
 
-`~/Library/Application Support/com.apple.backgroundtaskmanagementagent` は実装上の詳細であり、ファイルを書き込むだけで payload をインストールできるサポート対象の場所ではありません。古い `SMLoginItemSetEnabled` API は、新しいヘルパーでは `SMAppService` に置き換えられています。また、このページに以前記載されていた `/var/db/com.apple.xpc.launchd/loginitems.501.plist` は、macOS 26.5.2 のテストマシンには存在しませんでした。最新の Login Item を評価する際は、想定上のデータベースパスではなく、登録 API とシステム UI の状態を確認してください。
+`~/Library/Application Support/com.apple.backgroundtaskmanagementagent` は実装上の詳細であり、単にファイルを書き込んで payload をインストールするための、サポート対象の場所ではありません。古い `SMLoginItemSetEnabled` API は、新しいヘルパーでは `SMAppService` に置き換えられています。このページに以前記載されていた `/var/db/com.apple.xpc.launchd/loginitems.501.plist` のパスは、macOS 26.5.2 のテストマシンには存在しませんでした。最新の Login Item を評価する際は、データベースのパスを前提とせず、登録 API とシステム UI の状態を確認してください。
 
 ### ZIP as Login Item
 
-（Login Item に関する前のセクションを確認してください。ここではその応用を説明します）
+（Login Item に関する前のセクションを参照してください。この内容はその補足です）
 
-**ZIP** ファイルを **Login Item** として保存すると、**`Archive Utility`** が開きます。たとえば ZIP が **`~/Library`** に保存され、その中にバックドアを含む **`LaunchAgents/file.plist`** フォルダーがある場合、そのフォルダーが作成され（デフォルトでは存在しません）、plist が追加されます。そのため、ユーザーが次回ログインしたときに、plist に指定された **backdoor が実行されます**。
+**ZIP** ファイルを **Login Item** として保存すると、**`Archive Utility`** がそれを開きます。たとえば ZIP が **`~/Library`** に保存され、バックドアを含む **`LaunchAgents/file.plist`** フォルダーが入っていた場合、そのフォルダーが作成され（デフォルトでは存在しません）、plist が追加されます。そのため、次回ユーザーがログインしたときに、plist に指定された **backdoor が実行されます**。
 
 別の方法として、ユーザーの HOME 内に **`.bash_profile`** と **`.zshenv`** ファイルを作成する方法があります。これなら、LaunchAgents フォルダーがすでに存在する場合でも、この手法は機能します。
 
 ### At
 
-解説: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)<sup>[[16]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)<sup>[[16]](#references)</sup>
 
-- sandbox のバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
-  - **`at`** を**実行**する必要があり、有効になっていなければなりません
+- sandbox のバイパスに有効: [✅](https://emojipedia.org/check-mark-button)
+  - ただし、**`at`** を **実行**する必要があり、有効化されていなければなりません
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### 場所
+#### Location
 
-- **`at`** を**実行**する必要があり、有効になっていなければなりません
+- **`at`** を **実行**する必要があり、有効化されていなければなりません
 
-#### **説明**
+#### **Description**
 
-`at` タスクは、指定した時刻に実行する**一度限りのタスクをスケジュールする**ためのものです。cron ジョブとは異なり、`at` タスクは実行後に自動的に削除されます。これらのタスクはシステムの再起動後も保持されるため、特定の条件下ではセキュリティ上の懸念となる可能性がある点に注意が必要です。<sup>[[16]](#references)</sup>
+`at` タスクは、指定した時刻に実行する**一度限りのタスクをスケジュールする**ためのものです。cron ジョブとは異なり、`at` タスクは実行後に自動的に削除されます。重要な点として、これらのタスクはシステムの再起動後も保持されるため、特定の条件下ではセキュリティ上の懸念となる可能性があります。<sup>[[16]](#references)</sup>
 
-同梱されている `com.apple.atrun.plist` では `Disabled = true` になっていますが、launchd は有効／無効の実効的な上書き設定を別に保持します。macOS 26.5.2 のテストマシンでは、`launchctl print-disabled system` の結果、同梱ファイルのキーにかかわらず `com.apple.atrun` は**有効**と報告されました。`at` ジョブが実行されると断定する前に、実効状態を確認してください:
+同梱の `com.apple.atrun.plist` では `Disabled = true` になっていますが、launchd は実際に有効か無効かを示すオーバーライドを別に保持します。macOS 26.5.2 のテストマシンでは、`launchctl print-disabled system` により、同梱 plist の設定にかかわらず `com.apple.atrun` が**有効**と報告されました。`at` ジョブが実行されると主張する前に、実際の状態を確認してください:
 
 ```bash
 launchctl print-disabled system | grep 'com.apple.atrun'
 launchctl print system/com.apple.atrun
 ```
 
-管理者は `launchctl` を使って無効化された `atrun` サービスを有効にできます。以下はシステムサービスの状態を変更する過去の例であり、調査用 Mac では**実行していません**。
+管理者は `launchctl` を使って無効化された `atrun` サービスを有効にできます。以下の過去の例はシステムサービスの状態を変更するものであり、調査用 Mac では**実行していません**。
 
 ```bash
 sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
 ```
 
-これは1時間後にファイルを作成します：
+これは1時間後にファイルを作成します:
 
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
 
-`atq:` を使ってジョブキューを確認します。
+`atq:` を使用してジョブキューを確認します:
 
 ```shell-session
 sh-3.2# atq
@@ -1027,7 +1027,7 @@ sh-3.2# atq
 22	Wed Apr 28 00:29:00 2021
 ```
 
-上記では、2つのジョブがスケジュールされていることがわかります。`at -c JOBNUMBER`を使って、ジョブの詳細を表示できます。
+上記では、2つのジョブがスケジュールされていることがわかります。`at -c JOBNUMBER` を使うと、ジョブの詳細を表示できます。
 
 ```shell-session
 sh-3.2# at -c 26
@@ -1074,67 +1074,67 @@ total 32
 -rwx------  1 root  wheel  803 Apr 27 00:46 a0001a019bdcd2
 ```
 
-ファイル名には、キュー、ジョブ番号、実行予定時刻が含まれています。例として `a0001a019bdcd2` を見てみましょう。
+ファイル名にはキュー、ジョブ番号、実行予定時刻が含まれています。例として `a0001a019bdcd2` を見てみましょう。
 
 - `a` - キューです
 - `0001a` - 16進数のジョブ番号です。`0x1a = 26`
-- `019bdcd2` - 16進数の時刻です。エポックからの経過分数を表します。`0x019bdcd2` は10進数で `26991826` です。これに60を掛けると `1619509560` となり、`GMT: 2021年4月27日（火）7:46:00` です。
+- `019bdcd2` - 16進数の時刻です。epoch からの経過分数を表します。`0x019bdcd2` は10進数で `26991826` です。これに60を掛けると `1619509560` となり、`GMT: 2021年4月27日 火曜日 7:46:00` です。
 
-ジョブファイルを出力すると、`at -c` を使って得たものと同じ情報が含まれていることがわかります。
+ジョブファイルを出力すると、`at -c` で取得したものと同じ情報が含まれていることがわかります。
 
-### Calendarのファイルを開くアラート
+### Calendar のファイルを開くアラート
 
-- **書き込み対象:** Calendarイベントのカスタム**ファイルを開く**アラートで、すでに選択されている実行可能なアプリバンドルまたは別のファイル。アラート自体を作成または編集するには、Calendarまたは承認済みのカレンダーデータソースを通じて、そのCalendarイベントにアクセスする必要があります。無関係なファイルへの書き込みではアラートは作成されません。
-- **トリガー:** Calendarがイベントを処理するMacで、アラートに設定された時刻に実行されます。繰り返しイベントでは、この動作も繰り返されることがあります。[Appleの現行Calendarガイド](https://support.apple.com/guide/calendar/icl1012/mac)では、macOS 26の**カスタム → ファイルを開く**アラートオプションが確認できます。
-- **実行ユーザーと制限:** Calendarは、サインイン中のユーザーとして、関連付けられたアプリケーションで選択されたファイルを開きます。アプリバンドルの起動によって、そのコードがユーザーとして実行される場合がありますが、Gatekeeper、quarantine、その他のmacOSチェックが適用されます。通常のスクリプトファイルはエディタで開くだけの場合もあり、拡張子だけではコード実行の証拠になりません。
+- **書き込み先:** Calendar イベントのカスタム **ファイルを開く** アラートですでに選択されている実行可能なアプリバンドル、または別のファイル。アラート自体の作成や編集には、Calendar または承認済みのカレンダーデータソースを通じて、そのカレンダーイベントにアクセスする必要があります。無関係なファイルへの書き込みではアラートは作成されません。
+- **トリガー:** Calendar がイベントを処理する Mac での、アラートの予定時刻です。繰り返しイベントでは、この動作も繰り返されることがあります。[Apple の現行 Calendar ガイド](https://support.apple.com/guide/calendar/icl1012/mac)では、macOS 26 の **カスタム → ファイルを開く** アラートオプションが確認できます。
+- **実行ユーザーと制限:** Calendar は、選択されたファイルをサインイン中のユーザーとして、関連付けられたアプリケーションで開きます。アプリバンドルを起動すると、そのユーザーとしてコードが実行されることがありますが、Gatekeeper、quarantine、その他の macOS チェックが適用されます。通常のスクリプトファイルはエディタで開くだけの場合もあり、拡張子だけではコードが実行されるとは判断できません。
 
-候補を安全に評価するには、Calendarでイベントのアラートと、選択されたファイルの権限を確認してください。この方法はAppleのガイドに基づいて記載したもので、実際のカレンダーを変更し、デスクトップイベントを待つ必要があるため、調査用Macでは実行していません。使い捨てアカウントで、マーカーだけを含むアプリバンドルを選択し、近い将来の「ファイルを開く」アラートを設定して起動を確認した後、イベントとアプリを削除できます。
+候補を安全に評価するには、Calendar でイベントのアラートと選択されたファイルの権限を確認してください。この方法は Apple のガイドに基づいて記載したもので、実際のカレンダーを変更してデスクトップイベントを待つ必要があるため、調査用 Mac では実行していません。使い捨てアカウントで、マーカーのみを含むアプリバンドルを選択し、近い将来の「ファイルを開く」アラートを設定して起動を確認した後、イベントとアプリを削除してテストできます。
 
-### macOSのShortcutsオートメーション
+### macOS の Shortcuts オートメーション
 
-- **書き込み対象:** ショートカットのアクションからすでに参照されている実行可能ファイル、または権限を持つユーザーが編集できる既存のショートカット。無関係な `.shortcut` ファイルや、文書化されていないShortcutsデータベースへの書き込みは、サポートされているオートメーション登録方法ではありません。
-- **トリガーと実行ユーザー:** 時刻やアプリのイベントなど、事前に設定され有効化されたオートメーションイベントが、サインイン中のユーザーとしてショートカットを実行します。[Appleの現行Macオートメーションガイド](https://support.apple.com/guide/shortcuts-mac/add-automations-apdfbdbd7123/mac)には、サポートされるイベント、「実行前に尋ねる」を無効にできる条件、トリガーの削除方法が記載されています。[AppleのShortcutsプライバシーガイド](https://support.apple.com/guide/shortcuts-mac/apdfeb05586f/mac)では、スクリプトアクションに**スクリプトの実行を許可**する必要があり、個々のアクションが引き続き権限を要求する場合もあるとされています。
+- **書き込み先:** ショートカットのアクションですでに参照されている実行可能ファイル、または権限を持つユーザーが編集できる既存のショートカットです。無関係な `.shortcut` ファイルや、文書化されていない Shortcuts データベースへの書き込みは、サポートされたオートメーション登録方法ではありません。
+- **トリガーと実行ユーザー:** 時刻やアプリイベントなど、事前に設定され有効化されたオートメーションイベントが、サインイン中のユーザーとしてショートカットを実行します。[Apple の現行 Mac オートメーションガイド](https://support.apple.com/guide/shortcuts-mac/add-automations-apdfbdbd7123/mac)には、対応イベント、「確認なしで実行」できる条件、およびトリガーの削除方法が記載されています。[Apple の Shortcuts プライバシーガイド](https://support.apple.com/guide/shortcuts-mac/apdfeb05586f/mac)によると、スクリプトアクションには **スクリプトの実行を許可** が必要で、個々のアクションが引き続き権限を要求することもあります。
 
-これは、既存のアクションが書き込み可能な対象を読み込む場合に限られる、条件付きの書き込みから実行への経路です。UIから新しいオートメーションを作成すると実際の設定が変更されるため、調査用Macでは試していません。使い捨てアカウントでは、所有者が時刻指定のショートカットを設定し、そのスクリプトで `/tmp/ht-shortcuts-marker` にアクセスするようにできます。必要な権限を有効にし、イベント後にマーカーを確認したら、オートメーション、ショートカット、マーカーを削除します。
+これは、既存のアクションが書き込み可能なターゲットを読み込む場合に限る、条件付きの書き込みから実行への経路です。UI から新しいオートメーションを作成すると実際の設定が変更されるため、調査用 Mac では試していません。使い捨てアカウントでは、所有者が時刻指定のショートカットを設定し、そのスクリプトで `/tmp/ht-shortcuts-marker` に触れるようにできます。必要な権限を有効にし、イベント後にマーカーを確認してから、オートメーション、ショートカット、マーカーを削除します。
 
-### AutomatorアクションとQuick Actions
+### Automator アクションと Quick Actions
 
-- **書き込み対象:** アクションバンドル用の `~/Library/Automator/*.action`（ユーザー）と `/Library/Automator/*.action`（管理者）。保存済みのQuick Actionワークフローは、通常 `~/Library/Services/*.workflow` に置かれます。ユーザーが選択した実際のワークフローのパスを確認してください。[AppleのAutomatorフレームワークリファレンス](https://developer.apple.com/documentation/automator)には、アクションの検索ディレクトリが記載されています。
-- **トリガー:** Automatorは実行時に利用可能なアクションバンドルを読み込みますが、アクションのタスクが実行されるのは、それを使うワークフローが実行されたときです。Quick Actionは、ユーザーがFinder、Services、または表示された別のメニューから選択すると実行されます。Folder Actionワークフローは、**すでに関連付けられている**フォルダに項目が追加されると実行され、Calendar Alarmワークフローはイベント時刻に実行されます。[Appleのワークフローの種類](https://support.apple.com/guide/automator/aut7cac58839/mac)では、これらのイベントが区別されています。アクションやワークフローを書き込むだけでは、フォルダは関連付けられず、カレンダーイベントもスケジュールされません。
-- **実行ユーザーと制限:** ワークフローを実行するアカウントです。Automatorまたは呼び出し元のアプリがアクションを読み込み、現在のコード署名やプライバシーに関するチェックを通過する必要があります。アクティブなワークフローからすでに参照されている書き込み可能なアクションバンドルは、新しいアクションをインストールして選択されるのを待つケースとは異なります。
+- **書き込み先:** アクションバンドル用の `~/Library/Automator/*.action`（ユーザー）および `/Library/Automator/*.action`（管理者）。保存された Quick Action ワークフローは通常 `~/Library/Services/*.workflow` に保存されます。ユーザーが選択した実際のワークフローのパスを確認してください。[Apple の Automator フレームワークリファレンス](https://developer.apple.com/documentation/automator)には、アクションの検索ディレクトリが記載されています。
+- **トリガー:** Automator は起動時に利用可能なアクションバンドルを読み込みますが、アクションのタスクが実行されるのは、それを使用するワークフローが実行されたときです。Quick Action は、ユーザーが Finder、Services、またはその他の表示メニューから選択すると実行されます。Folder Action ワークフローは、**すでに関連付けられている**フォルダに項目が追加されたときに実行され、Calendar Alarm ワークフローはイベント時刻に実行されます。[Apple のワークフロータイプ](https://support.apple.com/guide/automator/aut7cac58839/mac)では、これらのイベントが区別されています。アクションやワークフローを書き込むだけでは、フォルダとの関連付けやカレンダーイベントのスケジュール設定は行われません。
+- **実行ユーザーと制限:** ワークフローを実行するアカウントです。Automator または呼び出し元のアプリがアクションを読み込み、現在のコード署名やプライバシーチェックなどで許可される必要があります。有効なワークフローからすでに参照されている書き込み可能なアクションバンドルは、新しいアクションをインストールして選択されるのを待つケースとは異なります。
 
-テスト用Mac（macOS 26.5.2）にはユーザーの `Automator` ディレクトリと `Services` ディレクトリがあり、`/Library/Automator` はありませんでした。実際のワークフローの作成、関連付け、実行は行っていません。特定の読み込み経路を確認するには、使い捨てアカウントと、マーカーだけを含むアクション／ワークフローを使用してください。イベントソースの詳細については、別の[Folder Actions](#folder-actions)セクションを参照してください。
+macOS 26.5.2 のテスト用 Mac には、ユーザーの `Automator` および `Services` ディレクトリが存在していましたが、`/Library/Automator` はありませんでした。実際のワークフローは作成、関連付け、実行していません。特定の読み込み経路を確認するには、使い捨てアカウントでマーカーのみを使ったアクション／ワークフローを使用してください。このイベントソースについては、別の [Folder Actions](#folder-actions) セクションで詳しく説明しています。
 
 ### Folder Actions
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)<sup>[[17]](#references)</sup>\
 Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)<sup>[[18]](#references)</sup>
 
-- sandboxのbypassに便利: [✅](https://emojipedia.org/check-mark-button)
-  - ただし、Folder Actionsを設定できるようにするには、**`System Events`** に連絡するため、引数付きで `osascript` を呼び出せる必要があります
+- sandbox のバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
+  - ただし、Folder Actions を設定するには、**`System Events`** に接続するための引数を付けて `osascript` を呼び出せる必要があります
 - TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
-  - Desktop、Documents、Downloadsなどの基本的なTCC権限があります
+  - Desktop、Documents、Downloads など、基本的な TCC 権限があります
 
 #### Location
 
 - **`/Library/Scripts/Folder Action Scripts`**
-  - root権限が必要
+  - root 権限が必要
   - **トリガー**: 指定フォルダへのアクセス
 - **`~/Library/Scripts/Folder Action Scripts`**
   - **トリガー**: 指定フォルダへのアクセス
 
 #### Description & Exploitation
 
-Folder Actionsは、項目の追加や削除、フォルダウィンドウを開く、サイズを変更するといった操作など、フォルダの変更によって自動的にトリガーされるスクリプトです。これらのアクションはさまざまなタスクに利用でき、Finder UIやターミナルコマンドなど、異なる方法でトリガーできます。<sup>[[17]](#references)[[18]](#references)</sup>
+Folder Actions は、項目の追加や削除、フォルダウィンドウを開く・サイズ変更するといった操作など、フォルダ内の変更によって自動的に実行されるスクリプトです。さまざまなタスクに利用でき、Finder UI やターミナルコマンドなど、異なる方法でトリガーできます。<sup>[[17]](#references)[[18]](#references)</sup>
 
-Folder Actionsを設定するには、次のような方法があります。
+Folder Actions を設定するには、次のような方法があります。
 
-1. [Automator](https://support.apple.com/guide/automator/welcome/mac)でFolder Actionワークフローを作成し、サービスとしてインストールする。
-2. フォルダのコンテキストメニューにあるFolder Actions Setupから、スクリプトを手動で関連付ける。
-3. OSAScriptを使って`System Events.app`にApple Eventメッセージを送信し、プログラムからFolder Actionを設定する。
-   - この方法は、アクションをシステムに組み込むのに特に便利で、一定のpersistenceを実現できます。
+1. [Automator](https://support.apple.com/guide/automator/welcome/mac) で Folder Action ワークフローを作成し、サービスとしてインストールする。
+2. フォルダのコンテキストメニューにある Folder Actions Setup から、スクリプトを手動で関連付ける。
+3. OSAScript を使用し、`System Events.app` に Apple Event メッセージを送信して、Folder Action をプログラムで設定する。
+   - この方法は、アクションをシステムに組み込んで、ある程度の永続性を実現するのに特に有用です。
 
-次のスクリプトは、Folder Actionで実行できる例です。
+次のスクリプトは、Folder Action で実行できるものの例です。
 
 ```applescript
 // source.js
@@ -1152,7 +1152,7 @@ app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 osacompile -l JavaScript -o folder.scpt source.js
 ```
 
-スクリプトをコンパイルしたら、以下のスクリプトを実行してフォルダアクションを設定します。このスクリプトは、フォルダアクションをシステム全体で有効にし、先ほどコンパイルしたスクリプトをデスクトップフォルダに関連付けます。
+スクリプトをコンパイルしたら、以下のスクリプトを実行してFolder Actionsを設定します。このスクリプトはFolder Actionsをシステム全体で有効にし、コンパイル済みのスクリプトをDesktopフォルダに関連付けます。
 
 ```javascript
 // Enabling and attaching Folder Action
@@ -1170,9 +1170,9 @@ fa.scripts.push(myScript)
 osascript -l JavaScript /Users/username/attach.scpt
 ```
 
-- GUI経由でこの永続化を実装する方法は次のとおりです。
+- GUI経由でこの persistence を実装する方法は次のとおりです：
 
-実行されるスクリプトは次のとおりです。
+実行されるスクリプトは次のとおりです：
 
 ```applescript:source.js
 var app = Application.currentApplication();
@@ -1183,7 +1183,7 @@ app.doShellScript("mkdir /tmp/asd123");
 app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
 
-`osacompile -l JavaScript -o folder.scpt source.js` でコンパイルします
+次のコマンドでコンパイルします: `osacompile -l JavaScript -o folder.scpt source.js`
 
 次の場所に移動します:
 
@@ -1192,17 +1192,17 @@ mkdir -p "$HOME/Library/Scripts/Folder Action Scripts"
 mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
 
-次に、`Folder Actions Setup` appを開き、**監視するフォルダ**を選択して、ここでは **`folder.scpt`** を選択します（私の場合はoutput2.scpという名前にしました）:
+次に、`Folder Actions Setup` appを開き、**監視したいフォルダ**を選択して、この場合は **`folder.scpt`** を選択します（私の場合はoutput2.scpという名前にしました）:
 
 <figure><img src="../images/image (39).png" alt="" width="297"><figcaption></figcaption></figure>
 
-これで、そのフォルダを**Finder**で開くとスクリプトが実行されます。
+これで、そのフォルダを**Finder**で開くと、スクリプトが実行されます。
 
-この設定は、**`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`**にある**plist**にbase64形式で保存されていました。
+この設定は、base64形式で **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** にある **plist** に保存されていました。
 
-では、GUIにアクセスせずにこの永続化を設定してみましょう。
+それでは、GUIアクセスなしでこの永続化を設定してみましょう:
 
-1. バックアップのために**`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`を**`/tmp`**にコピーします**:
+1. バックアップのため、**`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** を `/tmp` にコピーします:
    - `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
 2. 先ほど設定したFolder Actionsを**削除**します:
 
@@ -1211,12 +1211,12 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 これで環境が空になったので、
 
 3. バックアップファイルをコピーします: `cp /tmp/com.apple.FolderActionsDispatcher.plist ~/Library/Preferences/`
-4. Folder Actions Setup.appを開いてこの設定を読み込みます: `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
+4. Folder Actions Setup.appを開いて、この設定を読み込みます: `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
 
 > [!CAUTION]
-> 私の場合はうまくいきませんでしたが、writeupに記載されている手順はこれです:(
+> 私の場合はうまくいきませんでしたが、writeupにある手順は以上です:(
 
-### Dockショートカット
+### Dock shortcuts
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)<sup>[[19]](#references)</sup>
 
@@ -1224,16 +1224,16 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.g
   - ただし、悪意のあるアプリケーションをシステム内にインストールしておく必要があります
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### 場所
+#### Location
 
 - `~/Library/Preferences/com.apple.dock.plist`
   - **Trigger**: ユーザーがDock内のアプリをクリックしたとき
 
-#### 説明と悪用
+#### Description & Exploitation
 
-Dockに表示されるすべてのアプリケーションは、plist **`~/Library/Preferences/com.apple.dock.plist`**で指定されています<sup>[[19]](#references)</sup>
+Dockに表示されるすべてのアプリケーションは、plist **`~/Library/Preferences/com.apple.dock.plist`** 内で指定されています<sup>[[19]](#references)</sup>
 
-次のコマンドだけで**アプリケーションを追加**できます:
+**アプリケーションを追加**するには、次のようにします:
 
 ```bash
 # Add /System/Applications/Books.app
@@ -1243,7 +1243,7 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 killall Dock
 ```
 
-多少の **social engineering** を使えば、Dock 内でたとえば Google Chrome に偽装し、実際に独自のスクリプトを実行できます。
+**social engineering**を使えば、Dock 内でたとえば Google Chrome に偽装し、実際に自分のスクリプトを実行できます。
 
 ```bash
 #!/bin/sh
@@ -1300,38 +1300,38 @@ killall Dock
 
 ### 入力メソッド
 
-- **書き込み先:** `~/Library/Input Methods/`（ユーザー）または `/Library/Input Methods/`（管理者）にインストールされた、コードを含む入力メソッドアプリの bundle。これは、単体では任意のコードを実行する payload ではない、Apple のプレーンテキスト形式の `.inputplugin` キーボードマッピングファイルとは異なります。
-- **トリガー:** ユーザーが **システム設定 → キーボード → テキスト入力** で入力ソースを追加・有効にし、その後選択または使用します。bundle をディレクトリにコピーしただけでは、macOS がそれを起動する証拠にはなりません。[Apple's current Input Sources guide](https://support.apple.com/guide/mac-help/mchl84525d76/mac) では入力ソースの有効化と切り替えについて説明されており、[Apple's InputMethodKit documentation](https://developer.apple.com/documentation/inputmethodkit) ではコードを含む入力メソッドについて説明されています。
-- **実行時のユーザーと制限:** メソッドはサインイン中のユーザーとして実行され、入力メソッドの登録、コード署名、および現在の macOS セキュリティチェックの対象となります。既存の有効なメソッドで実行ファイルを書き換えられる場合は、別途、実行経路と署名を確認する必要があります。
+- **書き込み先:** `~/Library/Input Methods/`（ユーザー）または `/Library/Input Methods/`（管理者）にインストールされた、コードを含む入力メソッドアプリバンドル。これは、任意のコードを含むペイロードではない、Appleのプレーンテキストの `.inputplugin` キーボードマッピングファイルとは異なります。
+- **トリガー:** ユーザーが **システム設定 → キーボード → テキスト入力** で入力ソースを追加／有効化し、その後選択または使用します。バンドルをディレクトリにコピーしただけでは、macOSが起動する証拠にはなりません。[Appleの最新の入力ソースガイド](https://support.apple.com/guide/mac-help/mchl84525d76/mac)ではソースの有効化と切り替えについて説明されており、[AppleのInputMethodKitドキュメント](https://developer.apple.com/documentation/inputmethodkit)ではコードを含む入力メソッドについて説明されています。
+- **実行時のIDと制限:** このメソッドはサインイン中のユーザーとして実行されますが、入力メソッドの登録、コード署名、現在のmacOSセキュリティチェックが適用されます。既存の有効なメソッドの実行ファイルに書き込み可能な場合は、別途、パスと署名を確認する必要があります。
 
-Apple の[以前のサードパーティ製入力メソッドに関する注意書き](https://developer.apple.com/library/archive/qa/qa1810/_index.html)でも、特定のパレットメソッドをこれらのディレクトリにコピーしても、入力ソースに表示されるとは限らないとすでに警告されていました。macOS 26.5.2 の調査用 Mac ではユーザーディレクトリは存在しますが、bundle はインストールも有効化もされていませんでした。そのため、これはローカルでの実行結果ではなく、条件付きの実行経路として記載しています。
+Appleの[以前のサードパーティ製入力メソッドに関する注意書き](https://developer.apple.com/library/archive/qa/qa1810/_index.html)では、特定のパレットメソッドをこれらのディレクトリにコピーしても、入力ソースに表示すらされないことがすでに警告されていました。macOS 26.5.2を使用した調査用Macでは、ユーザーディレクトリは存在しますが、バンドルはインストールも有効化もされていません。そのため、これはローカルでの実行結果ではなく、条件付きのパスとして記載しています。
 
 ### カラーピッカー
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)<sup>[[20]](#references)</sup>
+解説記事: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)<sup>[[20]](#references)</sup>
 
-- sandbox のバイパスに有用: [🟠](https://emojipedia.org/large-orange-circle)
-  - 非常に限定された操作が必要
-  - 別の sandbox に移行する
+- sandboxのバイパスに有用: [🟠](https://emojipedia.org/large-orange-circle)
+  - 非常に特定の操作が必要
+  - 別のsandboxに入ることになる
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
 
 - `/Library/ColorPickers`
-  - root 権限が必要
+  - root権限が必要
   - トリガー: カラーピッカーを使用する
 - `~/Library/ColorPickers`
   - トリガー: カラーピッカーを使用する
 
-#### 説明と Exploit
+#### 説明とエクスプロイト
 
-独自のコードを含む**カラーピッカー** bundle を[**こちらの例**](https://github.com/viktorstrate/color-picker-plus)のようにコンパイルし、[スクリーンセーバーのセクション](macos-auto-start-locations.md#screen-saver)のように constructor を追加して、bundle を `~/Library/ColorPickers` にコピーします。<sup>[[20]](#references)</sup>
+コードを含む**カラーピッカー**バンドルをコンパイルし（例として[**こちら**](https://github.com/viktorstrate/color-picker-plus)を使用できます）、[スクリーンセーバーのセクション](macos-auto-start-locations.md#screen-saver)のようにコンストラクターを追加して、バンドルを `~/Library/ColorPickers` にコピーします。<sup>[[20]](#references)</sup>
 
-その後、カラーピッカーが呼び出されると、bundle も実行されるはずです。
+その後、カラーピッカーが起動されると、バンドルも実行されるはずです。
 
-互換性のあるアプリでシステムのカラーパネルを開き、インストールしたピッカーを選択することが条件です。[Apple's color-panel guide](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/DrawColor/Tasks/AddingColorPickers.html) では、従来の bundle の場所について説明されています。ローカルでパスを確認したところ、従来のカラーピッカー XPC サービスは見つかりましたが、調査用 Mac にはピッカーがインストールも読み込みもされていませんでした。パスだけから TCC bypass が可能だと推測しないでください。
+この方法は、互換性のあるアプリがシステムのカラーパネルを開き、インストール済みのピッカーを選択することが条件です。[Appleのカラーパネルガイド](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/DrawColor/Tasks/AddingColorPickers.html)では、従来のバンドルの場所について説明されています。ローカルでパスを確認したところ、従来のカラーピッカーXPCサービスは見つかりましたが、調査用Macにはピッカーがインストールも読み込みもされていませんでした。パスだけを根拠にTCC bypassが可能だと判断しないでください。
 
-ライブラリを読み込むバイナリには、**非常に制限の厳しい sandbox** があることに注意してください: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
+ライブラリを読み込むバイナリには**非常に制限の厳しいsandbox**が設定されています: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 
 ```bash
 [Key] com.apple.security.temporary-exception.sbpl
@@ -1342,25 +1342,25 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 			[String] (allow file-read* (extension "com.apple.app-sandbox.read"))
 ```
 
-### Finder Sync Plugins
+### Finder Sync プラグイン
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)<sup>[[21]](#references)</sup>\
 **Writeup**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)<sup>[[22]](#references)</sup>
 
-- sandboxの回避に有用: **いいえ。独自のアプリを実行する必要があるため**
-- TCC bypass: 有効化されたextensionのsandboxと権限によります。一般的なbypassは確認されていません。
+- sandbox bypassに有用: **いいえ。自分のアプリを実行する必要があるため**
+- TCC bypass: 有効化されているextensionのsandboxと権限によります。一般的なbypassは確認されていません。
 
 #### 場所
 
 - 特定のアプリ
 
-#### 説明と悪用
+#### 説明とExploit
 
-Finder Sync Extensionを含むアプリの例は[**こちらにあります**](https://github.com/D00MFist/InSync)。
+Finder Sync Extensionを備えたアプリの例は[**こちらで確認できます**](https://github.com/D00MFist/InSync)。
 
-アプリケーションには`Finder Sync Extensions`を含めることができます。このextensionは実行されるアプリケーション内に配置されます。また、extensionがコードを実行するには、有効なApple開発者証明書で**署名**され、**sandbox化**されている必要があり（ただし、制限を緩和する例外を追加できます）、次のような方法で登録する必要があります:<sup>[[21]](#references)[[22]](#references)</sup>
+アプリには`Finder Sync Extensions`を含めることができます。このextensionは、実行されるアプリ内に配置されます。さらに、extensionがコードを実行するには、有効なApple developer certificateで**署名**され、**sandbox化**されている必要があります（緩和された例外を追加することは可能です）。また、次のような方法で登録する必要があります:<sup>[[21]](#references)[[22]](#references)</sup>
 
-インストール済みのextensionも、**有効化**され、関連するFinderの場所または項目で呼び出される必要があります。任意の`.appex`バンドルを書き込むだけでは不十分です。[AppleのFinder Sync API](https://developer.apple.com/documentation/findersync/fifindersynccontroller/isextensionenabled)を使うと、有効化されているかどうかを確認できます。以下の`pluginkit`コマンドは、明示的な登録と有効化の例であり、ファイルを置くだけで自動起動するものではありません。この方法はドキュメントを確認したものであり、調査用Macに新しいextensionをインストールまたは有効化したわけではありません。
+インストール済みのextensionも、関連するFinderの場所または項目に対して**有効化**され、呼び出される必要があります。任意の`.appex` bundleを書き込むだけでは不十分です。[AppleのFinder Sync API](https://developer.apple.com/documentation/findersync/fifindersynccontroller/isextensionenabled)では、有効状態を確認できます。以下の`pluginkit`コマンドは、明示的な登録と有効化の例であり、ファイルを置くだけで自動起動する方法ではありません。この方法はドキュメントを確認したもので、調査用Macに新しいextensionをインストールまたは有効化していません。
 
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
@@ -1372,8 +1372,8 @@ pluginkit -e use -i com.example.InSync.InSync
 Writeup: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)<sup>[[23]](#references)</sup>\
 Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)<sup>[[24]](#references)</sup>
 
-- sandbox の bypass に有用: [🟠](https://emojipedia.org/large-orange-circle)
-  - ただし、一般的なアプリケーションの sandbox 内で実行されます
+- sandbox のバイパスに有用: [🟠](https://emojipedia.org/large-orange-circle)
+  - ただし、一般的な application sandbox 内で実行されます
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
@@ -1389,11 +1389,11 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 
 <figure><img src="../images/image (38).png" alt="" width="375"><figcaption></figcaption></figure>
 
-#### 説明と悪用
+#### 説明と Exploit
 
-Xcode で新しいプロジェクトを作成し、新しい **Screen Saver** を生成するテンプレートを選択します。次に、コードを追加します。たとえば、ログを生成するには次のコードを追加します。<sup>[[23]](#references)[[24]](#references)</sup>
+Xcode で新しいプロジェクトを作成し、新しい **Screen Saver** を生成するテンプレートを選択します。次に、コードを追加します。たとえば、以下のコードを使ってログを生成できます。<sup>[[23]](#references)[[24]](#references)</sup>
 
-**Build** して、`.saver` バンドルを **`~/Library/Screen Savers`** にコピーします。次に、スクリーンセーバーの GUI を開いてクリックするだけで、大量のログが生成されます。
+**Build** し、`.saver` バンドルを **`~/Library/Screen Savers`** にコピーします。次に、スクリーンセーバーの GUI を開いてクリックするだけで、多数のログが生成されるはずです。
 
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "hello_screensaver"'
@@ -1405,7 +1405,7 @@ Timestamp                       (process)[PID]
 ```
 
 > [!CAUTION]
-> このコードを読み込むバイナリ（`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`）のエンタイトルメントに **`com.apple.security.app-sandbox`** が含まれているため、**一般的なアプリケーションサンドボックス内で実行される**ことに注意してください。
+> このコードを読み込むバイナリ（`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`）のentitlements内に **`com.apple.security.app-sandbox`** が含まれているため、**一般的なアプリケーションのsandbox内で実行される**ことに注意してください。
 
 スクリーンセーバーのコード:
 
@@ -1475,39 +1475,39 @@ void custom(int argc, const char **argv) {
 @end
 ```
 
-### Spotlight プラグイン
+### Spotlightプラグイン
 
 writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.github.io/beyond/beyond_0011/)<sup>[[25]](#references)</sup>
 
-- sandbox の bypass に有用: [🟠](https://emojipedia.org/large-orange-circle)
-  - ただし、最終的にはアプリケーションの sandbox 内で実行されます
+- sandboxのバイパスに有用: [🟠](https://emojipedia.org/large-orange-circle)
+  - ただし、最終的にはアプリケーションのsandbox内に入ります
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
-  - sandbox は非常に制限されています
+  - sandboxは非常に制限されています
 
 #### 場所
 
 - `~/Library/Spotlight/`
-  - **Trigger**: Spotlight プラグインが管理する拡張子の新しいファイルが作成されたとき。
+  - **トリガー**: Spotlightプラグインが処理する拡張子の新しいファイルが作成される。
 - `/Library/Spotlight/`
-  - **Trigger**: Spotlight プラグインが管理する拡張子の新しいファイルが作成されたとき。
-  - root 権限が必要
+  - **トリガー**: Spotlightプラグインが処理する拡張子の新しいファイルが作成される。
+  - root権限が必要
 - `/System/Library/Spotlight/`
-  - **Trigger**: Spotlight プラグインが管理する拡張子の新しいファイルが作成されたとき。
-  - root 権限が必要
+  - **トリガー**: Spotlightプラグインが処理する拡張子の新しいファイルが作成される。
+  - root権限が必要
 - `Some.app/Contents/Library/Spotlight/`
-  - **Trigger**: Spotlight プラグインが管理する拡張子の新しいファイルが作成されたとき。
+  - **トリガー**: Spotlightプラグインが処理する拡張子の新しいファイルが作成される。
   - 新しいアプリが必要
 
-#### 説明とExploit
+#### 説明と悪用
 
-Spotlight は macOS に組み込まれた検索機能で、ユーザーがコンピューター上のデータに**すばやく包括的にアクセスできるように設計されています**。\
-この高速な検索機能を実現するため、Spotlight は**独自のデータベース**を保持し、**ほとんどのファイルを解析**してインデックスを作成します。これにより、ファイル名とファイルの内容の両方をすばやく検索できます。<sup>[[25]](#references)</sup>
+SpotlightはmacOSに組み込まれた検索機能で、ユーザーが**コンピューター上のデータにすばやく、網羅的にアクセスできる**ように設計されています。\
+この高速検索機能を実現するため、Spotlightは**独自のデータベース**を維持し、**ほとんどのファイルを解析して**インデックスを作成することで、ファイル名とファイル内容の両方をすばやく検索できるようにします。<sup>[[25]](#references)</sup>
 
-Spotlight の基盤となる仕組みでは、「metadata server」を意味する「mds」という名前の中央プロセスが、Spotlight サービス全体を制御します。これを補完する複数の「mdworker」デーモンが、さまざまなファイル形式のインデックス作成など、各種メンテナンス作業を実行します（`ps -ef | grep mdworker`）。これらの作業は Spotlight importer プラグイン、つまり**「.mdimporter bundle」**によって可能になり、Spotlight は多種多様なファイル形式の内容を理解してインデックス化できます。
+Spotlightの基盤となる仕組みは、「metadata server」を意味する「mds」という名前の中央プロセスです。このプロセスがSpotlightサービス全体を統括します。これを補完する複数の「mdworker」デーモンが、さまざまなファイル形式のインデックス作成など、各種の保守タスクを実行します（`ps -ef | grep mdworker`）。こうしたタスクはSpotlight importerプラグイン、つまり**「.mdimporter bundle」**によって実現されます。これにより、Spotlightは多種多様なファイル形式の内容を理解し、インデックスを作成できます。
 
-プラグインまたは**`.mdimporter`** bundle は、前述の場所にあります。新しい bundle が検出され、ファイルタイプに一致し、さらに Spotlight が実際に一致するファイルをインデックス化する必要があります。bundle をコピーしただけでは、ロードされたことの証明にはなりません。[Apple の MDImporter リファレンス](https://developer.apple.com/documentation/coreservices/file_metadata/mdimporter)では、ロードは対象となる変更済みファイルに関連付けられています。macOS 26 での Spotlight importer の実行は、ここではテストしていません。
+プラグイン、つまり**`.mdimporter`** bundleは前述の場所にあります。新しいbundleが検出され、ファイル形式に一致し、さらにSpotlightが実際に一致するファイルをインデックス化する必要があります。bundleをコピーしただけでは、読み込まれたことの証明にはなりません。[AppleのMDImporterリファレンス](https://developer.apple.com/documentation/coreservices/file_metadata/mdimporter)によると、読み込みは対象となる変更済みファイルに関連付けられています。macOS 26でのSpotlight importerの実行は、ここではテストしていません。
 
-実行中にロードされたすべての `mdimporters` を次のコマンドで**確認できます**:
+実行中に読み込まれている`mdimporters`をすべて**確認できます**:
 
 ```bash
 mdimport -L
@@ -1518,7 +1518,7 @@ Paths: id(501) (
     [...]
 ```
 
-また、例えば **/Library/Spotlight/iBooksAuthor.mdimporter** は、これらの種類のファイル（拡張子 `.iba` や `.book` など）を解析するために使用されます。
+また、たとえば **/Library/Spotlight/iBooksAuthor.mdimporter** は、これらの種類のファイル（拡張子 `.iba` や `.book` など）を解析するために使用されます。
 
 ```json
 plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
@@ -1557,19 +1557,19 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 ```
 
 > [!CAUTION]
-> 他の `mdimporter` の Plist を確認しても、**`UTTypeConformsTo`** のエントリが見つからないことがあります。これは組み込みの _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) であり、拡張子を指定する必要がないためです。
+> 他の `mdimporter` の Plist を確認しても、**`UTTypeConformsTo`** の項目が見つからないことがあります。これは組み込みの _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) であり、拡張子を指定する必要がないためです。
 >
-> さらに、システムのデフォルトプラグインが常に優先されるため、攻撃者がアクセスできるのは、Apple 独自の `mdimporters` ではインデックス化されないファイルに限られます。
+> さらに、システム標準のプラグインが常に優先されるため、攻撃者がアクセスできるのは、Apple 独自の `mdimporter` でインデックス化されないファイルに限られます。
 
-独自の importer を作成するには、このプロジェクトから始めるとよいでしょう: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer)。次に、名前と **`CFBundleDocumentTypes`** を変更し、サポートしたい拡張子に対応するよう **`UTImportedTypeDeclarations`** を追加して、それらを **`schema.xml`** に反映します。\
-その後、**`GetMetadataForFile`** 関数のコードを**変更**し、処理対象の拡張子を持つファイルが作成されたときに payload を実行するようにします。
+独自の importer を作成するには、次のプロジェクトをベースにできます: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer)。その後、名前と **`CFBundleDocumentTypes`** を変更し、対応させたい拡張子をサポートするために **`UTImportedTypeDeclarations`** を追加して、**`schema.xml`** に反映します。\
+続いて、**`GetMetadataForFile`** 関数のコードを**変更**し、処理対象の拡張子を持つファイルが作成されたときに payload を実行するようにします。
 
-最後に、新しい **`.mdimporter`** をビルドし、先ほどの3つの場所のいずれかにコピーします。**ログを監視**するか、**`mdimport -L`** を実行して、読み込まれたか確認できます。
+最後に、新しい **`.mdimporter` をビルドして、先ほどの3つの場所のいずれかにコピーします**。**ログを監視する**か、**`mdimport -L`** を実行して、ロードされたかどうかを確認できます。
 
 > [!TIP]
-> importer の sandbox は非常に制限的ですが、`mdworker` は**特権付きの読み取りアクセス**でファイルをインデックス化します。そのため、悪意のある `.mdimporter` は TCC で保護された場所（Downloads、Pictures、Desktop、…）内のファイルの*内容*を読み取り、TCC のプロンプトなしに収集した metadata を外部に送信できます。これは **「Sploitlight」TCC bypass (CVE-2025-31199)** で、macOS Sequoia 15.4 で修正されました。<sup>[[55]](#references)</sup>
+> importer の sandbox は非常に制限が厳しいものの、`mdworker` は**特権付きの読み取りアクセス**でファイルをインデックス化します。そのため、悪意のある `.mdimporter` は TCC で保護された場所（Downloads、Pictures、Desktop、…）にあるファイルの*内容*を読み取り、TCC プロンプトなしで取得したメタデータを流出させることができます。これは **「Sploitlight」TCC bypass（CVE-2025-31199）** と呼ばれ、macOS Sequoia 15.4 で修正されました。<sup>[[55]](#references)</sup>
 
-システムログではなく **Darwin notification names** に保護対象のバイト列を格納する、macOS 26 の別の手法については、[Darwin notification names を介した Spotlight importer の情報漏えい](macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/#spotlight-importer-leakage-via-darwin-notification-names)を参照してください。<sup>[[57]](#references)</sup>
+システムログではなく **Darwin notification 名**に保護対象のバイト列を含める、macOS 26 の別の手法については、[Darwin notification 名を介した Spotlight importer leakage](macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/#spotlight-importer-leakage-via-darwin-notification-names) を参照してください。<sup>[[57]](#references)</sup>
 
 ### ~~Preference Pane~~
 
@@ -1579,16 +1579,16 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 解説: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)<sup>[[26]](#references)</sup>
 
 - sandbox の bypass に有用: [🟠](https://emojipedia.org/large-orange-circle)
-  - 特定のユーザー操作が必要
+  - 特定のユーザー操作が必要です
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### 場所
+#### Location
 
 - **`/System/Library/PreferencePanes`**
 - **`/Library/PreferencePanes`**
 - **`~/Library/PreferencePanes`**
 
-#### 説明
+#### Description
 
 これはもう機能していないようです。<sup>[[26]](#references)</sup>
 
@@ -1597,21 +1597,21 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 解説: [https://theevilbit.github.io/beyond/beyond_0010/](https://theevilbit.github.io/beyond/beyond_0010/)<sup>[[37]](#references)</sup>
 
 - sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
-  - 対象のアプリケーションがインストールされており、被害者が実行・使用する必要があります
+  - ただし、対象のアプリケーションがインストールされており、被害者が実行または使用する必要があります
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### 場所
+#### Location
 
-インストール済みのアプリケーションやツールが実際に実行し、攻撃者が変更できる**インタープリター型スクリプト**。ファイルの権限と呼び出し元のパスを確認してください。`.sh` や `.py` ファイルを見つけただけでは不十分です。Apple の[コード署名ガイド](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html)によると、署名済みアプリバンドルはスクリプトを含むリソースを封印します。バンドル内のスクリプトを編集するとその封印が破られ、バンドルの検証時に検出またはブロックされる可能性があります。Homebrew のランチャーのような外部スクリプトは、署名や信頼の扱いが異なります。解説で挙げられている過去の例は次のとおりです。
+インストール済みのアプリケーションまたはツールが実際に実行する**インタープリター型スクリプト**で、攻撃者が変更できるものです。ファイルの権限と呼び出し元のパスを確認してください。`.sh` や `.py` ファイルが見つかっただけでは不十分です。Apple の[コード署名ガイド](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html)によると、署名済みアプリバンドルはスクリプトを含むリソースを封印します。バンドル内のスクリプトを編集すると封印が破られ、バンドルの検証時に検出またはブロックされる可能性があります。Homebrew の launcher などの外部スクリプトでは、署名や信頼の扱いが異なります。解説に含まれる過去の例は次のとおりです。
 
-- **`/Applications/Sublime Text.app/Contents/MacOS/sublime.py`** – 古い Sublime Text リリースで使われていたスクリプト。インストール済みバージョンでファイルの有無と起動時の使用状況を確認してください。テストした Mac にはありませんでした。
-- **`/opt/homebrew/bin/brew`** (Apple Silicon) または **`/usr/local/bin/brew`** (Intel) – インストールされており、攻撃者が書き込み可能な場合、その `brew` パスが呼び出されたときに実行される Bash ランチャー。テストした Mac では `/opt/homebrew/bin/brew` は書き込み可能な Bash スクリプトでした。これはローカルでの観測結果であり、Homebrew 全般の権限に関する規則ではありません。
-- Python アプリバンドル内の IDLE の `idlemain.py` – 書き込みに admin 権限が必要な場合がありますが、IDLE ユーザーの ID で実行されます。
-- **`/Library/Application Support/Wireshark/ChmodBPF/ChmodBPF`** – 対応する `org.wireshark.ChmodBPF` launchd job がインストールされている場合に、root で実行される過去のシェルスクリプト。テストした Mac にはスクリプトも job もありませんでした。
+- **`/Applications/Sublime Text.app/Contents/MacOS/sublime.py`** – 旧バージョンの Sublime Text で使用されていたスクリプトです。インストールされているバージョンで、ファイルの有無と起動時に使用されるかを確認してください。テスト用 Mac にはありませんでした。
+- **`/opt/homebrew/bin/brew`**（Apple Silicon）または **`/usr/local/bin/brew`**（Intel）– インストールされていて攻撃者が書き込み可能な場合、該当する `brew` パスが呼び出されたときに実行される Bash launcher です。テスト用 Mac では `/opt/homebrew/bin/brew` は書き込み可能な Bash スクリプトでした。これはその環境での観察結果であり、Homebrew 全般の権限を示すものではありません。
+- Python アプリバンドル内の IDLE の `idlemain.py` – 書き込みに管理者権限が必要な場合がありますが、IDLE ユーザーの権限で実行されます。
+- **`/Library/Application Support/Wireshark/ChmodBPF/ChmodBPF`** – 対応する `org.wireshark.ChmodBPF` launchd ジョブがインストールされている場合に root で実行される、過去のシェルスクリプトです。テスト用 Mac にはスクリプトもジョブもありませんでした。
 
-#### 説明と Exploitation
+#### Description & Exploitation
 
-一部のツールやアプリは、実行時にインタープリター型スクリプトを実行します。書き込み可能なスクリプトにコマンドを追加すると、署名の検証、quarantine、その他のチェックで許可される限り、次回そのスクリプトを呼び出す特定の処理が実行されたときにコマンドが実行されます。元の調査では、2019年時点の複数のインストール環境で実証されています。対象のバージョンでパスと実行条件を再確認してください。<sup>[[37]](#references)</sup>
+一部のツールやアプリは、実行時にインタープリター型スクリプトを実行します。書き込み可能なスクリプトにコマンドを追加すると、署名検証、quarantine、その他のチェックで許可される限り、次に該当する呼び出し元が実行されたときにそのコマンドを実行できます。元の調査では、2019年時点の複数のインストール環境で実証されました。対象のバージョンでパスと実行条件を再確認してください。<sup>[[37]](#references)</sup>
 
 ```python
 # Marker-only injection test on a COPY of Homebrew's launcher. The relocated
@@ -1629,26 +1629,26 @@ with tempfile.TemporaryDirectory(prefix='ht-script-copy-') as root:
     print('marker fired:', marker.exists())
 ```
 
-このコピーのテストでは、macOS 26.5.2 で `marker fired: True` が確認されました。元のランチャーには手を加えていません。これは挿入ポイントがコピー内で実行されることを示すものであり、変更した署名済みアプリバンドルや実際の Homebrew インストールが、すべての起動チェックを通過することを示すものではありません。
+このコピーのテストでは、macOS 26.5.2で`marker fired: True`が確認されました。元のlauncherには手を加えていません。これは、コピー内で挿入ポイントが実行されることを示すものであり、署名済みアプリバンドルを改変した場合や、実際のHomebrewインストールで、すべての起動チェックを通過することを示すものではありません。
 
-### Dock Tile Plugins
+### Dock Tileプラグイン
 
-解説記事: [https://theevilbit.github.io/beyond/beyond_0032/](https://theevilbit.github.io/beyond/beyond_0032/)<sup>[[38]](#references)</sup>
+解説: [https://theevilbit.github.io/beyond/beyond_0032/](https://theevilbit.github.io/beyond/beyond_0032/)<sup>[[38]](#references)</sup>
 
-- sandbox のバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
-  - プラグインを宣言するアプリが検出・登録され、Dock によって処理される必要がある
-  - プラグインは、app-sandbox entitlement がなく、library validation が無効になっている **Apple署名済み** ヘルパーに読み込まれる。引用元の調査では、このヘルパーは Background Task Management UI に表示されていませんでした。対象リリースでの表示状況は確認が必要です。
-- TCC バイパス: [🔴](https://emojipedia.org/large-red-circle)
+- sandbox bypassに有用: [✅](https://emojipedia.org/check-mark-button)
+  - プラグインを宣言するアプリがDockによって検出・登録され、処理される必要がある
+  - プラグインは、app-sandbox entitlementがなく、library validationが無効になっている**Apple署名済み**のhelperに読み込まれます。引用した調査では、このhelperはBackground Task Management UIに表示されていませんでした。対象のリリースで表示されるかどうかは確認が必要です。
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
 
-- アプリの `Info.plist` にある **`NSDockTilePlugIn`** キーで参照される **`<App>.app/Contents/PlugIns/<name>.docktileplugin`**。プラグイン独自の `Info.plist` では **`NSPrincipalClass`** を設定します。
+- **`<App>.app/Contents/PlugIns/<name>.docktileplugin`**。アプリの`Info.plist`にある**`NSDockTilePlugIn`**キーで参照されます。プラグイン自身の`Info.plist`では**`NSPrincipalClass`**を設定します。
 
-#### 説明と悪用
+#### 説明とExploit
 
-アプリが `NSDockTilePlugIn` を宣言すると、Dock はログイン時、またはアプリのタイルが追加されたときに、参照されたバンドルを **`com.apple.dock.external.extra`** XPC ヘルパー（Apple Silicon では `...extra.arm64`）に読み込むことができます。アプリ自体を起動する必要はありません。このためには、macOS によってアプリが検出・登録され、受け入れられる必要があります。このヘルパーは **Apple署名済み** で、`com.apple.security.app-sandbox` entitlement を持たず、`com.apple.security.cs.disable-library-validation` が設定されています。読み込み時には principal class の **`setDockTile:`** メソッドが呼び出されます。そこから、後続イベントに備えて分散通知（例: `com.apple.screenIsLocked`）を購読できます。<sup>[[38]](#references)</sup>
+アプリが`NSDockTilePlugIn`を宣言すると、Dockは、ログイン時またはそのタイルが追加されたときに、参照先のバンドルを**`com.apple.dock.external.extra`** XPC helper（Apple Siliconでは`...extra.arm64`）に読み込むことがあります。アプリ自体を起動する必要はありません。macOSによってアプリが検出・登録され、受け入れられる必要があります。このhelperは**Apple署名済み**で、`com.apple.security.app-sandbox` entitlementを持たず、`com.apple.security.cs.disable-library-validation`が設定されています。読み込み時にprincipal classの**`setDockTile:`**メソッドが呼び出され、そこから分散通知（例: `com.apple.screenIsLocked`）を購読し、後続のイベントを受け取ることができます。<sup>[[38]](#references)</sup>
 
-macOS 26.5.2 では、読み取り専用の `codesign` 検査によって、ヘルパーの Apple 署名と entitlements を確認しました。また、インストール済みアプリのいくつかで `NSDockTilePlugIn` の宣言が確認されました。この Mac には新しいプラグインをインストールも読み込みもしていないため、このリリースで新規作成したバンドルが実行されるかは未検証です。
+macOS 26.5.2では、読み取り専用の`codesign`調査により、helperのApple署名とentitlementsが確認され、インストール済みの複数のアプリで`NSDockTilePlugIn`が宣言されていることも確認されました。このMacには新しいプラグインをインストールも読み込みもしていないため、このリリースで新たに作成したバンドルが実行されるかどうかは未検証です。
 
 ```bash
 # Enumerate apps already shipping a Dock tile plugin (hijack / template targets)
@@ -1672,23 +1672,23 @@ done
 @end
 ```
 
-### Widgets (Notification Center / WidgetKit)
+### ウィジェット（Notification Center / WidgetKit）
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0033/](https://theevilbit.github.io/beyond/beyond_0033/)<sup>[[39]](#references)</sup>
 
-- Sandbox bypassに有用: [✅](https://emojipedia.org/check-mark-button)
-  - Widget extensionは**独自のプロセス**で実行され、追加してもBackground Task Managementの警告は表示されない
+- sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
+  - widget extension は**独自のプロセス**で実行され、追加しても Background Task Management の警告は表示されない
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
-  - config plistはTCCで保護されたコンテナ内にあるため、外部から編集するにはFull Disk AccessまたはTCC bypassが必要
+  - 設定 plist は TCC で保護されたコンテナ内にあるため、外部から編集するには Full Disk Access または TCC bypass が必要
 
-#### Location
+#### 場所
 
-- Widget extension bundle: **`<App>.app/Contents/PlugIns/<Widget>.appex`**
-- 有効化済み/登録済みのwidgets: **`~/Library/Containers/com.apple.notificationcenterui/Data/Library/Preferences/com.apple.notificationcenterui.plist`** (keys `widgets.instances` and `widgets.widgets`)
+- Widget extension の bundle: **`<App>.app/Contents/PlugIns/<Widget>.appex`**
+- 有効な/登録済みの widget: **`~/Library/Containers/com.apple.notificationcenterui/Data/Library/Preferences/com.apple.notificationcenterui.plist`**（キー `widgets.instances` と `widgets.widgets`）
 
-#### Description & Exploitation
+#### 説明と悪用
 
-アプリに同梱されたWidgetKit extensionは、Notification Centerによって管理される**独自のプロセス**で実行されます。`widgets.instances`にインスタンスを登録し（`INIntent`データを埋め込んだ、base64でエンコードされた`NSKeyedArchiver`形式の`CHSWidget` blob）、NotificationCenterを再起動すると、widgetが読み込まれ、その`TimelineProvider`/intentコードが実行されます。<sup>[[39]](#references)</sup>
+アプリに同梱された WidgetKit extension は、Notification Center が管理する**独自のプロセス**で実行されます。`widgets.instances` に（埋め込みの `INIntent` データを含む、base64 でエンコードされた `NSKeyedArchiver` 形式の `CHSWidget` blob）インスタンスを登録し、NotificationCenter を再起動すると、widget がロードされて `TimelineProvider`/intent のコードが実行されます。<sup>[[39]](#references)</sup>
 
 ```bash
 # Inspect currently-registered widgets (file present on stock macOS)
@@ -1696,24 +1696,24 @@ plutil -p ~/Library/Containers/com.apple.notificationcenterui/Data/Library/Prefe
   | grep -iE "widgets?\." | head
 ```
 
-### Mail.app ルール（Run AppleScript）
+### Mail.app Rules (Run AppleScript)
 
 Writeup: [https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)<sup>[[42]](#references)</sup>
 
-- sandbox のバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
-  - ただし、Mail.app にアカウントが設定され、起動している必要がある。トリガーは受信メール
+- sandbox bypassに有用: [✅](https://emojipedia.org/check-mark-button)
+  - ただし、Mail.appにアカウントが設定され、起動している必要がある。トリガーは受信メール
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
-  - Mail の外部からルールやスクリプトを編集する場合、Mail を終了し、最新の macOS では Full Disk Access が必要になることがある
+  - Mailの外部からルールやスクリプトを編集する場合、Mailを終了し、最新のmacOSではFull Disk Accessが必要になることがある
 
-#### Location
+#### 場所
 
-- **`~/Library/Mail/V10/MailData/SyncedRules.plist`**（ローカルルール。Sonoma/Sequoia では `V10`、それ以降のバージョンでは `V11`+）
-- **`~/Library/Mobile Documents/com~apple~mail/Data/V10/MailData/ubiquitous_SyncedRules.plist`**（iCloud 同期ルール。こちらが優先される）
+- **`~/Library/Mail/V10/MailData/SyncedRules.plist`**（ローカルルール。Sonoma/Sequoiaでは`V10`、それ以降では`V11`+）
+- **`~/Library/Mobile Documents/com~apple~mail/Data/V10/MailData/ubiquitous_SyncedRules.plist`**（iCloud同期ルール。こちらが優先される）
 - ルールの有効化: **`RulesActiveState.plist`**。AppleScript payload: **`~/Library/Application Scripts/com.apple.mail/*.scpt`**
 
-#### Description & Exploitation
+#### 説明と悪用
 
-Apple Mail の**ルール**には、*"Run AppleScript"* アクションを設定できます。特定の細工された**件名**に一致するルールを追加し、攻撃者のスクリプトを実行させることで、攻撃者は特定のメールが届くたびに Mail のコンテキストで実行される、**リモートからトリガー可能でステルス性の高い**コード実行手段を得ます。LaunchAgent/Login Item が作成されないため、多くの persistence スキャナーを回避できるベクターです。<sup>[[42]](#references)</sup> トリガーとなるメールも**削除**するようルールを設定すれば、痕跡を隠せます。防御側はこれを直接探せます:<sup>[[43]](#references)</sup>
+Apple Mailの**ルール**には、*"Run AppleScript"*アクションを設定できる。細工した**件名**に一致するルールを追加し、攻撃者のスクリプトを実行させると、特定のメールが届くたびにMailのコンテキストで、攻撃者は**リモートからトリガー可能でステルス性の高い**コード実行を実現できる。この手法ではLaunchAgentやLogin Itemが作成されないため、多くのpersistence scannerを回避できる。<sup>[[42]](#references)</sup> トリガーとなるメールを**削除**する設定も加えれば、証拠を隠せる。防御側は、次の場所を直接調査できる。<sup>[[43]](#references)</sup>
 
 ```bash
 # Enumerate Mail rules that invoke AppleScript
@@ -1721,24 +1721,24 @@ grep -A1 -i "AppleScript" ~/Library/Mail/V*/MailData/SyncedRules.plist 2>/dev/nu
 plutil -p ~/Library/Mail/V*/MailData/SyncedRules.plist 2>/dev/null | grep -iE "AppleScript|ShouldTransfer|Delete"
 ```
 
-### Configuration Profiles (.mobileconfig)
+### 構成プロファイル (.mobileconfig)
 
 解説: [https://www.jamf.com/blog/malicious-profiles-come/](https://www.jamf.com/blog/malicious-profiles-come/)<sup>[[44]](#references)</sup>
 
-- sandbox の回避に有用: [🔴](https://emojipedia.org/large-red-circle)
-  - 最近の macOS では、System Settings → *Device Management* で**ユーザーが手動で承認**する必要があります（MDM 管理下でない場合、サイレントな `profiles install` は利用できなくなっています）
+- sandbox の bypass に有用: [🔴](https://emojipedia.org/large-red-circle)
+  - 最新の macOS では、System Settings → *Device Management* で**ユーザーによる手動承認**が必要です（MDM 外では、サイレントな `profiles install` は使えなくなっています）
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
 
-- インストール済みプロファイルは **`/Library/Managed Preferences/`** と **`/var/db/ConfigurationProfiles/`** に保存されます。プロファイルは `PayloadContent` 配列を含む XML plist です。
+- インストール済みプロファイルは **`/Library/Managed Preferences/`** と **`/var/db/ConfigurationProfiles/`** にあり、プロファイルは `PayloadContent` 配列を含む XML plist です。
 
 #### 説明と悪用
 
-`.mobileconfig` は直接コードを実行する手段ではありませんが、**信頼されたルート CA**（`com.apple.security.root`）、**グローバルプロキシまたは PAC プロキシ**（`com.apple.proxy.*`）、**管理対象の環境設定**（`com.apple.ManagedClient.preferences`）、または制限などの設定を永続化できます。macOS 10.15 以降では、Apple の [`PayloadRemovalDisallowed` の定義](https://developer.apple.com/documentation/devicemanagement/toplevel)によると、**手動でインストールされた**プロファイルでこれを `true` に設定し、削除パスワードの payload がない場合、削除には**管理者認証**が必要になります。ただし、そのプロファイルが完全に削除不能になるわけではありません。MDM でインストールされたプロファイルには、別個の管理および削除ルールが適用されます。<sup>[[44]](#references)</sup>
+`.mobileconfig` は直接コードを実行するプリミティブではありませんが、**信頼されたルート CA** (`com.apple.security.root`)、**グローバルまたは PAC プロキシ** (`com.apple.proxy.*`)、**管理対象の環境設定** (`com.apple.ManagedClient.preferences`)、または制限などの構成を永続化できます。macOS 10.15 以降では、Apple の [`PayloadRemovalDisallowed` の定義](https://developer.apple.com/documentation/devicemanagement/toplevel)によると、**手動でインストールされた**プロファイルでこれを `true` に設定し、削除パスワードの payload がない場合、削除には**管理者認証**が必要です。ただし、そのプロファイルが絶対に削除できなくなるわけではありません。MDM でインストールされたプロファイルには、別の管理・削除ルールが適用されます。<sup>[[44]](#references)</sup>
 
 > [!WARNING]
-> 通常の configuration profile には、任意の `LaunchDaemon`/`LaunchAgent` を配置する payload type は**ありません**。その方法で daemon をインストールするには、完全な **MDM enrollment** と管理エージェントまたはスクリプトが必要です。.mobileconfig を launchd の配布手段として扱わないでください。
+> 通常の構成プロファイルには、任意の `LaunchDaemon`/`LaunchAgent` を配置する payload type は**ありません**。その方法で daemon をインストールするには、完全な **MDM enrollment** と管理 agent/script が必要です。.mobileconfig を launchd の配布手段として扱わないでください。
 
 ```bash
 # Inspect installed profiles (user context)
@@ -1748,18 +1748,18 @@ sudo profiles show       # system (root)
 
 ### DYLD_INSERT_LIBRARIES Persistence
 
-- sandbox の bypass に有用: [🔴](https://emojipedia.org/large-red-circle)
-  - dyld は SIP/platform binaries、hardened-runtime apps、setuid targets では `DYLD_*` を **除去**するため、保護されていないプロセスにのみ注入し、SIP/hardened runtime を **bypassしません**
+- sandbox bypassに有用: [🔴](https://emojipedia.org/large-red-circle)
+  - dyldはSIP/platform binaries、hardened-runtime apps、setuid targetsに対して`DYLD_*`を**除去**するため、保護されていないプロセスにのみ注入し、SIPやhardened runtimeをバイパスすることは**ありません**
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Location
+#### 場所
 
-- 信頼性の高い方法: 悪意のある `LaunchAgent`/`LaunchDaemon` plist 内の **`EnvironmentVariables`** dict（ログイン時/起動時に実行）
-- 廃止済み/歴史的な方法（報告のみ）: **`~/.MacOSX/environment.plist`**（10.8で削除）と **`/etc/launchd.conf`**（10.10で削除）
+- 信頼できる方法: 悪意のある`LaunchAgent`/`LaunchDaemon` plist内の**`EnvironmentVariables`** dict（ログイン時/起動時に実行）
+- 廃止済み/歴史的（報告のみ）: **`~/.MacOSX/environment.plist`**（10.8で削除）および**`/etc/launchd.conf`**（10.10で削除）
 
-#### Description & Exploitation
+#### 説明と悪用
 
-攻撃者が `DYLD_INSERT_LIBRARIES` を被害者プロセスの環境変数に設定できれば、dyld が攻撃者の dylib をそのプロセスにロードします（その constructor が実行されます）。永続化するには、この変数を LaunchAgent に埋め込み、ジョブが起動するたびに再注入させます。なお、現行の macOS では `launchctl setenv DYLD_*` はフィルタリングされるため、代わりに plist に埋め込んでください。<sup>[[45]](#references)</sup>
+攻撃者が被害者プロセスの環境変数に`DYLD_INSERT_LIBRARIES`を設定できると、dyldは攻撃者のdylibをそのプロセスに読み込みます（そのコンストラクタが実行されます）。永続化する場合は、この変数をLaunchAgentに埋め込み、ジョブが起動するたびに再注入します。なお、最近のmacOSでは`launchctl setenv DYLD_*`はフィルタリングされるため、代わりにplistに埋め込んでください。<sup>[[45]](#references)</sup>
 
 ```xml
 <key>EnvironmentVariables</key>
@@ -1777,31 +1777,31 @@ macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injecti
 
 ### AI Coding Agent CLI（hooks、MCP servers、rules files）
 
-解説記事: [CVE-2025-59536（Check Point）](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)<sup>[[47]](#references)</sup>、[Rules File Backdoor（Pillar Security）](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)<sup>[[48]](#references)</sup>
+解説記事: [CVE-2025-59536 (Check Point)](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)<sup>[[47]](#references)</sup>、[Rules File Backdoor (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)<sup>[[48]](#references)</sup>
 
 - sandbox の回避に有用: [✅](https://emojipedia.org/check-mark-button)
-  - 開発者が該当するagentを使用する必要があります。agentが設定を受け入れると、起動コマンドはそのユーザーの権限で実行されます。workspace trustとMCPの承認条件は、製品やセッションモードによって異なります。
-- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)（ユーザーとして実行され、ターミナル/agentがすでに持っている権限を引き継ぎます）
+  - 該当する agent を開発者が使用する必要があります。agent が設定を受け入れると、起動コマンドはそのユーザーの権限で実行されます。workspace trust と MCP の承認要件は、製品やセッションモードによって異なります。
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)（ユーザーとして実行され、ターミナル/agent がすでに持つ権限を継承）
 
 #### 場所
 
-明示的なhookおよびMCP設定ファイルは、開発者がツールを使ったときに **shell commandsまたはchild processesを実行させる** 可能性があります。ユーザーごとのグローバルファイル（persistence）から実行される場合と、リポジトリにコミットされたファイル（supply-chain）から実行される場合があります。`CLAUDE.md`、`AGENTS.md`、`GEMINI.md`、およびeditor rulesは **agentへの指示であり**、読み込まれただけでshellが実行されるとは限りません。効果はagentの動作とツール権限によって異なります。各製品の最新のtrustおよび承認ルールを確認してください。
+明示的に設定された hook および MCP の設定ファイルは、**開発者がツールを使用したときに shell commands または child processes を実行**させる可能性があります。ユーザーごとのグローバルファイル（persistence）から実行される場合と、リポジトリにコミットされたファイル（supply-chain）から実行される場合があります。`CLAUDE.md`、`AGENTS.md`、`GEMINI.md`、および editor rules は **agent への指示であり**、読み込まれた際に shell が確実に実行されるわけではありません。その効果は agent の挙動とツールの権限に依存します。各製品の現在の trust および承認ルールを確認してください。
 
 - **Claude Code**
-  - `~/.claude/settings.json`、プロジェクトの`.claude/settings.json`、`.claude/settings.local.json`、およびrootのみが扱える **`/Library/Application Support/ClaudeCode/managed-settings.json`**（MDM/managed settings **はユーザーが上書きできません** → 強力なpersistence）
-  - `hooks` object — `PreToolUse`、`PostToolUse`、`UserPromptSubmit`、`Stop`、`SubagentStop`、`SessionStart`、`SessionEnd`、`Notification`、`PreCompact`の各eventでshell `command`を実行
-  - `statusLine.command` — status lineを表示するために実行されるshell command（毎セッション）
-  - `~/.claude.json` / プロジェクトの`.mcp.json`内のMCP servers — `command`+`args`をchild processesとして起動
-  - `CLAUDE.md` / `~/.claude/CLAUDE.md` — prompt injectionを試みる指示（agentの動作とツール権限に依存）
-- **OpenAI Codex CLI**: `~/.codex/config.toml`の`[mcp_servers.*]`（`command`/`args`をchild processesとして起動）；プロジェクト指示の`AGENTS.md`
+  - `~/.claude/settings.json`、プロジェクトの `.claude/settings.json`、`.claude/settings.local.json`、および root のみが管理する **`/Library/Application Support/ClaudeCode/managed-settings.json`**（MDM/managed settings **はユーザーが上書きできない** → 強力な persistence）
+  - `hooks` object — イベント `PreToolUse`、`PostToolUse`、`UserPromptSubmit`、`Stop`、`SubagentStop`、`SessionStart`、`SessionEnd`、`Notification`、`PreCompact` のそれぞれで shell `command` を実行
+  - `statusLine.command` — status line の描画に使われる shell command（毎セッション実行）
+  - `~/.claude.json` / プロジェクトの `.mcp.json` にある MCP servers — `command`+`args` を child processes として起動
+  - `CLAUDE.md` / `~/.claude/CLAUDE.md` — prompt injection を試みる指示。実際の影響は agent の挙動とツールの権限に依存
+- **OpenAI Codex CLI**: `~/.codex/config.toml` の `[mcp_servers.*]`（`command`/`args` を child processes として起動）；プロジェクトの指示ファイル `AGENTS.md`
 - **Gemini CLI**: `~/.gemini/settings.json`（`hooks`、MCP servers）；`GEMINI.md`
-- **Cursor**: `~/.cursor/hooks.json`（`beforeShellExecution`、`afterAgentResponse`、`stop`などでコマンドを実行）；`.cursor/rules/`、`.cursorrules`、`~/.cursor/mcp.json`；GitHub Copilotの`.github/copilot-instructions.md`
+- **Cursor**: `~/.cursor/hooks.json`（`beforeShellExecution`、`afterAgentResponse`、`stop`、…でコマンドを実行）；`.cursor/rules/`、`.cursorrules`、`~/.cursor/mcp.json`；GitHub Copilot の `.github/copilot-instructions.md`
 
 #### 説明と悪用
 
-攻撃者がアカウントのユーザーグローバル設定を変更できる場合、そのhookまたはMCP commandsは、以降のセッションでそのアカウントの権限により実行されます。リポジトリが制御する設定は別のケースです。[現行のClaude Code security docs](https://code.claude.com/docs/en/security)によると、workspace trustは対話型ダイアログで確認され、プロジェクトの`.mcp.json` serversには別途承認プロンプトが表示されます。[権限マトリクス](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder)では、親フォルダがtrustされた後にhooksが実行される場合があるとされています。また、`claude -p`/SDK sessionsでは対話型trustプロンプトが表示されず、これらの非対話型モードではプロジェクトのMCP serversが承認プロンプトなしで接続されます。CVE-2025-59536として報告された、trust前にプロジェクトhookを実行できるbypassは[2025年に修正済み](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)です。現在の標準動作として扱わないでください。侵入経路には、侵害されたリポジトリや悪意あるinstallerなどがあります。rules fileによるprompt injectionは明示的なhookほど確実ではなく、ツールの承認にも依存します。<sup>[[47]](#references)</sup><sup>[[48]](#references)</sup>
+攻撃者がアカウントのユーザーグローバル設定を変更できる場合、その hook または MCP commands は、今後そのアカウントで開始されるセッション中に実行できます。リポジトリが制御する設定は別のケースです。[現在の Claude Code security docs](https://code.claude.com/docs/en/security) では、対話型の workspace trust ダイアログと、プロジェクトの `.mcp.json` servers に対する別個の承認プロンプトが説明されています。[権限マトリクス](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder) によると、親フォルダーが trust された後に hooks が実行される場合があります。また、`claude -p`/SDK sessions では対話型の trust プロンプトは表示されず、これらの非対話型モードではプロジェクトの MCP servers が承認プロンプトなしで接続されます。CVE-2025-59536 として報告された、trust 前にプロジェクトの hook が実行される問題は[2025年に修正済み](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)です。これを現在のデフォルトの挙動とみなさないでください。侵入経路には、侵害されたリポジトリや悪意のある installer が含まれる場合があります。rules file による prompt injection は、明示的な hook より挙動が予測しにくく、依然としてツールの承認に左右されます。<sup>[[47]](#references)</sup><sup>[[48]](#references)</sup>
 
-Claude Codeのユーザーグローバル設定の例。テストする場合は、破棄可能なアカウントにのみ設定してください。
+Claude Code のユーザーグローバル設定の例。テスト時は使い捨てのアカウントにのみ配置してください。
 
 ```json
 {
@@ -1814,7 +1814,7 @@ Claude Codeのユーザーグローバル設定の例。テストする場合は
 }
 ```
 
-ユーザーグローバルの Codex MCP 設定例:
+ユーザー全体に適用される Codex MCP 設定の例：
 
 ```toml
 [mcp_servers.evil]
@@ -1822,7 +1822,7 @@ command = "/bin/sh"
 args = ["-c", "touch /tmp/hacktricks_codex_mcp; exec real-mcp-server"]
 ```
 
-Cursor hook の設定例。使用前に、インストール済みバージョンのスキーマを確認してください：
+Cursor hook configurationの例。使用する前に、インストール済みバージョンのschemaを確認してください:
 
 ```json
 { "version": 1, "hooks": { "beforeShellExecution": [ { "command": "touch /tmp/hacktricks_cursor_hook" } ] } }
@@ -1836,32 +1836,32 @@ ls -la .claude/settings*.json .mcp.json ~/.claude/settings.json ~/.claude.json \
 python3 -c 'import json;d=json.load(open("'"$HOME"'/.claude/settings.json"));print("claude hooks:",list(d.get("hooks",{}).keys()),"statusLine:",bool(d.get("statusLine")))' 2>/dev/null
 ```
 
-### Browser Extensions（Chromium: Chrome / Brave / Edge）
+### Browser Extensions (Chromium: Chrome / Brave / Edge)
 
-解説: [Chrome external extensions](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)<sup>[[49]](#references)</sup>、[macOSでのExtensionInstallForcelistの悪用](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)<sup>[[50]](#references)</sup>
+解説: [Chrome external extensions](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)<sup>[[49]](#references)</sup>, [ExtensionInstallForcelist abuse on macOS](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)<sup>[[50]](#references)</sup>
 
-- サンドボックスの回避に有用: [✅](https://emojipedia.org/check-mark-button)
-  - 対応ブラウザーと、インストール済みで有効な拡張機能が必要です。macOSのExternal Extensionsではユーザーの確認が必要です。管理対象の強制インストールには、適用可能なエンタープライズポリシーが必要です。
+- sandbox のバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
+  - 対応ブラウザーと、インストール済みで有効になっている拡張機能が必要です。macOS の External Extensions ではユーザーの確認が必要です。管理対象の強制インストールには、適用可能なエンタープライズポリシーが必要です。
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 > [!NOTE]
-> これは**native messaging hosts**とは別の仕組みです（上記の*Chrome native messaging hosts*セクションを参照）。ここでの永続化は、**自動インストールされる拡張機能**そのものです。
+> これは **native messaging hosts** とは別のものです（上記の *Chrome native messaging hosts* セクションを参照）。ここで永続化するのは、**自動インストールされた拡張機能**そのものです。
 
 #### 場所
 
-- **External Extensions JSON**（ブラウザーの起動時に検出され、その後macOSでは有効化の確認が表示される）:
-  - Chrome: `~/Library/Application Support/Google/Chrome/External Extensions/<extID>.json`（ユーザーごと）または `/Library/Application Support/Google/Chrome/External Extensions/`（全ユーザー）
+- **External Extensions JSON**（ブラウザー起動時に検出され、その後 macOS では有効化の確認が求められる）:
+  - Chrome: `~/Library/Application Support/Google/Chrome/External Extensions/<extID>.json`（ユーザー単位）または `/Library/Application Support/Google/Chrome/External Extensions/`（全ユーザー）
   - Brave: `~/Library/Application Support/BraveSoftware/Brave-Browser/External Extensions/`
   - Edge: `~/Library/Application Support/Microsoft Edge/External Extensions/`
-- 管理対象の環境設定 / 構成プロファイルによる**エンタープライズポリシーでの強制インストール**:
-  - `com.google.Chrome`キーの`ExtensionInstallForcelist`（Braveは`com.brave.Browser`、Edgeは`com.microsoft.Edge`）。`/Library/Managed Preferences/`またはインストール済みの`.mobileconfig`から読み込まれます。
+- 管理対象の設定 / 構成プロファイルによる**エンタープライズポリシーの強制インストール**:
+  - `com.google.Chrome` キーの `ExtensionInstallForcelist`（Brave は `com.brave.Browser`、Edge は `com.microsoft.Edge`）。`/Library/Managed Preferences/` またはインストール済みの `.mobileconfig` から読み込まれます。
 
-#### 説明と悪用方法
+#### 説明と悪用
 
-これらは異なる2つのインストール方法です。Chromeの[外部インストールに関するドキュメント](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)によると、*External Extensions*ファイルを通じて拡張機能が提示された場合、**WindowsとmacOSのユーザーは確認して有効化する必要があります**。そのJSONファイルを書き込んだだけで実行されるわけではありません。macOSで全ユーザー向けにインストールする場合、Chromeは外部拡張機能のファイルが非特権ユーザーによる変更から保護されていることも要求します。管理対象の`ExtensionInstallForcelist`または`ExtensionSettings`ポリシーを使えば、ユーザー操作なしで拡張機能をインストールして固定できます。[GoogleのMac向けポリシーガイド](https://support.google.com/chrome/a/answer/7517624)では、管理対象の構成について説明されており、強制インストールされた拡張機能はユーザーが削除できないとされています。これはポリシーを使った配布方法であり、ユーザーごとの`defaults write`による簡易な方法ではありません。<sup>[[49]](#references)</sup>
+これらは異なる2つのインストール方法です。Chrome の [external-install documentation](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions) によると、*External Extensions* ファイルを通じて提供される拡張機能は、**Windows と macOS のユーザーが確認して有効化する必要があります**。JSON ファイルを書き込んだだけでは実行されません。macOS で全ユーザー向けにインストールする場合、Chrome は外部拡張機能のファイルが、権限のないユーザーによる変更から保護されていることも要求します。管理対象の `ExtensionInstallForcelist` または `ExtensionSettings` ポリシーを使えば、ユーザーの操作なしで拡張機能をインストールして固定できます。[Google's Mac policy guide](https://support.google.com/chrome/a/answer/7517624) では、管理対象の設定について説明されており、強制インストールされた拡張機能はユーザーが削除できないと記載されています。これはポリシーによる展開方法であり、ユーザー単位の `defaults write` による簡易な方法ではありません。<sup>[[49]](#references)</sup>
 
 > [!WARNING]
-> macOSでは、*External Extensions* JSONマニフェストの更新URLには、ローカルのCRXではなく**Chrome Web Store**のURLを指定する必要があります。管理ポリシーによる配布には独自のエンタープライズ要件があり、管理対象のセルフホスト更新URLが許可される場合もあります。テスト用プロファイルでローカルの展開済み拡張機能を使う場合、Chromeのデベロッパーモードにおける`--load-extension=/path`スイッチは別の仕組みであり、External Extensions JSONファイルを自動実行可能にするものではありません。`Secure Preferences`への書き込みを、いずれかの公式な登録方法と同等のものとして扱わないでください。
+> macOS では、*External Extensions* JSON マニフェストの参照先は、ローカルの CRX ではなく **Chrome Web Store** の更新 URL でなければなりません。管理ポリシーによる展開には独自のエンタープライズ要件があり、管理対象のセルフホスト更新 URL が許可される場合があります。テスト用プロファイルでローカルの unpacked extension を使う場合、Chrome の開発者モードの `--load-extension=/path` スイッチは別の仕組みであり、External Extensions JSON ファイルを自動実行させるものではありません。`Secure Preferences` への書き込みを、文書化されているどちらかの登録方法と同等のものとして扱わないでください。
 
 ```bash
 # In a disposable browser account, propose a Chrome Web Store extension for enablement
@@ -1873,70 +1873,76 @@ cat > "$external_dir/$ext_id.json" <<'JSON'
 JSON
 ```
 
-その使い捨てアカウントで Chrome を起動し、有効化のプロンプトを確認します。ユーザーが承認した後に拡張機能が独自に動作することが、実行 PoC となります。テスト後は manifest を削除し、そのプロファイルで拡張機能を無効化またはアンインストールしてください。この方法は、調査用 Mac のアクティブな Chrome プロファイルでは**試していません**。managed-policy を使う方法も、同 Mac では適用していません。
+その使い捨てアカウントで Chrome を起動し、有効化プロンプトを確認します。ユーザーが承認すると、拡張機能自体の動作が実行 PoC になります。テスト後は、manifest を削除し、そのプロファイルで拡張機能を無効化またはアンインストールしてください。この方法は、調査用 Mac のアクティブな Chrome プロファイルでは**テストしていません**。管理ポリシー経由の方法も、同じ Mac では導入していません。
 
-Force-install と External Extensions は **Chrome Web Store** の拡張機能 ID を参照します。プロファイルの HMAC 署名付き `Secure Preferences` を編集してローカル拡張機能をサイレントに挿入する低レベルの手法や、その他の Chromium プロセスの悪用については、以下を参照してください。
+Force-install と External Extensions は、**Chrome Web Store** の拡張機能 ID を参照します。プロファイルの HMAC 署名付き `Secure Preferences` を編集してローカル拡張機能を密かに注入する、より低レベルの手法や、その他の Chromium プロセスの悪用については、次を参照してください。
 
 {{#ref}}
 macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md
 {{#endref}}
 
-### URL Scheme & File-Type Handlers (LaunchServices)
+### URL Scheme と File-Type Handler（LaunchServices）
 
-解説：[カスタム URL Scheme による Remote Mac Exploitation (Objective-See)](https://objective-see.org/blog/blog_0x38.html)<sup>[[52]](#references)</sup>
+解説：[カスタム URL Scheme を使ったリモート Mac Exploitation（Objective-See）](https://objective-see.org/blog/blog_0x38.html)<sup>[[52]](#references)</sup>
 
-- サンドボックスのバイパスに有用: [✅](https://emojipedia.org/check-mark-button)
-  - トリガーは、被害者がリンク（例: Chrome/Brave/Safari 内）をクリックするか、登録されたタイプのファイルを開くことです
+- sandbox のバイパスに有効: [✅](https://emojipedia.org/check-mark-button)
+  - トリガーは、被害者がリンク（例: Chrome/Brave/Safari 内）をクリックするか、登録済みの種類のファイルを開くことです
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Location
+#### 場所
 
 - **`CFBundleURLTypes`/`CFBundleURLSchemes`**（カスタム URL scheme）または **`CFBundleDocumentTypes`**（ファイル拡張子/UTI）を宣言するアプリバンドルの `Info.plist`
-- ユーザー単位で有効なデフォルト設定は、**`~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`**（`LSHandlers` 配列）に存在する場合があります。URL scheme のデフォルトを選択する Apple のサポート対象 API は `LSSetDefaultHandlerForURLScheme` です。この plist を直接書き換える方法は、文書化された登録方法でもキャッシュ更新方法でもありません。
+- ユーザーごとの実効的なデフォルト設定は、**`~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`**（`LSHandlers` 配列）に記録される場合があります。URL scheme のデフォルトを選択するために Apple がサポートする API は `LSSetDefaultHandlerForURLScheme` です。この plist を直接書き換える方法は、文書化された登録方法でもキャッシュ更新方法でもありません。
 
-#### Description & Exploitation
+#### 説明と悪用
 
-Launch Services は、登録済みアプリの `Info.plist` から URL scheme とドキュメントの関連付けを取得します。[Apple の登録ガイド](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCTasks/LSCTasks.html)によると、登録は Finder がアプリを検出したとき、起動時またはログイン時、あるいは明示的な登録 API を通じて行われます。アプリをどこかに書き込むだけでは、即時に登録が行われる保証はありません。登録後、該当する URL またはドキュメントを開くと、ユーザーが選択したデフォルトハンドラーと通常の macOS 起動チェックに従って、選択されたハンドラーアプリが起動する場合があります。サポート対象の `LSSetDefaultHandlerForURLScheme` API は、ユーザーが優先する URL ハンドラーを変更しますが、新たに配置したアプリを自動的に実行するものではありません。<sup>[[52]](#references)</sup>
+Launch Services は、登録済みアプリの `Info.plist` から URL scheme と document の関連付けを取得します。[Apple の登録ガイド](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCTasks/LSCTasks.html)によると、登録は Finder がアプリを検出したとき、起動時またはログイン時、あるいは明示的な登録 API を通じて行われます。アプリをどこかに置くだけでは、即時に登録が実行される保証はありません。登録後は、一致する URL または document を開くと、ユーザーが選択したデフォルトハンドラーや通常の macOS 起動チェックに従って、選択されたハンドラーアプリが起動することがあります。サポート対象の `LSSetDefaultHandlerForURLScheme` API は、ユーザーが優先する URL ハンドラーを変更しますが、新たに配置したアプリを自動実行させるものではありません。<sup>[[52]](#references)</sup>
 
 ```bash
 # Inspect known handlers without registering an app or changing defaults
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -dump | grep -A3 "scheme:"
 ```
 
-macOS 26.5.2 の調査用 Mac では、アプリを登録せず、ハンドラーの優先設定も変更していません。実際のハンドラーをテストするには、使い捨てのユーザーアカウントを使い、一意な scheme を持つマーカーのみのアプリを登録して、その URL を呼び出した後、アプリと登録を削除してください。
+macOS 26.5.2 の調査用 Mac では、アプリを登録せず、ハンドラーの優先設定も変更していません。実際のハンドラーをテストするには、使い捨てのユーザーアカウントを使い、一意な scheme を持つ marker-only app を登録してその URL を呼び出し、その後アプリと登録を削除してください。
 
-ファイル拡張子および URL scheme ハンドラーの詳細な列挙や悪用については、以下を参照してください。
+ファイル拡張子および URL scheme のハンドラーを詳しく列挙・悪用する方法については、以下を参照してください。
 
 {{#ref}}
 macos-security-and-privilege-escalation/macos-file-extension-apps.md
 {{#endref}}
 
-### Python startup files (`.pth` / `usercustomize` / `sitecustomize`)
+<a id="python-startup-files-pth--usercustomize--sitecustomize"></a>
+
+### Python の startup files（`.pth` / `.start` / `usercustomize` / `sitecustomize`）
 
 解説: [https://docs.python.org/3/library/site.html](https://docs.python.org/3/library/site.html)<sup>[[56]](#references)</sup>
 
 - sandbox の bypass に有用: [✅](https://emojipedia.org/check-mark-button)
-  - 関連する Python interpreter が、その site directory を有効にして起動すると実行されます。このトリガーは、すべての virtual environment、Python build、startup flag で共通するものではありません
+  - 対象の site directory が有効な状態で、該当する Python interpreter が起動すると実行されます。この trigger は、すべての virtual environment、Python build、startup flag で共通ではありません。
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
-  - interpreter を起動したプロセスが持つ権限/TCC で実行されます
+  - interpreter を起動したプロセスの privileges/TCC で実行されます。
 
-#### 場所
+#### Location
 
-- **`$(python3 -m site --user-site)/*.pth`** (macOS framework build: `~/Library/Python/<X.Y>/lib/python/site-packages/`)
-  - root 不要（ユーザーが書き込み可能）
-  - **トリガー**: user site が有効な状態での、その Python build の起動。`site` module が有効な site directory 内の `.pth` ファイルを処理します
+- **`$(python3 -m site --user-site)/*.pth`**（macOS framework builds: `~/Library/Python/<X.Y>/lib/python/site-packages/`）
+  - root は不要（ユーザーが書き込み可能）
+  - **Trigger**: user site が有効な状態での、その Python build の起動。`site` module は有効な site directory 内の `.pth` files を処理します。
+- **`<site-packages>/*.start`**（Python 3.15 以降。user または interpreter の site directory）
+  - **Trigger**: その directory を含み、`site` をロードする interpreter の起動。<sup>[[58]](#references)[[59]](#references)</sup>
 - **`<user-site>/usercustomize.py`**
-  - root 不要
-  - **トリガー**: user site が有効な状態での起動（`site` によって自動 import されます）
-- **`<prefix>/site-packages/sitecustomize.py`** (例: `/opt/homebrew/lib/python3.13/site-packages/`、または system path)
-  - interpreter の場所によっては root/admin が必要
-  - **トリガー**: その site directory を含む interpreter の起動
+  - root は不要
+  - **Trigger**: user site が有効な状態での起動（`site` によって自動 import されます）
+- **`<prefix>/site-packages/sitecustomize.py`**（例: `/opt/homebrew/lib/python3.13/site-packages/`、または system paths）
+  - interpreter の場所によっては root/admin が必要な場合があります
+  - **Trigger**: その site directory を含む interpreter の起動
 
-#### 説明と悪用
+#### Description & Exploitation
 
-起動時に Python は通常 `site` を import し、有効な `site-packages` directory 内の `.pth` ファイルを検索します。パスを追加するだけでなく、`.pth` 内の `import ` で始まる行は、指定された module が他の場所で使われなくても Python code を実行します。Python はさらに `sitecustomize` の import を試み、**user site が有効な場合は** `usercustomize` も import します。<sup>[[56]](#references)</sup> トリガーとなるのは、変更された directory を参照する interpreter の次回起動です。`-S` は `site` の処理を無効にします。`-s`、`-I`、または `PYTHONNOUSERSITE` は **user-site** の対象を無効にします。`-I` は通常、global `sitecustomize` を無効にしません。virtual environment では user site が除外されることもあります。対象の interpreter については `python3 -m site` で確認してください。
+起動時に、Python は通常 `site` を import し、有効な `site-packages` directories 内の `.pth` files を検索します。path の追加に加えて、`.pth` 内の `import ` で始まる行は、記載された module が他で使用されなくても Python code を実行します。Python は `sitecustomize` の import も試み、**user site が有効な場合は** `usercustomize` も import します。<sup>[[56]](#references)</sup> trigger となるのは、変更された directory を参照する interpreter が後から起動することです。`-S` は `site` の処理を無効にします。`-s`、`-I`、または `PYTHONNOUSERSITE` は **user-site** の variant を無効にします。`-I` は通常、global `sitecustomize` を無効にしません。virtual environment によっては user site が除外されることもあります。対象の interpreter については `python3 -m site` で確認してください。
 
-以下の PoC は macOS 26.5.2 で実行しました。このテストでは `PYTHONUSERBASE` によって user site を一時 directory に移すため、実際の user site は変更されません:
+**Python 3.15 以降**では、site directory に `pkg.mod:callable` 形式の entry point を含む `<name>.start` を置くこともできます。site module は interpreter の起動時にその module を import し、引数なしの function を呼び出します。アプリケーションがその package を import しなくても実行されます。たとえば、`foo.start` に `foo.submod:initialize` が含まれている場合、user code より前に `foo.submod.initialize()` が呼び出されます。有効な site directory に書き込める package または actor は、この startup path を利用できます。これは macOS に限られません。`foo.start` と `foo.pth` が同時にある場合、Python 3.15 以降は `.pth` の import lines を実行せず、`.start` の entry を優先します。一方、古い interpreter は `.start` を無視し、`.pth` の行を引き続き実行します。wheel を複数の interpreter でテストする際は、この version の違いが重要です。<sup>[[58]](#references)[[59]](#references)[[60]](#references)</sup>
+
+以下の PoC は macOS 26.5.2 で実行しました。このテストでは `PYTHONUSERBASE` によって user site を一時 directory に移すため、実際の user site は変更されません。
 
 ```python
 import os, pathlib, subprocess, tempfile
@@ -1961,17 +1967,17 @@ with tempfile.TemporaryDirectory(prefix='ht-python-site-') as root:
     print('pth:', pth_marker.exists(), 'usercustomize:', user_marker.exists())
 ```
 
-Both markers appeared. `-s`、`-I`、または `-S` を指定して再度実行すると、このテストでは両方の **user-site** マーカーが表示されなくなりました。グローバル site ディレクトリ内の `sitecustomize` はテストしていません。
+両方のマーカーが表示されました。このテストでは、`-s`、`-I`、または `-S` を指定して繰り返すと、両方の **user-site** マーカーが表示されなくなりました。グローバルな site ディレクトリにある `sitecustomize` はテストしていません。
 
 ## Root Sandbox Bypass
 
 > [!TIP]
-> ここでは、**root** として**ファイルに書き込むだけで**何かを実行できる **sandbox bypass** に役立つ起動場所や、その他の**特殊な条件が必要な**起動場所を紹介します。
+> ここでは、**root** で**ファイルに書き込むだけで**何かを実行できる、または**その他の特殊な条件**が必要な **sandbox bypass** に役立つ起動場所を紹介します。
 
 ### Periodic
 
 > [!CAUTION]
-> **過去の仕組み:** macOS 26.5.2 のテストマシンには、`/usr/sbin/periodic`、`/etc/defaults/periodic.conf`、`/etc/periodic`、および `com.apple.periodic-*` launch daemon がありません。現在のシステムで `/etc/periodic` を作成しても、その中身がスケジュール実行されるとは限りません。以下の例を使用する前に、対象のリリースでコマンドと有効なスケジューラの両方が存在することを確認してください。
+> **過去の仕組み:** macOS 26.5.2 のテストマシンには、`/usr/sbin/periodic`、`/etc/defaults/periodic.conf`、`/etc/periodic`、および `com.apple.periodic-*` launch daemons は存在しません。現行システムで `/etc/periodic` を作成しても、その内容がスケジュール実行されるとは限りません。以下の例を使う前に、対象のリリースでコマンドと有効なスケジューラの両方を確認してください。
 
 解説: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)<sup>[[27]](#references)</sup>
 
@@ -1979,18 +1985,18 @@ Both markers appeared. `-s`、`-I`、または `-S` を指定して再度実行�
   - ただし、root 権限が必要
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Location
+#### 場所
 
-- `/etc/periodic/daily`、`/etc/periodic/weekly`、`/etc/periodic/monthly`、`/usr/local/etc/periodic`
+- `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
   - root 権限が必要
-  - **実行タイミング**: 時刻になったとき
+  - **トリガー**: 時刻になったとき
 - `/etc/daily.local`、`/etc/weekly.local`、または `/etc/monthly.local`
   - root 権限が必要
-  - **実行タイミング**: 時刻になったとき
+  - **トリガー**: 時刻になったとき
 
-#### Description & Exploitation
+#### 説明と悪用
 
-古いリリースでは、periodic スクリプト（**`/etc/periodic`**）は、`/System/Library/LaunchDaemons/com.apple.periodic*` にある **launch daemon** によってスケジュール実行されていました。macOS Big Sur 11.5 以降、periodic runner は periodic ディレクトリ内のスクリプトを**各ファイルの所有者**として実行するようになり、従来の権限昇格経路は塞がれました。<sup>[[27]](#references)</sup> 以下のコマンドとディレクトリ一覧は過去の出力であり、macOS 26.5.2 でのテスト結果ではありません。
+古いリリースでは、periodic スクリプト（**`/etc/periodic`**）は **launch daemons**（`/System/Library/LaunchDaemons/com.apple.periodic*`）によってスケジュール実行されていました。macOS Big Sur 11.5 以降、periodic runner は periodic ディレクトリ内のスクリプトを**各ファイルの所有者**として実行するようになり、以前の権限昇格経路は塞がれました。<sup>[[27]](#references)</sup> 以下のコマンドとディレクトリ一覧は過去の出力であり、macOS 26.5.2 でのテスト結果ではありません。
 
 ```bash
 # Launch daemons that will execute the periodic scripts
@@ -2023,7 +2029,7 @@ total 8
 -rwxr-xr-x  1 root  wheel  620 May 13 00:29 999.local
 ```
 
-実行される他の定期スクリプトは、**`/etc/defaults/periodic.conf`**に記載されています：
+**`/etc/defaults/periodic.conf`**に記載されている、定期的に実行される他のスクリプトもあります。
 
 ```bash
 grep "Local scripts" /etc/defaults/periodic.conf
@@ -2032,21 +2038,21 @@ weekly_local="/etc/weekly.local"			# Local scripts
 monthly_local="/etc/monthly.local"			# Local scripts
 ```
 
-`periodic`とそのlaunch daemonがインストールされ、有効になっている古いシステムでは、`/etc/daily.local`、`/etc/weekly.local`、`/etc/monthly.local`も追加の実行パスでした。無害な読み取り専用の確認方法は次のとおりです。
+古いシステムで `periodic` とその launch daemon がインストールされ、有効になっている場合、`/etc/daily.local`、`/etc/weekly.local`、`/etc/monthly.local` も追加の実行経路でした。無害な読み取り専用チェックは次のとおりです。
 
 ```bash
 test -x /usr/sbin/periodic && ls /System/Library/LaunchDaemons/com.apple.periodic-*.plist
 ```
 
 > [!WARNING]
-> periodic ディレクトリ内のスクリプトには、所有者ベースのルールが適用されていました。以前の `999.local` wrapper は、同じ所有者チェックを行わずに `/etc/daily.local`、`/etc/weekly.local`、または `/etc/monthly.local` を source していました。そのため、scheduler が root として実行されると、これらのローカルファイルも root として実行されていました。この違いと Big Sur 11.5 での変更については、[original research](https://theevilbit.github.io/beyond/beyond_0019/) に記載されています。`periodic` が存在しない場合、これらのパスが有効だと想定してはいけません。
+> owner-based rule は periodic ディレクトリ内に直接置かれたスクリプトに適用されます。以前の `999.local` wrapper は、同じ所有者チェックを行わずに `/etc/daily.local`、`/etc/weekly.local`、または `/etc/monthly.local` を source していました。そのため、scheduler が root として実行されると、これらのローカルファイルも root として実行されました。この違いと Big Sur 11.5 での変更については、[元の調査](https://theevilbit.github.io/beyond/beyond_0019/)に記載されています。`periodic` が存在しない場合、これらのパスが有効だと想定してはいけません。
 
 ### PAM
 
-解説記事: [Linux Hacktricks PAM](../linux-hardening/software-information/pam-pluggable-authentication-modules.md)\
-解説記事: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)<sup>[[28]](#references)</sup>
+解説: [Linux Hacktricks PAM](../linux-hardening/software-information/pam-pluggable-authentication-modules.md)\
+解説: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)<sup>[[28]](#references)</sup>
 
-- sandbox の bypass に有用: [🟠](https://emojipedia.org/large-orange-circle)
+- sandbox のバイパスに有用: [🟠](https://emojipedia.org/large-orange-circle)
   - ただし、root である必要があります
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
@@ -2054,9 +2060,9 @@ test -x /usr/sbin/periodic && ls /System/Library/LaunchDaemons/com.apple.periodi
 
 - 常に root が必要
 
-#### 説明と悪用
+#### 説明とExploit
 
-PAM は、macOS 内で簡単に実行することよりも**persistence** とマルウェアに重点を置いているため、このブログでは詳細な説明はしません。**この technique をよりよく理解するには、解説記事を読んでください**。<sup>[[28]](#references)</sup>
+PAM は、macOS 内での簡単な実行よりも**persistence**とマルウェアに重点を置いているため、このブログでは詳細な説明は行いません。このtechniqueをよりよく理解するには、**解説を読んでください**。<sup>[[28]](#references)</sup>
 
 次のコマンドで PAM modules を確認します:
 
@@ -2064,13 +2070,13 @@ PAM は、macOS 内で簡単に実行することよりも**persistence** とマ
 ls -l /etc/pam.d
 ```
 
-PAMを悪用した persistence/privilege escalation の手法は、モジュール /etc/pam.d/sudo を変更し、先頭に次の行を追加するだけで簡単に実行できます:
+PAMを悪用する永続化／権限昇格手法は、モジュール /etc/pam.d/sudo を変更し、先頭に次の行を追加するだけで実行できます。
 
 ```bash
 auth       sufficient     pam_permit.so
 ```
 
-すると、次のように**見えます**：
+つまり、次のように**見える**でしょう:
 
 ```bash
 # sudo: auth account password session
@@ -2083,12 +2089,12 @@ password   required       pam_deny.so
 session    required       pam_permit.so
 ```
 
-したがって、**`sudo`を使おうとすれば、どの方法でも機能します**。
+そのため、**`sudo`を使う試みは成功します**。
 
 > [!CAUTION]
-> このディレクトリはTCCによって保護されているため、ユーザーにアクセス許可を求めるプロンプトが表示される可能性が非常に高いことに注意してください。
+> このディレクトリはTCCによって保護されているため、ユーザーにアクセス許可を求めるプロンプトが表示される可能性が非常に高い点に注意してください。
 
-もう1つのよい例がsuです。ここでは、PAMモジュールにパラメーターを渡すことも可能であることがわかります（このファイルにバックドアを仕込むこともできます）。
+もう1つの好例はsuです。PAM modulesにパラメーターを渡すことも可能だとわかります（このファイルにbackdoorを仕込むこともできます）。
 
 ```bash
 cat /etc/pam.d/su
@@ -2103,22 +2109,22 @@ session    required       pam_launchd.so
 
 ### Authorization Plugins
 
-解説: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)<sup>[[29]](#references)</sup>\
-解説: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)<sup>[[30]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)<sup>[[29]](#references)</sup>\
+Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)<sup>[[30]](#references)</sup>
 
-- sandbox のバイパスに便利: [🟠](https://emojipedia.org/large-orange-circle)
-  - ただし、root 権限が必要で、追加の設定も必要
+- sandboxのbypassに有用: [🟠](https://emojipedia.org/large-orange-circle)
+  - ただし、root権限が必要で、追加の設定も必要です
 - TCC bypass: ???
 
-#### 場所
+#### Location
 
 - `/Library/Security/SecurityAgentPlugins/`
-  - root 権限が必要
-  - また、このプラグインを使用するように authorization database を設定する必要がある
+  - root権限が必要
+  - プラグインを使用するようにauthorization databaseを設定する必要もあります
 
-#### 説明と悪用方法
+#### Description & Exploitation
 
-ユーザーのログイン時に実行される authorization plugin を作成して、永続化を維持できます。この種のプラグインの作成方法については、前述の解説を確認してください（また、適切に作成しないとログインできなくなり、recovery mode から Mac を修復する必要があるため注意してください）。<sup>[[29]](#references)[[30]](#references)</sup>
+ユーザーのログイン時に実行されるauthorization pluginを作成して、persistenceを維持できます。これらのpluginの作成方法については、前述のwriteupを確認してください（不適切に作成するとログインできなくなり、recovery modeからMacをクリーンアップする必要があるので注意してください）。<sup>[[29]](#references)[[30]](#references)</sup>
 
 ```objectivec
 // Compile the code and create a real bundle
@@ -2135,13 +2141,13 @@ __attribute__((constructor)) static void run()
 }
 ```
 
-**移動**して、バンドルを読み込ませる場所に配置します:
+**バンドルを**読み込ませる場所に**移動**する:
 
 ```bash
 cp -r CustomAuth.bundle /Library/Security/SecurityAgentPlugins/
 ```
 
-最後に、このプラグインを読み込むための**ルール**を追加します：
+最後に、この Plugin を読み込むための**ルール**を追加します：
 
 ```bash
 cat > /tmp/rule.plist <<EOF
@@ -2162,41 +2168,41 @@ EOF
 security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```
 
-**`evaluate-mechanisms`**は、認証フレームワークに**認可のため外部メカニズムを呼び出す必要がある**ことを伝えます。さらに、**`privileged`**を指定すると、rootとして実行されます。
+**`evaluate-mechanisms`** は、認可フレームワークに認可のため外部 mechanism を呼び出す必要があることを伝えます。さらに、**`privileged`** を指定すると root として実行されます。
 
-次のコマンドでトリガーします:
+次の方法でトリガーします：
 
 ```bash
 security authorize com.asdf.asdf
 ```
 
-そして、**staff グループには sudo** アクセス権が必要です（`/etc/sudoers` を読んで確認してください）。
+その後、**staffグループにはsudo**アクセス権が必要です（`/etc/sudoers`を読んで確認してください）。
 
 ### Man.conf
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)<sup>[[31]](#references)</sup>
 
-- sandbox の bypass に有用: [🟠](https://emojipedia.org/large-orange-circle)
-  - ただし、root 権限が必要で、ユーザーが man を使う必要があります
+- sandboxのバイパスに有用: [🟠](https://emojipedia.org/large-orange-circle)
+  - ただし、root権限が必要で、ユーザーがmanを使う必要があります
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
 
 - **`/private/etc/man.conf`**
-  - root 権限が必要
-  - **`/private/etc/man.conf`**: man が使われるたび
+  - root権限が必要
+  - **`/private/etc/man.conf`**: manが使われるたび
 
-#### 説明と Exploit
+#### 説明とExploit
 
-設定ファイル **`/private/etc/man.conf`** は、man のドキュメントファイルを開く際に使用するバイナリ／スクリプトを指定します。そのため、実行ファイルのパスを変更すれば、ユーザーが man を使ってドキュメントを読むたびに backdoor を実行できます。<sup>[[31]](#references)</sup>
+設定ファイル **`/private/etc/man.conf`** は、manのドキュメントファイルを開くときに使用するバイナリ／スクリプトを指定します。そのため、実行ファイルのパスを変更すれば、ユーザーがmanでドキュメントを読むたびにバックドアを実行できます。<sup>[[31]](#references)</sup>
 
-たとえば、**`/private/etc/man.conf`** に次のように設定します。
+たとえば、**`/private/etc/man.conf`** に次のように設定します:
 
 ```
 MANPAGER /tmp/view
 ```
 
-そして、`/tmp/view` を次のように作成します:
+そして、次のように `/tmp/view` を作成します:
 
 ```bash
 #!/bin/zsh
@@ -2210,7 +2216,7 @@ touch /tmp/manconf
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0025/](https://theevilbit.github.io/beyond/beyond_0025/)<sup>[[32]](#references)</sup>
 
-- sandbox のバイパスに有用: [🟠](https://emojipedia.org/large-orange-circle)
+- sandbox bypass に有用: [🟠](https://emojipedia.org/large-orange-circle)
   - ただし、root 権限が必要で、apache が実行中である必要があります
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
   - Httpd には entitlements がありません
@@ -2223,15 +2229,15 @@ touch /tmp/manconf
 
 #### 説明と Exploit
 
-次のような行を追加して、`/etc/apache2/httpd.conf` でモジュールをロードするよう指定できます:<sup>[[32]](#references)</sup>
+`/etc/apache2/httpd.conf` に次のような行を追加して、モジュールを読み込むように指定できます:<sup>[[32]](#references)</sup>
 
 ```bash
 LoadModule my_custom_module /Users/Shared/example.dylib "My Signature Authority"
 ```
 
-この方法で、コンパイルしたモジュールが Apache に読み込まれます。必要なのは、有効な Apple 証明書で**署名する**か、システムに**新しい信頼済み証明書を追加**し、その証明書で**署名する**ことです。
+この方法で、コンパイルしたモジュールが Apache に読み込まれます。ただし、**有効な Apple certificate で署名する**か、システムに**新しい trusted certificate を追加して、それで署名する**必要があります。
 
-必要であれば、サーバーが起動することを確認するために、次を実行できます。
+次に、必要であれば、サーバーが起動することを確認するために、次を実行できます。
 
 ```bash
 sudo launchctl load -w /System/Library/LaunchDaemons/org.apache.httpd.plist
@@ -2256,7 +2262,7 @@ static void myconstructor(int argc, const char **argv)
 Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)<sup>[[33]](#references)</sup>
 
 - sandbox の bypass に有用: [🟠](https://emojipedia.org/large-orange-circle)
-  - ただし、root 権限が必要で、auditd が実行中であり、警告を発生させる必要があります
+  - ただし、root 権限が必要で、auditd が実行中であり、警告を発生させる必要がある
 - TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
@@ -2265,26 +2271,26 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.g
   - root 権限が必要
   - **トリガー**: auditd が警告を検出したとき
 
-#### 説明とExploit
+#### 説明と悪用
 
-auditd が警告を検出するたびに、スクリプト **`/etc/security/audit_warn`** が**実行**されます。そのため、ペイロードを追加できます。<sup>[[33]](#references)</sup>
+auditd が警告を検出すると、スクリプト **`/etc/security/audit_warn`** が**実行**されます。そのため、ここにペイロードを追加できます。<sup>[[33]](#references)</sup>
 
 ```bash
 echo "touch /tmp/auditd_warn" >> /etc/security/audit_warn
 ```
 
-`sudo audit -n` を実行して、警告を強制的に表示できます。
+`sudo audit -n`で警告を強制的に表示できます。
 
-### Startup Items
+### 起動項目
 
-> [!CAUTION] > **これは非推奨のため、これらのディレクトリ内に何も見つからないはずです。**
+> [!CAUTION] > **これは非推奨のため、これらのディレクトリには何も見つからないはずです。**
 
-**StartupItem** は、`/Library/StartupItems/` または `/System/Library/StartupItems/` のいずれかに配置するディレクトリです。このディレクトリを作成したら、次の2つのファイルを含める必要があります。
+**StartupItem**は、`/Library/StartupItems/`または`/System/Library/StartupItems/`のいずれかに配置するディレクトリです。このディレクトリには、次の2つのファイルを含める必要があります。
 
-1. **rc script**: 起動時に実行されるシェルスクリプト。
-2. **plist file**: `StartupParameters.plist` という名前のファイルで、さまざまな設定を含みます。
+1. **rc script**：起動時に実行されるシェルスクリプト。
+2. **plist file**：`StartupParameters.plist`という名前のファイルで、さまざまな設定が含まれています。
 
-起動プロセスがこれらを認識して利用できるよう、rc script と `StartupParameters.plist` ファイルの両方を **StartupItem** ディレクトリ内に正しく配置してください。
+起動プロセスがファイルを認識して使用できるように、rc scriptと`StartupParameters.plist`ファイルの両方が**StartupItem**ディレクトリ内に正しく配置されていることを確認してください。
 
 {{#tabs}}
 {{#tab name="StartupParameters.plist"}}
@@ -2335,13 +2341,13 @@ RunService "$1"
 ### ~~emond~~
 
 > [!CAUTION]
-> 私のmacOSではこのコンポーネントを確認できないため、詳細はwriteupを確認してください。
+> 私のmacOSではこのコンポーネントを確認できないため、詳しくはwriteupを参照してください。
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)<sup>[[34]](#references)</sup>
 
-Appleによって導入された**emond**は、開発が不十分、あるいは放棄された可能性があるように見えるログ記録メカニズムですが、現在も利用できます。Mac管理者にとって特に有益ではありませんが、この知られざるサービスは、ほとんどのmacOS管理者に気づかれないまま、脅威アクターによる目立たない永続化手段として使われる可能性があります。<sup>[[34]](#references)</sup>
+Appleによって導入された**emond**は、開発途上、あるいは放棄された可能性があるものの、現在もアクセス可能なロギング機構です。Macの管理者にとって特に有用ではありませんが、この目立たないサービスは、ほとんどのmacOS管理者に気づかれないまま、脅威アクターがひそかに永続化する手段として使われる可能性があります。<sup>[[34]](#references)</sup>
 
-**emond**の存在を知っている人にとって、悪意ある使用を特定するのは簡単です。このサービスのシステムのLaunchDaemonは、実行するスクリプトを単一のディレクトリ内から探します。これを確認するには、次のコマンドを使用できます：
+その存在を知っていれば、**emond**が悪用されているかどうかを特定するのは簡単です。このサービスのシステムのLaunchDaemonは、単一のディレクトリ内に実行するスクリプトがないか探します。これを確認するには、次のコマンドを使用できます。
 
 ```bash
 ls -l /private/var/db/emondClients
@@ -2349,17 +2355,17 @@ ls -l /private/var/db/emondClients
 
 ### ~~XQuartz~~
 
-解説: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
 
 #### 場所
 
 - **`/opt/X11/etc/X11/xinit/privileged_startx.d`**
   - root権限が必要
-  - **トリガー**: XQuartzがある場合
+  - **トリガー**: XQuartzの使用時
 
 #### 説明とExploit
 
-XQuartzは**macOSにインストールされなくなった**ため、詳しくは解説を確認してください。<sup>[[3]](#references)</sup>
+XQuartzは**macOSにはもうインストールされていない**ため、詳細についてはwriteupを確認してください。<sup>[[3]](#references)</sup>
 
 ### ~~kext~~
 
@@ -2368,10 +2374,10 @@ XQuartzは**macOSにインストールされなくなった**ため、詳しく�
 
 #### 場所
 
-KEXTをスタートアップ項目としてインストールするには、**次のいずれかの場所にインストールする必要があります**。
+KEXTをstartup itemとしてインストールするには、**次のいずれかの場所にインストールする必要があります**。
 
 - `/System/Library/Extensions`
-  - OS Xオペレーティングシステムに組み込まれているKEXTファイル。
+  - OS Xオペレーティングシステムに組み込まれたKEXTファイル。
 - `/Library/Extensions`
   - サードパーティ製ソフトウェアによってインストールされたKEXTファイル
 
@@ -2385,40 +2391,40 @@ kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
 
-カーネル拡張機能について詳しくは、[**こちらのセクションを確認してください**](macos-security-and-privilege-escalation/mac-os-architecture/index.html#i-o-kit-drivers)。
+For more information about [**kernel extensions check this section**](macos-security-and-privilege-escalation/mac-os-architecture/index.html#i-o-kit-drivers).
 
 ### ~~amstoold~~
 
-解説記事: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.github.io/beyond/beyond_0029/)<sup>[[35]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.github.io/beyond/beyond_0029/)<sup>[[35]](#references)</sup>
 
 #### 場所
 
 - **`/usr/local/bin/amstoold`**
   - root権限が必要
 
-#### 説明と悪用方法
+#### 説明とExploit
 
-どうやら`/System/Library/LaunchAgents/com.apple.amstoold.plist`の`plist`は、XPCサービスを公開しながらこのバイナリを使用していたようです……問題は、そのバイナリが存在しなかったことです。そのため、そこに何かを配置しておけば、XPCサービスが呼び出されたときに、配置したバイナリが実行されます。<sup>[[35]](#references)</sup>
+どうやら、`/System/Library/LaunchAgents/com.apple.amstoold.plist` の `plist` は、このバイナリを使いながらXPC serviceを公開していたようです。問題は、このバイナリが存在しなかったことです。そのため、そこに何かを配置すれば、XPC serviceが呼び出されたときにそのバイナリが実行されます。<sup>[[35]](#references)</sup>
 
-現在のmacOSでは、これを見つけられませんでした。
+現在、私のmacOSではこれを見つけられません。
 
 ### ~~xsanctl~~
 
-解説記事: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.github.io/beyond/beyond_0015/)<sup>[[36]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.github.io/beyond/beyond_0015/)<sup>[[36]](#references)</sup>
 
 #### 場所
 
 - **`/Library/Preferences/Xsan/.xsanrc`**
   - root権限が必要
-  - **トリガー**: サービスの実行時（まれ）
+  - **実行条件**: サービスが実行されたとき（まれ）
 
-#### 説明と悪用方法
+#### 説明とExploit
 
-このスクリプトが実行されることはあまりないようです。私のmacOSでも見つけられなかったので、詳しくは解説記事を確認してください。<sup>[[36]](#references)</sup>
+このスクリプトが実行されることはあまりないようで、私のmacOSでは見つけることすらできませんでした。詳しくはWriteupを確認してください。<sup>[[36]](#references)</sup>
 
 ### ~~/etc/rc.common~~
 
-> [!CAUTION] > **これは最新のmacOSでは動作しません**
+> [!CAUTION] > **これは最近のMacOSバージョンでは動作しません**
 
 ここに**起動時に実行されるコマンド**を配置することもできます。通常のrc.commonスクリプトの例:
 
@@ -2515,49 +2521,49 @@ RunService ()
 }
 ```
 
-### launchd 起動タスク
+### launchdのブートタスク
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0034/](https://theevilbit.github.io/beyond/beyond_0034/)<sup>[[40]](#references)</sup>
+解説: [https://theevilbit.github.io/beyond/beyond_0034/](https://theevilbit.github.io/beyond/beyond_0034/)<sup>[[40]](#references)</sup>
 
-- sandbox のバイパスに有用: [🔴](https://emojipedia.org/large-red-circle) (root が必要)
-- root が必要。さらに、パスに応じて **SIP bypass** または **`kTCCServiceSystemPolicySysAdminFiles`**/Full Disk Access の権限が必要
+- sandboxのバイパスに有用: [🔴](https://emojipedia.org/large-red-circle) (rootが必要)
+- rootが必要。さらにパスに応じて、**SIP bypass**または**`kTCCServiceSystemPolicySysAdminFiles`**/Full Disk Access権限が必要
 
 #### 場所
 
-`launchd` は、初期の「起動タスク」を記述する plist を **`__TEXT,__config`** セクションに埋め込んでいます。デフォルトでは存在せず、攻撃者が作成できる参照スクリプト／バイナリがいくつかあります。
+`launchd`は、初期の「ブートタスク」を記述したplistを**`__TEXT,__config`**セクションに埋め込んでいます。いくつかの参照スクリプト/バイナリはデフォルトでは存在せず、攻撃者が作成できます:
 
-- SIP-bypass セット: **`/Library/Apple/usr/libexec/finish_demo_restore`**, **`/private/var/install/shutdown_installer_tasks`**, **`/private/var/install/deferred_install`**
-- TCC/FDA セット: **`/etc/rc.server`**, **`/etc/rc.cdrom`**, **`/etc/rc.netboot`** (`rc.netboot` は Sequoia 以降でのみ既存)
+- SIP-bypassセット: **`/Library/Apple/usr/libexec/finish_demo_restore`**, **`/private/var/install/shutdown_installer_tasks`**, **`/private/var/install/deferred_install`**
+- TCC/FDAセット: **`/etc/rc.server`**, **`/etc/rc.cdrom`**, **`/etc/rc.netboot`** (`rc.netboot`はSequoia以降でのみ既存)
 
-#### 説明と Exploitation
+#### 説明と悪用
 
-埋め込みタスクテーブルをダンプすると、`launchd` が実行するファイルと、サポートされるキー (`Program`、`ProgramArguments`、`PerformAfterUserspaceReboot`、`RequireSuccess` など) を確認できます。
+埋め込まれたタスクテーブルをダンプすると、`launchd`が実行するファイルと、サポートされているキー (`Program`、`ProgramArguments`、`PerformAfterUserspaceReboot`、`RequireSuccess`など)を確認できます:
 
 ```bash
 otool -X -s __TEXT __config /sbin/launchd | awk '{print $2 $3 $4 $5}' | \
   xxd -r -p | hexdump -v -e '1/4 "%08x"' -e '"\n"' | xxd -r -p
 ```
 
-参照されているファイル（例: `/etc/rc.server`）のいずれかを作成すると、次回の（userspace）再起動時に`launchd`が実行します。有用なエントリの多くはSIPによって制限されているか、TCCのSysAdminFiles/Full Disk Accessが必要なため、これはroot権限が必要な再起動時実行型の手法です。<sup>[[40]](#references)</sup>
+参照されているファイル（例: `/etc/rc.server`）を作成すると、次回の（userspace）再起動時に `launchd` がそのファイルを実行します。最も有用なエントリは SIP によって制限されるか、TCC の SysAdminFiles/Full Disk Access が必要なため、これは root レベルの再起動トリガー型テクニックです。<sup>[[40]](#references)</sup>
 
 ### ~~NVRAM (`apple-trusted-trampoline`)~~
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0035/](https://theevilbit.github.io/beyond/beyond_0035/)<sup>[[41]](#references)</sup>
+解説: [https://theevilbit.github.io/beyond/beyond_0035/](https://theevilbit.github.io/beyond/beyond_0035/)<sup>[[41]](#references)</sup>
 
-`rc.trampoline`ブートタスクは、起動時に`apple-trusted-trampoline` NVRAM変数に格納された**platform（Apple署名済み）バイナリ**を実行します。ただし、**`rc.trampoline=1`ブート引数が設定され、SIPが無効になっている場合に限ります**（サイズ上限は約390&nbsp;KBで、ブロックせず高速に戻る必要があります）。**root権限 + SIP無効化 + Apple署名済みのペイロード**が必要なため、実環境での永続化には実質的に使えず、完全性のためにのみここに記載しています。<sup>[[41]](#references)</sup>
+`rc.trampoline` の boot task は、起動時に `apple-trusted-trampoline` NVRAM 変数に保存された**platform（Apple 署名済み）バイナリ**を実行します。ただし、これは**`rc.trampoline=1` の boot-arg が設定され、SIP が無効になっている場合に限ります**（サイズ上限は約 390&nbsp;KB で、ブロッキング／即時リターンの制約もあります）。**root + SIP 無効化 + Apple 署名済みペイロード**が必要なため、実環境での persistence には実質的に利用できず、完全性のためにのみここに記載しています。<sup>[[41]](#references)</sup>
 
-### /etc/paths と /etc/paths.d (PATH hijack)
+### /etc/paths and /etc/paths.d (PATH hijack)
 
-- sandboxのバイパスに有用: [🔴](https://emojipedia.org/large-red-circle) (書き込みにはroot権限が必要)
-- root権限が必要
+- sandbox のバイパスに有用: [🔴](https://emojipedia.org/large-red-circle) (書き込みには root が必要)
+- root が必要
 
-#### Location
+#### 場所
 
-- **`/etc/paths`** と **`/etc/paths.d/*`** — `path_helper`（`/etc/zprofile`から呼び出される）が読み込み、ログイン時のデフォルトの`PATH`を構築します。
+- **`/etc/paths`** および **`/etc/paths.d/*`** — `path_helper`（`/etc/zprofile` から呼び出される）が読み込み、ログイン時のデフォルト `PATH` を構築します。
 
-#### Description & Exploitation
+#### 説明と悪用
 
-どちらもroot所有です。攻撃者が制御するディレクトリを先頭に追加（`/etc/paths`を編集するか、`/etc/paths.d/`にファイルを配置）すると、以降の新しいログインシェルすべてで、そのディレクトリが`PATH`の先頭付近に現れます。そのため、一般的なコマンド（`ls`、`git`など）と同じ名前の悪意あるバイナリが本物を**shadow**し、被害者が次にそのコマンドを実行したときに起動します。
+どちらも root 所有です。攻撃者が制御するディレクトリを先頭に追加する（`/etc/paths` を編集するか、`/etc/paths.d/` にファイルを配置する）と、そのディレクトリが新しいログインシェルすべての `PATH` の前方に現れます。そのため、一般的なコマンド（`ls`、`git`、…）と同じ名前の悪意あるバイナリが本物を**シャドウし**、被害者が次にそのコマンドを実行したときに起動します。
 
 ```bash
 # e.g. Homebrew already ships a /etc/paths.d entry; an attacker drops their own
@@ -2567,33 +2573,33 @@ echo "/private/tmp/evil" | sudo tee /etc/paths.d/00-evil
 
 ### storagekitd SIP Bypass (CVE-2024-44243)
 
-Writeup: [https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)<sup>[[46]](#references)</sup>
+解説: [https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)<sup>[[46]](#references)</sup>
 
-- sandbox の bypass に有用: [🔴](https://emojipedia.org/large-red-circle) (root が必要)
-- root が必要。結果として **SIP を bypass**。影響を受ける macOS は **15.0–15.1**、**15.2** で修正済み
+- sandboxのbypassに有用: [🔴](https://emojipedia.org/large-red-circle) (rootが必要)
+- rootが必要。結果として**SIPをbypass**する。影響を受けるmacOSは**15.0–15.1**、**15.2**で修正済み
 
-#### Location
+#### 場所
 
-- **`/Library/Filesystems/`** に filesystem bundle を配置する。
+- **`/Library/Filesystems/`**にfilesystem bundleを配置する。
 
-#### Description & Exploitation
+#### 説明と悪用
 
-`storagekitd` は entitlement **`com.apple.rootless.install.heritable`** を持ち、filesystem bundle のバイナリを SIP を bypass できる capability を**継承した状態で**起動していた。悪意のある filesystem bundle を配置することで、攻撃者は SIP bypass を使ってコードを実行し、**永続的な kernel extension** をインストールしたり、SIP で保護された `LaunchDaemon` ディレクトリに書き込んだりできた。これは通常の保護を回避し、その後も残る永続化手法となる。<sup>[[46]](#references)</sup> Apple は macOS Sequoia 15.2 で修正した。
+`storagekitd`はentitlement **`com.apple.rootless.install.heritable`**を持ち、filesystem bundleのバイナリをSIP-bypassing capabilityを**継承**した状態で起動する。悪意のあるfilesystem bundleを配置することで、攻撃者はSIP bypassを使ってコードを実行し、**永続的なkernel extension**をインストールしたり、SIPで保護された`LaunchDaemon`ディレクトリに書き込んだりできる。これは通常の保護を回避し、それを無効化する永続化手段となる。<sup>[[46]](#references)</sup> AppleはmacOS Sequoia 15.2で修正した。
 
 ### sudo plugins (/etc/sudo.conf)
 
-Writeup: [On Writing Sudo Plugins (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)<sup>[[51]](#references)</sup>
+解説: [On Writing Sudo Plugins (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)<sup>[[51]](#references)</sup>
 
-- sandbox の bypass に有用: [🔴](https://emojipedia.org/large-red-circle) (`/etc/sudo.conf` への書き込みに root が必要)
-- インストールには root が必要。プラグインはその後、**すべての `sudo` 呼び出し**内で実行される（setuid-root コンテキスト）
+- sandboxのbypassに有用: [🔴](https://emojipedia.org/large-red-circle) (`/etc/sudo.conf`への書き込みにrootが必要)
+- インストールにはrootが必要。その後、pluginは**すべての`sudo`実行時**に実行される (setuid-rootコンテキスト)
 
-#### Location
+#### 場所
 
-- **`/etc/sudo.conf`** — `Plugin` 行で **`/usr/libexec/sudo/`** (または絶対パス) から shared object を読み込む。デフォルトでは存在しない（sudo は組み込みのポリシーを使用する）ため、新規作成すればクリーンな hook になる。
+- **`/etc/sudo.conf`** — `Plugin`行は**`/usr/libexec/sudo/`** (または絶対パス)からshared objectを読み込む。デフォルトでは存在しない (sudoは組み込みのpolicyを使用する) ため、作成すればクリーンなhookとなる。
 
-#### Description & Exploitation
+#### 説明と悪用
 
-`sudo` は `/etc/sudo.conf` からポリシー、承認、監査プラグインを読み込む。`sudo` は setuid-root であるため、悪意のある shared-object プラグインは、ユーザーが `sudo` を実行するたびに **root 権限で実行される**。これは各 sudo コマンドも確認できる、持続性のある root 永続化手法となる。<sup>[[51]](#references)</sup> macOS にはプラグイン API をサポートする sudo 1.9.x が付属する。
+`sudo`は`/etc/sudo.conf`からpolicy/approval/audit pluginsを読み込む。`sudo`はsetuid-rootであるため、悪意のあるshared-object pluginは、ユーザーが`sudo`を実行するたびに**root権限**で実行される。各sudoコマンドも確認できる、持続性の高いroot persistenceとなる。<sup>[[51]](#references)</sup> macOSに付属するsudo 1.9.xはplugin APIに対応している。
 
 ```bash
 # As root: load a malicious audit/approval plugin on every sudo
@@ -2607,40 +2613,40 @@ CONF
 ### CoreMediaIO DAL Plug-Ins
 
 解説: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>\
-最小限の例: [https://github.com/johnboiles/coremediaio-dal-minimal-example](https://github.com/johnboiles/coremediaio-dal-minimal-example)<sup>[[54]](#references)</sup>
+最小例: [https://github.com/johnboiles/coremediaio-dal-minimal-example](https://github.com/johnboiles/coremediaio-dal-minimal-example)<sup>[[54]](#references)</sup>
 
-- **レガシー機構:** macOS 12.3 以降、非推奨です。macOS 14.1 以降では、レガシー video plug-ins はデフォルトで無効になっています。この方法を利用するには、ユーザーが Recovery からレガシー video サポートを復元する必要があります。書き込み可能なディレクトリがあるだけでは不十分です。[Apple の最新のサポートガイダンス](https://support.apple.com/en-us/108387)を参照してください。
-- plug-in ディレクトリへの書き込みには root が必要です。コード実行の成否は、DAL plug-ins をまだ読み込む互換性のあるクライアントに依存します。macOS 26 では実行時テストを行っていません。
+- **レガシー機構:** macOS 12.3以降では非推奨です。macOS 14.1以降では、デフォルトでレガシー video plug-ins が無効になっています。この方法を使うには、ユーザーがRecoveryからレガシー video support を復元する必要があります。書き込み可能なディレクトリがあるだけでは不十分です。[Appleの最新サポートガイダンス](https://support.apple.com/en-us/108387)を参照してください。
+- plug-in directory への書き込みにはrootが必要です。コード実行は、DAL plug-insを引き続き読み込む互換性のあるクライアントがある場合に限られます。macOS 26では実行時テストを行っていません。
 
-#### Location
+#### 場所
 
 - **`/Library/CoreMediaIO/Plug-Ins/DAL/*.plugin`**
-  - root が必要
-  - **トリガー:** 互換性のある camera クライアントが、**レガシーサポートの復元後に**デバイスを列挙すること。クライアントの library validation によって、サードパーティ製 plug-in がブロックされる場合があります。
+  - rootが必要
+  - **トリガー:** 互換性のあるカメラクライアントが、**レガシーsupportの復元後に**デバイスを列挙します。クライアントのlibrary validationによって、サードパーティーのplug-inがブロックされる場合があります。
 
-#### Description & Exploitation
+#### 説明と悪用
 
-CoreMediaIO **DAL** (Device Abstraction Layer) plug-ins は、一部の camera アプリケーションによってプロセス内で読み込まれていました。Apple の [camera-extension のプレゼンテーション](https://developer.apple.com/videos/play/wwdc2022/10022/)には、レガシー DAL plug-ins は FaceTime、QuickTime Player、Photo Booth では**動作せず**、ほかの多くのクライアントでも library validation が適用されると明記されています。最新の [Core Media I/O extensions](https://developer.apple.com/documentation/coremediaio) は、別のインストールおよび承認モデルでプロセス外実行されます。過去のプロセス内手法が、現在の macOS で一般的な Camera TCC bypass として使えるわけではありません。<sup>[[53]](#references)[[54]](#references)</sup>
+CoreMediaIO **DAL**（Device Abstraction Layer）plug-insは、一部のカメラアプリケーションによってプロセス内で読み込まれていました。Appleの[カメラ拡張機能に関するプレゼンテーション](https://developer.apple.com/videos/play/wwdc2022/10022/)では、レガシーDAL plug-insはFaceTime、QuickTime Player、Photo Boothでは**動作せず**、ほかの多くのクライアントではlibrary validationが適用されると明記されています。最新の[Core Media I/O extensions](https://developer.apple.com/documentation/coremediaio)は、別のインストールおよび承認モデルでプロセス外実行されます。過去のプロセス内実行の手法は、現在のmacOSで一般的なCamera TCC bypassが可能であることを意味しません。<sup>[[53]](#references)[[54]](#references)</sup>
 
-macOS 26 で読み取り専用の確認を行ったところ、`/Library/CoreMediaIO/Plug-Ins/DAL` は存在し、root が所有しています。レガシーサポートの有効化や、クライアントでの読み込みは確認していません。
+macOS 26で読み取り専用の確認を行ったところ、`/Library/CoreMediaIO/Plug-Ins/DAL`は存在し、root所有でした。レガシーsupportの有効化も、クライアントによる読み込みも確認していません。
 
 ### Directory Service Plugins
 
 解説: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
 
-- **レガシーの条件付き機構:** インストールには root が必要であり、実際に設定されて読み込まれる plug-in が必要です。DirectoryService の plug-in API は非推奨です。これを起動時のトリガーとみなす前に、対象 Mac の Open Directory 設定を確認してください。
+- **レガシーかつ条件付きの機構:** インストールにはroot権限が必要で、実際に設定され、読み込まれるplug-inが必要です。DirectoryServiceのplug-in APIは非推奨です。これを起動時のトリガーとみなす前に、対象MacのOpen Directory設定を確認してください。
 
-#### Location
+#### 場所
 
 - **`/Library/DirectoryServices/PlugIns/*.dsplug`**
-  - root が必要
-  - **トリガー:** Open Directory が必要としたときに、`dspluginhelperd` が条件を満たす設定済み plug-in を読み込みます。[Apple の plug-in ランタイムガイド](https://developer.apple.com/library/archive/documentation/Networking/Conceptual/Open_Dir_Plugin/RuntimeEnviornment/RuntimeEnviornment.html)によると、起動時に読み込むよう設定されていない plug-ins は、対応する node が開かれたときに遅延読み込みされる場合があります。
+  - rootが必要
+  - **トリガー:** Open Directoryが必要とした際に、`dspluginhelperd`が対象の設定済みplug-inを読み込みます。[Appleのplug-inランタイムガイド](https://developer.apple.com/library/archive/documentation/Networking/Conceptual/Open_Dir_Plugin/RuntimeEnviornment/RuntimeEnviornment.html)によると、起動時に読み込むよう設定されていないplug-insは、ノードが開かれたときに遅延読み込みされる場合があります。
 
-#### Description & Exploitation
+#### 説明と悪用
 
-`dspluginhelperd` はレガシー DirectoryService plug-in bundles をサポートしています。レガシー plug-in が受け入れられ、有効化される環境では、悪意のある plug-in が特権実行経路となる可能性があります。これは PAM や Authorization Plugins とは別の仕組みです。ディレクトリが存在するだけでは、新たに書き込んだ plug-in が次回起動時に実行されることを示しません。macOS 26.5 の Apple 提供のローカルマニュアル `dspluginhelperd(8)` および `opendirectoryd(8)` には、helper とこのレガシー経路が引き続き記載されています。<sup>[[53]](#references)</sup>
+`dspluginhelperd`は、レガシーDirectoryService plug-in bundlesをサポートしています。悪意あるplug-inは、レガシーplug-inが受け入れられ、有効化された場合に、PAMやAuthorization Pluginsとは異なる特権実行経路となる可能性があります。このディレクトリが存在するからといって、新たに書き込んだplug-inが次回起動時に実行されるとは限りません。macOS 26.5のAppleのローカルマニュアル`dspluginhelperd(8)`と`opendirectoryd(8)`には、現在もhelperとこのレガシー経路が記載されています。<sup>[[53]](#references)</sup>
 
-macOS 26 で読み取り専用の確認を行ったところ、`/Library/DirectoryServices/PlugIns` と `/usr/libexec/dspluginhelperd` は存在します。このテストでは plug-in のインストール、設定、読み込みは行っていません。
+macOS 26で読み取り専用の確認を行ったところ、`/Library/DirectoryServices/PlugIns`と`/usr/libexec/dspluginhelperd`は存在していました。このテストでは、plug-inのインストール、設定、読み込みは行っていません。
 
 ## Persistence techniques and tools
 
@@ -2649,61 +2655,64 @@ macOS 26 で読み取り専用の確認を行ったところ、`/Library/Directo
 
 ## References
 
-- [1] [2025 年、Infostealer の年](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-- [2] [おなじみの LaunchAgents を超えて - 1 - shell startup files](https://theevilbit.github.io/beyond/beyond_0001/)
-- [3] [おなじみの LaunchAgents を超えて - 18 - X11 と XQuartz](https://theevilbit.github.io/beyond/beyond_0018/)
-- [4] [おなじみの LaunchAgents を超えて - 21 - 再度開かれるアプリケーション](https://theevilbit.github.io/beyond/beyond_0021/)
-- [5] [おなじみの LaunchAgents を超えて - 20 - Terminal Preferences](https://theevilbit.github.io/beyond/beyond_0020/)
-- [6] [おなじみの LaunchAgents を超えて - 13 - Audio Plugins](https://theevilbit.github.io/beyond/beyond_0013/)
+- [1] [2025年、Infostealerの年](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [2] [従来のLaunchAgentsを超えて - 1 - shellの起動ファイル](https://theevilbit.github.io/beyond/beyond_0001/)
+- [3] [従来のLaunchAgentsを超えて - 18 - X11とXQuartz](https://theevilbit.github.io/beyond/beyond_0018/)
+- [4] [従来のLaunchAgentsを超えて - 21 - 再オープンされるアプリケーション](https://theevilbit.github.io/beyond/beyond_0021/)
+- [5] [従来のLaunchAgentsを超えて - 20 - Terminalの設定](https://theevilbit.github.io/beyond/beyond_0020/)
+- [6] [従来のLaunchAgentsを超えて - 13 - Audio Plugins](https://theevilbit.github.io/beyond/beyond_0013/)
 - [7] [Audio Unit Plug-ins (SpecterOps)](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
-- [8] [おなじみの LaunchAgents を超えて - 12 - QuickLook Plugins](https://theevilbit.github.io/beyond/beyond_0012/)
-- [9] [おなじみの LaunchAgents を超えて - 22 - LoginHook と LogoutHook](https://theevilbit.github.io/beyond/beyond_0022/)
-- [10] [おなじみの LaunchAgents を超えて - 4 - cron jobs](https://theevilbit.github.io/beyond/beyond_0004/)
-- [11] [おなじみの LaunchAgents を超えて - 2 - iTerm2 startup](https://theevilbit.github.io/beyond/beyond_0002/)
-- [12] [おなじみの LaunchAgents を超えて - 7 - xbar plugins](https://theevilbit.github.io/beyond/beyond_0007/)
-- [13] [おなじみの LaunchAgents を超えて - 8 - Hammerspoon](https://theevilbit.github.io/beyond/beyond_0008/)
-- [14] [おなじみの LaunchAgents を超えて - 6 - SSHRC](https://theevilbit.github.io/beyond/beyond_0006/)
-- [15] [おなじみの LaunchAgents を超えて - 3 - Login Items](https://theevilbit.github.io/beyond/beyond_0003/)
-- [16] [おなじみの LaunchAgents を超えて - 14 - atrun](https://theevilbit.github.io/beyond/beyond_0014/)
-- [17] [おなじみの LaunchAgents を超えて - 24 - Folder Actions](https://theevilbit.github.io/beyond/beyond_0024/)
-- [18] [macOS での Persistence のための Folder Actions (SpecterOps)](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
-- [19] [おなじみの LaunchAgents を超えて - 27 - Dock shortcuts](https://theevilbit.github.io/beyond/beyond_0027/)
-- [20] [おなじみの LaunchAgents を超えて - 17 - Color Pickers](https://theevilbit.github.io/beyond/beyond_0017/)
-- [21] [おなじみの LaunchAgents を超えて - 26 - Finder Sync Plugins](https://theevilbit.github.io/beyond/beyond_0026/)
-- [22] ["Mac File Opener" の Persistence を分析する (Objective-See)](https://objective-see.org/blog/blog_0x11.html)
-- [23] [おなじみの LaunchAgents を超えて - 16 - Screen Saver](https://theevilbit.github.io/beyond/beyond_0016/)
-- [24] [アクセスを維持する: macOS Persistence のための Screensavers (SpecterOps)](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
-- [25] [おなじみの LaunchAgents を超えて - 11 - Spotlight Importers](https://theevilbit.github.io/beyond/beyond_0011/)
-- [26] [おなじみの LaunchAgents を超えて - 9 - Preference Pane](https://theevilbit.github.io/beyond/beyond_0009/)
-- [27] [おなじみの LaunchAgents を超えて - 19 - Periodic Scripts](https://theevilbit.github.io/beyond/beyond_0019/)
-- [28] [おなじみの LaunchAgents を超えて - 5 - Pluggable Authentication Modules (PAM)](https://theevilbit.github.io/beyond/beyond_0005/)
-- [29] [おなじみの LaunchAgents を超えて - 28 - Authorization Plugins](https://theevilbit.github.io/beyond/beyond_0028/)
-- [30] [Authorization Plugins を使った永続的な認証情報の窃取 (SpecterOps)](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
-- [31] [おなじみの LaunchAgents を超えて - 30 - man の設定ファイル - man.conf](https://theevilbit.github.io/beyond/beyond_0030/)
-- [32] [おなじみの LaunchAgents を超えて - 25 - Apache2 modules](https://theevilbit.github.io/beyond/beyond_0025/)
-- [33] [おなじみの LaunchAgents を超えて - 31 - BSM audit framework](https://theevilbit.github.io/beyond/beyond_0031/)
-- [34] [おなじみの LaunchAgents を超えて - 23 - emond、Event Monitor Daemon](https://theevilbit.github.io/beyond/beyond_0023/)
-- [35] [おなじみの LaunchAgents を超えて - 29 - amstoold](https://theevilbit.github.io/beyond/beyond_0029/)
-- [36] [おなじみの LaunchAgents を超えて - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
-- [37] [おなじみの LaunchAgents を超えて - 10 - アプリケーションの script files](https://theevilbit.github.io/beyond/beyond_0010/)
-- [38] [おなじみの LaunchAgents を超えて - 32 - Dock Tile Plugins](https://theevilbit.github.io/beyond/beyond_0032/)
-- [39] [おなじみの LaunchAgents を超えて - 33 - Widgets](https://theevilbit.github.io/beyond/beyond_0033/)
-- [40] [おなじみの LaunchAgents を超えて - 34 - launchd boot tasks](https://theevilbit.github.io/beyond/beyond_0034/)
-- [41] [おなじみの LaunchAgents を超えて - 35 - NVRAM 経由での Persistence (apple-trusted-trampoline)](https://theevilbit.github.io/beyond/beyond_0035/)
-- [42] [OS X で Persistence に email を使う (n00py)](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)
-- [43] [Apple Mail の Rule Plist に対する不審な変更 (Elastic)](https://www.elastic.co/guide/en/security/current/suspicious-apple-mail-rule-plist-modification.html)
-- [44] [悪意のある Profiles - Mac にとって最も深刻な脅威の一つ (Jamf)](https://www.jamf.com/blog/malicious-profiles-come/)
+- [8] [従来のLaunchAgentsを超えて - 12 - QuickLook Plugins](https://theevilbit.github.io/beyond/beyond_0012/)
+- [9] [従来のLaunchAgentsを超えて - 22 - LoginHookとLogoutHook](https://theevilbit.github.io/beyond/beyond_0022/)
+- [10] [従来のLaunchAgentsを超えて - 4 - cron jobs](https://theevilbit.github.io/beyond/beyond_0004/)
+- [11] [従来のLaunchAgentsを超えて - 2 - iTerm2の起動](https://theevilbit.github.io/beyond/beyond_0002/)
+- [12] [従来のLaunchAgentsを超えて - 7 - xbar plugins](https://theevilbit.github.io/beyond/beyond_0007/)
+- [13] [従来のLaunchAgentsを超えて - 8 - Hammerspoon](https://theevilbit.github.io/beyond/beyond_0008/)
+- [14] [従来のLaunchAgentsを超えて - 6 - SSHRC](https://theevilbit.github.io/beyond/beyond_0006/)
+- [15] [従来のLaunchAgentsを超えて - 3 - Login Items](https://theevilbit.github.io/beyond/beyond_0003/)
+- [16] [従来のLaunchAgentsを超えて - 14 - atrun](https://theevilbit.github.io/beyond/beyond_0014/)
+- [17] [従来のLaunchAgentsを超えて - 24 - Folder Actions](https://theevilbit.github.io/beyond/beyond_0024/)
+- [18] [macOSのPersistenceにおけるFolder Actions (SpecterOps)](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
+- [19] [従来のLaunchAgentsを超えて - 27 - Dock shortcuts](https://theevilbit.github.io/beyond/beyond_0027/)
+- [20] [従来のLaunchAgentsを超えて - 17 - Color Pickers](https://theevilbit.github.io/beyond/beyond_0017/)
+- [21] [従来のLaunchAgentsを超えて - 26 - Finder Sync Plugins](https://theevilbit.github.io/beyond/beyond_0026/)
+- [22] ["Mac File Opener"のPersistenceを分析する (Objective-See)](https://objective-see.org/blog/blog_0x11.html)
+- [23] [従来のLaunchAgentsを超えて - 16 - Screen Saver](https://theevilbit.github.io/beyond/beyond_0016/)
+- [24] [アクセスを維持する: macOSのPersistenceにおけるScreensavers (SpecterOps)](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
+- [25] [従来のLaunchAgentsを超えて - 11 - Spotlight Importers](https://theevilbit.github.io/beyond/beyond_0011/)
+- [26] [従来のLaunchAgentsを超えて - 9 - Preference Pane](https://theevilbit.github.io/beyond/beyond_0009/)
+- [27] [従来のLaunchAgentsを超えて - 19 - Periodic Scripts](https://theevilbit.github.io/beyond/beyond_0019/)
+- [28] [従来のLaunchAgentsを超えて - 5 - Pluggable Authentication Modules (PAM)](https://theevilbit.github.io/beyond/beyond_0005/)
+- [29] [従来のLaunchAgentsを超えて - 28 - Authorization Plugins](https://theevilbit.github.io/beyond/beyond_0028/)
+- [30] [Authorization Pluginsによる永続的な認証情報の窃取 (SpecterOps)](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
+- [31] [従来のLaunchAgentsを超えて - 30 - manの設定ファイル - man.conf](https://theevilbit.github.io/beyond/beyond_0030/)
+- [32] [従来のLaunchAgentsを超えて - 25 - Apache2 modules](https://theevilbit.github.io/beyond/beyond_0025/)
+- [33] [従来のLaunchAgentsを超えて - 31 - BSM audit framework](https://theevilbit.github.io/beyond/beyond_0031/)
+- [34] [従来のLaunchAgentsを超えて - 23 - emond、Event Monitor Daemon](https://theevilbit.github.io/beyond/beyond_0023/)
+- [35] [従来のLaunchAgentsを超えて - 29 - amstoold](https://theevilbit.github.io/beyond/beyond_0029/)
+- [36] [従来のLaunchAgentsを超えて - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
+- [37] [従来のLaunchAgentsを超えて - 10 - アプリケーションのスクリプトファイル](https://theevilbit.github.io/beyond/beyond_0010/)
+- [38] [従来のLaunchAgentsを超えて - 32 - Dock Tile Plugins](https://theevilbit.github.io/beyond/beyond_0032/)
+- [39] [従来のLaunchAgentsを超えて - 33 - Widgets](https://theevilbit.github.io/beyond/beyond_0033/)
+- [40] [従来のLaunchAgentsを超えて - 34 - launchdの起動タスク](https://theevilbit.github.io/beyond/beyond_0034/)
+- [41] [従来のLaunchAgentsを超えて - 35 - NVRAMを介したPersistence (apple-trusted-trampoline)](https://theevilbit.github.io/beyond/beyond_0035/)
+- [42] [OS XでのPersistenceにemailを利用する (n00py)](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)
+- [43] [Apple Mailのルールplistに対する不審な変更 (Elastic)](https://www.elastic.co/guide/en/security/current/suspicious-apple-mail-rule-plist-modification.html)
+- [44] [悪意あるProfiles - Macにとって最も深刻な脅威の一つ (Jamf)](https://www.jamf.com/blog/malicious-profiles-come/)
 - [45] [The Art of Mac Malware Vol.1 - Ch.0x2 Persistence (dyld)](https://taomm.org/PDFs/vol1/CH%200x02%20Persistence.pdf)
-- [46] [CVE-2024-44243 の分析: kernel extensions を介した macOS SIP bypass (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)
-- [47] [Claude Code の Project Files を介した RCE と API Token の窃取 (CVE-2025-59536、Check Point)](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
-- [48] [GitHub Copilot と Cursor の新たな脆弱性 - Rules File Backdoor (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)
+- [46] [CVE-2024-44243の分析: kernel extensionsを介したmacOS SIP bypass (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)
+- [47] [Claude Codeのプロジェクトファイルを介したRCEとAPI Tokenの窃取 (CVE-2025-59536、Check Point)](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
+- [48] [GitHub CopilotとCursorの新たな脆弱性 - Rules File Backdoor (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)
 - [49] [Chrome - 代替インストール方法 (External Extensions)](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)
-- [50] [Mac の Chrome で ExtensionInstallForcelist を削除する (macsecurity.net)](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)
-- [51] [Sudo Plugins の作成について (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)
-- [52] [カスタム URL Schemes を介したリモート Mac の悪用 (Objective-See)](https://objective-see.org/blog/blog_0x38.html)
-- [53] [Plugins を悪用する 2 つの macOS persistence tricks (codecolorist)](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)
-- [54] [CoreMediaIO DAL の最小限の例 (johnboiles)](https://github.com/johnboiles/coremediaio-dal-minimal-example)
-- [55] [Sploitlight: Spotlight ベースの macOS TCC 脆弱性の分析 (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
-- [56] [Python `site` module のドキュメント (.pth / usercustomize / sitecustomize)](https://docs.python.org/3/library/site.html)
-- [57] [Spotlight から Apple Intelligence へ — 0day を悪用して macOS AI の学習データを窃取する](https://objective-see.org/blog/blog_0x81.html)
+- [50] [MacのChromeでExtensionInstallForcelistを削除する (macsecurity.net)](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)
+- [51] [Sudo Pluginsの作成について (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)
+- [52] [カスタムURL Schemesを介したRemote Mac Exploitation (Objective-See)](https://objective-see.org/blog/blog_0x38.html)
+- [53] [plug-insを悪用した2つのmacOS persistence手法 (codecolorist)](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)
+- [54] [CoreMediaIO DALの最小例 (johnboiles)](https://github.com/johnboiles/coremediaio-dal-minimal-example)
+- [55] [Sploitlight: SpotlightベースのmacOS TCC vulnerabilityを分析する (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
+- [56] [Python `site` moduleのドキュメント (.pth / usercustomize / sitecustomize)](https://docs.python.org/3/library/site.html)
+- [57] [SpotlightからApple Intelligenceへ — 0dayを悪用し、macOS AIを支えるデータを窃取する](https://objective-see.org/blog/blog_0x81.html)
+- [58] [PEP 829 — Package Startup Configuration Files](https://peps.python.org/pep-0829/)
+- [59] [Python 3.15 `site`のドキュメント — 起動時のエントリーポイント](https://docs.python.org/3.15/library/site.html)
+- [60] [autorun-audit — PEP 829と`.start`ファイル](https://github.com/ag3ntsc4rn/autorun-audit)
 {{#include ../banners/hacktricks-training.md}}
