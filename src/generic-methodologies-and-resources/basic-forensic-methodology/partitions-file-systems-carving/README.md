@@ -4,14 +4,13 @@
 
 ## Partitions
 
-A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\
-The **minimum** unit of a disk is the **sector** (normally composed of 512B). So, each partition size needs to be multiple of that size.
+A disk can contain multiple **partitions**: logical ranges of blocks, not physically separate storage. Partition starts and lengths are measured in **logical sectors**; do not assume every image uses 512-byte sectors, because 4096-byte logical sectors also exist.<sup>[[4]](#references)</sup>
 
 ### MBR (master Boot Record)
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate to the PC what and from where a partition should be mounted.\
-It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
-MBR allows **max 2.2TB**.
+The MBR occupies the first logical sector (LBA 0); its four 16-byte partition entries begin at byte 446. The preceding area includes boot code and may include a disk signature.<sup>[[4]](#references)</sup>\
+It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The last **two bytes** of the 512-byte MBR are the boot signature **0x55 0xAA**. Only one partition can be marked as active.\
+With 512-byte logical sectors, MBR's 32-bit sector fields limit addressability to about **2 TiB** (2.2 TB).<sup>[[4]](#references)</sup>
 
 ![Partitions - MBR (master Boot Record): MBR allows max 2.2TB](<../../../images/image (350).png>)
 
@@ -47,17 +46,13 @@ From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Sig
 | 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
 | 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
 
-In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
+To inspect a partition in a whole-disk MBR image, obtain its start LBA and logical sector size first. `mount` takes a **byte offset**, not an LBA; the example below is valid only for a 512-byte-sector image whose partition begins at LBA 63. For untrusted images or journaled filesystems, use the isolated, read-only workflow in [Image Acquisition & Mount](../image-acquisition-and-mount.md) instead.<sup>[[5]](#references)[[11]](#references)</sup>
 
 ![Partitions - MBR (master Boot Record): In order to mount an MBR in Linux you first need to get the start offset (you can use fdisk and the p command)](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-And then use the following code
-
 ```bash
-#Mount MBR in Linux
-mount -o ro,loop,offset=<Bytes>
-#63x512 = 32256Bytes
-mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
+mmls -b 512 /path/to/image.dd  # Confirm the start LBA from this image
+sudo mount -o ro,loop,offset=$((63 * 512)),noatime /path/to/image.dd /media/part/
 ```
 
 **LBA (Logical block addressing)**
@@ -66,16 +61,16 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 ### GPT (GUID Partition Table)
 
-The GUID Partition Table, known as GPT, is favored for its enhanced capabilities compared to MBR (Master Boot Record). Distinctive for its **globally unique identifier** for partitions, GPT stands out in several ways:
+The GUID Partition Table (GPT) stores a unique GUID for each partition and uses primary and backup metadata. Its layout differs from MBR as follows:<sup>[[4]](#references)</sup>
 
-- **Location and Size**: Both GPT and MBR start at **sector 0**. However, GPT operates on **64bits**, contrasting with MBR's 32bits.
-- **Partition Limits**: GPT supports up to **128 partitions** on Windows systems and accommodates up to **9.4ZB** of data.
+- **Location and Size**: LBA 0 contains a **protective MBR**. The primary GPT header is at LBA 1; its partition-entry array follows it, and a backup array and header are at the end of the disk. GPT uses 64-bit LBA fields, while MBR partition entries use 32-bit LBA fields.
+- **Partition Limits**: A common 16-KiB entry array holds **128 entries of 128 bytes**, but the entry count is recorded in the header rather than fixed by GPT. The addressable size also depends on logical sector size (about **9.4 ZB** with 512-byte sectors).<sup>[[4]](#references)</sup>
 - **Partition Names**: Offers the ability to name partitions with up to 36 Unicode characters.
 
 **Data Resilience and Recovery**:
 
 - **Redundancy**: Unlike MBR, GPT doesn't confine partitioning and boot data to a single place. It replicates this data across the disk, enhancing data integrity and resilience.
-- **Cyclic Redundancy Check (CRC)**: GPT employs CRC to ensure data integrity. It actively monitors for data corruption, and when detected, GPT attempts to recover the corrupted data from another disk location.
+- **Cyclic Redundancy Check (CRC)**: The header and partition-entry array each have a CRC32. A CRC detects inconsistency; it does not continuously monitor or itself repair the disk. If the primary copy is invalid, validate the backup at the last LBA before any recovery on a working copy.<sup>[[4]](#references)</sup>
 
 **Protective MBR (LBA0)**:
 
@@ -137,7 +132,18 @@ After mounting the forensics image with [**ArsenalImageMounter**](https://arsena
 
 ![GPT (GUID Partition Table) - Inspecting: After mounting the forensics image with ArsenalImageMounter , you can inspect the first sector using the Windows tool Active Disk Editor . In the...](<../../../images/image (354).png>)
 
-If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
+For GPT, look for the _EFI PART_ signature in the primary header at **LBA 1**; LBA 0 still contains the protective MBR.<sup>[[4]](#references)</sup>
+
+### Finding data outside listed partitions
+
+A deleted partition entry or deliberately unused gap can leave a filesystem outside the current partition map. On a **verified raw working copy**, list unallocated ranges, then test a candidate start LBA as a filesystem. `mmls` and `fsstat` use **sector offsets**; give both the actual logical sector size. Do not mistake GPT metadata sectors for a hidden volume.<sup>[[5]](#references)[[6]](#references)</sup>
+
+```bash
+mmls -b 512 -A disk.img                # Unallocated ranges: Start and Length
+fsstat -b 512 -o 2048 disk.img       # Replace 2048 with a candidate Start LBA
+```
+
+If `fsstat` cannot identify a filesystem at the gap start, use TestDisk **Analyse → Quick Search**, then **Deeper Search** if needed. Press `P` on a candidate to inspect files; do not select **Write** on evidence. On GPT images, `sgdisk --verify disk.img` checks CRCs and main/backup agreement, but a backup header can be stale after repartitioning, so corroborate candidate boundaries with filesystem structures before recovery.<sup>[[9]](#references)[[10]](#references)[[4]](#references)</sup>
 
 ## File-Systems
 
@@ -151,15 +157,15 @@ If it was a **GPT table instead of an MBR** it should appear the signature _EFI 
 
 ### FAT
 
-The **FAT (File Allocation Table)** file system is designed around its core component, the file allocation table, positioned at the volume's start. This system safeguards data by maintaining **two copies** of the table, ensuring data integrity even if one is corrupted. The table, along with the root folder, must be in a **fixed location**, crucial for the system's startup process.
+The **FAT (File Allocation Table)** file system is designed around its core component, the file allocation table, positioned at the volume's start. A volume commonly has **two FAT copies**, though the BPB permits one. FAT12/16 place the root directory in a fixed region; FAT32 stores its root directory in the data area at the cluster named by `BPB_RootClus`.<sup>[[7]](#references)</sup>
 
-The file system's basic unit of storage is a **cluster, usually 512B**, comprising multiple sectors. FAT has evolved through versions:
+The allocation unit is a **cluster**: `BPB_BytsPerSec × BPB_SecPerClus`, not necessarily 512 bytes. FAT type is determined by the number of data clusters, not by a version string in the boot sector. The cluster-count boundaries are:<sup>[[7]](#references)</sup>
 
-- **FAT12**, supporting 12-bit cluster addresses and handling up to 4078 clusters (4084 with UNIX).
-- **FAT16**, enhancing to 16-bit addresses, thereby accommodating up to 65,517 clusters.
-- **FAT32**, further advancing with 32-bit addresses, allowing an impressive 268,435,456 clusters per volume.
+- **FAT12**: fewer than 4,085 data clusters.
+- **FAT16**: 4,085 to 65,524 data clusters.
+- **FAT32**: at least 65,525 data clusters; only 28 bits of each 32-bit FAT entry are used for the cluster number.
 
-A significant limitation across FAT versions is the **4GB maximum file size**, imposed by the 32-bit field used for file size storage.
+The 32-bit file-size field limits a regular file to **2³²−1 bytes** (just under 4 GiB).<sup>[[7]](#references)</sup>
 
 Key components of the root directory, particularly for FAT12 and FAT16, include:
 
@@ -204,7 +210,7 @@ file-data-carving-recovery-tools.md
 
 **File carving** is a technique that tries to **find files in the bulk of data**. There are 3 main ways tools like this work: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
 
-Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
+Simple header/footer carving assumes contiguous blocks and can return only a fragment when a file is split. This is not an absolute limit: PhotoRec has a CPU-intensive **Paranoid → bruteforce** option for some fragmented JPEGs, while format-aware fragment reassembly can recover other supported types. See [file carving and recovery tools](file-data-carving-recovery-tools.md#scalpel3-fragmented-carving) for a current fragment-reassembly workflow.<sup>[[8]](#references)</sup>
 
 There are several tools that you can use for file Carving indicating the file types you want to search for
 
@@ -228,10 +234,19 @@ file-data-carving-recovery-tools.md
 Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.<sup>[[3]](#references)</sup>\
 You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
 
+
+
 ## References
 
 - [1] [GUID Partition Table - Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [2] [How to scan NTFS $I30 (directory) entries for evidence of deleted files](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
 - [3] [Volume Shadow Copy Service (VSS)](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
-
+- [4] [UEFI specification: GPT disk layout](https://uefi.org/specs/UEFI/2.9_A/05_GUID_Partition_Table_Format.html)
+- [5] [The Sleuth Kit mmls manual](https://sleuthkit.org/sleuthkit/man/mmls.html)
+- [6] [The Sleuth Kit fsstat manual](https://www.sleuthkit.org/sleuthkit/man/fsstat.html)
+- [7] [Microsoft FAT specification](https://academy.cba.mit.edu/classes/networking_communications/SD/FAT.pdf)
+- [8] [PhotoRec recovery options](https://www.cgsecurity.org/testdisk_doc/photorec.html)
+- [9] [TestDisk deleted-partition recovery](https://www.cgsecurity.org/testdisk_doc/partition_recovery.html)
+- [10] [sgdisk manual](https://manpages.debian.org/trixie/gdisk/sgdisk.8.en.html)
+- [11] [mount(8) manual](https://man7.org/linux/man-pages/man8/mount.8.html)
 {{#include ../../../banners/hacktricks-training.md}}
