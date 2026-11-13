@@ -1,83 +1,80 @@
-# Partitions/File Systems/Carving
+# Κατατμήσεις/Συστήματα αρχείων/Carving
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Partitions
+## Κατατμήσεις
 
-Ένας σκληρός δίσκος ή ένας **SSD disk μπορεί να περιέχει διαφορετικά partitions** με στόχο τον φυσικό διαχωρισμό των δεδομένων.\
-Η **ελάχιστη** μονάδα ενός disk είναι ο **sector** (συνήθως αποτελείται από 512B). Επομένως, το μέγεθος κάθε partition πρέπει να είναι πολλαπλάσιο αυτού του μεγέθους.
+Ένας δίσκος μπορεί να περιέχει πολλές **κατατμήσεις**: λογικές περιοχές μπλοκ, όχι φυσικά ξεχωριστούς αποθηκευτικούς χώρους. Οι αρχές και τα μήκη των κατατμήσεων μετρώνται σε **λογικούς τομείς**· μην υποθέτετε ότι κάθε image χρησιμοποιεί τομείς των 512 byte, καθώς υπάρχουν και λογικοί τομείς των 4096 byte.<sup>[[4]](#references)</sup>
 
 ### MBR (master Boot Record)
 
-Κατανέμεται στον **πρώτο sector του disk μετά τα 446B του boot code**. Αυτός ο sector είναι απαραίτητος για να υποδείξει στο PC ποιο partition πρέπει να γίνει mount και από πού.\
-Επιτρέπει έως και **4 partitions** (το πολύ **μόνο 1** μπορεί να είναι active/**bootable**). Ωστόσο, αν χρειάζεστε περισσότερα partitions, μπορείτε να χρησιμοποιήσετε **extended partitions**. Το **τελικό byte** αυτού του πρώτου sector είναι η boot record signature **0x55AA**. Μόνο ένα partition μπορεί να επισημανθεί ως active.\
-Το MBR επιτρέπει **το πολύ 2.2TB**.
+Το MBR καταλαμβάνει τον πρώτο λογικό τομέα (LBA 0)· οι τέσσερις εγγραφές κατατμήσεων των 16 byte αρχίζουν στο byte 446. Η προηγούμενη περιοχή περιλαμβάνει κώδικα εκκίνησης και μπορεί να περιλαμβάνει υπογραφή δίσκου.<sup>[[4]](#references)</sup>\
+Επιτρέπει έως και **4 κατατμήσεις** (το πολύ **μόνο 1** μπορεί να είναι ενεργή/**εκκινήσιμη**). Ωστόσο, αν χρειάζεστε περισσότερες κατατμήσεις, μπορείτε να χρησιμοποιήσετε **εκτεταμένες κατατμήσεις**. Τα τελευταία **δύο byte** του MBR των 512 byte είναι η υπογραφή εκκίνησης **0x55 0xAA**. Μόνο μία κατάτμηση μπορεί να επισημανθεί ως ενεργή.\
+Με λογικούς τομείς των 512 byte, τα πεδία τομέων 32 bit του MBR περιορίζουν τη διευθυνσιοδότηση σε περίπου **2 TiB** (2.2 TB).<sup>[[4]](#references)</sup>
 
-![Partitions - MBR (master Boot Record): Το MBR επιτρέπει το πολύ 2.2TB](<../../../images/image (350).png>)
+![Κατατμήσεις - MBR (master Boot Record): Το MBR επιτρέπει έως 2.2TB](<../../../images/image (350).png>)
 
-![Partitions - MBR (master Boot Record): Το MBR επιτρέπει το πολύ 2.2TB](<../../../images/image (304).png>)
+![Κατατμήσεις - MBR (master Boot Record): Το MBR επιτρέπει έως 2.2TB](<../../../images/image (304).png>)
 
-Από τα **bytes 440 έως 443** του MBR μπορείτε να βρείτε το **Windows Disk Signature** (αν χρησιμοποιείται Windows). Το logical drive letter του hard disk εξαρτάται από το Windows Disk Signature. Η αλλαγή αυτής της signature θα μπορούσε να εμποδίσει την εκκίνηση των Windows (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+Στα **byte 440 έως 443** του MBR μπορείτε να βρείτε την **Υπογραφή δίσκου Windows** (αν χρησιμοποιούνται Windows). Το λογικό γράμμα μονάδας δίσκου εξαρτάται από την Υπογραφή δίσκου Windows. Η αλλαγή αυτής της υπογραφής μπορεί να εμποδίσει την εκκίνηση των Windows (εργαλείο: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
-![Partitions - MBR (master Boot Record): Από τα bytes 440 έως 443 του MBR μπορείτε να βρείτε το Windows Disk Signature (αν χρησιμοποιείται Windows). Το logical drive letter του hard disk...](<../../../images/image (310).png>)
+![Κατατμήσεις - MBR (master Boot Record): Στα byte 440 έως 443 του MBR μπορείτε να βρείτε την Υπογραφή δίσκου Windows (αν χρησιμοποιούνται Windows). Το λογικό γράμμα μονάδας δίσκου...](<../../../images/image (310).png>)
 
 **Μορφή**
 
 | Offset      | Length     | Item                |
 | ----------- | ---------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | First Partition     |
-| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
-| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
-| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
-| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
+| 0 (0x00)    | 446(0x1BE) | Κώδικας εκκίνησης   |
+| 446 (0x1BE) | 16 (0x10)  | Πρώτη κατάτμηση     |
+| 462 (0x1CE) | 16 (0x10)  | Δεύτερη κατάτμηση   |
+| 478 (0x1DE) | 16 (0x10)  | Τρίτη κατάτμηση     |
+| 494 (0x1EE) | 16 (0x10)  | Τέταρτη κατάτμηση   |
+| 510 (0x1FE) | 2 (0x2)    | Υπογραφή 0x55 0xAA |
 
-**Μορφή Partition Record**
+**Μορφή εγγραφής κατάτμησης**
 
 | Offset    | Length   | Item                                                   |
 | --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
-| 1 (0x01)  | 1 (0x01) | Start head                                             |
-| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
-| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | End head                                               |
-| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
-| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
-| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
+| 0 (0x00)  | 1 (0x01) | Σημαία ενεργής κατάτμησης (0x80 = εκκινήσιμη)          |
+| 1 (0x01)  | 1 (0x01) | Αρχική κεφαλή                                          |
+| 2 (0x02)  | 1 (0x01) | Αρχικός τομέας (bits 0-5)· ανώτερα bits του κυλίνδρου (6- 7) |
+| 3 (0x03)  | 1 (0x01) | Τα χαμηλότερα 8 bits του αρχικού κυλίνδρου             |
+| 4 (0x04)  | 1 (0x01) | Κωδικός τύπου κατάτμησης (0x83 = Linux)                |
+| 5 (0x05)  | 1 (0x01) | Τελική κεφαλή                                          |
+| 6 (0x06)  | 1 (0x01) | Τελικός τομέας (bits 0-5)· ανώτερα bits του κυλίνδρου (6- 7) |
+| 7 (0x07)  | 1 (0x01) | Τα χαμηλότερα 8 bits του τελικού κυλίνδρου             |
+| 8 (0x08)  | 4 (0x04) | Τομείς πριν από την κατάτμηση (little endian)           |
+| 12 (0x0C) | 4 (0x04) | Τομείς στην κατάτμηση                                   |
 
-Για να κάνετε mount ένα MBR στο Linux, πρέπει πρώτα να βρείτε το start offset (μπορείτε να χρησιμοποιήσετε το `fdisk` και την εντολή `p`)
+Για να εξετάσετε μια κατάτμηση σε image ολόκληρου δίσκου με MBR, βρείτε πρώτα το αρχικό LBA και το μέγεθος του λογικού τομέα. Η `mount` δέχεται **offset σε byte**, όχι LBA· το παρακάτω παράδειγμα ισχύει μόνο για image με τομείς των 512 byte, όπου η κατάτμηση αρχίζει στο LBA 63. Για μη έμπιστα image ή συστήματα αρχείων με journal, χρησιμοποιήστε αντ’ αυτού την απομονωμένη ροή εργασίας μόνο για ανάγνωση στο [Image Acquisition & Mount](../image-acquisition-and-mount.md).<sup>[[5]](#references)[[11]](#references)</sup>
 
-![Partitions - MBR (master Boot Record): Για να κάνετε mount ένα MBR στο Linux, πρέπει πρώτα να βρείτε το start offset (μπορείτε να χρησιμοποιήσετε το fdisk και την εντολή p)](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![Κατατμήσεις - MBR (master Boot Record): Για να προσαρτήσετε ένα MBR στο Linux, πρέπει πρώτα να βρείτε το αρχικό offset (μπορείτε να χρησιμοποιήσετε το fdisk και την εντολή p)](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-Στη συνέχεια, χρησιμοποιήστε τον ακόλουθο κώδικα
 ```bash
-#Mount MBR in Linux
-mount -o ro,loop,offset=<Bytes>
-#63x512 = 32256Bytes
-mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
+mmls -b 512 /path/to/image.dd  # Confirm the start LBA from this image
+sudo mount -o ro,loop,offset=$((63 * 512)),noatime /path/to/image.dd /media/part/
 ```
+
 **LBA (Logical block addressing)**
 
-**Logical block addressing** (**LBA**) είναι ένα συνηθισμένο σχήμα που χρησιμοποιείται για τον **καθορισμό της τοποθεσίας των blocks** δεδομένων που είναι αποθηκευμένα σε συσκευές αποθήκευσης υπολογιστών, γενικά σε συστήματα secondary storage όπως οι σκληροί δίσκοι. Το LBA είναι ένα ιδιαίτερα απλό γραμμικό σχήμα addressing· **τα blocks εντοπίζονται μέσω ενός ακέραιου index**, με το πρώτο block να είναι το LBA 0, το δεύτερο το LBA 1 κ.ο.κ.
+**Logical block addressing** (**LBA**) είναι ένα κοινό σχήμα που χρησιμοποιείται για τον **καθορισμό της θέσης μπλοκ** δεδομένων αποθηκευμένων σε συσκευές αποθήκευσης υπολογιστών, γενικά σε συστήματα δευτερεύουσας αποθήκευσης, όπως οι σκληροί δίσκοι. Το LBA είναι ένα ιδιαίτερα απλό σχήμα γραμμικής διευθυνσιοδότησης· **τα μπλοκ εντοπίζονται με ακέραιο δείκτη**, όπου το πρώτο μπλοκ είναι το LBA 0, το δεύτερο το LBA 1 κ.ο.κ.
 
 ### GPT (GUID Partition Table)
 
-Το GUID Partition Table, γνωστό ως GPT, προτιμάται για τις αυξημένες δυνατότητές του σε σύγκριση με το MBR (Master Boot Record). Χαρακτηριστικό του είναι το **globally unique identifier** για τα partitions, ενώ το GPT ξεχωρίζει με διάφορους τρόπους:
+Το GUID Partition Table (GPT) αποθηκεύει ένα μοναδικό GUID για κάθε partition και χρησιμοποιεί πρωτεύοντα και εφεδρικά μεταδεδομένα. Η διάταξή του διαφέρει από το MBR ως εξής:<sup>[[4]](#references)</sup>
 
-- **Τοποθεσία και μέγεθος**: Τόσο το GPT όσο και το MBR ξεκινούν από το **sector 0**. Ωστόσο, το GPT λειτουργεί με **64bits**, σε αντίθεση με τα 32bits του MBR.
-- **Όρια partitions**: Το GPT υποστηρίζει έως **128 partitions** σε συστήματα Windows και μπορεί να διαχειριστεί έως **9.4ZB** δεδομένων.
-- **Ονόματα partitions**: Παρέχει τη δυνατότητα ονομασίας partitions με έως 36 Unicode χαρακτήρες.
+- **Θέση και μέγεθος**: Το LBA 0 περιέχει ένα **protective MBR**. Η πρωτεύουσα επικεφαλίδα GPT βρίσκεται στο LBA 1· ακολουθεί ο πίνακας εγγραφών partition, ενώ ένας εφεδρικός πίνακας και μια εφεδρική επικεφαλίδα βρίσκονται στο τέλος του δίσκου. Το GPT χρησιμοποιεί πεδία LBA 64 bit, ενώ οι εγγραφές partition του MBR χρησιμοποιούν πεδία LBA 32 bit.
+- **Όρια partition**: Ένας συνηθισμένος πίνακας εγγραφών 16 KiB περιέχει **128 εγγραφές των 128 byte**, αλλά ο αριθμός των εγγραφών καταγράφεται στην επικεφαλίδα και δεν είναι σταθερός στο GPT. Το διευθυνσιοδοτούμενο μέγεθος εξαρτάται επίσης από το μέγεθος του λογικού τομέα (περίπου **9,4 ZB** με τομείς 512 byte).<sup>[[4]](#references)</sup>
+- **Ονόματα partition**: Παρέχει τη δυνατότητα ονομασίας partition με έως και 36 χαρακτήρες Unicode.
 
 **Ανθεκτικότητα και ανάκτηση δεδομένων**:
 
-- **Πλεονασμός**: Σε αντίθεση με το MBR, το GPT δεν περιορίζει τα δεδομένα partitioning και boot σε μία μόνο τοποθεσία. Αντιγράφει αυτά τα δεδομένα σε ολόκληρο τον δίσκο, ενισχύοντας την ακεραιότητα και την ανθεκτικότητα των δεδομένων.
-- **Cyclic Redundancy Check (CRC)**: Το GPT χρησιμοποιεί CRC για να διασφαλίζει την ακεραιότητα των δεδομένων. Παρακολουθεί ενεργά για corruption δεδομένων και, όταν αυτό εντοπιστεί, το GPT προσπαθεί να ανακτήσει τα corrupted δεδομένα από άλλη τοποθεσία του δίσκου.
+- **Πλεονασμός**: Σε αντίθεση με το MBR, το GPT δεν περιορίζει τα δεδομένα partitioning και boot σε μία μόνο θέση. Αντιγράφει αυτά τα δεδομένα σε διάφορα σημεία του δίσκου, ενισχύοντας την ακεραιότητα και την ανθεκτικότητα των δεδομένων.
+- **Κυκλικός έλεγχος πλεονασμού (CRC)**: Η επικεφαλίδα και ο πίνακας εγγραφών partition έχουν καθένας CRC32. Ένα CRC εντοπίζει ασυνέπειες· δεν παρακολουθεί συνεχώς τον δίσκο ούτε τον επιδιορθώνει από μόνο του. Αν το πρωτεύον αντίγραφο δεν είναι έγκυρο, επικυρώστε το εφεδρικό αντίγραφο στο τελευταίο LBA πριν από οποιαδήποτε ανάκτηση σε ένα λειτουργικό αντίγραφο.<sup>[[4]](#references)</sup>
 
 **Protective MBR (LBA0)**:
 
-- Το GPT διατηρεί backward compatibility μέσω ενός protective MBR. Αυτή η δυνατότητα βρίσκεται στον χώρο του legacy MBR, αλλά έχει σχεδιαστεί ώστε να αποτρέπει παλαιότερα utilities που βασίζονται σε MBR από το να κάνουν κατά λάθος overwrite σε GPT disks, προστατεύοντας έτσι την ακεραιότητα των δεδομένων σε GPT-formatted disks.
+- Το GPT διατηρεί συμβατότητα με παλαιότερα συστήματα μέσω ενός protective MBR. Αυτό το χαρακτηριστικό βρίσκεται στον χώρο του παλαιού MBR, αλλά έχει σχεδιαστεί ώστε να αποτρέπει παλαιότερα βοηθητικά προγράμματα που βασίζονται σε MBR από το να αντικαταστήσουν κατά λάθος δίσκους GPT, προστατεύοντας έτσι την ακεραιότητα των δεδομένων σε δίσκους με μορφοποίηση GPT.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
@@ -85,61 +82,72 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 [Από τη Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table).<sup>[[1]](#references)</sup>
 
-Σε operating systems που υποστηρίζουν **GPT-based boot μέσω υπηρεσιών BIOS** αντί για EFI, το πρώτο sector μπορεί επίσης να χρησιμοποιείται για την αποθήκευση του πρώτου σταδίου του κώδικα **bootloader**, αλλά να είναι **τροποποιημένο** ώστε να αναγνωρίζει **GPT** **partitions**. Ο bootloader στο MBR δεν πρέπει να υποθέτει μέγεθος sector 512 bytes.
+Σε λειτουργικά συστήματα που υποστηρίζουν **εκκίνηση μέσω GPT με υπηρεσίες BIOS** αντί για EFI, ο πρώτος τομέας μπορεί και πάλι να χρησιμοποιείται για την αποθήκευση του κώδικα πρώτου σταδίου του **bootloader**, αλλά **τροποποιημένο** ώστε να αναγνωρίζει **partition GPT**. Ο bootloader στο MBR δεν πρέπει να υποθέτει μέγεθος τομέα 512 byte.
 
-**Partition table header (LBA 1)**
+**Επικεφαλίδα πίνακα partition (LBA 1)**
 
 [Από τη Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table).<sup>[[1]](#references)</sup>
 
-Το partition table header καθορίζει τα usable blocks στον δίσκο. Καθορίζει επίσης τον αριθμό και το μέγεθος των partition entries που αποτελούν το partition table (offsets 80 και 84 στον πίνακα).
+Η επικεφαλίδα του πίνακα partition ορίζει τα χρησιμοποιήσιμα μπλοκ στον δίσκο. Ορίζει επίσης τον αριθμό και το μέγεθος των εγγραφών partition που αποτελούν τον πίνακα partition (μετατοπίσεις 80 και 84 στον πίνακα).
 
 | Offset    | Length   | Contents                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 bytes  | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h ή 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)σε little-endian machines) |
-| 8 (0x08)  | 4 bytes  | Revision 1.0 (00h 00h 01h 00h) για UEFI 2.8                                                                                                                                  |
-| 12 (0x0C) | 4 bytes  | Header size σε little endian (σε bytes, συνήθως 5Ch 00h 00h 00h ή 92 bytes)                                                                                                 |
-| 16 (0x10) | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) του header (offset +0 έως το header size) σε little endian, με αυτό το field μηδενισμένο κατά τον υπολογισμό                  |
-| 20 (0x14) | 4 bytes  | Reserved· πρέπει να είναι zero                                                                                                                                               |
-| 24 (0x18) | 8 bytes  | Current LBA (τοποθεσία αυτού του αντιγράφου του header)                                                                                                                      |
-| 32 (0x20) | 8 bytes  | Backup LBA (τοποθεσία του άλλου αντιγράφου του header)                                                                                                                       |
-| 40 (0x28) | 8 bytes  | First usable LBA για partitions (last LBA του primary partition table + 1)                                                                                                  |
-| 48 (0x30) | 8 bytes  | Last usable LBA (first LBA του secondary partition table − 1)                                                                                                                |
-| 56 (0x38) | 16 bytes | Disk GUID σε mixed endian                                                                                                                                                    |
-| 72 (0x48) | 8 bytes  | Starting LBA ενός array από partition entries (πάντα 2 στο primary copy)                                                                                                    |
-| 80 (0x50) | 4 bytes  | Number of partition entries στο array                                                                                                                                         |
-| 84 (0x54) | 4 bytes  | Size ενός single partition entry (συνήθως 80h ή 128)                                                                                                                        |
-| 88 (0x58) | 4 bytes  | CRC32 του partition entries array σε little endian                                                                                                                           |
-| 92 (0x5C) | \*       | Reserved· πρέπει να αποτελείται από zeroes για το υπόλοιπο του block (420 bytes για sector size 512 bytes· μπορεί να είναι μεγαλύτερο με μεγαλύτερα sector sizes)           |
+| 0 (0x00)  | 8 bytes  | Υπογραφή ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h or 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)on little-endian machines) |
+| 8 (0x08)  | 4 bytes  | Έκδοση 1.0 (00h 00h 01h 00h) για UEFI 2.8                                                                                                                                  |
+| 12 (0x0C) | 4 bytes  | Μέγεθος επικεφαλίδας σε little endian (σε bytes, συνήθως 5Ch 00h 00h 00h ή 92 bytes)                                                                                                 |
+| 16 (0x10) | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) της επικεφαλίδας (offset +0 έως το μέγεθος της επικεφαλίδας) σε little endian, με αυτό το πεδίο μηδενισμένο κατά τον υπολογισμό                             |
+| 20 (0x14) | 4 bytes  | Δεσμευμένο· πρέπει να είναι μηδέν                                                                                                                                                       |
+| 24 (0x18) | 8 bytes  | Τρέχον LBA (θέση αυτού του αντιγράφου επικεφαλίδας)                                                                                                                                   |
+| 32 (0x20) | 8 bytes  | Εφεδρικό LBA (θέση του άλλου αντιγράφου επικεφαλίδας)                                                                                                                               |
+| 40 (0x28) | 8 bytes  | Πρώτο χρησιμοποιήσιμο LBA για partition (τελευταίο LBA του πρωτεύοντος πίνακα partition + 1)                                                                                                       |
+| 48 (0x30) | 8 bytes  | Τελευταίο χρησιμοποιήσιμο LBA (πρώτο LBA του δευτερεύοντος πίνακα partition − 1)                                                                                                                    |
+| 56 (0x38) | 16 bytes | GUID δίσκου σε mixed endian                                                                                                                                                    |
+| 72 (0x48) | 8 bytes  | Αρχικό LBA ενός πίνακα εγγραφών partition (πάντα 2 στο πρωτεύον αντίγραφο)                                                                                                     |
+| 80 (0x50) | 4 bytes  | Αριθμός εγγραφών partition στον πίνακα                                                                                                                                         |
+| 84 (0x54) | 4 bytes  | Μέγεθος μίας εγγραφής partition (συνήθως 80h ή 128)                                                                                                                        |
+| 88 (0x58) | 4 bytes  | CRC32 του πίνακα εγγραφών partition σε little endian                                                                                                                            |
+| 92 (0x5C) | \*       | Δεσμευμένο· πρέπει να είναι μηδενικά για το υπόλοιπο μπλοκ (420 bytes για μέγεθος τομέα 512 bytes· μπορεί να είναι μεγαλύτερο για μεγαλύτερα μεγέθη τομέα)                                      |
 
-**Partition entries (LBA 2–33)**
+**Εγγραφές partition (LBA 2–33)**
 
-| GUID partition entry format |          |                                                                                                               |
+| Μορφή εγγραφής partition GUID |          |                                                                                                               |
 | --------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
 | Offset                      | Length   | Contents                                                                                                      |
-| 0 (0x00)                    | 16 bytes | [Partition type GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (mixed endian) |
-| 16 (0x10)                   | 16 bytes | Unique partition GUID (mixed endian)                                                                          |
-| 32 (0x20)                   | 8 bytes  | First LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)                   | 8 bytes  | Last LBA (inclusive, συνήθως odd)                                                                             |
-| 48 (0x30)                   | 8 bytes  | Attribute flags (π.χ. το bit 60 δηλώνει read-only)                                                            |
-| 56 (0x38)                   | 72 bytes | Partition name (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units)                               |
+| 0 (0x00)                    | 16 bytes | [GUID τύπου partition](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (mixed endian) |
+| 16 (0x10)                   | 16 bytes | Μοναδικό GUID partition (mixed endian)                                                                          |
+| 32 (0x20)                   | 8 bytes  | Πρώτο LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
+| 40 (0x28)                   | 8 bytes  | Τελευταίο LBA (συμπεριλαμβάνεται, συνήθως περιττός)                                                                             |
+| 48 (0x30)                   | 8 bytes  | Σημαίες χαρακτηριστικών (π.χ. το bit 60 δηλώνει μόνο για ανάγνωση)                                                               |
+| 56 (0x38)                   | 72 bytes | Όνομα partition (36 μονάδες κώδικα [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE)                               |
 
-**Partitions Types**
+**Τύποι partition**
 
-![MBR (master Boot Record) - GPT (GUID Partition Table): 56 (0x38) | 72 bytes | Partition name (36 UTF-16LE code units)](<../../../images/image (83).png>)
+![MBR (master Boot Record) - GPT (GUID Partition Table): 56 (0x38) | 72 bytes | Όνομα partition (36 μονάδες κώδικα UTF-16LE)](<../../../images/image (83).png>)
 
-Περισσότεροι τύποι partitions στο [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table).<sup>[[1]](#references)</sup>
+Περισσότεροι τύποι partition στο [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table).<sup>[[1]](#references)</sup>
 
-### Inspecting
+### Επιθεώρηση
 
-Αφού κάνετε mount το forensics image με το [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), μπορείτε να επιθεωρήσετε το πρώτο sector χρησιμοποιώντας το Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** Στην παρακάτω εικόνα εντοπίστηκε ένα **MBR** στο **sector 0** και έγινε interpretation:
+Αφού προσαρτήσετε το forensics image με το [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), μπορείτε να επιθεωρήσετε τον πρώτο τομέα χρησιμοποιώντας το εργαλείο των Windows [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** Στην παρακάτω εικόνα εντοπίστηκε και ερμηνεύτηκε ένα **MBR** στον **τομέα 0**:
 
-![GPT (GUID Partition Table) - Inspecting: After mounting the forensics image with ArsenalImageMounter , you can inspect the first sector using the Windows tool Active Disk Editor . In the...](<../../../images/image (354).png>)
+![GPT (GUID Partition Table) - Επιθεώρηση: Αφού προσαρτήσετε το forensics image με το ArsenalImageMounter , μπορείτε να επιθεωρήσετε τον πρώτο τομέα χρησιμοποιώντας το εργαλείο των Windows Active Disk Editor . Στην...](<../../../images/image (354).png>)
 
-Αν υπήρχε **GPT table αντί για MBR**, θα έπρεπε να εμφανίζεται το signature _EFI PART_ στο **sector 1** (το οποίο στην προηγούμενη εικόνα είναι κενό).
+Για το GPT, αναζητήστε την υπογραφή _EFI PART_ στην πρωτεύουσα επικεφαλίδα στο **LBA 1**· το LBA 0 εξακολουθεί να περιέχει το protective MBR.<sup>[[4]](#references)</sup>
 
-## File-Systems
+### Εύρεση δεδομένων εκτός των καταγεγραμμένων partition
 
-### Windows file-systems list
+Μια διαγραμμένη εγγραφή partition ή ένα σκόπιμα αχρησιμοποίητο κενό μπορεί να αφήσει ένα filesystem εκτός του τρέχοντος χάρτη partition. Σε ένα **επαληθευμένο ακατέργαστο λειτουργικό αντίγραφο**, καταγράψτε τις μη εκχωρημένες περιοχές και, στη συνέχεια, ελέγξτε ένα πιθανό αρχικό LBA ως filesystem. Τα `mmls` και `fsstat` χρησιμοποιούν **offset τομέα**· δώστε και στα δύο το πραγματικό μέγεθος λογικού τομέα. Μην εκλάβετε τους τομείς μεταδεδομένων GPT ως κρυφό volume.<sup>[[5]](#references)[[6]](#references)</sup>
+
+```bash
+mmls -b 512 -A disk.img                # Unallocated ranges: Start and Length
+fsstat -b 512 -o 2048 disk.img       # Replace 2048 with a candidate Start LBA
+```
+
+Αν το `fsstat` δεν μπορεί να αναγνωρίσει σύστημα αρχείων στην αρχή του κενού τμήματος, χρησιμοποιήστε το TestDisk **Analyse → Quick Search** και, αν χρειάζεται, έπειτα το **Deeper Search**. Πατήστε `P` σε ένα υποψήφιο αποτέλεσμα για να επιθεωρήσετε τα αρχεία· μην επιλέξετε **Write** στα αποδεικτικά στοιχεία. Σε εικόνες GPT, η εντολή `sgdisk --verify disk.img` ελέγχει τα CRC και τη συμφωνία κύριας/εφεδρικής κεφαλίδας, αλλά μια εφεδρική κεφαλίδα μπορεί να είναι παρωχημένη μετά από αλλαγή διαμερισμάτων, επομένως επιβεβαιώστε τα όρια των υποψήφιων διαμερισμάτων με δομές συστήματος αρχείων πριν από την ανάκτηση.<sup>[[9]](#references)[[10]](#references)[[4]](#references)</sup>
+
+## Συστήματα αρχείων
+
+### Λίστα συστημάτων αρχείων Windows
 
 - **FAT12/16**: MSDOS, WIN95/98/NT/200
 - **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -149,49 +157,50 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 ### FAT
 
-Το **FAT (File Allocation Table)** file system είναι σχεδιασμένο γύρω από το βασικό του component, το file allocation table, το οποίο βρίσκεται στην αρχή του volume. Αυτό το σύστημα προστατεύει τα δεδομένα διατηρώντας **δύο αντίγραφα** του table, διασφαλίζοντας την ακεραιότητα των δεδομένων ακόμη και αν το ένα corrupted. Το table, μαζί με το root folder, πρέπει να βρίσκεται σε **fixed location**, κάτι κρίσιμο για τη διαδικασία startup του συστήματος.
+Το σύστημα αρχείων **FAT (File Allocation Table)** σχεδιάστηκε γύρω από το βασικό του στοιχείο, τον πίνακα κατανομής αρχείων, ο οποίος βρίσκεται στην αρχή του τόμου. Ένας τόμος έχει συνήθως **δύο αντίγραφα FAT**, αν και το BPB επιτρέπει ένα. Τα FAT12/16 τοποθετούν τον ριζικό κατάλογο σε σταθερή περιοχή· το FAT32 αποθηκεύει τον ριζικό κατάλογο στην περιοχή δεδομένων, στο cluster που ορίζεται από το `BPB_RootClus`.<sup>[[7]](#references)</sup>
 
-Η βασική μονάδα storage του file system είναι ένα **cluster, συνήθως 512B**, που αποτελείται από πολλαπλά sectors. Το FAT έχει εξελιχθεί σε διάφορες versions:
+Η μονάδα κατανομής είναι ένα **cluster**: `BPB_BytsPerSec × BPB_SecPerClus`, όχι απαραίτητα 512 bytes. Ο τύπος FAT καθορίζεται από τον αριθμό των data clusters και όχι από μια συμβολοσειρά έκδοσης στον τομέα εκκίνησης. Τα όρια του αριθμού των clusters είναι τα εξής:<sup>[[7]](#references)</sup>
 
-- **FAT12**, που υποστηρίζει 12-bit cluster addresses και διαχειρίζεται έως 4078 clusters (4084 με UNIX).
-- **FAT16**, που αυξάνει τα addresses σε 16-bit και έτσι υποστηρίζει έως 65.517 clusters.
-- **FAT32**, που προχωρά σε 32-bit addresses, επιτρέποντας έως 268.435.456 clusters ανά volume.
+- **FAT12**: λιγότερα από 4.085 data clusters.
+- **FAT16**: 4.085 έως 65.524 data clusters.
+- **FAT32**: τουλάχιστον 65.525 data clusters· χρησιμοποιούνται μόνο 28 bits από κάθε καταχώριση FAT των 32 bit για τον αριθμό του cluster.
 
-Ένας σημαντικός περιορισμός σε όλες τις FAT versions είναι το **μέγιστο μέγεθος αρχείου των 4GB**, το οποίο επιβάλλεται από το 32-bit field που χρησιμοποιείται για την αποθήκευση του file size.
+Το πεδίο μεγέθους αρχείου των 32 bit περιορίζει ένα κανονικό αρχείο σε **2³²−1 bytes** (λίγο λιγότερο από 4 GiB).<sup>[[7]](#references)</sup>
 
-Τα βασικά components του root directory, ιδιαίτερα για FAT12 και FAT16, περιλαμβάνουν:
+Στα βασικά στοιχεία του ριζικού καταλόγου, ιδιαίτερα για τα FAT12 και FAT16, περιλαμβάνονται:
 
-- **File/Folder Name** (έως 8 χαρακτήρες)
-- **Attributes**
-- **Creation, Modification και Last Access Dates**
-- **FAT Table Address** (υποδεικνύει το start cluster του αρχείου)
-- **File Size**
+- **Όνομα αρχείου/φακέλου** (έως 8 χαρακτήρες)
+- **Χαρακτηριστικά**
+- **Ημερομηνίες δημιουργίας, τροποποίησης και τελευταίας πρόσβασης**
+- **Διεύθυνση πίνακα FAT** (που υποδεικνύει το αρχικό cluster του αρχείου)
+- **Μέγεθος αρχείου**
 
 ### EXT
 
-Το **Ext2** είναι το πιο συνηθισμένο file system για **not journaling** partitions (**partitions που δεν αλλάζουν πολύ**), όπως το boot partition. Τα **Ext3/4** είναι **journaling** και χρησιμοποιούνται συνήθως για τα **rest partitions**.
+Το **Ext2** είναι το πιο συνηθισμένο σύστημα αρχείων για διαμερίσματα **χωρίς journaling** (**διαμερίσματα που δεν αλλάζουν πολύ**), όπως το διαμέρισμα εκκίνησης. Τα **Ext3/4** χρησιμοποιούν **journaling** και συνήθως προορίζονται για τα **υπόλοιπα διαμερίσματα**.
 
-## **Metadata**
+## **Μεταδεδομένα**
 
-Ορισμένα αρχεία περιέχουν metadata. Αυτές οι πληροφορίες αφορούν το περιεχόμενο του αρχείου και μερικές φορές μπορεί να είναι ενδιαφέρουσες για έναν analyst, καθώς ανάλογα με τον τύπο του αρχείου μπορεί να περιλαμβάνουν πληροφορίες όπως:
+Ορισμένα αρχεία περιέχουν μεταδεδομένα. Πρόκειται για πληροφορίες σχετικά με το περιεχόμενο του αρχείου, οι οποίες ενδέχεται μερικές φορές να ενδιαφέρουν έναν αναλυτή, καθώς, ανάλογα με τον τύπο του αρχείου, μπορεί να περιλαμβάνουν:
 
-- Title
-- MS Office Version που χρησιμοποιήθηκε
-- Author
+- Τίτλο
+- Έκδοση του MS Office που χρησιμοποιήθηκε
+- Συγγραφέα
 - Ημερομηνίες δημιουργίας και τελευταίας τροποποίησης
-- Model της camera
-- GPS coordinates
-- Image information
+- Μοντέλο κάμερας
+- Συντεταγμένες GPS
+- Πληροφορίες εικόνας
 
-Μπορείτε να χρησιμοποιήσετε εργαλεία όπως το [**exiftool**](https://exiftool.org) και το [**Metadiver**](https://www.easymetadata.com/metadiver-2/) για να λάβετε τα metadata ενός αρχείου.
+Μπορείτε να χρησιμοποιήσετε εργαλεία όπως το [**exiftool**](https://exiftool.org) και το [**Metadiver**](https://www.easymetadata.com/metadiver-2/) για να λάβετε τα μεταδεδομένα ενός αρχείου.
 
-## **Deleted Files Recovery**
+## **Ανάκτηση διαγραμμένων αρχείων**
 
-### Logged Deleted Files
+### Καταγεγραμμένα διαγραμμένα αρχεία
 
-Όπως είδαμε προηγουμένως, υπάρχουν αρκετές τοποθεσίες όπου το αρχείο εξακολουθεί να είναι αποθηκευμένο αφού έχει γίνει "deleted". Αυτό συμβαίνει επειδή συνήθως η διαγραφή ενός αρχείου από ένα file system απλώς το σημειώνει ως deleted, χωρίς να αγγίζει τα δεδομένα. Επομένως, είναι δυνατό να επιθεωρήσετε τα registries των αρχείων (όπως το MFT) και να εντοπίσετε τα deleted files.<sup>[[2]](#references)</sup>
+Όπως είδαμε προηγουμένως, υπάρχουν διάφορες τοποθεσίες όπου το αρχείο εξακολουθεί να είναι αποθηκευμένο μετά τη «διαγραφή» του. Αυτό συμβαίνει επειδή συνήθως η διαγραφή ενός αρχείου από ένα σύστημα αρχείων απλώς το επισημαίνει ως διαγραμμένο, χωρίς να αγγίζει τα δεδομένα. Έτσι, είναι δυνατό να εξετάσετε τις εγγραφές των αρχείων (όπως το MFT) και να εντοπίσετε τα διαγραμμένα αρχεία.<sup>[[2]](#references)</sup>
 
-Επίσης, το OS συνήθως αποθηκεύει πολλές πληροφορίες σχετικά με τις αλλαγές και τα backups του file system, επομένως μπορείτε να προσπαθήσετε να τα χρησιμοποιήσετε για να ανακτήσετε το αρχείο ή όσο το δυνατόν περισσότερες πληροφορίες.
+Επίσης, το λειτουργικό σύστημα συνήθως αποθηκεύει πολλές πληροφορίες σχετικά με τις αλλαγές στο σύστημα αρχείων και τα αντίγραφα ασφαλείας, επομένως μπορείτε να δοκιμάσετε να τις χρησιμοποιήσετε για να ανακτήσετε το αρχείο ή όσο το δυνατόν περισσότερες πληροφορίες.
+
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -199,33 +208,45 @@ file-data-carving-recovery-tools.md
 
 ### **File Carving**
 
-Το **File carving** είναι μια τεχνική που προσπαθεί να **εντοπίσει αρχεία στο σύνολο των δεδομένων**. Υπάρχουν 3 βασικοί τρόποι με τους οποίους λειτουργούν εργαλεία αυτού του είδους: **με βάση τα headers και footers των file types**, με βάση τις **structures** των file types και με βάση το ίδιο το **content**.
+Το **File carving** είναι μια τεχνική που προσπαθεί να **εντοπίσει αρχεία μέσα στον όγκο των δεδομένων**. Υπάρχουν 3 βασικοί τρόποι λειτουργίας εργαλείων αυτού του είδους: **με βάση τις κεφαλίδες και τις υπογραφές τέλους των τύπων αρχείων**, με βάση τις **δομές** των τύπων αρχείων και με βάση το ίδιο το **περιεχόμενο**.
 
-Σημειώστε ότι αυτή η τεχνική **δεν λειτουργεί για την ανάκτηση fragmented files**. Αν ένα αρχείο **δεν είναι αποθηκευμένο σε contiguous sectors**, τότε αυτή η τεχνική δεν θα μπορέσει να το εντοπίσει ή τουλάχιστον να εντοπίσει μέρος του.
+Το απλό carving με κεφαλίδες/υπογραφές τέλους υποθέτει ότι τα blocks είναι συνεχόμενα και μπορεί να επιστρέψει μόνο ένα τμήμα όταν ένα αρχείο είναι κατακερματισμένο. Αυτό δεν αποτελεί απόλυτο περιορισμό: το PhotoRec διαθέτει μια υπολογιστικά απαιτητική επιλογή **Paranoid → bruteforce** για ορισμένα κατακερματισμένα JPEG, ενώ η ανασύνθεση τμημάτων που λαμβάνει υπόψη τη μορφή μπορεί να ανακτήσει και άλλους υποστηριζόμενους τύπους. Δείτε τα [εργαλεία file carving και ανάκτησης](file-data-carving-recovery-tools.md#scalpel3-fragmented-carving) για μια επικαιροποιημένη ροή εργασιών ανασύνθεσης τμημάτων.<sup>[[8]](#references)</sup>
 
-Υπάρχουν αρκετά εργαλεία που μπορείτε να χρησιμοποιήσετε για File Carving, δηλώνοντας τους file types που θέλετε να αναζητήσετε.
+Υπάρχουν διάφορα εργαλεία για File Carving, στα οποία μπορείτε να ορίσετε τους τύπους αρχείων που θέλετε να αναζητήσετε.
 
-{{#ref}}
-file-data-carving-recovery-tools.md
-{{#endref}}
-
-### Data Stream **C**arving
-
-Το Data Stream Carving είναι παρόμοιο με το File Carving, αλλά **αντί να αναζητά ολοκληρωμένα αρχεία, αναζητά ενδιαφέροντα fragments** πληροφοριών.\
-Για παράδειγμα, αντί να αναζητά ένα ολοκληρωμένο αρχείο που περιέχει logged URLs, αυτή η τεχνική θα αναζητήσει URLs.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Secure Deletion
+### **Data Stream Carving**
 
-Προφανώς, υπάρχουν τρόποι για **"securely" delete αρχείων και τμημάτων των logs που τα αφορούν**. Για παράδειγμα, είναι δυνατό να γίνει **overwrite του content** ενός αρχείου με junk data αρκετές φορές και στη συνέχεια να **αφαιρεθούν** τα **logs** από τα **$MFT** και **$LOGFILE** σχετικά με το αρχείο, καθώς και να **αφαιρεθούν τα Volume Shadow Copies**.<sup>[[3]](#references)</sup>\
-Μπορεί να παρατηρήσετε ότι, ακόμη και μετά την εκτέλεση αυτής της ενέργειας, ενδέχεται να υπάρχουν **άλλα σημεία όπου εξακολουθεί να καταγράφεται η ύπαρξη του αρχείου**, και αυτό είναι αλήθεια· μέρος της εργασίας ενός forensics professional είναι να τα εντοπίσει.
+Το Data Stream Carving είναι παρόμοιο με το File Carving, αλλά **αντί να αναζητά ολοκληρωμένα αρχεία, αναζητά ενδιαφέροντα τμήματα πληροφοριών**.\
+Για παράδειγμα, αντί να αναζητά ένα ολοκληρωμένο αρχείο που περιέχει καταγεγραμμένα URLs, αυτή η τεχνική αναζητά URLs.
+
+
+{{#ref}}
+file-data-carving-recovery-tools.md
+{{#endref}}
+
+### Ασφαλής διαγραφή
+
+Προφανώς, υπάρχουν τρόποι για να **διαγράψετε «με ασφάλεια» αρχεία και τμήματα των αρχείων καταγραφής που τα αφορούν**. Για παράδειγμα, μπορείτε να **αντικαταστήσετε το περιεχόμενο** ενός αρχείου με άχρηστα δεδομένα αρκετές φορές, έπειτα να **αφαιρέσετε** από τα **$MFT** και **$LOGFILE** τα **αρχεία καταγραφής** που αφορούν το αρχείο και να **αφαιρέσετε τα Volume Shadow Copies**.<sup>[[3]](#references)</sup>\
+Μπορεί να παρατηρήσετε ότι, ακόμη και αφού κάνετε αυτές τις ενέργειες, ενδέχεται να **υπάρχουν άλλα σημεία όπου εξακολουθεί να καταγράφεται η ύπαρξη του αρχείου**. Αυτό ισχύει· μέρος της δουλειάς του επαγγελματία της ψηφιακής εγκληματολογίας είναι να τα εντοπίζει.
+
+
 
 ## References
 
-- [1] [GUID Partition Table - Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
-- [2] [Πώς να σαρώσετε entries NTFS $I30 (directory) για evidence διαγραμμένων αρχείων](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
+- [1] [Πίνακας διαμερισμάτων GUID - Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+- [2] [Πώς να σαρώσετε τις εγγραφές NTFS $I30 (καταλόγου) για στοιχεία σχετικά με διαγραμμένα αρχεία](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
 - [3] [Υπηρεσία Volume Shadow Copy (VSS)](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
+- [4] [Προδιαγραφή UEFI: διάταξη δίσκου GPT](https://uefi.org/specs/UEFI/2.9_A/05_GUID_Partition_Table_Format.html)
+- [5] [Εγχειρίδιο mmls του The Sleuth Kit](https://sleuthkit.org/sleuthkit/man/mmls.html)
+- [6] [Εγχειρίδιο fsstat του The Sleuth Kit](https://www.sleuthkit.org/sleuthkit/man/fsstat.html)
+- [7] [Προδιαγραφή FAT της Microsoft](https://academy.cba.mit.edu/classes/networking_communications/SD/FAT.pdf)
+- [8] [Επιλογές ανάκτησης του PhotoRec](https://www.cgsecurity.org/testdisk_doc/photorec.html)
+- [9] [Ανάκτηση διαγραμμένων διαμερισμάτων με το TestDisk](https://www.cgsecurity.org/testdisk_doc/partition_recovery.html)
+- [10] [Εγχειρίδιο sgdisk](https://manpages.debian.org/trixie/gdisk/sgdisk.8.en.html)
+- [11] [Εγχειρίδιο mount(8)](https://man7.org/linux/man-pages/man8/mount.8.html)
 {{#include ../../../banners/hacktricks-training.md}}
