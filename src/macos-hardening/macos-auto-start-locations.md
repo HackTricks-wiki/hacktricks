@@ -1911,7 +1911,9 @@ For enumerating/abusing file-extension and URL-scheme handlers in depth, see:
 macos-security-and-privilege-escalation/macos-file-extension-apps.md
 {{#endref}}
 
-### Python startup files (`.pth` / `usercustomize` / `sitecustomize`)
+<a id="python-startup-files-pth--usercustomize--sitecustomize"></a>
+
+### Python startup files (`.pth` / `.start` / `usercustomize` / `sitecustomize`)
 
 Writeup: [https://docs.python.org/3/library/site.html](https://docs.python.org/3/library/site.html)<sup>[[56]](#references)</sup>
 
@@ -1925,6 +1927,8 @@ Writeup: [https://docs.python.org/3/library/site.html](https://docs.python.org/3
 - **`$(python3 -m site --user-site)/*.pth`** (macOS framework builds: `~/Library/Python/<X.Y>/lib/python/site-packages/`)
   - No root required (user-writable)
   - **Trigger**: startup of that Python build with its user site enabled; the `site` module processes `.pth` files in active site directories
+- **`<site-packages>/*.start`** (Python 3.15+; user or interpreter site directory)
+  - **Trigger**: startup of an interpreter that includes the directory and loads `site`.<sup>[[58]](#references)[[59]](#references)</sup>
 - **`<user-site>/usercustomize.py`**
   - No root required
   - **Trigger**: startup with the user site enabled (auto-imported by `site`)
@@ -1935,6 +1939,8 @@ Writeup: [https://docs.python.org/3/library/site.html](https://docs.python.org/3
 #### Description & Exploitation
 
 At startup, Python normally imports `site` and scans its active `site-packages` directories for `.pth` files. Besides adding paths, a `.pth` line beginning with `import ` executes Python code even if the named module is never otherwise used. Python also tries to import `sitecustomize` and, **when the user site is enabled**, `usercustomize`.<sup>[[56]](#references)</sup> The trigger is a later start of an interpreter that sees the modified directory. `-S` disables `site` processing; `-s`, `-I`, or `PYTHONNOUSERSITE` disable the **user-site** variants. `-I` does not generally disable a global `sitecustomize`. Virtual environments may also exclude the user site. Check `python3 -m site` for the specific interpreter.
+
+On **Python 3.15 and later**, a site directory can also contain `<name>.start` with a `pkg.mod:callable` entry point. The site module imports that module and calls the zero-argument function at interpreter startup, even if the application never imports the package. For example, a `foo.start` containing `foo.submod:initialize` invokes `foo.submod.initialize()` before user code. A package or actor able to write an active site directory can use this startup path; it is not limited to macOS. When `foo.start` accompanies `foo.pth`, Python 3.15+ skips the `.pth` import lines in favor of the `.start` entry, while older interpreters ignore `.start` and still execute the `.pth` line. This version difference matters when testing a wheel across interpreters.<sup>[[58]](#references)[[59]](#references)[[60]](#references)</sup>
 
 The following PoC was run on macOS 26.5.2. `PYTHONUSERBASE` moves the user site into a temporary directory for this test; no real user site is modified:
 
@@ -2706,5 +2712,8 @@ Read-only observation on macOS 26: `/Library/DirectoryServices/PlugIns` and `/us
 - [55] [Sploitlight: Analyzing a Spotlight-based macOS TCC vulnerability (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
 - [56] [Python `site` module documentation (.pth / usercustomize / sitecustomize)](https://docs.python.org/3/library/site.html)
 - [57] [From Spotlight to Apple Intelligence — Abusing an 0day to steal the data that fuels macOS AI](https://objective-see.org/blog/blog_0x81.html)
+- [58] [PEP 829 — Package Startup Configuration Files](https://peps.python.org/pep-0829/)
+- [59] [Python 3.15 `site` documentation — startup entry points](https://docs.python.org/3.15/library/site.html)
+- [60] [autorun-audit — PEP 829 and `.start` files](https://github.com/ag3ntsc4rn/autorun-audit)
 
 {{#include ../banners/hacktricks-training.md}}
