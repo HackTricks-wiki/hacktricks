@@ -19,12 +19,12 @@
 - Android acquisition, locked-device options, physical/ADB imaging and LiME → `src/generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md`. Mobile owns app testing; malware post-exploitation is separate.
 - Firmware acquisition, package decryption, updates and early boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay under firmware, not Stack Overflow.
 - TODO relocations: Rust → `src/generic-methodologies-and-resources/rust-basics.md`; investment terms → `src/blockchain/blockchain-and-crypto-currencies/investment-terms.md`; cookies → `src/welcome/cookies-policy.md`; recon/reputation/breach APIs → `src/generic-methodologies-and-resources/external-recon-methodology/reconnaissance-and-threat-intelligence-apis.md`.
-- Referer leakage, Referrer-Policy and injected meta → `src/pentesting-web/referer-header-and-referrer-policy.md`; OAuth links there. `sensitive-information-exfiltration.md` maps CORS/XSS/dangling markup/clickjacking routes.
+- Referer leakage and Referrer-Policy → `src/pentesting-web/referer-header-and-referrer-policy.md`; OAuth links there. Exfiltration overview maps other routes.
 - UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
 - Blockchain chapters → top-level Blockchain & Smart Contract Security (`blockchain-and-crypto-currencies/README.md` entry). Bitcoin P2P stays in Network Services, DApp tests in Web, cryptocurrency privacy in Privacy.
 - VM guest surfaces → `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md`, linking QEMU/KVM, VirtualBox and VMware chapters. Slirp allocator stays in `libc-heap/` but appears with guest-to-host cases in SUMMARY.
-- SOAP/REST/GraphQL testing → `src/pentesting-web/web-api-pentesting.md`; the 80/443 overview links there. Cloud keeps provider-specific APIs.
+- SOAP/REST API methodology → `src/pentesting-web/web-api-pentesting.md`; GraphQL endpoint/security testing → `src/pentesting-web/graphql.md` beneath it in SUMMARY. 80/443 links to both; Cloud keeps provider APIs.
 - Go `net/http` `ServeMux` `CONNECT` path canonicalization → `src/pentesting-web/403-and-401-bypasses.md#go-nethttp-servemux-connect-path-canonicalization`; 80/443 and TiDB link there. This is a method/path authorization mismatch, not a Go product guide.
 - RDPexec → `src/network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session`; Windows Lateral Movement links directly there, avoiding a procedure-free stub.
 - Python `venv` and wheel builds → `src/generic-methodologies-and-resources/python/basic-python.md#virtual-environments-and-wheel-builds-venv`; the Python hub links to this heading, not a thin setup page.
@@ -55,14 +55,12 @@
 ## Researcher entry points
 
 - Board debug/serial/glitching → Hardware; RFID/NFC → Radio. OT safety → ICS; OT protocols → Network Services. Android images → Forensics; app/eSIM → Mobile; guest surfaces → VM Escape.
-- SOAP/REST/GraphQL → Web APIs; 401/403 → Web authorization; LFI upload race → Web File Inclusion.
+- SOAP/REST → Web APIs; GraphQL schema/resolver/federation/batching → Web > Web APIs > GraphQL; 401/403 → Web authorization; LFI upload race → Web File Inclusion.
 - Browser `nosniff`, UTF-16 script, ICO width → XS-Leaks; executable cross-origin script inclusion → XSSI; in-origin script injection → XSS.
 - `R_PROFILE`, `RUBYOPT`, `ERL_AFLAGS` → macOS interpreter startup chapter.
 - Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; unlike cross-origin XS-Leaks, injection and the probed page share an origin. Former standalone page redirects.
 
 ## Deferred
 
-- Audit mixed `network-services-pentesting/pentesting-web/` before moves.
-- Audit cross-domain `todo/more-tools.md` before splitting; coordinate SaaS with Cloud.
+- Audit remaining mixed `network-services-pentesting/pentesting-web/` before moving; GraphQL is an API task, not a product/port guide.
 - Blockchain and Privacy cryptocurrency need a union audit.
-- Audit long escalation/iOS chapters by task, not length.
