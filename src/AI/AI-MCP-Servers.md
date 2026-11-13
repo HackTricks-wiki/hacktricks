@@ -167,7 +167,7 @@ The final `exec` delegates to the real binary with the original argument vector,
 
 #### Dev-container initialization on the host
 
-A repository-controlled `.devcontainer/devcontainer.json` can set `initializeCommand`. When a developer opts to open that project in a dev container, this command runs **on the host that holds the source**, before container creation; it may also run on later starts and more than once per session. By contrast, `onCreateCommand` and later setup commands run inside the container. A committed command or referenced script can therefore execute with the developer's host identity without escaping a container. The trigger is using the dev container, not merely cloning the repository.<sup>[[50]](#references)[[51]](#references)</sup>
+A repository-controlled `.devcontainer/devcontainer.json` can set `initializeCommand`. When a developer opts to open that project in a dev container, this command runs **on the host that holds the source**, before container creation; it may also run on later starts and more than once per session. By contrast, `onCreateCommand` and later setup commands run inside the container. A committed command or referenced script can therefore execute in the source host's user context without escaping a container. The trigger is using the dev container, not merely cloning the repository.<sup>[[50]](#references)[[51]](#references)</sup>
 
 The project's defanged example makes the execution boundary explicit:<sup>[[51]](#references)</sup>
 
@@ -783,7 +783,7 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [47] [How Some Malicious AI Skills Hide Instructions from Reviewers](https://blog.virustotal.com/2026/10/how-some-malicious-ai-skills-hide.html)
 - [48] [Wiz — Off Guard: Breaking LiteLLM from Authentication Bypass to Cloud Compromise](https://wiz.io/blog/off-guard-breaking-litellm-from-authentication-bypass-to-cloud-compromise)
 - [49] [LiteLLM v1.84.0 release notes](https://github.com/BerriAI/litellm-docs/blob/main/release_notes/v1.84.0/index.md)
-- [50] [Development Containers JSON reference — lifecycle commands](https://containers.dev/implementors/json_reference/)
+- [50] [Development Containers JSON reference — lifecycle commands](https://github.com/devcontainers/spec/blob/main/docs/specs/devcontainerjson-reference.md)
 - [51] [autorun-audit — repository and environment autorun examples](https://github.com/ag3ntsc4rn/autorun-audit)
 
 {{#include ../banners/hacktricks-training.md}}

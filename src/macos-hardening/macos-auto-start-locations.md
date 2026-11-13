@@ -1911,6 +1911,8 @@ For enumerating/abusing file-extension and URL-scheme handlers in depth, see:
 macos-security-and-privilege-escalation/macos-file-extension-apps.md
 {{#endref}}
 
+<a id="python-startup-files-pth--usercustomize--sitecustomize"></a>
+
 ### Python startup files (`.pth` / `.start` / `usercustomize` / `sitecustomize`)
 
 Writeup: [https://docs.python.org/3/library/site.html](https://docs.python.org/3/library/site.html)<sup>[[56]](#references)</sup>
@@ -1925,6 +1927,8 @@ Writeup: [https://docs.python.org/3/library/site.html](https://docs.python.org/3
 - **`$(python3 -m site --user-site)/*.pth`** (macOS framework builds: `~/Library/Python/<X.Y>/lib/python/site-packages/`)
   - No root required (user-writable)
   - **Trigger**: startup of that Python build with its user site enabled; the `site` module processes `.pth` files in active site directories
+- **`<site-packages>/*.start`** (Python 3.15+; user or interpreter site directory)
+  - **Trigger**: startup of an interpreter that includes the directory and loads `site`.<sup>[[58]](#references)[[59]](#references)</sup>
 - **`<user-site>/usercustomize.py`**
   - No root required
   - **Trigger**: startup with the user site enabled (auto-imported by `site`)
@@ -2708,7 +2712,7 @@ Read-only observation on macOS 26: `/Library/DirectoryServices/PlugIns` and `/us
 - [55] [Sploitlight: Analyzing a Spotlight-based macOS TCC vulnerability (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
 - [56] [Python `site` module documentation (.pth / usercustomize / sitecustomize)](https://docs.python.org/3/library/site.html)
 - [57] [From Spotlight to Apple Intelligence — Abusing an 0day to steal the data that fuels macOS AI](https://objective-see.org/blog/blog_0x81.html)
-- [58] [PEP 829 — Discourage and deprecate executable lines in .pth files](https://peps.python.org/pep-0829/)
+- [58] [PEP 829 — Package Startup Configuration Files](https://peps.python.org/pep-0829/)
 - [59] [Python 3.15 `site` documentation — startup entry points](https://docs.python.org/3.15/library/site.html)
 - [60] [autorun-audit — PEP 829 and `.start` files](https://github.com/ag3ntsc4rn/autorun-audit)
 
