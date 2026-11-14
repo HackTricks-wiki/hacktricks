@@ -124,6 +124,7 @@
   - [Web Requests](generic-methodologies-and-resources/python/web-requests.md)
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Side Channel Attacks On Messaging Protocols](generic-methodologies-and-resources/side-channel-attacks-on-messaging-protocols.md)
+  - [WhatsApp Prekey Bundle Side Channel](generic-methodologies-and-resources/whatsapp-prekey-bundle-side-channel.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
