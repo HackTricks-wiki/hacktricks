@@ -1,141 +1,147 @@
-# Mashambulizi ya Side-Channel ya Delivery Receipt katika E2EE Messengers
+# Mashambulizi ya Side-Channel kupitia Risiti za Uwasilishaji katika E2EE Messengers
 
 {{#include ../banners/hacktricks-training.md}}
 
-Delivery receipts ni lazima katika E2EE messengers za kisasa kwa sababu clients wanahitaji kujua ciphertext ilipo-decryptiwa ili waweze kutupa hali ya ratcheting na ephemeral keys. Server hu-forward opaque blobs, hivyo acknowledgements za device (double checkmarks) hutumwa na recipient baada ya decryption kufanikiwa. Kupima round-trip time (RTT) kati ya kitendo kilichoanzishwa na attacker na delivery receipt inayolingana hufichua timing channel yenye resolution kubwa inayovuja hali ya device, uwepo online, na inaweza kutumiwa vibaya kwa covert DoS. Deployments za multi-device zenye "client-fanout" huongeza leakage kwa sababu kila device iliyosajiliwa hu-decrypt probe na kurudisha receipt yake.<sup>[[1]](#references)</sup>
+Risiti za uwasilishaji ni za lazima katika E2EE messengers za kisasa kwa sababu clients zinahitaji kujua wakati ciphertext ilipotolewa kutoka usimbaji fiche ili ziweze kutupa hali ya ratcheting na funguo za muda mfupi. Server husambaza blobs zisizoeleweka, kwa hiyo acknowledgements za kifaa (alama mbili za tiki) hutumwa na mpokeaji baada ya kutoa ujumbe kwa mafanikio kutoka usimbaji fiche. Kupima muda wa kwenda na kurudi (RTT) kati ya kitendo kilichoanzishwa na mshambuliaji na risiti ya uwasilishaji inayohusiana hufichua timing channel ya ubora wa juu inayovuja hali ya kifaa na uwepo mtandaoni, na inaweza kutumiwa vibaya kwa DoS ya siri. Usambazaji wa "client-fanout" wa vifaa vingi huongeza uvujaji kwa sababu kila kifaa kilichosajiliwa hutoa probe kutoka usimbaji fiche na kurudisha risiti yake.<sup>[[1]](#references)</sup>
 
-## Vyanzo vya delivery receipt dhidi ya signals zinazoonekana na user
+## Vyanzo vya risiti za uwasilishaji dhidi ya ishara zinazoonekana kwa mtumiaji
 
-Chagua aina za messages ambazo hutuma delivery receipt kila mara lakini hazionyeshi artifacts za UI kwa victim. Jedwali hapa chini linatoa muhtasari wa tabia iliyothibitishwa kwa majaribio:<sup>[[1]](#references)</sup>
+Chagua aina za ujumbe ambazo hutuma risiti ya uwasilishaji kila wakati lakini hazionyeshi mabaki ya UI kwa mwathiriwa. Jedwali hapa chini linafupisha tabia iliyothibitishwa kwa majaribio:<sup>[[1]](#references)</sup>
 
-| Messenger | Kitendo | Delivery receipt | Notification ya victim | Maelezo |
+| Messenger | Kitendo | Risiti ya uwasilishaji | Arifa kwa mwathiriwa | Maelezo |
 |-----------|--------|------------------|---------------------|-------|
-| **WhatsApp** | Text message | ● | ● | Huleta kelele kila mara → muhimu tu kwa kuanzisha state. |
-| | Reaction | ● | ◐ (ikiwa tu inareact kwa message ya victim) | Self-reactions na removals hubaki kimya. |
-| | Edit | ● | Silent push inayotegemea platform | Edit window ≈20 min; bado hu-ack baada ya expiry. |
-| | Delete for everyone | ● | ○ | UI inaruhusu takriban saa 60, lakini packets za baadaye bado hu-ack. |
-| **Signal** | Text message | ● | ● | Vikwazo sawa na WhatsApp. |
-| | Reaction | ● | ◐ | Self-reactions hazionekani kwa victim. |
-| | Edit/Delete | ● | ○ | Server hutekeleza window ya takriban saa 48, huruhusu hadi edits 10, lakini packets za kuchelewa bado hu-ack. |
-| **Threema** | Text message | ● | ● | Multi-device receipts hu-aggregated, kwa hiyo RTT moja tu kwa kila probe huonekana. |
+| **WhatsApp** | Ujumbe wa maandishi | ● | ● | Huleta kelele kila wakati → ni muhimu tu kuanzisha hali. |
+| | Reaction | ● | ◐ (ikiwa tu reaction inajibu ujumbe wa mwathiriwa) | Self-reactions na kuondoa reaction hubaki kimya. |
+| | Kuhariri | ● | Silent push hutegemea platform | Kipindi cha kuhariri ≈ dakika 20; bado hupokea ack baada ya muda kuisha. |
+| | Kufuta kwa kila mtu | ● | ○ | UI huruhusu takriban saa 60, lakini packets zinazotumwa baadaye bado hupokea ack. |
+| **Signal** | Ujumbe wa maandishi | ● | ● | Vizuizi sawa na vya WhatsApp. |
+| | Reaction | ● | ◐ | Self-reactions hazionekani kwa mwathiriwa. |
+| | Kuhariri/Kufuta | ● | ○ | Server hutekeleza kipindi cha takriban saa 48, huruhusu hadi edits 10, lakini packets zinazotumwa kwa kuchelewa bado hupokea ack. |
+| **Threema** | Ujumbe wa maandishi | ● | ● | Risiti za vifaa vingi hujumlishwa, kwa hiyo RTT moja tu kwa kila probe huonekana. |
 
-Legend: ● = kila mara, ◐ = kwa masharti, ○ = kamwe. Tabia ya UI inayotegemea platform imeonyeshwa ndani ya mistari. Zima read receipts ikihitajika, lakini delivery receipts haziwezi kuzimwa katika WhatsApp au Signal.<sup>[[1]](#references)</sup>
+Maana ya alama: ● = kila wakati, ◐ = hutegemea hali, ○ = kamwe. Tabia ya UI inayotegemea platform imeelezwa ndani ya jedwali. Zima read receipts ikihitajika, lakini risiti za uwasilishaji haziwezi kuzimwa katika WhatsApp au Signal.<sup>[[1]](#references)</sup>
 
-## Malengo na models za attacker
+## Malengo na mifano ya mshambuliaji
 
-* **G1 – Device fingerprinting:** Hesabu idadi ya receipts zinazowasili kwa kila probe, cluster RTTs ili kubaini OS/client (Android dhidi ya iOS dhidi ya desktop), na fuatilia mabadiliko ya online/offline.
-* **G2 – Behavioural monitoring:** Chukulia mfululizo wa RTT wa frequency ya juu (≈1 Hz ni thabiti) kama time-series na bainisha screen on/off, app foreground/background, muda wa kusafiri dhidi ya saa za kazi, n.k.
-* **G3 – Resource exhaustion:** Weka radios/CPUs za kila device ya victim zikiwa active kwa kutuma silent probes zisizoisha, ukimaliza battery/data na kupunguza ubora wa video-call.<sup>[[1]](#references)</sup>
+* **G1 – Kutambua kifaa:** Hesabu risiti ngapi zinafika kwa kila probe, panga RTT katika makundi ili kukisia OS/client (Android dhidi ya iOS dhidi ya desktop), na fuatilia mabadiliko ya hali ya mtandaoni/nje ya mtandao.
+* **G2 – Kufuatilia tabia:** Chukulia mfululizo wa RTT wa masafa ya juu (≈1 Hz ni thabiti) kama mfululizo wa data za muda na ukisie skrini kuwashwa/kuzimwa, app kuwa mbele/nyuma, muda wa safari dhidi ya saa za kazi, n.k.
+* **G3 – Kumaliza rasilimali:** Weka radios/CPUs za kila kifaa cha mwathiriwa zikiwa hai kwa kutuma probes zisizo na mwisho na zisizoonekana, ukimaliza betri/data na kudhoofisha ubora wa video-call.<sup>[[1]](#references)</sup>
 
-Threat actors wawili wanatosha kueleza abuse surface:<sup>[[1]](#references)</sup>
+Wahusika wawili wa tishio wanatosha kueleza eneo la matumizi mabaya:<sup>[[1]](#references)</sup>
 
-1. **Creepy companion:** Tayari anashiriki chat na victim na hutumia vibaya self-reactions, reaction removals, au edits/deletes zinazorudiwa zinazohusishwa na message IDs zilizopo.
-2. **Spooky stranger:** Husajili burner account na kutuma reactions zinazorejelea message IDs ambazo hazijawahi kuwepo katika conversation ya ndani; WhatsApp na Signal bado hu-decrypt na ku-acknowledge hizo reactions ingawa UI hutupa state change, kwa hiyo conversation ya awali haihitajiki.
+1. **Mwenza wa kutisha:** tayari anashiriki chat na mwathiriwa na hutumia vibaya self-reactions, kuondoa reactions, au kuhariri/kufuta mara kwa mara kwa kutumia message IDs zilizopo.
+2. **Mgeni wa kutisha:** husajili akaunti ya muda na kutuma reactions zinazorejelea message IDs ambazo hazijawahi kuwepo kwenye mazungumzo ya ndani; WhatsApp na Signal bado huzitoa kutoka usimbaji fiche na kutoa acknowledgements ingawa UI hutupa mabadiliko ya hali, kwa hiyo hakuna mazungumzo ya awali yanayohitajika.
 
-## Tooling ya kufikia raw protocol
+## Zana za kufikia raw protocol
 
-Tegemea clients zinazoonyesha sehemu ya kutosha ya E2EE protocol ya msingi ili kuunda packets zinazoungwa mkono nje ya vikwazo vya UI na kurekodi timestamps sahihi; message IDs za kiholela zinahitaji kukaguliwa katika kila implementation:
+Tumia clients zinazoonyesha sehemu ya kutosha ya E2EE protocol ili kuunda packets zinazotumika nje ya vizuizi vya UI na kurekodi timestamps sahihi; message IDs za kiholela zinahitaji kuhakikiwa katika kila implementation:
 
-* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web multidevice API) inaandika kuhusu kutuma na kupokea delivery receipts; [Cobalt](https://github.com/Auties00/Cobalt) (unofficial Java/Kotlin Web and mobile API) inaandika kuhusu message operations kama reacting, editing, na deleting. Tumia APIs zao zilizoandikwa badala ya kudhani kuwa kila internal frame imewekwa wazi.<sup>[[3]](#references)[[4]](#references)</sup>
-* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) inaonyesha CLI, JSON-RPC, na D-Bus interfaces, huku [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) ikiwa Java library ya kuwasiliana na Signal.<sup>[[5]](#references)[[7]](#references)</sup> Syntax ya sasa ya `signal-cli` hutumia `sendReaction RECIPIENT --target-author --target-timestamp`; endelea kuendesha `receive` au `daemon` ili protocol updates ziendelee kuchakatwa.<sup>[[6]](#references)</sup> Mfano wa self-reaction toggle:
-```bash
-signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
---target-timestamp 1712345678901 --emoji "👍"
-signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
---target-timestamp 1712345678901 --remove
-```
-* **Threema:** Vipimo katika paper ya Careless Whisper viligundua kuwa delivery receipts husawazishwa katika devices, kwa hiyo receipt moja tu kwa kila message huonekana hata katika setup ya multi-device.<sup>[[1]](#references)</sup>
-* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) husambaza WhatsApp/Signal backends, kwa default hutumia silent delete probes, na huweka labels za `active` dhidi ya `standby` kwa threshold ya rolling-median (`RTT < 0.9 * median`).<sup>[[8]](#references)</sup> [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) ni CLI nyepesi inayolenga WhatsApp kwanza, yenye `--delay`, `--concurrent`, CSV/Prometheus exporters, na output inayofaa Grafana.<sup>[[9]](#references)</sup> Zichukulie zote mbili kama reconnaissance helpers badala ya protocol references; jambo muhimu ni jinsi code ndogo inavyohitajika pindi raw client access inapopatikana.
+* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web multidevice API) inaeleza jinsi ya kutuma na kupokea risiti za uwasilishaji; [Cobalt](https://github.com/Auties00/Cobalt) (API isiyo rasmi ya Java/Kotlin Web na mobile) inaeleza shughuli za ujumbe kama vile ku-react, kuhariri na kufuta. Tumia APIs zilizoelezwa badala ya kudhani kila internal frame inapatikana.<sup>[[3]](#references)[[4]](#references)</sup>
+* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) hutoa interfaces za CLI, JSON-RPC na D-Bus, huku [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) ikiwa Java library ya kuwasiliana na Signal.<sup>[[5]](#references)[[7]](#references)</sup> Sintaksia ya sasa ya `signal-cli` hutumia `sendReaction RECIPIENT --target-author --target-timestamp`; acha `receive` au `daemon` ikiendelea kufanya kazi ili protocol updates ziendelee kuchakatwa.<sup>[[6]](#references)</sup> Mfano wa kuwasha/kuzima self-reaction:
+  ```bash
+  signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+      --target-timestamp 1712345678901 --emoji "👍"
+  signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+      --target-timestamp 1712345678901 --remove
+  ```
+* **Threema:** Vipimo katika karatasi ya Careless Whisper vilibaini kuwa risiti za uwasilishaji husawazishwa kati ya vifaa, kwa hivyo risiti moja tu kwa kila ujumbe huonekana hata katika usanidi wa vifaa vingi.<sup>[[1]](#references)</sup>
+* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) ina backends za WhatsApp/Signal, hutumia silent delete probes kwa chaguomsingi, na huainisha `active` dhidi ya `standby` kwa kutumia kizingiti cha rolling median (`RTT < 0.9 * median`).<sup>[[8]](#references)</sup> [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) ni CLI nyepesi zaidi inayolenga WhatsApp, yenye `--delay`, `--concurrent`, exporters za CSV/Prometheus, na matokeo yanayofaa Grafana.<sup>[[9]](#references)</sup> Zichukulie zote mbili kama zana saidizi za uchunguzi wa awali badala ya marejeleo ya itifaki; jambo muhimu ni kuona jinsi msimbo mchache unavyohitajika mara tu ufikiaji wa raw client unapopatikana.
 
-Custom tooling isipopatikana, official clients au browser developer tools bado zinaweza kuanzisha silent actions na kuonyesha timing ya encrypted traffic; raw APIs huondoa ucheleweshaji wa UI na huruhusu invalid operations.<sup>[[1]](#references)</sup>
+Zana maalum zisipopatikana, clients rasmi au zana za msanidi wa kivinjari bado zinaweza kuanzisha vitendo visivyoonekana na kufichua muda wa trafiki iliyosimbwa kwa njia fiche; raw APIs huondoa ucheleweshaji wa UI na kuruhusu operesheni zisizo halali.<sup>[[1]](#references)</sup>
 
-## Creepy companion: silent sampling loop
+## Msaidizi wa kutisha: mzunguko wa sampuli zisizoonekana
 
-1. Chagua message yoyote ya zamani uliyoandika katika chat ili victim asione mabadiliko ya "reaction" balloons.
-2. Badilisha kati ya emoji inayoonekana na empty reaction payload (iliyowekwa kama `""` katika WhatsApp protobufs au `--remove` katika signal-cli). Kila transmission hutoa device ack licha ya kutokuwepo kwa UI delta kwa victim.
-3. Weka timestamp ya muda wa kutuma na kila delivery receipt inayowasili. Loop ya 1 Hz kama ifuatayo hutoa RTT traces za kila device bila kikomo:
-```python
-while True:
-send_reaction(msg_id, "👍")
-log_receipts()
-send_reaction(msg_id, "")  # removal
-log_receipts()
-time.sleep(0.5)
-```
-4. Kwa sababu WhatsApp/Signal hukubali reaction updates zisizo na kikomo, attacker hahitaji kamwe kuchapisha chat content mpya au kuwa na wasiwasi kuhusu edit windows.<sup>[[1]](#references)</sup>
+1. Chagua ujumbe wowote wa zamani ulioutuma kwenye gumzo ili mwathiriwa asione kamwe viputo vya "reaction" vikibadilika.
+2. Badilishana kati ya emoji inayoonekana na payload tupu ya reaction (iliyowekwa msimbo kama `""` katika WhatsApp protobufs au `--remove` katika signal-cli). Kila utumaji husababisha ack ya kifaa licha ya kutokuwa na mabadiliko ya UI kwa mwathiriwa.
+3. Rekodi muda wa kutuma na kila risiti ya uwasilishaji inapowasili. Mzunguko wa 1 Hz kama huu ufuatao hutoa mfululizo wa RTT wa kila kifaa bila kikomo:
+   ```python
+   while True:
+       send_reaction(msg_id, "👍")
+       log_receipts()
+       send_reaction(msg_id, "")  # removal
+       log_receipts()
+       time.sleep(0.5)
+   ```
+4. Kwa kuwa WhatsApp/Signal hukubali masasisho ya reactions bila kikomo, mshambuliaji hahitaji kamwe kuchapisha maudhui mapya ya gumzo au kuwa na wasiwasi kuhusu muda wa kufanya edit.<sup>[[1]](#references)</sup>
 
-## Spooky stranger: kuchunguza namba za simu kiholela
+## Mgeni wa kutisha: kuchunguza nambari za simu kiholela
 
-1. Sajili WhatsApp/Signal account mpya na upate public identity keys za namba inayolengwa (hufanyika kiotomatiki wakati wa session setup).
-2. Tengeneza reaction packet inayorejelea `message_id` ya nasibu ambayo haijawahi kuonekana na upande wowote; paper inaripoti kuwa WhatsApp na Signal hukubali reactions kama hizo na bado hutengeneza delivery receipts.<sup>[[1]](#references)</sup>
-3. Tuma packet hata kama hakuna thread. Devices za victim hu-decrypt, hushindwa kupata base message, hutupa state change, lakini bado hu-acknowledge incoming ciphertext, na kutuma device receipts kurudi kwa attacker.
-4. Rudia mfululizo ili kujenga RTT series bila conversation ya awali au notification inayoonekana.<sup>[[1]](#references)</sup>
+1. Sajili akaunti mpya ya WhatsApp/Signal na upate identity keys za umma za nambari lengwa (hufanyika kiotomatiki wakati wa kusanidi session).
+2. Tengeneza reaction packet inayorejelea `message_id` ya nasibu ambayo haijawahi kuonekana na upande wowote; karatasi ya utafiti inaripoti kuwa WhatsApp na Signal zote hukubali reactions kama hizo na bado hutengeneza delivery receipts.<sup>[[1]](#references)</sup>
+3. Tuma packet hiyo hata kama hakuna thread. Vifaa vya mwathiriwa hu-decrypt packet, hushindwa kulinganisha ujumbe msingi, hutupa mabadiliko ya state, lakini bado huthibitisha kupokea ciphertext inayoingia kwa kutuma device receipts kwa mshambuliaji.
+4. Rudia mchakato huo mfululizo ili kujenga mfululizo wa RTT bila mazungumzo ya awali au notification inayoonekana.<sup>[[1]](#references)</sup>
 
-Ikiwa kwanza unahitaji kugundua namba zilizosajiliwa au kutayarisha device inventories kwa kiwango kikubwa, unganisha hii na [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) badala ya kubahatisha ranges za E.164 kwa mkono.
+Ikiwa kwanza unahitaji kugundua ni nambari zipi zimesajiliwa au unataka kujaza mapema orodha za vifaa kwa kiwango kikubwa, unganisha mbinu hii na [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) badala ya kubahatisha safu za E.164 kwa mkono.
 
-Kazi iliyochapishwa kuhusu contact-discovery ilionyesha kwa nini hili ni muhimu kiutendaji: kwa kutumia phone-prefix tables sahihi na resources za wastani, watafiti waliweza ku-query takriban `10%` ya namba za mobile za Marekani kwenye WhatsApp na `100%` kwenye Signal kabla ya kuendelea na targeted probing.<sup>[[11]](#references)</sup> Kwa matumizi ya kawaida, kuchuja live accounts kwanza huweka silent-probe budget yako ikilenga namba ambazo kwa hakika zita-decrypt packets.
+Utafiti uliochapishwa kuhusu contact-discovery ulionyesha umuhimu wa hili kiutendaji: kwa kutumia majedwali sahihi ya viambishi vya nambari za simu na rasilimali za wastani, watafiti waliweza kuuliza takriban `10%` ya nambari za simu za mkononi za Marekani kwenye WhatsApp na `100%` kwenye Signal kabla ya kuendelea na uchunguzi lengwa.<sup>[[11]](#references)</sup> Kwa vitendo, kuchuja akaunti zinazotumika kwanza hufanya bajeti yako ya silent-probe ilenge nambari ambazo kwa hakika zita-decrypt packets.
 
-WhatsApp builds za hivi karibuni pia zinaonyesha `Settings -> Privacy -> Advanced -> Block unknown account messages`.<sup>[[10]](#references)</sup> Ichukulie kama throughput limiter: tracker documentation inasema WhatsApp huzuia high-volume messages kutoka kwa unknown accounts lakini haifichui threshold, kwa hiyo haizuii kikamilifu probe reactions.<sup>[[8]](#references)</sup>
+Miundo ya hivi karibuni ya WhatsApp pia ina chaguo la `Settings -> Privacy -> Advanced -> Block unknown account messages`.<sup>[[10]](#references)</sup> Ichukulie kama kizuizi cha throughput: nyaraka za tracker zinasema WhatsApp huzuia ujumbe mwingi kutoka kwa akaunti zisizojulikana lakini haifichui kiwango cha juu, kwa hiyo haizuii kabisa probe reactions.<sup>[[8]](#references)</sup>
 
-## Kutumia tena edits na deletes kama covert triggers
+## Kutumia tena edits na deletes kama vichochezi fiche
 
-* **Repeated deletes:** Baada ya message kufutwa kwa kila mtu mara moja, delete packets zaidi zinazorejelea `message_id` hiyo hiyo hazina athari ya UI lakini kila device bado hu-decrypt na ku-acknowledge.
-* **Out-of-window operations:** WhatsApp hutekeleza delete windows za takriban saa 60 / edit windows za takriban dakika 20 katika UI; Signal hutekeleza takriban saa 48. Crafted protocol messages zilizo nje ya windows hizi hupuuziwa kimya kwenye device ya victim lakini receipts hutumwa, hivyo attackers wanaweza ku-probe kwa muda usio na kikomo muda mrefu baada ya conversation kumalizika.
-* **Invalid payloads:** Paper inaripoti kuwa invalid messages bado zinaweza ku-acknowledge; tabia kamili ya malformed bodies au purged IDs inategemea implementation, kwa hiyo fanya majaribio kabla ya kuitegemea.<sup>[[1]](#references)</sup>
+* **Deletes zinazorudiwa:** Baada ya ujumbe kufutwa kwa kila mtu mara moja, delete packets zaidi zinazorejelea `message_id` hiyo hiyo hazina athari kwenye UI, lakini kila kifaa bado huzidecrypt na kuzithibitisha.
+* **Operesheni nje ya muda unaoruhusiwa:** WhatsApp hutekeleza vipindi vya takriban saa 60 vya delete / dakika 20 vya edit kwenye UI; Signal hutekeleza takriban saa 48. Ujumbe wa protocol uliotengenezwa nje ya vipindi hivi hupuuzwa kimyakimya kwenye kifaa cha mwathiriwa, lakini receipts hutumwa, hivyo washambuliaji wanaweza kuendelea kuchunguza kwa muda usio na kikomo baada ya mazungumzo kumalizika.
+* **Payloads zisizo sahihi:** Karatasi ya utafiti inaripoti kuwa ujumbe usio sahihi bado unaweza kuthibitishwa; tabia kamili kwa bodies zilizoharibika au IDs zilizofutwa inategemea utekelezaji, kwa hiyo jaribu kabla ya kuitegemea.<sup>[[1]](#references)</sup>
 
-## Multi-device amplification & fingerprinting
+## Uongezaji wa athari kwenye vifaa vingi na fingerprinting
 
-* Katika WhatsApp na Signal, kila associated device (phone, desktop app, browser companion) hu-decrypt probe kivyake na kurudisha ack yake. Kuhesabu receipts kwa kila probe hufichua idadi kamili ya devices.<sup>[[1]](#references)</sup>
-* Device ikiwa offline, receipt yake huwekwa kwenye queue na kutumwa inapounganishwa tena. Kwa hiyo mapengo huvuja mizunguko ya online/offline na hata ratiba za kusafiri (kwa mfano, desktop receipts hukoma wakati wa safari).
-* Distributions za RTT hutofautiana kulingana na platform na mazingira kwa sababu OS, model, client, na hali za network huathiri timing. Cluster RTTs (kwa mfano, k-means kwenye median/variance features) ili kuweka labels kama “Android handset", “iOS handset", “Electron desktop", n.k.
-* Kwa sababu sender lazima apate recipient’s key inventory kabla ya ku-encrypt, attacker anaweza pia kufuatilia devices mpya zinapounganishwa; ongezeko la ghafla la idadi ya devices au RTT cluster mpya ni kiashiria thabiti.<sup>[[1]](#references)</sup>
+* Kwenye WhatsApp na Signal, kila kifaa kinachohusishwa (simu, desktop app, browser companion) hu-decrypt probe kivyake na kurudisha ack yake. Kuhesabu receipts kwa kila probe hufichua idadi kamili ya vifaa.<sup>[[1]](#references)</sup>
+* Kifaa kikiwa offline, receipt yake huwekwa kwenye foleni na kutumwa kinapounganishwa tena. Kwa hiyo, mapengo hufichua mizunguko ya kuwa online/offline na hata ratiba za safari za kila siku (kwa mfano, receipts za desktop hukoma wakati wa safari).
+* Usambazaji wa RTT hutofautiana kulingana na platform na mazingira kwa sababu OS, model, client na hali ya mtandao huathiri muda. Panga RTT katika makundi (kwa mfano, k-means inayotumia vipengele vya median/variance) ili kutambua “Android handset”, “iOS handset”, “Electron desktop”, n.k.
+* Kwa kuwa mtumaji lazima apate orodha ya recipient’s key inventory kabla ya kusimba ujumbe, mshambuliaji anaweza pia kufuatilia wakati vifaa vipya vinapooanishwa; ongezeko la ghafla la idadi ya vifaa au kundi jipya la RTT ni kiashiria kikubwa.<sup>[[1]](#references)</sup>
 
-## Sampling cadence, queueing, na stacked receipts
+**Fanya fingerprinting kwa kutumia receipts zilizowekwa kwenye foleni:** Tuma probes kadhaa zenye message IDs tofauti kifaa lengwa kikiwa offline. Kinapounganishwa tena, linganisha IDs kwenye delivery receipts zilizorudishwa na uangalie kama ni receipts tofauti au zimeunganishwa kwenye receipt moja, na kama IDs zilizounganishwa zinahifadhi au kubadilisha mpangilio wa utumaji. Kwenye clients zilizojaribiwa, WhatsApp Android/iOS zilirudisha delivery receipts tofauti, ilhali Web, Windows na macOS zilizijumuisha pamoja; macOS ilibadilisha mpangilio wa IDs zilizojumuishwa. Signal Desktop ilijumuisha receipts, tofauti na clients zake za simu. Hii inaweza kutambua client inayounganishwa tena hata wakati usambazaji wa RTT unafanana. Usichanganye delivery receipts na read receipts, ambazo kanuni zake za kuziunganisha ni tofauti.<sup>[[1]](#references)</sup>
 
-* **WhatsApp burst tolerance:** Vipimo vilivyochapishwa viliripoti kuwa WhatsApp ilikubali silent-reaction bursts zenye kasi ya probe moja kila `50 ms` bila queueing inayoonekana upande wa server. Hii ni muhimu kwa calibration bursts fupi, kuhesabu devices haraka, au kuongeza kasi ya drain attack.
-* **Signal long-run queueing:** Signal ilivumilia bursts fupi lakini ilianza kuweka kwenye queue traffic endelevu ya probes nyingi kwa sekunde. Kwa monitoring ya muda mrefu, weka cadence karibu na `1 Hz` (au chini) ili kila receipt bado iakisi hali ya sasa ya device badala ya kumaliza backlog.
-* **Reconnect artefacts:** Device inaporudi online, baadhi ya clients hu-batch au hu-flush kwa kasi receipts nyingi zilizochelewa. Chukulia receipt bursts hizo kama state-transition marker badala ya RTT samples huru, la sivyo classifier yako ya clustering / `active` dhidi ya `idle` ita-overfit reconnect noise.<sup>[[1]](#references)</sup>
+Kwa probe tofauti ya WhatsApp inayosoma **server-side prekey refills** bila kupeleka ujumbe, angalia [Prekey Bundle Depletion and Refill Side Channel](whatsapp-prekey-bundle-side-channel.md).
 
-## Behaviour inference kutoka RTT traces
+## Muda wa uchukuaji wa sampuli, foleni, na receipts zilizounganishwa
 
-1. Sample kwa ≥1 Hz ili kunasa athari za OS scheduling. Kwa WhatsApp kwenye iOS, RTT za <1 s huhusiana kwa nguvu na screen-on/foreground, huku >1 s zikihusiana na screen-off/background throttling.
-2. Tengeneza classifiers rahisi (thresholding au two-cluster k-means) zinazoweka kila RTT label ya "active" au "idle". Aggregati labels katika streaks ili kupata muda wa kulala, safari za kwenda/kutoka, saa za kazi, au wakati desktop companion iko active.
-3. Correlate probes za wakati mmoja kuelekea kila device ili kuona wakati users wanabadilika kutoka mobile kwenda desktop, companions zinapoenda offline, na kama app inawekewa rate limit na push dhidi ya persistent socket.
-4. Katika networks halisi, epuka threshold moja ngumu ya `1 s`. Anzisha kila device kwa short warm-up window na weka rolling baseline (kwa mfano, device-activity-tracker PoC hutumia `threshold = 0.9 * median RTT`) ili Wi-Fi/cellular drift isivunje classifier yako.<sup>[[1]](#references)[[8]](#references)</sup>
+* **Uvumilivu wa WhatsApp kwa bursts:** Vipimo vilivyochapishwa viliripoti kuwa WhatsApp ilikubali bursts za silent-reaction kwa kasi ya probe moja kila `50 ms` bila foleni dhahiri upande wa server. Hii inafaa kwa bursts fupi za calibration, kuhesabu vifaa haraka, au kuongeza kasi ya drain attack.
+* **Foleni za muda mrefu za Signal:** Signal ilivumilia bursts fupi lakini ilianza kuweka kwenye foleni trafiki endelevu ya probes nyingi kwa sekunde. Kwa ufuatiliaji wa muda mrefu, weka cadence karibu na `1 Hz` (au chini) ili kila receipt iakisi hali ya sasa ya kifaa badala ya foleni inayomalizwa.
+* **Athari za kuunganishwa tena:** Kifaa kinaporudi online, baadhi ya clients huweka pamoja au hutuma kwa kasi receipts kadhaa zilizochelewa. Zichukulie bursts hizo za receipts kama alama ya mabadiliko ya hali badala ya sampuli huru za RTT, la sivyo clustering / classifier yako ya `active` dhidi ya `idle` itajifunza kupita kiasi kutokana na kelele za kuunganishwa tena.<sup>[[1]](#references)</sup>
 
-## Location inference kutoka delivery RTT
+## Kukisia tabia kutoka kwa RTT traces
 
-Timing primitive hiyo hiyo inaweza kutumiwa tena kubaini recipient yuko wapi, si tu kama yuko active. Kazi ya `Hope of Delivery` ilionyesha kuwa training kwenye RTT distributions za receiver locations zinazojulikana humwezesha attacker baadaye ku-classify location ya victim kutokana na delivery confirmations pekee:<sup>[[2]](#references)</sup>
+1. Chukua sampuli kwa ≥1 Hz ili kunasa athari za upangaji wa kazi za OS. Kwa WhatsApp kwenye iOS, RTT za <1 s zinahusiana sana na skrini kuwashwa/app kuwa mbele, na RTT za >1 s zinahusiana na skrini kuzimwa/app kuwa nyuma ya pazia na kupunguzwa kasi.
+2. Jenga classifiers rahisi (kwa kutumia thresholds au two-cluster k-means) zinazoweka kila RTT kwenye kundi la "active" au "idle". Kusanya lebo hizo katika mfululizo ili kubaini nyakati za kulala, safari za kila siku, saa za kazi, au wakati desktop companion inatumika.
+3. Linganisha probes zinazotumwa kwa wakati mmoja kwa kila kifaa ili kuona watumiaji wanapobadilika kutoka simu kwenda desktop, companions zinapokuwa offline, na kama app inadhibitiwa kasi na push au persistent socket.
+4. Kwenye mitandao halisi, epuka threshold moja isiyobadilika ya `1 s`. Anzisha kila kifaa kwa kipindi kifupi cha warm-up na tumia baseline inayosasishwa kila mara (kwa mfano, device-activity-tracker PoC hutumia `threshold = 0.9 * median RTT`) ili mabadiliko ya Wi-Fi/cellular yasivuruge classifier yako.<sup>[[1]](#references)[[8]](#references)</sup>
 
-* Tengeneza baseline kwa target huyo huyo akiwa katika maeneo kadhaa yanayojulikana (nyumbani, ofisini, campus, country A dhidi ya country B, n.k.).
-* Kwa kila location, kusanya normal message RTTs nyingi na utoe features rahisi kama median, variance, au percentile buckets.
-* Wakati wa attack halisi, linganisha probe series mpya na trained clusters. Paper inaripoti kuwa hata locations zilizo ndani ya mji huo huo mara nyingi zinaweza kutenganishwa, kwa accuracy ya `>80%` katika setting yenye locations 3.
-* Hii hufanya kazi vizuri zaidi attacker anapodhibiti sender environment na ku-probe chini ya hali zinazofanana za network, kwa sababu njia inayopimwa inajumuisha recipient access network, wake-up latency, na messenger infrastructure.<sup>[[2]](#references)</sup>
+## Kukisia eneo kutoka kwa delivery RTT
 
-Tofauti na silent reaction/edit/delete attacks zilizo hapo juu, location inference haihitaji invalid message IDs au stealthy state-changing packets. Plain messages zenye normal delivery confirmations zinatosha, kwa hiyo tradeoff ni stealth ndogo lakini applicability pana katika messengers mbalimbali.
+Mbinu hii hii ya kupima muda inaweza kutumiwa tena kukisia aliko recipient, si tu kama yuko active. Utafiti wa `Hope of Delivery` ulionyesha kuwa mafunzo yanayotumia usambazaji wa RTT wa maeneo yanayojulikana ya wapokeaji humwezesha mshambuliaji baadaye kuainisha eneo la mwathiriwa kwa kutumia delivery confirmations pekee:<sup>[[2]](#references)</sup>
 
-## Stealthy resource exhaustion
+* Tengeneza baseline ya target yuleyule akiwa katika maeneo kadhaa yanayojulikana (nyumbani, ofisini, chuoni, nchi A dhidi ya nchi B, n.k.).
+* Kwa kila eneo, kusanya RTT nyingi za kawaida za ujumbe na utoe features rahisi kama median, variance, au percentile buckets.
+* Wakati wa attack halisi, linganisha mfululizo mpya wa probe na makundi yaliyofundishwa. Karatasi ya utafiti inaripoti kuwa hata maeneo yaliyo ndani ya jiji moja mara nyingi yanaweza kutofautishwa, kwa usahihi wa `>80%` katika mpangilio wa maeneo 3.
+* Hii hufanya kazi vizuri zaidi mshambuliaji anapodhibiti mazingira ya mtumaji na kufanya probes chini ya hali zinazofanana za mtandao, kwa sababu njia inayopimwa inajumuisha mtandao wa ufikiaji wa recipient, muda wa kuamshwa kwa kifaa, na miundombinu ya messenger.<sup>[[2]](#references)</sup>
 
-Kwa sababu kila silent probe lazima i-decryptiwe na i-acknowledge, kutuma reaction toggles, invalid edits, au delete-for-everyone packets kila mara hutengeneza application-layer DoS:<sup>[[1]](#references)</sup>
+Tofauti na mashambulizi ya silent reaction/edit/delete yaliyoelezwa hapo juu, kukisia eneo hakuhitaji message IDs zisizo sahihi au packets fiche zinazobadilisha state. Ujumbe wa kawaida wenye delivery confirmations za kawaida unatosha, hivyo kuna tradeoff ya stealth ndogo lakini matumizi mapana zaidi kwenye messengers.
 
-* Hulazimisha radio/modem kutuma/kupokea kila sekunde → battery drain inayoonekana, hasa kwenye idle handsets.
-* Hutengeneza upstream/downstream traffic inayotumia mobile data plans na inaweza kushindana na features zinazohitaji latency ndogo kama video calls.<sup>[[1]](#references)</sup>
-* Invalid payloads kubwa huongeza processing work, lakini paper inaripoti kuwa cryptography yenyewe ni sehemu ndogo sana ya battery cost.<sup>[[1]](#references)</sup>
-* Kwenye WhatsApp, invalid reactions hukubali data nyingi zaidi kuliko emoji ya kawaida inavyodokeza: vipimo vilivyochapishwa vilipata server-side acceptance ya hadi takriban `1 MB` kwa reaction.
-* Oversized reactions huacha kutoa delivery receipts zinazoaminika body inapozidi takriban `30 bytes`, lakini bado hu-forwardiwa na kuchakatwa kabla ya kutupwa. Weka reaction bodies ndogo unapohitaji ACKs; zikuze tu unapolenga pure drain au covert one-way transport.
-* Vipimo vya umma vilifikia takriban `3.7 MB/s` (`~13.3 GB/h`) ya victim traffic katika hali hii.
+## Kumaliza rasilimali kwa njia fiche
+
+Kwa kuwa kila silent probe lazima idecryptiwe na kuthibitishwa, kutuma reaction toggles, edits zisizo sahihi, au packets za delete-for-everyone mfululizo husababisha DoS ya application-layer:<sup>[[1]](#references)</sup>
+
+* Hulazimisha radio/modem kutuma/kupokea kila sekunde → betri huisha kwa kiwango kinachoonekana, hasa kwenye simu zisizotumika.
+* Hutengeneza trafiki ya upstream/downstream inayotumia data ya simu na inaweza kushindana na vipengele vinavyohitaji latency ndogo kama simu za video.<sup>[[1]](#references)</sup>
+* Payloads kubwa zisizo sahihi huongeza kazi ya uchakataji, lakini karatasi ya utafiti inaripoti kuwa cryptography yenyewe hutumia sehemu ndogo sana ya betri.<sup>[[1]](#references)</sup>
+* Kwenye WhatsApp, reactions zisizo sahihi hukubali data nyingi zaidi kuliko emoji ya kawaida inavyoweza kudokeza: vipimo vilivyochapishwa vilipata kukubaliwa upande wa server hadi takriban `1 MB` kwa reaction.
+* Reactions kubwa kupita kiasi huacha kutoa delivery receipts za kuaminika body inapozidi takriban `30 bytes`, lakini bado hutumwa na kuchakatwa kabla ya kutupwa. Weka reaction bodies ndogo unapohitaji ACKs; zikuze tu lengo linapokuwa kumaliza rasilimali pekee au usafirishaji fiche wa njia moja.
+* Vipimo vya umma vilifikia takriban `3.7 MB/s` (`~13.3 GB/h`) ya trafiki ya mwathiriwa kwa kutumia mbinu hii.
+
+
 
 ## References
 
-- [1] [Careless Whisper: Exploiting Silent Delivery Receipts to Monitor Users on Mobile Instant Messengers](https://arxiv.org/html/2411.11194v4)
-- [2] [Hope of Delivery: Extracting User Locations From Mobile Instant Messengers](https://www.ndss-symposium.org/wp-content/uploads/2023-188-paper.pdf)
+- [1] [Careless Whisper: Kutumia Vibaya Silent Delivery Receipts Kufuatilia Watumiaji kwenye Mobile Instant Messengers](https://arxiv.org/html/2411.11194v4)
+- [2] [Hope of Delivery: Kutoa Maeneo ya Watumiaji kutoka kwa Mobile Instant Messengers](https://www.ndss-symposium.org/wp-content/uploads/2023-188-paper.pdf)
 - [3] [whatsmeow](https://github.com/tulir/whatsmeow)
 - [4] [Cobalt](https://github.com/Auties00/Cobalt)
 - [5] [signal-cli](https://github.com/AsamK/signal-cli)
-- [6] [signal-cli manpage](https://github.com/AsamK/signal-cli/blob/master/man/signal-cli.1.adoc)
+- [6] [ukurasa wa mwongozo wa signal-cli](https://github.com/AsamK/signal-cli/blob/master/man/signal-cli.1.adoc)
 - [7] [libsignal-service-java](https://github.com/signalapp/libsignal-service-java)
 - [8] [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker)
 - [9] [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python)
-- [10] [How to block high volumes of unknown messages | WhatsApp Help Center](https://faq.whatsapp.com/3379690015658337)
-- [11] [All the Numbers are US: Large-scale Abuse of Contact Discovery in Mobile Messengers](https://www.ndss-symposium.org/ndss-paper/all-the-numbers-are-us-large-scale-abuse-of-contact-discovery-in-mobile-messengers/)
+- [10] [Jinsi ya kuzuia idadi kubwa ya ujumbe usiojulikana | WhatsApp Help Center](https://faq.whatsapp.com/3379690015658337)
+- [11] [Nambari Zote ni za Marekani: Matumizi Mabaya ya Kiwango Kikubwa ya Contact Discovery kwenye Mobile Messengers](https://www.ndss-symposium.org/ndss-paper/all-the-numbers-are-us-large-scale-abuse-of-contact-discovery-in-mobile-messengers/)
 {{#include ../banners/hacktricks-training.md}}
