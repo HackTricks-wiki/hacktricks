@@ -897,7 +897,7 @@
     "src/pentesting-web/hacking-with-cookies/cookie-tossing.md": "4163a60dffbd1de4fa50661d3c9c7fb7d3a2ffd8",
     "src/pentesting-web/http-connection-contamination.md": "96434deb6abdef3fd2d60dce4c3a364f568fd846",
     "src/pentesting-web/http-connection-request-smuggling.md": "4d361df903b039ea3badcf05fab25f73a54dd5ad",
-    "src/pentesting-web/http-request-smuggling/README.md": "d966a34f8dcea5fa90b017b1302c059808f43f62",
+    "src/pentesting-web/http-request-smuggling/README.md": "2017292da42fdcff5e895a528aad113d268c5a85",
     "src/pentesting-web/http-request-smuggling/browser-http-request-smuggling.md": "9a9989cd57e4ec4f9a996572b8b08fbb59eda6f2",
     "src/pentesting-web/http-request-smuggling/request-smuggling-in-http-2-downgrades.md": "2fd68381ee1a2063c01066d46dce34f8fa0f1a88",
     "src/pentesting-web/http-response-smuggling-desync.md": "f26037bb2efff4a0e243e2e96844b7a2814f868b",
