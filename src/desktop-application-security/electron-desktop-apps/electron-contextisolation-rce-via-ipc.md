@@ -1,20 +1,20 @@
-# RCE por IPC con contextIsolation en Electron
+# RCE de Electron con contextIsolation mediante IPC
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
-El aislamiento de contexto no hace que un puente preload inseguro sea seguro. Si un preload expone IPC privilegiado al contenido del renderer, una XSS o un renderer comprometido puede llamar a ese puente; la RCE depende entonces de la validación y las capacidades del handler correspondiente en el proceso principal. Electron recomienda exponer un método limitado por operación, validar los emisores de IPC y no exponer nunca primitivas IPC sin restricciones.<sup>[[3]](#references)[[4]](#references)</sup>
+El aislamiento de contexto no hace que un puente preload inseguro sea seguro. Si un preload expone IPC privilegiado al contenido del renderer, un XSS o un renderer comprometido puede llamar a ese puente; la RCE depende entonces de la validación y las capacidades del handler correspondiente del proceso principal. Electron recomienda exponer un método limitado por operación, validar los emisores de IPC y no exponer nunca primitivas IPC sin restricciones.<sup>[[3]](#references)[[4]](#references)</sup>
 
 **La mayoría de estos ejemplos se tomaron de aquí** [**https://www.youtube.com/watch?v=xILfQGkLXQo**](https://www.youtube.com/watch?v=xILfQGkLXQo). Consulta el video para obtener más información.<sup>[[1]](#references)</sup>
 
 ## Ejemplo 0
 
-Ejemplo de [https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21) (en esas diapositivas tienes el ejemplo completo de cómo se abusó de MS Teams para pasar de una XSS a una RCE; este es solo un ejemplo muy básico):<sup>[[2]](#references)</sup>
+Ejemplo de [https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21) (en esas diapositivas tienes el ejemplo completo de cómo se aprovechó un XSS para conseguir RCE en MS Teams; este es solo un ejemplo muy básico):<sup>[[2]](#references)</sup>
 
-<figure><img src="../../../images/image (9) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../images/image (9) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Ejemplo 1
 
-Observa cómo `main.js` escucha en `getUpdate` y **descarga y ejecuta cualquier URL** que se le pase.\
+Observa cómo `main.js` escucha `getUpdate` y **descarga y ejecuta cualquier URL** que se le pase.\
 Observa también cómo `preload.js` **expone cualquier evento IPC** del proceso principal.
 
 ```javascript
@@ -81,7 +81,7 @@ Exploit:
 
 ## Ejemplo 2
 
-Si el preload expone `shell.openExternal` sin validar el esquema ni el destino, la entrada controlada por el renderer puede iniciar controladores externos registrados. Que esto llegue a convertirse en ejecución de código depende de la plataforma, los controladores instalados, el esquema y la versión de Electron; restringe el acceso a una lista de permitidos explícita de destinos `https:` esperados.<sup>[[3]](#references)</sup>
+Si el preload expone `shell.openExternal` sin validar el esquema ni el destino, una entrada controlada por el renderer puede iniciar manejadores externos registrados. Que esto permita ejecutar código depende de la plataforma, los manejadores instalados, el esquema y la versión de Electron; restríngelo a una lista de permitidos explícita de destinos `https:` esperados.<sup>[[3]](#references)</sup>
 
 ```javascript
 // Part of preload.js code
@@ -92,7 +92,7 @@ window.electronOpenInBrowser = (url) => {
 
 ## Ejemplo 3
 
-Si el preload expone una comunicación sin restricciones con el proceso principal, un XSS puede enviar nombres de canales y datos arbitrarios. El impacto depende de los controladores IPC registrados y de sus comprobaciones de autorización.
+Si el preload expone comunicación sin restricciones con el proceso principal, un XSS puede enviar nombres de canal y datos arbitrarios. El impacto depende de los handlers IPC registrados y de sus comprobaciones de autorización.
 
 ```javascript
 window.electronListen = (event, cb) => {
@@ -111,4 +111,4 @@ window.electronSend = (event, data) => {
 - [2] [Cómo hackeé Microsoft Teams y conseguí $150,000 en Pwn2Own](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own)
 - [3] [Electron — Lista de verificación de seguridad](https://www.electronjs.org/docs/latest/tutorial/security)
 - [4] [Electron — Aislamiento de contexto y exposición segura de API](https://www.electronjs.org/docs/latest/tutorial/context-isolation)
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
