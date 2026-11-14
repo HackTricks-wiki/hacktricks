@@ -8,7 +8,7 @@ Software:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## Automazione user-mode di WinDbg
+## Automazione di WinDbg in modalità user-mode
 
 {{#ref}}
 windbg-automation.md
@@ -55,29 +55,29 @@ nodejs-v8-cached-bytecode.md
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek è un decompiler che **decompila ed esamina diversi formati**, tra cui **librerie** (.dll), **file di metadati di Windows** (.winmd) ed **eseguibili** (.exe). Dopo la decompilazione, un assembly può essere salvato come progetto Visual Studio (.csproj).
+dotPeek è un decompiler che **decompila ed esamina diversi formati**, tra cui **librerie** (.dll), **file di metadati Windows** (.winmd) ed **eseguibili** (.exe). Una volta decompilato, un assembly può essere salvato come progetto Visual Studio (.csproj).
 
-Il vantaggio è che, se occorre recuperare il codice sorgente perduto da un assembly legacy, questa operazione può far risparmiare tempo. Inoltre, dotPeek offre una comoda navigazione nel codice decompilato, rendendolo uno degli strumenti ideali per l'**analisi degli algoritmi Xamarin.**
+Il vantaggio è che, se è necessario ripristinare il codice sorgente mancante da un assembly legacy, questa operazione può far risparmiare tempo. Inoltre, dotPeek offre una comoda navigazione nel codice decompilato, rendendolo uno degli strumenti ideali per l'**analisi di algoritmi Xamarin**.
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-Grazie a un modello di add-in completo e a un'API che estende lo strumento per adattarlo alle tue esigenze specifiche, .NET Reflector fa risparmiare tempo e semplifica lo sviluppo. Vediamo la vasta gamma di servizi di reverse engineering offerti da questo strumento:
+Grazie a un modello di add-in completo e a un'API che estende lo strumento per adattarlo alle tue esigenze specifiche, .NET Reflector fa risparmiare tempo e semplifica lo sviluppo. Ecco i numerosi servizi di reverse engineering offerti da questo strumento:
 
-- Fornisce informazioni sul flusso dei dati in una libreria o un componente
+- Mostra come fluiscono i dati attraverso una libreria o un componente
 - Fornisce informazioni sull'implementazione e sull'uso dei linguaggi e dei framework .NET
-- Individua funzionalità non documentate e non esposte, per sfruttare meglio le API e le tecnologie utilizzate.
+- Individua funzionalità non documentate e non esposte per sfruttare meglio le API e le tecnologie utilizzate.
 - Individua dipendenze e assembly diversi
 - Individua la posizione esatta degli errori nel tuo codice, nei componenti di terze parti e nelle librerie.
 - Esegue il debug del codice sorgente di tutto il codice .NET con cui lavori.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) e [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Plugin ILSpy per Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): puoi usarlo su qualsiasi OS (puoi installarlo direttamente da VSCode, senza bisogno di scaricare il repository git. Fai clic su **Extensions** e **cerca ILSpy**).\
-Se devi **decompilare**, **modificare** e **ricompilare**, puoi usare [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un suo fork mantenuto attivamente, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** per modificare qualcosa all'interno di una funzione).
+[Plugin ILSpy per Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): puoi usarlo su qualsiasi sistema operativo (puoi installarlo direttamente da VSCode, senza bisogno di scaricare git. Fai clic su **Extensions** e **cerca ILSpy**).\
+Se devi **decompilare**, **modificare** e **ricompilare**, puoi usare [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) oppure un suo fork mantenuto attivamente, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic destro -> Modify Method** per modificare qualcosa all'interno di una funzione).
 
 ### Ispezione managed senza esecuzione con REA
 
-**REA** può ispezionare i metadati PE/CLI e il CIL senza caricare l'assembly. Inizia identificando l'artefatto, quindi esamina i membri e i confini native dichiarati; è utile quando si analizzano chiamate sospette prima di usare un decompiler o eseguire il programma.<sup>[[16]](#references)[[17]](#references)</sup>
+**REA** può ispezionare i metadati PE/CLI e il CIL senza caricare l'assembly. Inizia identificando l'artefatto, quindi ispeziona i membri e i confini nativi dichiarati; è utile quando si analizzano chiamate sospette prima di usare un decompiler o eseguire il programma.<sup>[[16]](#references)[[17]](#references)</sup>
 
 ```bash
 rea inspect-managed-artifact /absolute/path/Assembly.dll --json
@@ -85,9 +85,9 @@ rea inspect-managed-members /absolute/path/Assembly.dll --json
 rea inspect-managed-native-boundaries /absolute/path/Assembly.dll --json
 ```
 
-Per il version diffing, `compare_managed_members` usa l’identità raw di CIL/firma e fingerprint delle istruzioni decodificate, invece di considerare stabili i metadata token tra build diverse. Una dichiarazione P/Invoke non dimostra che sia stato eseguito codice nativo; `verify_managed_native_boundaries` richiede un export nativo o una function Evidence corrispondente per verificare quel confine. Conserva il digest dell’artefatto, l’MVID e le mapping non risolte insieme al risultato.<sup>[[17]](#references)</sup>
+Per confrontare le versioni, `compare_managed_members` usa l’identità grezza di CIL/firma e fingerprint delle istruzioni decodificate, invece di considerare stabili i metadata token tra build diverse. Una dichiarazione P/Invoke non dimostra che sia stato eseguito codice nativo; `verify_managed_native_boundaries` richiede un export nativo corrispondente o Evidence della funzione per verificare quel confine. Conserva il digest dell’artefatto, MVID e le mappature irrisolte insieme al risultato.<sup>[[17]](#references)</sup>
 
-### DNSpy Logging
+### Logging di DNSpy
 
 Per fare in modo che **DNSpy registri alcune informazioni in un file**, puoi usare questo snippet:
 
@@ -97,13 +97,13 @@ path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
 
-### Debugging di DNSpy
+### Debugging con DNSpy
 
-Per eseguire il debug del codice usando DNSpy devi:
+Per eseguire il debugging del codice con DNSpy, devi:
 
 Per prima cosa, modifica gli **attributi dell'assembly** relativi al **debugging**:
 
-![DNSpy Logging - Debugging di DNSpy: per prima cosa, modifica gli attributi dell'assembly relativi al debugging](<../../images/image (973).png>)
+![DNSpy Logging - Debugging con DNSpy: per prima cosa, modifica gli attributi dell'assembly relativi al debugging](<../../images/image (973).png>)
 
 Da:
 
@@ -120,15 +120,15 @@ DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
 
-E fai clic su **compile**:
+E clicca su **compila**:
 
-![DNSpy Logging - DNSpy Debugging: fai clic su compile](<../../images/image (314) (1).png>)
+![DNSpy Logging - DNSpy Debugging: E clicca su compila](<../../images/image (314) (1).png>)
 
-Poi salva il nuovo file con _**File >> Save module...**_:
+Poi salva il nuovo file tramite _**File >> Salva modulo...**_:
 
-![DNSpy Logging - DNSpy Debugging: poi salva il nuovo file con File Save module](<../../images/image (602).png>)
+![DNSpy Logging - DNSpy Debugging: Poi salva il nuovo file tramite File Salva modulo](<../../images/image (602).png>)
 
-Questo è necessario perché, se non lo fai, al **runtime** verranno applicate al codice diverse **ottimizzazioni** e potrebbe capitare che, durante il debugging, un **breakpoint non venga mai raggiunto** o che alcune **variabili non esistano**.
+È necessario perché, se non lo fai, in **runtime** al codice verranno applicate diverse **ottimizzazioni** e potrebbe succedere che, durante il debug, un **punto di interruzione non venga mai raggiunto** oppure che alcune **variabili non esistano**.
 
 Poi, se la tua applicazione .NET viene **eseguita** da **IIS**, puoi **riavviarla** con:
 
@@ -136,29 +136,29 @@ Poi, se la tua applicazione .NET viene **eseguita** da **IIS**, puoi **riavviarl
 iisreset /noforce
 ```
 
-Quindi, per iniziare il debugging, chiudi tutti i file aperti e nella scheda **Debug** seleziona **Attach to Process...**:
+Poi, per iniziare il debugging, dovresti chiudere tutti i file aperti e selezionare **Attach to Process...** nella **Debug Tab**:
 
-![DNSpy Logging - DNSpy Debugging: Quindi, per iniziare il debugging, chiudi tutti i file aperti e nella scheda Debug seleziona Attach to Process](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: Poi, per iniziare il debugging, dovresti chiudere tutti i file aperti e selezionare Attach to Process nella scheda Debug](<../../images/image (318).png>)
 
-Seleziona **w3wp.exe** per collegarti al **server IIS** e fai clic su **attach**:
+Quindi seleziona **w3wp.exe** per collegarti al **server IIS** e fai clic su **attach**:
 
-![DNSpy Logging - DNSpy Debugging: Seleziona w3wp.exe per collegarti al server IIS e fai clic su attach](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging: Poi seleziona w3wp.exe per collegarti al server IIS e fai clic su attach](<../../images/image (113).png>)
 
-Ora che stiamo facendo debugging del processo, è il momento di arrestarlo e caricare tutti i moduli. Prima fai clic su _Debug >> Break All_, quindi su _**Debug >> Windows >> Modules**_:
+Ora che stiamo eseguendo il debugging del processo, è il momento di interromperlo e caricare tutti i moduli. Per prima cosa fai clic su _Debug >> Break All_, quindi su _**Debug >> Windows >> Modules**_:
 
-![DNSpy Logging - DNSpy Debugging: Ora che stiamo facendo debugging del processo, è il momento di arrestarlo e caricare tutti i moduli. Prima fai clic su Debug Break All, quindi su Debug Windows Modules](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: Ora che stiamo eseguendo il debugging del processo, è il momento di interromperlo e caricare tutti i moduli. Per prima cosa fai clic su Debug Break All, quindi su Debug Windows Modules](<../../images/image (132).png>)
 
-![DNSpy Logging - DNSpy Debugging: Ora che stiamo facendo debugging del processo, è il momento di arrestarlo e caricare tutti i moduli. Prima fai clic su Debug Break All, quindi su Debug Windows Modules](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: Ora che stiamo eseguendo il debugging del processo, è il momento di interromperlo e caricare tutti i moduli. Per prima cosa fai clic su Debug Break All, quindi su Debug Windows Modules](<../../images/image (834).png>)
 
 Fai clic su un modulo qualsiasi in **Modules** e seleziona **Open All Modules**:
 
 ![DNSpy Logging - DNSpy Debugging: Fai clic su un modulo qualsiasi in Modules e seleziona Open All Modules](<../../images/image (922).png>)
 
-Fai clic con il tasto destro su un modulo qualsiasi in **Assembly Explorer** e fai clic su **Sort Assemblies**:
+Fai clic con il tasto destro su un modulo qualsiasi in **Assembly Explorer** e seleziona **Sort Assemblies**:
 
-![DNSpy Logging - DNSpy Debugging: Fai clic con il tasto destro su un modulo qualsiasi in Assembly Explorer e fai clic su Sort Assemblies](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Fai clic con il tasto destro su un modulo qualsiasi in Assembly Explorer e seleziona Sort Assemblies](<../../images/image (339).png>)
 
-## Decompilatore Java
+## Decompiler Java
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
@@ -171,52 +171,52 @@ Fai clic con il tasto destro su un modulo qualsiasi in **Assembly Explorer** e f
 - Seleziona il debugger **Windbg**
 - Seleziona "**Suspend on library load/unload**"
 
-![Debugging DLLs - Using IDA: Seleziona " Suspend on library load/unload "](<../../images/image (868).png>)
+![Debugging DLLs - Uso di IDA: Seleziona " Suspend on library load/unload "](<../../images/image (868).png>)
 
 - Configura i **parametri** di esecuzione inserendo il **percorso della DLL** e la funzione che vuoi chiamare:
 
-![Debugging DLLs - Using IDA: Configura i parametri di esecuzione inserendo il percorso della DLL e la funzione che vuoi chiamare](<../../images/image (704).png>)
+![Debugging DLLs - Uso di IDA: Configura i parametri di esecuzione inserendo il percorso della DLL e la funzione che vuoi chiamare](<../../images/image (704).png>)
 
-Quindi, quando avvii il debugging, **l'esecuzione si arresta ogni volta che viene caricata una DLL**; quando rundll32 carica la tua DLL, l'esecuzione si arresta.
+Quindi, quando avvii il debugging, **l'esecuzione si interromperà ogni volta che viene caricata una DLL**; quando rundll32 caricherà la tua DLL, l'esecuzione si interromperà.
 
-Questo metodo si arresta in corrispondenza degli eventi di caricamento dei moduli, ma raggiungere l'entry point della DLL caricata è meno diretto rispetto al workflow con x64dbg descritto sotto.
+Questo metodo si interrompe in corrispondenza degli eventi di caricamento dei moduli, ma raggiungere l'entry point della DLL caricata è meno immediato rispetto al workflow con x64dbg descritto di seguito.
 
 ### Uso di x64dbg/x32dbg
 
 - **Carica rundll32** (64 bit in C:\Windows\System32\rundll32.exe e 32 bit in C:\Windows\SysWOW64\rundll32.exe)
-- **Modifica la Command Line** ( _File --> Change Command Line_ ) e imposta il percorso della dll e la funzione che vuoi chiamare, ad esempio: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- Vai su _Options --> Settings_ e seleziona "**DLL Entry**".
-- Quindi **avvia l'esecuzione**: il debugger si arresterà a ogni dll main e, a un certo punto, **si arresterà all'Entry della tua dll**. Da lì, cerca i punti in cui vuoi impostare un breakpoint.
+- **Modifica la Command Line** ( _File --> Change Command Line_ ) e imposta il percorso della DLL e la funzione che vuoi chiamare, per esempio: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- Modifica _Options --> Settings_ e seleziona "**DLL Entry**".
+- Quindi **avvia l'esecuzione**; il debugger si interromperà a ogni dll main e, a un certo punto, **si fermerà sull'Entry della tua DLL**. Da lì, cerca i punti in cui vuoi impostare un breakpoint.
 
-Nota che quando l'esecuzione viene arrestata per qualsiasi motivo in win64dbg, puoi vedere **in quale codice ti trovi** guardando la **parte superiore della finestra di win64dbg**:
+Nota che, quando l'esecuzione viene interrotta per qualsiasi motivo in win64dbg, puoi vedere **in quale codice ti trovi** guardando **nella parte superiore della finestra di win64dbg**:
 
-![Using IDA - Using x64dbg/x32dbg: Nota che quando l'esecuzione viene arrestata per qualsiasi motivo in win64dbg, puoi vedere in quale codice ti trovi guardando la parte superiore della finestra di win64dbg](<../../images/image (842).png>)
+![Uso di IDA - Uso di x64dbg/x32dbg: Nota che, quando l'esecuzione viene interrotta per qualsiasi motivo in win64dbg, puoi vedere in quale codice ti trovi guardando nella parte superiore della finestra di win64dbg](<../../images/image (842).png>)
 
-Questo indicatore conferma che l'esecuzione si è arrestata all'interno della DLL di cui vuoi fare debugging.
+Questo indicatore conferma che l'esecuzione si è interrotta all'interno della DLL di cui vuoi eseguire il debugging.
 
 ## App GUI / Videogiochi
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati nella memoria i valori importanti di un gioco in esecuzione e modificarli. Maggiori informazioni in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati in memoria i valori importanti di un gioco in esecuzione e modificarli. Maggiori informazioni in:
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) è un front-end/strumento di reverse engineering per GNU Project Debugger (GDB), focalizzato sui giochi. Tuttavia, può essere usato per qualsiasi attività legata al reverse engineering.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) è un front-end/strumento di reverse engineering per il GNU Project Debugger (GDB), pensato per i giochi. Tuttavia, può essere usato per qualsiasi attività relativa al reverse engineering.
 
-[**Decompiler Explorer**](https://dogbolt.org/) è un front-end web per diversi decompiler. Questo servizio web consente di confrontare l'output di vari decompiler su eseguibili di piccole dimensioni.
+[**Decompiler Explorer**](https://dogbolt.org/) è un front-end web per diversi decompiler. Questo servizio web consente di confrontare l'output di diversi decompiler su piccoli eseguibili.
 
-### Decrittazione di Godot PCK e recupero del progetto
+### Decrittazione di PCK Godot e recupero del progetto
 
-Per un gioco Godot distribuito, individua il suo PCK: può essere un file `.pck` autonomo, un pack aggiunto o incorporato in un eseguibile oppure trovarsi nella directory `assets` di un APK. [gore](https://github.com/figurophobia/gore) può ispezionare ed estrarre il pack, mentre per ricostruire completamente script e risorse occorrono GDRE Tools (`gore setup` li installa, oppure usa `--gdre`). Per questo workflow, lo strumento supporta i formati PCK di Godot 4.x dalla v2 alla v4; è in grado di rilevare gli header v1, ma per la v1 richiede una chiave fornita dall'utente.<sup>[[25]](#references)</sup>
+Per un gioco Godot distribuito, individua il relativo PCK, che può essere un file `.pck` autonomo, un pack aggiunto o incorporato nell'eseguibile oppure trovarsi nella directory `assets` di un APK. [gore](https://github.com/figurophobia/gore) può ispezionare ed estrarre il pack, mentre la ricostruzione completa di script e risorse richiede GDRE Tools (`gore setup` lo installa, oppure usa `--gdre`). Per questo workflow, lo strumento supporta i formati PCK v2–v4 di Godot 4.x; può rilevare gli header v1, ma per v1 è necessario fornire una chiave.<sup>[[25]](#references)</sup>
 
 Il recupero automatico della chiave richiede una tabella dei file crittografata; se sono crittografati solo i contenuti dei file, fornisci invece una chiave nota. Un tentativo di recupero non riuscito non dimostra che il pack non sia crittografato.<sup>[[28]](#references)</sup>
 
-La ricerca della chiave **non** è un attacco allo spazio delle chiavi AES-256. Una tabella dei file crittografata espone l'MD5 del testo in chiaro, la lunghezza del testo in chiaro, l'IV e il testo cifrato AES-256-CFB.<sup>[[27]](#references)</sup> `gore` prova finestre di 32 byte dell'eseguibile del gioco o dei file vicini come chiavi candidate. Filtra le candidate in base alla lunghezza e al prefisso plausibili dei percorsi decrittografati, quindi conferma i risultati della scansione binaria decrittografando l'intera tabella e verificandone l'MD5.<sup>[[26]](#references)[[28]](#references)</sup> Cerca prima nelle sezioni di dati inizializzati di PE/ELF e, se non trova risultati, esegue una scansione dell'intero file; `--scan` aggiunge altri file candidati.<sup>[[28]](#references)</sup>
+La ricerca della chiave **non** è un attacco allo spazio delle chiavi AES-256. Una tabella dei file crittografata espone l'MD5 del testo in chiaro, la lunghezza del testo in chiaro, l'IV e il testo cifrato AES-256-CFB.<sup>[[27]](#references)</sup> `gore` prova finestre di 32 byte dell'eseguibile del gioco o dei file adiacenti come possibili chiavi. Filtra i candidati in base a una lunghezza e a un prefisso plausibili del percorso decrittato, quindi verifica i risultati della scansione binaria decrittando l'intera tabella e controllandone l'MD5.<sup>[[26]](#references)[[28]](#references)</sup> Cerca prima nelle sezioni di dati inizializzati di PE/ELF e, se necessario, esegue una scansione dell'intero file; `--scan` aggiunge altri file candidati.<sup>[[28]](#references)</sup>
 
-Se non viene trovata alcuna chiave incorporata, viene provato un piccolo elenco di password integrato; `--wordlist` consente di specificare altre candidate. Ogni password viene provata come rappresentazione della chiave derivata dalla password usata dall'engine, come valore letterale riempito con zeri o come chiave esadecimale di 64 caratteri. A differenza dei risultati della scansione binaria, in questa implementazione i risultati della wordlist superano solo il filtro relativo alla struttura dei percorsi. Verificali aprendo il pack e convalidando gli asset estratti.<sup>[[26]](#references)[[28]](#references)</sup>
+Se non viene trovata alcuna chiave incorporata, viene provato un piccolo elenco di password integrato; `--wordlist` consente di specificare altri candidati. Ogni password viene provata come rappresentazione della chiave derivata dalla password usata dal motore, come valore letterale con padding a zero o come chiave di 64 caratteri esadecimali. A differenza dei risultati della scansione binaria, in questa implementazione i risultati della wordlist superano solo il filtro della struttura dei percorsi. Verificali aprendo il pack e convalidando le risorse estratte.<sup>[[26]](#references)[[28]](#references)</sup>
 
-Con l'artefatto del gioco disponibile in locale, scegli il passaggio necessario per l'analisi. `recover` invoca GDRE per ricostruire un progetto apribile, mentre `extract` si limita a estrarre i file grezzi. `key` stampa una chiave candidata da usare con un altro strumento.<sup>[[25]](#references)[[28]](#references)</sup>
+Con l'artefatto del gioco disponibile localmente, scegli la fase necessaria per l'analisi. `recover` usa GDRE per ricostruire un progetto apribile, mentre `extract` si limita a estrarre i file grezzi. `key` stampa una possibile chiave da usare con un altro strumento.<sup>[[25]](#references)[[28]](#references)</sup>
 
 ```bash
 gore info game.exe
@@ -226,9 +226,9 @@ gore setup
 gore recover game.exe -o ./game_project
 ```
 
-## Indagine nativa supportata da evidenze con REA
+## Indagine nativa basata su evidenze con REA
 
-**REA** espone le analisi di Hopper, Ghidra e IDA tramite CLI e MCP. Richiede Node.js 22.x (almeno 22.19), 24.x (almeno 24.11) o 26+, oltre a npm. Configura prima un provider nativo esistente; controlla `rea providers --json` e seleziona esplicitamente un provider se più di uno supporta il target. Sostituisci `0x1000` qui sotto con il nome o l'indirizzo di una funzione osservata nell'inventario.<sup>[[16]](#references)[[18]](#references)</sup>
+**REA** espone le analisi di Hopper, Ghidra e IDA tramite CLI e MCP. Richiede Node.js 22.x (almeno 22.19), 24.x (almeno 24.11) o 26+, oltre a npm. Configura prima un provider nativo esistente; controlla `rea providers --json` e seleziona esplicitamente un provider se più di uno supporta il target. Usa al posto di `0x1000` qui sotto il nome o l’indirizzo di una funzione osservata nell’inventario.<sup>[[16]](#references)[[18]](#references)</sup>
 
 ```bash
 npm install --global rea-agents
@@ -240,15 +240,15 @@ rea xrefs /absolute/path/to/program 0x1000 --provider ghidra --json
 rea function /absolute/path/to/program 0x1000 --provider ghidra --json
 ```
 
-Parti da una stringa o un simbolo relativo a una feature, segui i riferimenti e i chiamanti, quindi esamina la scheda della funzione selezionata e il pseudocodice con `rea decompile`. REA associa una sessione al provider selezionato, invece di sostituirlo silenziosamente in caso di errore. Per query ripetibili, `--snapshot PATH` riutilizza solo i byte degli artifact, il provider, le impostazioni, l'operazione e i parametri corrispondenti; uno snapshot è una cache locale, non un database del provider salvato. Conserva l'`Evidence` restituita e gli unknown espliciti, anziché trattare i percorsi dedotti o il testo del decompiler come codice sorgente originale.<sup>[[16]](#references)[[18]](#references)</sup>
+Parti da una stringa o un simbolo di interesse, segui i riferimenti e i chiamanti, quindi esamina la scheda della funzione selezionata e il pseudocodice con `rea decompile`. REA associa una sessione al provider selezionato, invece di sostituirlo silenziosamente dopo un errore. Per query ripetibili, `--snapshot PATH` riutilizza solo i byte degli artefatti, il provider, le impostazioni, l’operazione e i parametri corrispondenti; uno snapshot è una cache locale, non un database del provider salvato. Conserva l’oggetto Evidence restituito e le incognite esplicite, senza trattare i percorsi dedotti o il testo del decompiler come codice sorgente originale.<sup>[[16]](#references)[[18]](#references)</sup>
 
-Per gli entry point JavaScript/Electron che portano ad add-on nativi, vedi [Electron Desktop Apps](../../network-services-pentesting/pentesting-web/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea).
+Per i punti di ingresso JavaScript/Electron che conducono agli add-on nativi, consulta [Electron Desktop Apps](../../desktop-application-security/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea).
 
-## Analisi tramite script di IDA e Ghidra con un bridge TCP locale
+## Analisi con script di IDA e Ghidra tramite un bridge TCP locale
 
-[IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge) viene eseguito all'interno di un database IDA o di un programma Ghidra CodeBrowser **già aperto** e consente a uno script separato di interrogare e modificare quel database di analisi. Esegui `ID_Server.py` dalla Python CLI di IDA (`import ID_Server`) oppure `Ghidra_Server.py` dallo Script Manager di Ghidra. IDA si mette in ascolto su `127.0.0.1`, a partire dalla porta `5073`, e prova le porte successive. Lo script Ghidra attuale parte dalla porta `5093` e prova dieci porte fino a `5102`; il suo socket Java si associa all'indirizzo wildcard, non solo all'interfaccia loopback. Prima di connetterti, controlla la porta indicata dall'istanza. A differenza di un analyzer headless, questo bridge opera sul programma attualmente aperto in quella istanza della GUI.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+[IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge) viene eseguito all’interno di un database IDA o di un programma Ghidra CodeBrowser **già aperto** e consente a uno script separato di interrogare e modificare quel database di analisi. Esegui `ID_Server.py` dalla Python CLI di IDA (`import ID_Server`) oppure `Ghidra_Server.py` dallo Script Manager di Ghidra. IDA si associa a `127.0.0.1` a partire dalla porta `5073` e prova le porte successive. Lo script Ghidra attuale parte dalla porta `5093` e prova dieci porte, fino alla `5102`; il suo socket Java si associa all’indirizzo wildcard, non solo al loopback. Controlla la porta stampata dall’istanza prima di connetterti. A differenza di un analizzatore headless, questo bridge opera sul programma attualmente aperto in quell’istanza della GUI.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
-Invia **un comando terminato da newline per ogni connessione** e leggi la risposta terminata da newline. Di norma il risultato è JSON. Per esempio, dopo aver trovato un'API importata pertinente a un percorso di input, `IMPORTXREF` trova i relativi call site; `DECOMP_XREF` decompila quindi in batch i chiamanti di un indirizzo selezionato. `FUNC` esamina una funzione, mentre `PCODE` restituisce la rappresentazione intermedia del decompiler. Usa l'indirizzo del database attivo, non un indirizzo copiato da un binario con una base di caricamento diversa. L'esempio seguente usa la porta predefinita di IDA; per Ghidra, usa la porta indicata dal suo script.<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
+Invia **un comando terminato da newline per ogni connessione** e leggi la risposta terminata da newline. Il risultato è normalmente JSON. Per esempio, dopo aver trovato un’API importata rilevante per un percorso di input, `IMPORTXREF` individua i suoi call site; `DECOMP_XREF` esegue quindi la decompilazione in batch dei chiamanti di un indirizzo selezionato. `FUNC` esamina una funzione, mentre `PCODE` restituisce la rappresentazione intermedia del decompiler. Usa l’indirizzo del database attivo, non un indirizzo copiato da un binario con una base di rilocazione diversa. L’esempio seguente usa la porta predefinita di IDA; per Ghidra, usa la porta stampata dal suo script.<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
 
 ```python
 import socket
@@ -258,7 +258,7 @@ with socket.create_connection(("127.0.0.1", 5073)) as sock:
     print(sock.makefile("r", encoding="utf-8").readline())
 ```
 
-Lo stesso canale può **modificare il database di analisi**: `RENAME_FUNC`, `RETYPE`, `SETCONV`, `DEFSTRUCT`/`SETFIELD`, `MAKEFUNC` e `PATCH` modificano nomi, tipi, definizioni di strutture, limiti delle funzioni o byte memorizzati. `PATCH` è una modifica al database, **non** la prova di una patch al processo in esecuzione. Nessuno dei listener documenta l'autenticazione. IDA è limitato al loopback, ma Ghidra potrebbe essere raggiungibile tramite interfacce di rete; quando lo usi, limita l'accesso al listener di Ghidra. `QUIT` arresta entrambi i listener; IDA espone anche `ida_bridge_stop()`.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+Lo stesso canale può **modificare il database di analisi**: `RENAME_FUNC`, `RETYPE`, `SETCONV`, `DEFSTRUCT`/`SETFIELD`, `MAKEFUNC` e `PATCH` modificano nomi, tipi, definizioni delle strutture, limiti delle funzioni o byte memorizzati. `PATCH` è una modifica al database, **non** una prova di una patch applicata a un processo in esecuzione. Nessuno dei due listener documenta l'autenticazione. IDA è limitato al loopback, ma Ghidra potrebbe essere raggiungibile tramite le interfacce di rete; quando lo usi, limita l'accesso al listener di Ghidra. `QUIT` arresta entrambi i listener e IDA espone anche `ida_bridge_stop()`.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
 ## ARM & MIPS
 
@@ -267,51 +267,51 @@ Lo stesso canale può **modificare il database di analisi**: `RENAME_FUNC`, `RET
 https://github.com/nongiach/arm_now
 {{#endref}}
 
-## Shellcodes
+## Shellcode
 
-### Debugging di uno shellcode con blobrunner
+### Debuggare uno shellcode con blobrunner
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) alloca lo **shellcode**, stampa il suo **indirizzo di memoria** e mette in pausa l'esecuzione.\
-Collega un debugger come IDA o x64dbg, imposta un breakpoint all'indirizzo stampato e riprendi l'esecuzione per eseguire il debugging dello shellcode.
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) alloca lo **shellcode**, ne stampa l'**indirizzo di memoria** e mette in pausa l'esecuzione.\
+Collega un debugger come IDA o x64dbg, imposta un breakpoint all'indirizzo stampato e riprendi l'esecuzione per debuggare lo shellcode.
 
-La pagina GitHub delle release contiene file zip con le versioni compilate: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Puoi trovare una versione leggermente modificata di Blobrunner al link seguente. Per compilarla, **crea un progetto C/C++ in Visual Studio Code, copia e incolla il codice e compila**.
+La pagina delle release su GitHub contiene gli archivi zip con le versioni compilate: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Puoi trovare una versione leggermente modificata di Blobrunner al link seguente. Per compilarla, **crea un progetto C/C++ in Visual Studio Code, copia e incolla il codice e compilalo**.
 
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Debugging di uno shellcode con jmp2it
+### Debuggare uno shellcode con jmp2it
 
 [**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) è simile a BlobRunner. Alloca lo shellcode ed entra in un loop infinito. Collega il debugger, riprendi l'esecuzione per **2–5 secondi**, metti in pausa l'esecuzione all'interno del loop e fai uno step fino alla chiamata successiva, che trasferisce l'esecuzione allo shellcode allocato.
 
 ![Debugger in pausa nel loop infinito di jmp2it, subito prima della chiamata allo shellcode allocato](<../../images/image (509).png>)
 
-Puoi scaricare una versione compilata di [jmp2it nella pagina delle release](https://github.com/adamkramer/jmp2it/releases/).
+Puoi scaricare una versione compilata di [jmp2it dalla pagina delle release](https://github.com/adamkramer/jmp2it/releases/).
 
-### Debugging di uno shellcode con Cutter
+### Debuggare uno shellcode usando Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) è la GUI di radare. Con Cutter puoi emulare lo shellcode e analizzarlo dinamicamente.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) è la GUI di radare. Usando Cutter puoi emulare lo shellcode e ispezionarlo dinamicamente.
 
-Nota che Cutter permette di "Open File" e "Open Shellcode". Nel mio caso, aprendo lo shellcode come file lo ha decompilato correttamente, mentre aprendolo come shellcode non ci è riuscito:
+Nota che Cutter permette di "Open File" e "Open Shellcode". Nel mio caso, aprendo lo shellcode come file è stato decompilato correttamente, mentre aprendolo come shellcode non lo è stato:
 
 ![Cutter mostra risultati di analisi diversi quando gli stessi byte vengono aperti come file o come shellcode](<../../images/image (562).png>)
 
-Per avviare l'emulazione nel punto desiderato, imposta lì un bp; a quanto pare, Cutter avvierà automaticamente l'emulazione da quel punto:
+Per avviare l'emulazione dal punto desiderato, imposta un bp in quel punto: a quanto pare, Cutter avvierà automaticamente l'emulazione da lì:
 
 ![Impostazione di un breakpoint all'entry point desiderato dello shellcode prima di avviare l'emulazione di Cutter](<../../images/image (589).png>)
 
 ![Emulatore di Cutter in pausa sul breakpoint selezionato dello shellcode](<../../images/image (387).png>)
 
-Puoi, per esempio, visualizzare lo stack in un hex dump:
+Puoi visualizzare lo stack, per esempio, in un hex dump:
 
 ![Visualizzazione dello stack dello shellcode emulato nell'hex dump di Cutter](<../../images/image (186).png>)
 
-### Deoffuscare lo shellcode e individuare le funzioni eseguite
+### Deoffuscare uno shellcode e ottenere le funzioni eseguite
 
 Dovresti provare [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Ti indicherà, per esempio, **quali funzioni** usa lo shellcode e se si sta **decodificando** in memoria.
+Ti dirà cose come **quali funzioni** usa lo shellcode e se si sta **decodificando** in memoria.
 
 ```bash
 scdbg.exe -f shellcode # Get info
@@ -322,48 +322,48 @@ scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
 
-scDbg include anche un launcher grafico da cui puoi selezionare le opzioni desiderate ed eseguire lo shellcode
+scDbg dispone anche di un launcher grafico in cui puoi selezionare le opzioni desiderate ed eseguire lo shellcode
 
 ![Launcher grafico di scDbg per selezionare le opzioni di emulazione e tracing dello shellcode](<../../images/image (258).png>)
 
-L'opzione **Create Dump** esegue il dump dello shellcode finale se viene apportata qualsiasi modifica allo shellcode in modo dinamico in memoria (utile per scaricare lo shellcode decodificato). Lo **start offset** può essere utile per avviare lo shellcode da un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug dello shellcode usando il terminale di scDbg (tuttavia, ritengo che una qualsiasi delle opzioni spiegate in precedenza sia più adatta a questo scopo, perché potrai usare Ida o x64dbg).
+L'opzione **Create Dump** esegue il dump dello shellcode finale se viene apportata dinamicamente in memoria una modifica allo shellcode (utile per scaricare lo shellcode decodificato). L'opzione **start offset** può essere utile per avviare lo shellcode da un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug dello shellcode usando il terminale di scDbg (tuttavia, per questo scopo trovo migliori le opzioni illustrate in precedenza, perché potrai usare Ida o x64dbg).
 
-### Disassemblare usando CyberChef
+### Disassemblare con CyberChef
 
 Carica il file dello shellcode come input e usa la seguente ricetta per disassemblarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
-## Deoffuscazione della MBA obfuscation
+## Deoffuscazione dell'offuscamento MBA
 
-L'obfuscation **Mixed Boolean-Arithmetic (MBA)** nasconde espressioni semplici come `x + y` dietro formule che combinano operatori aritmetici (`+`, `-`, `*`) e bitwise (`&`, `|`, `^`, `~`, shift). L'aspetto importante è che queste identità sono in genere corrette solo nell'ambito di un'**aritmetica modulare a larghezza fissa**, quindi i riporti e gli overflow sono rilevanti:
+L'offuscamento **Mixed Boolean-Arithmetic (MBA)** nasconde espressioni semplici come `x + y` dietro formule che combinano operatori aritmetici (`+`, `-`, `*`) e bitwise (`&`, `|`, `^`, `~`, shift). L'aspetto importante è che queste identità sono in genere corrette solo nell'ambito dell'**aritmetica modulare a larghezza fissa**, quindi riporti e overflow sono rilevanti:
 
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
 
-Se semplifichi questo tipo di espressione con strumenti di algebra generica, puoi facilmente ottenere un risultato errato perché la semantica dell’ampiezza in bit è stata ignorata.<sup>[[1]](#references)</sup>
+Se semplifichi questo tipo di espressione con strumenti algebrici generici, puoi facilmente ottenere un risultato errato perché la semantica della larghezza in bit è stata ignorata.<sup>[[1]](#references)</sup>
 
-### Flusso di lavoro pratico
+### Workflow pratico
 
-1. **Mantieni l’ampiezza in bit originale** del codice/IR/decompiler (`8/16/32/64` bit).
+1. **Mantieni la larghezza in bit originale** del codice/IR sollevato o dell’output del decompiler (`8/16/32/64` bit).
 2. **Classifica l’espressione** prima di provare a semplificarla:
-   - **Lineare**: somme ponderate di atomi bitwise
+   - **Lineare**: somme pesate di atomi bitwise
    - **Semilineare**: lineare più maschere costanti come `x & 0xFF`
-   - **Polinomiale**: compaiono prodotti
+   - **Polinomiale**: sono presenti prodotti
    - **Mista**: prodotti e logica bitwise sono intercalati, spesso con sottoespressioni ripetute
-3. **Verifica ogni riscrittura candidata** con test casuali o una prova SMT. Se l’equivalenza non può essere dimostrata, mantieni l’espressione originale invece di fare supposizioni.
+3. **Verifica ogni riscrittura candidata** con test casuali o una dimostrazione SMT. Se l’equivalenza non può essere dimostrata, mantieni l’espressione originale invece di fare supposizioni.
 
-### Aggirare il control-flow flattening con una slice di esecuzione ristretta
+### Bypass del control-flow flattening con una narrow execution slice
 
-Spesso non è necessario ricostruire l’intero grafo di control-flow. In presenza di control-flow flattening, opaque predicates, dispatcher di grandi dimensioni o codice ricco di MBA, segui i riferimenti dai blob cifrati e dai buffer di output fino alla routine più piccola che li trasforma. Poi riproduci solo quella slice del flusso di dati oppure eseguila in modo indipendente; il dispatcher non fa parte della soluzione necessaria se lo stato rilevante può essere inizializzato direttamente.<sup>[[7]](#references)</sup>
+Ricostruire l’intero grafo di controllo spesso non è necessario. In presenza di control-flow flattening, opaque predicates, grandi dispatcher o codice ricco di MBA, segui i riferimenti dai blob cifrati e dai buffer di output fino alla routine più piccola che li trasforma. Poi riproduci solo quella porzione del data-flow oppure eseguila in modo indipendente; il dispatcher non è necessario per la soluzione se lo stato rilevante può essere inizializzato direttamente.<sup>[[7]](#references)</sup>
 
-Un flusso di lavoro pratico è:<sup>[[7]](#references)</sup>
+Un workflow pratico è:<sup>[[7]](#references)</sup>
 
-1. Fai l’inventario delle sezioni eseguibili e dei dati, delle relocation e dei cross-reference. Estrai le tabelle candidate da `.rodata` preservandone l’ordine dei byte e la dimensione degli elementi.
-2. Identifica l’ultima routine che scrive il testo in chiaro o il buffer di output. Registra i suoi input, le tabelle referenziate, le chiamate importate e lo stato globale richiesto.
-3. Trasponi solo queste operazioni in un modello Python a larghezza fissa. Se la slice dipende ancora da troppo stato, richiama la routine con Unicorn, QEMU o un debugger e intercetta le importazioni irrilevanti invece di emulare l’intero programma.
-4. Verifica che l’estrattore ricavi effettivamente il proprio output dal binario fornito: rimuovi i fallback silenziosi, cerca le risposte incorporate e provalo su build mai viste prima, con stringhe, chiavi, identificatori, layout e seed di offuscamento modificati.
+1. Inventaria le sezioni eseguibili e dati, le rilocazioni e i cross-reference. Estrai le tabelle candidate da `.rodata`, preservandone l’ordine dei byte e la larghezza degli elementi.
+2. Identifica l’ultima routine che scrive il plaintext o il buffer di output. Registra i suoi input, le tabelle referenziate, le chiamate importate e lo stato globale richiesto.
+3. Solleva solo quelle operazioni in un modello Python a larghezza fissa. Se la porzione dipende ancora da troppo stato, invoca la routine con Unicorn, QEMU o un debugger e aggancia le importazioni non rilevanti invece di emulare l’intero programma.
+4. Verifica che l’estrattore ricavi effettivamente il suo output dal binario fornito: rimuovi i fallback silenziosi, cerca al suo interno risposte incorporate ed eseguilo su build non viste con stringhe, chiavi, identificatori, layout e seed di offuscamento modificati.
 
-Comandi utili per una prima analisi sono:<sup>[[7]](#references)</sup>
+Alcuni comandi utili per una prima analisi sono:<sup>[[7]](#references)</sup>
 
 ```bash
 readelf -SW target
@@ -371,9 +371,9 @@ objdump -s -j .rodata target > rodata.txt
 objdump -d target | rg 'adrp|add|ldr|str'
 ```
 
-#### Rilevare espressioni MBA che nascondono costanti
+#### Rilevare le espressioni MBA che mascherano costanti
 
-Un'espressione a byte apparentemente dipendente dall'input può annullare completamente il proprio input. Dopo aver estratto le tabelle, valuta l'espressione sull'intero dominio a 8 bit; un insieme di output con un solo elemento dimostra che quel byte è costante, senza dover ricostruire la macchina a stati circostante.<sup>[[7]](#references)</sup>
+Un’espressione a byte apparentemente dipendente dall’input può annullare completamente il suo input. Dopo aver estratto le tabelle, valuta l’espressione sull’intero dominio a 8 bit; un insieme di output formato da un solo valore dimostra che quel byte è costante, senza dover ricostruire la state machine circostante.<sup>[[7]](#references)</sup>
 
 ```python
 def mba(a, b, c, d, e, x):
@@ -389,15 +389,15 @@ for row in zip(A, B, C, D, E):
 print(decoded)
 ```
 
-Mantieni la maschera finale perché l’addizione originale prevede un wraparound alla larghezza del byte. Per un dominio più ampio, chiedi a un SMT solver se `f(x1) != f(x2)` è soddisfacibile per due input simbolici della stessa larghezza: `unsat` dimostra l’invarianza, mentre `sat` fornisce un controesempio e significa che l’input non può essere scartato.<sup>[[7]](#references)</sup>
+Mantieni la maschera finale perché l'addizione originale prevede un wraparound della larghezza di un byte. Per un dominio più ampio, chiedi a un solver SMT se `f(x1) != f(x2)` è soddisfacibile per due input simbolici della stessa larghezza: `unsat` dimostra l'invarianza, mentre `sat` fornisce un controesempio e significa che l'input non può essere scartato.<sup>[[7]](#references)</sup>
 
-#### Riconoscere la decodifica vincolata all’ambiente
+#### Riconoscere la decodifica vincolata all'ambiente
 
-I controlli anti-analisi non devono necessariamente causare un branch o un crash. Un decoder può integrare il risultato di un sensore in un bit della chiave, in una costante di un opaque predicate o nello stato di un dispatcher appiattito, proseguire normalmente e produrre un plaintext plausibile ma falso in un emulatore. Pertanto, correggere solo i branch di errore visibili non è sufficiente; traccia le dipendenze dei dati dalle sonde dell’ambiente allo stato del decoder, confronta la stessa porzione di codice sul dispositivo autentico e sull’emulatore e verifica come forzare ciascun risultato del sensore modifichi il buffer finale.<sup>[[7]](#references)</sup>
+I controlli anti-analysis non devono necessariamente causare un branch o un crash. Un decoder può mescolare il risultato di un sensore in un bit della chiave, in una costante di un opaque predicate o nello stato di un flattened dispatcher, continuare normalmente e produrre plaintext plausibile ma falso in un emulatore. Pertanto, correggere solo i branch di errore visibili non è sufficiente; traccia le dipendenze dei dati dalle sonde ambientali allo stato del decoder, confronta la stessa porzione sul dispositivo autentico e sull'emulatore e verifica come forzare il risultato di ciascun sensore modifichi il buffer finale.<sup>[[7]](#references)</sup>
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) è un semplificatore MBA pratico per l’analisi del malware e il reverse engineering di binari protetti. Classifica l’espressione e la instrada attraverso pipeline specializzate invece di applicare un unico passaggio di riscrittura generico a tutto.<sup>[[2]](#references)</sup>
+[**CoBRA**](https://github.com/trailofbits/CoBRA) è uno strumento pratico per semplificare le MBA nell'analisi di malware e nel reversing di binari protetti. Classifica l'espressione e la indirizza a pipeline specializzate, invece di applicare un'unica passata di riscrittura generica a tutto.<sup>[[2]](#references)</sup>
 
 Uso rapido:
 
@@ -416,17 +416,17 @@ cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 
 Casi utili:
 
-- **Linear MBA**: CoBRA valuta l’espressione su input booleani, ne ricava una signature e mette a confronto diversi metodi di recupero, come il pattern matching, la conversione ANF e l’interpolazione dei coefficienti.
-- **Semilinear MBA**: gli atomi mascherati con costanti vengono ricostruiti tramite una ricostruzione partizionata per bit, in modo da preservare la correttezza delle regioni mascherate.
-- **Polynomial/Mixed MBA**: i prodotti vengono scomposti in nuclei e le sottoespressioni ripetute possono essere estratte in variabili temporanee prima di semplificare la relazione esterna.
+- **Linear MBA**: CoBRA valuta l'espressione su input booleani, ne ricava una firma e mette in competizione diversi metodi di recupero, come il pattern matching, la conversione ANF e l'interpolazione dei coefficienti.
+- **Semilinear MBA**: gli atomi con maschera costante vengono ricostruiti tramite una ricostruzione partizionata per bit, così da mantenere corrette le regioni mascherate.
+- **Polynomial/Mixed MBA**: i prodotti vengono scomposti in componenti di base e le sottoespressioni ripetute possono essere estratte in variabili temporanee prima di semplificare la relazione esterna.
 
-Esempio di identità mista che spesso vale la pena tentare di recuperare:
+Esempio di un'identità mista che spesso vale la pena provare a recuperare:
 
 ```c
 (x & y) * (x | y) + (x & ~y) * (~x & y)
 ```
 
-Questo può essere ridotto a:
+Questo può ridursi a:
 
 ```c
 x * y
@@ -434,64 +434,63 @@ x * y
 
 ### Note sul reversing
 
-- Preferisci eseguire CoBRA su **espressioni IR sollevate** o sull'output del decompiler dopo aver isolato il calcolo esatto.
-- Usa `--bitwidth` esplicitamente quando l'espressione deriva da aritmetica con maschere o da registri di larghezza ridotta.
-- Se ti serve una dimostrazione più rigorosa, consulta le note locali su Z3 qui:
-
+- Preferisci eseguire CoBRA su **espressioni IR lifted** o sull'output del decompiler, dopo aver isolato il calcolo esatto.
+- Usa esplicitamente `--bitwidth` quando l'espressione deriva da aritmetica mascherata o da registri di ampiezza ridotta.
+- Se ti serve una dimostrazione più solida, consulta le note locali su Z3:
 
 {{#ref}}
 satisfiability-modulo-theories-smt-z3.md
 {{#endref}}
 
-- CoBRA è disponibile anche come **plugin pass LLVM** (`libCobraPass.so`), utile quando vuoi normalizzare IR LLVM con molto MBA prima di eseguire ulteriori pass di analisi.
-- I residui misti tra domini non supportati e sensibili al carry sono un segnale che conviene mantenere l'espressione originale e ragionare manualmente sul percorso del carry.
+- CoBRA è disponibile anche come **plugin LLVM pass** (`libCobraPass.so`), utile per normalizzare LLVM IR ricco di MBA prima di eseguire pass di analisi successive.
+- I residui misti, non supportati e sensibili al carry, indicano che è meglio mantenere l'espressione originale e ragionare manualmente sul percorso del carry.
 
-## Recupero del control-flow flattening con stato XOR
+## Recuperare il control-flow flattening con stato XOR
 
-Un flattener in stile OLLVM può mantenere lo stato del basic block corrente in due registri a 64 bit e ricostruirlo con XOR nel dispatcher. Ogni blocco originale scrive la coppia corrispondente allo stato successivo e salta al dispatcher. Un blocco condizionale può usare `CMOVcc` per sostituire una metà della coppia in base ai flag della CPU, quindi seguire solo le istruzioni di branch visibili fa perdere di vista i due successori. A differenza di un dispatcher con indirect jump, questa struttura può usare back-edge diretti ovunque.<sup>[[19]](#references)[[20]](#references)</sup>
+Un flattener di tipo OLLVM può mantenere lo stato del basic block corrente in due registri a 64 bit e ricostruirlo con XOR in un dispatcher. Ogni blocco originale scrive la coppia corrispondente allo stato successivo e torna al dispatcher. Un blocco condizionale può usare `CMOVcc` per sostituire una metà della coppia in base ai flag della CPU, quindi seguire solo le istruzioni di branch visibili fa perdere di vista i due successori. A differenza di un dispatcher con jump indiretti, questa struttura può usare back-edge diretti ovunque.<sup>[[19]](#references)[[20]](#references)</sup>
 
-Per recuperare il grafo, individua l'albero di confronti del dispatcher e i due registri di stato, associa ogni stato XOR confrontato al suo blocco di destinazione, quindi risali alle scritture della coppia di registri raggiungibili in ciascun blocco originale. Per le scritture condizionali, includi l'istruzione che imposta i flag e entrambi gli esiti di `CMOVcc`. Riscrivi l'uscita di ciascun blocco verso il dispatcher come successore diretto risolto o branch condizionale; il dispatcher diventerà irraggiungibile senza modificare il binario. Questo approccio riguarda l'intero CFG; se ti interessa un solo decoder, il [workflow con narrow execution-slice](#bypass-flattened-control-flow-with-a-narrow-execution-slice) qui sopra potrebbe essere più rapido.<sup>[[19]](#references)[[20]](#references)</sup>
+Per recuperare il grafo, individua l'albero di confronti del dispatcher e i due registri di stato, associa ogni stato XOR confrontato al relativo blocco di destinazione, quindi traccia le scritture che raggiungono la coppia di registri in ogni blocco originale. Per le scritture condizionali, includi l'istruzione che imposta i flag e i due esiti di `CMOVcc`. Riscrivi l'uscita di ogni blocco verso il dispatcher come successore diretto o branch condizionale risolto; il dispatcher diventerà quindi irraggiungibile senza patchare il binario. Questo è un approccio basato sull'intero CFG; se ti interessa un solo decoder, il [workflow di execution slice ristretta](#bypass-flattened-control-flow-with-a-narrow-execution-slice) qui sopra può essere più rapido.<sup>[[19]](#references)[[20]](#references)</sup>
 
-[DispatchThis](https://github.com/YungBinary/DispatchThis) automatizza questa struttura in Binary Ninja. Copia `plugins/DispatchThis` nella directory dei plugin utente di Binary Ninja e riavvia. Sulla funzione interessata, apri **Function Settings** e seleziona `OLLVM_XOR_64`; se l'analisi non parte, usa **Analysis → Reanalyze All Functions**. Questa modalità riscrive gli archi di control-flow di MLIL, non i byte del file, e non richiede Z3 né l'indirect-jump resolver. È stato testato su Binary Ninja 5.3.9757+; non rimuove le scritture di stato per blocco ormai inutilizzate, quindi non confonderle con transizioni ancora attive.<sup>[[19]](#references)</sup>
+[DispatchThis](https://github.com/YungBinary/DispatchThis) automatizza questa struttura in Binary Ninja. Copia `plugins/DispatchThis` nella directory dei plugin utente di Binary Ninja e riavvia. Sulla funzione interessata, apri **Function Settings** e seleziona `OLLVM_XOR_64`; se l'analisi non parte, usa **Analysis → Reanalyze All Functions**. Questa modalità riscrive gli archi di control-flow di MLIL, non i byte del file, e non richiede Z3 né l'indirect-jump resolver. È stata testata con Binary Ninja 5.3.9757+; non rimuove le scritture di stato per blocco ormai inutilizzate, quindi non confonderle con transizioni ancora attive.<sup>[[19]](#references)</sup>
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Questo obfuscator sostituisce le operazioni del programma con sequenze di istruzioni basate su `mov` e usa la gestione di signal/exception per alterare il control-flow. Per i dettagli:
+Questo obfuscator sostituisce le operazioni del programma con sequenze di istruzioni basate su `mov` e usa la gestione di segnali/eccezioni per alterare il control-flow. Per i dettagli:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-Per i binari supportati, [demovfuscator](https://github.com/kirschju/demovfuscator) può deobfuscate il risultato. Ha diverse dipendenze.
+Per i binari supportati, [demovfuscator](https://github.com/kirschju/demovfuscator) può deoffuscare il risultato. Ha diverse dipendenze.
 
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
 
-And [installa keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
+E [installa keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-Se stai partecipando a un **CTF, questa soluzione alternativa per trovare la flag** potrebbe esserti molto utile: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Se stai giocando a un **CTF, questa soluzione alternativa per trovare la flag** potrebbe esserti molto utile: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-Per trovare il **punto di ingresso**, cerca le funzioni con `::main`, come in:
+Per trovare l'**entry point**, cerca le funzioni con `::main`, come in:
 
-![Individuazione di un punto di ingresso Rust in Ghidra cercando i nomi delle funzioni contenenti i due punti doppi e main](<../../images/image (1080).png>)
+![Individuazione di un entry point Rust in Ghidra cercando i nomi delle funzioni con doppio due punti e main](<../../images/image (1080).png>)
 
-In questo caso il binario si chiamava authenticator, quindi è abbastanza ovvio che questa sia la funzione main interessante.\
-Conoscendo i **nomi** delle **funzioni** chiamate, cercale su **Internet** per scoprirne gli **input** e gli **output**.
+In questo caso il binary si chiamava authenticator, quindi è abbastanza ovvio che questa sia la funzione main interessante.\
+Una volta individuati i **nomi** delle **funzioni** chiamate, cercale su **Internet** per scoprire i relativi **input** e **output**.
 
-### Recuperare le stringhe Rust dal firmware ELF
+### Recupero delle stringhe Rust dal firmware ELF
 
-Nei binari **ELF Rust**, molte stringhe statiche non sono referenziate tramite puntatori terminati da NUL in stile C. Un layout comune di `rustc` è una **tupla puntatore/lunghezza** in **`.data.rel.ro`** che punta al vero blob di stringhe memorizzato in **`.rodata`**:
+Nei binary **Rust ELF**, molte stringhe statiche non sono referenziate da puntatori terminati da NUL in stile C. Un layout comune di `rustc` è una **coppia puntatore/lunghezza** all'interno di **`.data.rel.ro`**, che punta al vero blob di stringa archiviato in **`.rodata`**:
 
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
 
-Questo significa che `strings` o l’analisi predefinita di Ghidra potrebbero unire stringhe adiacenti o non rilevare affatto i riferimenti incrociati.<sup>[[3]](#references)</sup>
+Questo significa che `strings` o l’analisi predefinita di Ghidra possono unire stringhe adiacenti o non rilevare affatto i riferimenti incrociati.<sup>[[3]](#references)</sup>
 
-Flusso di lavoro rapido:
+Workflow rapido:
 
 ```bash
 readelf -S <bin>
@@ -499,11 +498,11 @@ objdump -h <bin>
 ```
 
 1. Ottieni l’indirizzo virtuale e la dimensione di **`.rodata`**.
-2. Enumera **`.data.rel.ro`** una word alla volta.
-3. Considera qualsiasi valore compreso nell’intervallo di indirizzi di `.rodata` come un potenziale puntatore a una stringa.
-4. Considera la word successiva come la lunghezza potenziale.
-5. Applica filtri di plausibilità (ad esempio, mantieni le lunghezze comprese tra **4** e **100** byte).
-6. Leggi esattamente `length` byte da `.rodata` invece di continuare la scansione fino a `0x00`.
+2. Enumera **`.data.rel.ro`** una parola alla volta.
+3. Considera qualsiasi valore compreso nell’intervallo di indirizzi di `.rodata` come un puntatore a una stringa candidata.
+4. Considera la parola successiva come la lunghezza candidata.
+5. Applica filtri di coerenza (ad esempio, mantieni le lunghezze comprese tra **4** e **100** byte).
+6. Leggi esattamente `length` byte da `.rodata` invece di eseguire la scansione fino a `0x00`.
 
 Logica minima dell’estrattore:
 
@@ -516,19 +515,19 @@ for off in range(0, len(data_rel_ro), 8):
         print(rodata[start:start+length])
 ```
 
-Questo è particolarmente utile nel reversing del firmware, perché le stringhe Rust recuperate spesso rivelano **route HTTP, nomi RPC, messaggi di log, assertion, nomi di file, chiavi di configurazione, gestori di comandi e logica relativa all'autenticazione**.
+Questo è particolarmente utile nel firmware reversing, perché le stringhe Rust recuperate spesso rivelano **route HTTP, nomi RPC, messaggi di log, asserzioni, nomi di file, chiavi di configurazione, gestori di comandi e logica relativa all'autenticazione**.
 
-Se Ghidra non individua queste stringhe, esegui uno script/plugin personalizzato che applichi la stessa euristica e crei dati stringa agli offset `.rodata` a cui fanno riferimento. Gli strumenti `rust-strings` e `RustStrings.py` pubblicati da Pen Test Partners sono ottimi riferimenti per adattare l'idea ad altri **word size, endianness e layout delle sezioni**.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
+Se Ghidra non individua queste stringhe, esegui uno script o un plugin personalizzato che applichi la stessa euristica e crei dati stringa agli offset referenziati di `.rodata`. Gli strumenti `rust-strings` e `RustStrings.py` pubblicati da Pen Test Partners sono ottimi riferimenti per adattare l'idea ad altre **dimensioni delle word, endianness e strutture delle sezioni**.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
 
 ## **Delphi**
 
 Per i binari compilati con Delphi puoi usare [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Se devi fare reversing di un binario Delphi, ti consiglio di usare il plugin per IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Se devi fare reversing di un binario Delphi, ti consiglio di usare il plugin di IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Premi **Alt+F7** in IDA per caricare un plugin Python, quindi seleziona il file del plugin.
 
-Questo plugin esegue il binario e risolve dinamicamente i nomi delle funzioni all'inizio del debugging. Dopo aver avviato il debugging, premi di nuovo il pulsante Start (quello verde o F9) e si attiverà un breakpoint all'inizio del codice effettivo.
+Questo plugin esegue il binario e risolve dinamicamente i nomi delle funzioni all'avvio del debugging. Dopo aver avviato il debugging, premi di nuovo il pulsante Start (quello verde o f9) e verrà raggiunto un breakpoint all'inizio del codice effettivo.
 
 Se premi un pulsante nell'applicazione grafica, il debugger può fermarsi nella funzione invocata da quel pulsante.
 
@@ -536,7 +535,7 @@ Se premi un pulsante nell'applicazione grafica, il debugger può fermarsi nella 
 
 Per i normali binari Go, [IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) può recuperare le strutture runtime e migliorare i nomi delle funzioni in IDA. Carica il suo plugin Python con **Alt+F7**.
 
-Se devi fare reversing di un binario Golang, ti consiglio di usare il plugin per IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Se devi fare reversing di un binario Golang, ti consiglio di usare il plugin di IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Premi **Alt+F7** in IDA per caricare un plugin Python, quindi seleziona il file del plugin.
 
@@ -544,24 +543,24 @@ Questo risolverà i nomi delle funzioni.
 
 ### Recuperare i metadati senza la tabella dei simboli
 
-Un eseguibile Go stripped ha comunque bisogno dei metadati runtime per associare i program counter alle funzioni. [GoReSym](https://github.com/mandiant/GoReSym) individua e analizza strutture come `pclntab` e `moduledata` usando codice derivato dal runtime di Go. In questo modo è possibile recuperare i confini delle funzioni, i nomi, i percorsi dei sorgenti, i tipi e i dettagli della build senza dipendere dalla tabella dei simboli convenzionale.<sup>[[9]](#references)[[13]](#references)</sup>
+Un eseguibile Go stripped ha comunque bisogno dei metadati runtime per associare i program counter alle funzioni. [GoReSym](https://github.com/mandiant/GoReSym) individua e analizza strutture come `pclntab` e `moduledata` usando codice derivato dal runtime Go. In questo modo può recuperare i limiti delle funzioni, i nomi, i percorsi dei sorgenti, i tipi e i dettagli di compilazione senza dipendere dalla convenzionale tabella dei simboli.<sup>[[9]](#references)[[13]](#references)</sup>
 
 ```bash
 GoReSym.exe -t -d -p /path/to/sample.exe > goresym.json
 ```
 
-Un obfuscator può lasciare utilizzabili queste strutture, sostituendo però i nomi recuperati. Garble, ad esempio, esegue l’hash degli identificatori e dei percorsi dei package e rimuove le informazioni di build, module e debug.<sup>[[12]](#references)</sup> Il token obfuscato del package deve rimanere coerente tra le funzioni di quel package. Raggruppa le funzioni in base al token ripetuto, deduci un package dai suoi callee, dalle stringhe e dalle API, quindi assegna quell’etichetta all’intero gruppo.<sup>[[13]](#references)</sup>
+Un obfuscator può lasciare utilizzabili queste strutture sostituendo i nomi recuperati. Garble, ad esempio, applica hash agli identificatori e ai percorsi dei package e rimuove le informazioni di build, modulo e debug.<sup>[[12]](#references)</sup> Il token obfuscato del package deve rimanere coerente tra le funzioni di quel package. Raggruppa le funzioni in base al token ripetuto, deduci un package dai suoi callee, dalle stringhe e dalle API, quindi propaga l'etichetta del package all'intero gruppo.<sup>[[13]](#references)</sup>
 
 ### Recuperare i nomi Garble con GoResolver
 
-[GoResolver](https://github.com/volexity/GoResolver) combina l’estrazione dei simboli runtime con la generazione di riferimenti puliti e il confronto dei control-flow graph (CFG). Segui questa sequenza:<sup>[[10]](#references)[[13]](#references)</sup>
+[GoResolver](https://github.com/volexity/GoResolver) combina l'estrazione dei simboli runtime con la generazione di riferimenti puliti e il matching dei control-flow graph (CFG). Segui questa sequenza:<sup>[[10]](#references)[[13]](#references)</sup>
 
-1. **Identifica la versione del compilatore.** Prova prima `BuildInfo` e le stringhe di versione incorporate. Se l’obfuscator le ha rimosse, confronta parti del runtime Go incluso con runtime di riferimento associati a versioni specifiche. Nei test di Volexity, circa il `2%` del runtime era sufficiente per distinguere le versioni principali di Go. Consideralo un’ottimizzazione empirica, non una soglia universale.<sup>[[13]](#references)</sup>
-2. **Genera riferimenti corrispondenti.** Genera binari puliti per la versione di Go identificata, l’architettura di destinazione e le librerie probabili. Usare una toolchain corrispondente riduce le differenze nei CFG generati dal compilatore.<sup>[[10]](#references)[[13]](#references)</sup>
-3. **Confronta le funzioni.** GoGrapher confronta i CFG delle funzioni e produce punteggi normalizzati da `0.0` a `1.0`. Il confronto dei basic block si basa su una comparazione ponderata di istruzioni simili. Le corrispondenze con un alto livello di confidenza associano le funzioni con nomi randomizzati all’implementazione pulita. Le corrispondenze meno affidabili possono comunque identificare un package o un module.<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
-4. **Convalida e importa.** Conferma i nomi proposti verificando le relazioni tra le chiamate, le costanti, le stringhe e gli effetti collaterali, quindi importa il report JSON con il plugin GoResolver per IDA o Ghidra.<sup>[[10]](#references)[[13]](#references)</sup>
+1. **Identifica la versione del compilatore.** Prova prima `BuildInfo` e le stringhe di versione incorporate. Se l'obfuscator le ha rimosse, confronta porzioni del runtime Go incluso con runtime di riferimento versionati. Nei test di Volexity, circa il `2%` del runtime era sufficiente per distinguere le versioni principali di Go. Consideralo un'ottimizzazione empirica, non una soglia universale.<sup>[[13]](#references)</sup>
+2. **Crea riferimenti corrispondenti.** Genera binari puliti per la versione di Go identificata, l'architettura target e le librerie probabili. Abbinare la toolchain riduce le differenze nei CFG generati dal compilatore.<sup>[[10]](#references)[[13]](#references)</sup>
+3. **Confronta le funzioni.** GoGrapher abbina i CFG delle funzioni e produce punteggi normalizzati da `0.0` a `1.0`. Il matching dei basic block si basa su un confronto ponderato di istruzioni simili. Le corrispondenze con un alto livello di affidabilità associano le funzioni randomizzate all'implementazione pulita. Anche le corrispondenze meno affidabili possono identificare un package o un modulo.<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
+4. **Convalida e importa.** Verifica i nomi proposti tramite le relazioni tra chiamate, le costanti, le stringhe e gli effetti collaterali, quindi importa il report JSON con il plugin GoResolver per IDA o Ghidra.<sup>[[10]](#references)[[13]](#references)</sup>
 
-Installa la toolchain ed esegui l’estrattore combinato con il graph matcher:<sup>[[10]](#references)</sup>
+Installa la toolchain ed esegui l'estrattore e il matcher dei grafi combinati:<sup>[[10]](#references)</sup>
 
 ```bash
 python3 -m venv goresolver-env
@@ -576,34 +575,34 @@ goresolver resolve -v go1.23.4 -l os/exec net/http \
   -t 0.9 -o report.json /path/to/sample.exe
 ```
 
-La soglia predefinita di corrispondenza significativa è `0.9`. Le opzioni `--extract` e `--graph` consentono di isolare ciascuna fase, mentre per impostazione predefinita vengono eseguite entrambe, perché i metadati runtime recuperati e gli indizi del CFG si completano a vicenda.<sup>[[10]](#references)</sup> I punteggi del CFG sono euristici: inlining, flag di compilazione, architettura e differenze tra versioni delle librerie possono modificare la struttura del grafo, quindi è preferibile mantenere le funzioni irrisolte anziché assegnare nomi con bassa confidenza.<sup>[[13]](#references)</sup>
+La soglia predefinita per le corrispondenze significative è `0.9`. Le opzioni `--extract` e `--graph` consentono di isolare ciascuna fase, mentre per impostazione predefinita vengono eseguite entrambe, perché i metadati del runtime recuperati e le evidenze del CFG si completano a vicenda.<sup>[[10]](#references)</sup> I punteggi CFG sono euristici: inlining, build flags, architettura e differenze tra versioni delle librerie possono modificare la struttura del grafo, quindi conserva le funzioni non risolte invece di assegnare nomi con un basso livello di confidenza.<sup>[[13]](#references)</sup>
 
-### Recupero della tabella delle stringhe di Go
+### Recupero della tabella delle stringhe Go
 
-I binari Go collocano i byte delle stringhe di ogni pacchetto collegato in un'unica tabella contigua. Le voci non terminano con NUL e le strutture runtime non espongono la base o la dimensione della tabella. Tuttavia, il compilatore ordina le voci prima per lunghezza e poi alfabeticamente, su tutti i sistemi operativi e le architetture. Dopo aver individuato una voce, un analista può quindi scorrere le voci adiacenti e usare i riferimenti incrociati ai dati per associare le stringhe al codice.<sup>[[15]](#references)</sup>
+I binari Go collocano i byte delle stringhe di ogni pacchetto collegato in un'unica tabella contigua. Le voci non sono terminate da NUL e le strutture del runtime non espongono né la base né la dimensione della tabella. Tuttavia, il compilatore ordina le voci prima per lunghezza e poi alfabeticamente, indipendentemente dal sistema operativo e dall'architettura. Dopo aver individuato una voce, un analista può quindi scorrere le voci adiacenti e usare i riferimenti incrociati ai dati per associare le stringhe al codice.<sup>[[15]](#references)</sup>
 
-[GoStringExtractor](https://github.com/volexity/GoStringExtractor) automatizza questo flusso di lavoro in IDA Pro e Ghidra. Attendi il completamento dell'analisi automatica, perché il plugin si basa sui riferimenti incrociati presenti nei segmenti dati. L'ancora predefinita è la stringa runtime `entersyscall`; da lì, lo strumento può eseguire la scansione in entrambe le direzioni, definire le stringhe recuperate nel database ed esportare una mappatura JSON delle stringhe e delle funzioni che le referenziano.<sup>[[14]](#references)</sup>
+[GoStringExtractor](https://github.com/volexity/GoStringExtractor) automatizza questo flusso di lavoro in IDA Pro e Ghidra. Attendi il completamento dell'auto-analisi, poiché il plugin si basa sui riferimenti incrociati ai segmenti di dati. L'ancora predefinita è la stringa del runtime `entersyscall`; da lì, il plugin può eseguire la scansione in entrambe le direzioni, definire le stringhe recuperate nel database ed esportare una mappatura JSON delle stringhe e delle funzioni che vi fanno riferimento.<sup>[[14]](#references)</sup>
 
-Filtra il report in base al pacchetto della funzione che effettua il riferimento, per separare il codice dell'applicazione o del malware dal rumore delle librerie collegate. Questa tecnica non può recuperare i letterali eliminati da offuscamenti come la trasformazione `-literals` di Garble. Può comunque organizzare le stringhe runtime che non sono state offuscate.<sup>[[14]](#references)[[15]](#references)</sup>
+Filtra il report in base al pacchetto della funzione che fa riferimento alla stringa, per separare il codice dell'applicazione o del malware dal rumore delle librerie collegate. Questa tecnica non può recuperare i valori letterali eliminati dall'obfuscation, come nella trasformazione `-literals` di Garble. Può comunque organizzare le stringhe del runtime rimaste non offuscate.<sup>[[14]](#references)[[15]](#references)</sup>
 
-### Recupero dei tipi runtime di Go
+### Recupero dei tipi del runtime Go
 
-Go incorpora informazioni sui tipi runtime usate da funzionalità come la garbage collection. Quando le informazioni di build vengono rimosse o il disassembler non analizza questi metadati, le istruzioni possono sembrare caricare indirizzi dati arbitrari e la regione di destinazione rimane priva di tipi. Recuperare i metadati trasforma questi indirizzi in riferimenti a tipi leggibili e facilita la comprensione delle capacità dei pacchetti.<sup>[[15]](#references)</sup>
+Go incorpora informazioni sui tipi del runtime utilizzate da funzionalità come il garbage collection. Quando le informazioni di build vengono rimosse o il disassembler non analizza questi metadati, le istruzioni possono sembrare caricare indirizzi di dati arbitrari e la regione di destinazione rimane senza tipo. Recuperando i metadati, questi indirizzi diventano riferimenti a tipi leggibili e risulta più facile comprendere le funzionalità dei pacchetti.<sup>[[15]](#references)</sup>
 
-[GoResolver](https://github.com/volexity/GoResolver) può estrarre simboli e analizzare i tipi runtime per produrre un report JSON. L'attuale CLI usa il sottocomando `resolve`:<sup>[[10]](#references)</sup>
+[GoResolver](https://github.com/volexity/GoResolver) può estrarre i simboli e analizzare i tipi del runtime per generare un report JSON. La CLI attuale usa il sottocomando `resolve`:<sup>[[10]](#references)</sup>
 
 ```bash
 pip install goresolver
 goresolver resolve -x -y -o report.json sample_bin.exe
 ```
 
-L'opzione `-y`/`--types` abilita l'analisi dei tipi. Importa il report con il plugin IDA Pro o Ghidra di GoResolver per definire i tipi recuperati e applicarne i riferimenti nel database di analisi. Nel formato di report introdotto con questa funzionalità, se ometti `-y`, i campi dell'indirizzo RTTI e dei tipi recuperati restano null.<sup>[[10]](#references)[[15]](#references)</sup>
+L'opzione `-y`/`--types` abilita l'analisi dei tipi. Importa il report con il plugin di GoResolver per IDA Pro o Ghidra per definire i tipi recuperati e applicarne i riferimenti nel database di analisi. Nel formato del report introdotto con questa funzionalità, se ometti `-y`, i membri relativi all'indirizzo RTTI e ai tipi recuperati rimangono nulli.<sup>[[10]](#references)[[15]](#references)</sup>
 
-GoResolver supporta campioni PE, ELF e Mach-O per x86, AMD64, ARM e ARM64, quindi lo stesso workflow si applica ai binari Go per Windows, Linux e macOS.<sup>[[10]](#references)</sup>
+GoResolver supporta campioni PE, ELF e Mach-O per x86, AMD64, ARM e ARM64, quindi lo stesso workflow si applica ai binari Go di Windows, Linux e macOS.<sup>[[10]](#references)</sup>
 
 ## Python compilato
 
-In questa pagina puoi trovare come ottenere il codice Python da un binario ELF/EXE compilato in Python:
+In questa pagina puoi trovare le istruzioni per ottenere il codice Python da un binario ELF/EXE compilato da Python:
 
 
 {{#ref}}
@@ -612,18 +611,18 @@ In questa pagina puoi trovare come ottenere il codice Python da un binario ELF/E
 
 ## GBA - Game Boy Advance
 
-Se ottieni il **binario** di un gioco per GBA, puoi usare diversi strumenti per **emularlo** e **debuggarlo**:
+Se hai il **binario** di un gioco GBA, puoi usare diversi strumenti per **emularlo** e **debuggarlo**:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_Scarica la versione debug_) - Include un debugger con interfaccia
 - [**mgba** ](https://mgba.io)- Include un debugger CLI
-- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin Ghidra
-- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin Ghidra
+- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin di Ghidra
+- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin di Ghidra
 
 In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_** ** puoi vedere come premere i **pulsanti** del Game Boy Advance
 
-![Configurazione dei controlli di no$gba con la mappatura dei pulsanti del Game Boy Advance](<../../images/image (581).png>)
+![no$gba controls configuration showing Game Boy Advance button mappings](<../../images/image (581).png>)
 
-Quando viene premuto, ogni **tasto ha un valore** che lo identifica:
+Quando vengono premuti, a ogni **tasto è associato un valore** che lo identifica:
 
 ```
 A = 1
@@ -681,7 +680,7 @@ void FUN_080015a8(void)
       if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
 
-L'ultimo if verifica che **`uVar4`** sia tra le **Keys** precedenti e non sia il tasto corrente, ovvero che si stia rilasciando un pulsante (il tasto corrente è memorizzato in **`uVar1`**).
+L'ultimo if verifica che **`uVar4`** sia tra gli **ultimi tasti** e non sia il tasto corrente, ovvero che si stia rilasciando un pulsante (il tasto corrente è memorizzato in **`uVar1`**).
 
 ```c
         if (uVar1 == 4) {
@@ -713,15 +712,15 @@ L'ultimo if verifica che **`uVar4`** sia tra le **Keys** precedenti e non sia il
 
 Nel codice precedente puoi vedere che confrontiamo **uVar1** (la posizione in cui si trova il **valore del pulsante premuto**) con alcuni valori:
 
-- Per prima cosa, viene confrontato con il **valore 4** (pulsante **SELECT**): in questa challenge, questo pulsante cancella lo schermo
-- Poi confronta il valore con **8** (pulsante **START**); in questa challenge, quel percorso verifica se il codice inserito è valido.
+- Prima viene confrontato con il **valore 4** (pulsante **SELECT**): nella challenge, questo pulsante cancella lo schermo
+- Poi il valore viene confrontato con **8** (il pulsante **START**); in questa challenge, quel percorso verifica se il codice inserito è valido.
   - In questo caso, la variabile **`DAT_030000d8`** viene confrontata con 0xf3 e, se il valore corrisponde, viene eseguito del codice.
 - In tutti gli altri casi, viene controllato e incrementato un contatore (`DAT_030000d4`).\
-  Finché il contatore è minore di 8, i valori dei tasti premuti vengono accumulati in `DAT_030000d8`.
+  Finché il contatore è inferiore a 8, i valori dei tasti premuti vengono accumulati in `DAT_030000d8`.
 
-Quindi, in questa challenge, conoscendo i valori dei pulsanti, dovevi **premere una combinazione di lunghezza inferiore a 8 la cui somma risultante fosse 0xf3.**
+Quindi, in questa challenge, conoscendo i valori dei pulsanti, dovevi **premere una combinazione con una lunghezza inferiore a 8 la cui somma risultante fosse 0xf3.**
 
-**Riferimento per questo tutorial:** [writeup archiviato della challenge Nostalgia](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
+**Riferimento per questo tutorial:** [resoconto archiviato della challenge Nostalgia](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
 
 ## Game Boy
 
@@ -733,34 +732,34 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 ## Corsi
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Deoffuscamento dei binari)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (deoffuscamento di binari)
 
 ## References
 
-- [1] [Semplificare l’offuscamento MBA con CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [1] [Semplificare l'offuscamento MBA con CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
 - [2] [Repository CoBRA di Trail of Bits](https://github.com/trailofbits/CoBRA)
 - [3] [Decodificare le stringhe Rust - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
 - [4] [pentestpartners/reverse-engineering - stringhe Rust](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 - [6] [Nostalgia - tutorial di reversing GBA (archiviato)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
-- [7] [Sconfiggere il reverse engineering assistito dall’IA, o almeno provarci](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
-- [8] [Un approccio al confronto dei grafi di flusso di controllo basato sulla corrispondenza dei blocchi di base](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
+- [7] [Sconfiggere il reverse engineering assistito dall'IA, o almeno provarci](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
+- [8] [Un approccio al confronto dei grafi di flusso di controllo basato sulla corrispondenza dei blocchi base](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
 - [9] [Mandiant GoReSym](https://github.com/mandiant/GoReSym)
 - [10] [Repository GoResolver di Volexity](https://github.com/volexity/GoResolver)
 - [11] [Volexity GoGrapher](https://github.com/volexity/GoGrapher)
-- [12] [Meccanismo di offuscamento Garble](https://github.com/burrowers/garble#mechanism)
-- [13] [GoResolver: usare la somiglianza dei grafi di flusso di controllo per deoffuscare automaticamente i binari Golang](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
+- [12] [Meccanismo di offuscamento di Garble](https://github.com/burrowers/garble#mechanism)
+- [13] [GoResolver: usare la similarità dei grafi di flusso di controllo per deoffuscare automaticamente i binari Golang](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
 - [14] [Repository GoStringExtractor di Volexity](https://github.com/volexity/GoStringExtractor)
 - [15] [Go Get 'Em: aggiornamenti agli strumenti Golang di Volexity](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
-- [16] [REA: retroingegnerizzare qualsiasi cosa](https://github.com/morluto/rea)
-- [17] [Analisi del codice gestito in REA](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
-- [18] [Guida alla CLI e alle evidenze di REA](https://github.com/morluto/rea/blob/main/docs/cli.md)
-- [19] [DispatchThis: workflow di appiattimento inverso del flusso di controllo in Binary Ninja](https://github.com/YungBinary/DispatchThis)
+- [16] [REA: reverse engineering di qualsiasi cosa](https://github.com/morluto/rea)
+- [17] [Analisi del codice gestito con REA](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
+- [18] [Guida alla CLI e alle prove di REA](https://github.com/morluto/rea/blob/main/docs/cli.md)
+- [19] [DispatchThis: workflow di deappiattimento del flusso di controllo di Binary Ninja](https://github.com/YungBinary/DispatchThis)
 - [20] [eSentire: intrusione zero-day in PaperCut MF, loader Java, web shell e AdaptixC2](https://esentire.com/blog/papercut-mf-zero-day-intrusion-java-loader-web-shell-and-adaptixc2-via-cve-2026-82078-and-cve-2026-81578)
 - [21] [README di IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge)
-- [22] [Implementazione del server bridge di IDA](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
-- [23] [Implementazione del server bridge di Ghidra](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
-- [24] [Oracle - InetSocketAddress(int) si associa all’indirizzo wildcard](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
+- [22] [Implementazione del server bridge IDA](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
+- [23] [Implementazione del server bridge Ghidra](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
+- [24] [Oracle - InetSocketAddress(int) si associa all'indirizzo wildcard](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
 - [25] [gore: toolkit di reverse engineering per Godot](https://github.com/figurophobia/gore)
 - [26] [Implementazione del recupero delle chiavi di gore](https://github.com/figurophobia/gore/blob/master/src/keyfind.rs)
 - [27] [Formato dei blob cifrati di gore](https://github.com/figurophobia/gore/blob/master/src/crypto.rs)

@@ -31,6 +31,10 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-ipc.html" = "../../../desktop-application-security/electron-desktop-apps/electron-contextisolation-rce-via-ipc.html"
+"/network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-electron-internal-code.html" = "../../../desktop-application-security/electron-desktop-apps/electron-contextisolation-rce-via-electron-internal-code.html"
+"/network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-preload-code.html" = "../../../desktop-application-security/electron-desktop-apps/electron-contextisolation-rce-via-preload-code.html"
+"/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html" = "../../../desktop-application-security/electron-desktop-apps/index.html"
 "/network-services-pentesting/pentesting-web/graphql.html" = "../../pentesting-web/graphql.html"
 "/network-services-pentesting/pentesting-web/python.html" = "../../generic-methodologies-and-resources/python/bypass-python-sandboxes/index.html"
 "/network-services-pentesting/pentesting-ftp/ftp-bounce-download-2oftp-file.html" = "ftp-bounce-protocol-relay.html"
