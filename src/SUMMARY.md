@@ -591,10 +591,6 @@
   - [DotNetNuke (DNN)](network-services-pentesting/pentesting-web/dotnetnuke-dnn.md)
   - [Drupal](network-services-pentesting/pentesting-web/drupal/README.md)
     - [Drupal RCE](network-services-pentesting/pentesting-web/drupal/drupal-rce.md)
-  - [Electron Desktop Apps](network-services-pentesting/pentesting-web/electron-desktop-apps/README.md)
-    - [Electron contextIsolation RCE via preload code](network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-preload-code.md)
-    - [Electron contextIsolation RCE via Electron internal code](network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-electron-internal-code.md)
-    - [Electron contextIsolation RCE via IPC](network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-ipc.md)
   - [Flask](network-services-pentesting/pentesting-web/flask.md)
   - [Fortinet Fortiweb](network-services-pentesting/pentesting-web/fortinet-fortiweb.md)
   - [Git](network-services-pentesting/pentesting-web/git.md)
@@ -951,6 +947,15 @@
   - [CSS Injection](pentesting-web/xs-search/css-injection/README.md)
     - [LESS Code Injection](pentesting-web/xs-search/css-injection/less-code-injection.md)
 - [Iframe Traps](pentesting-web/iframe-traps.md)
+
+# 🖥️ Desktop Application Security
+
+- [Electron Desktop Apps](desktop-application-security/electron-desktop-apps/README.md)
+  - [Electron Auto-Update Trust Boundaries](desktop-application-security/electron-desktop-apps/electron-auto-update-trust-boundaries.md)
+  - [Electron Local Code Injection and Snapshot Tampering](desktop-application-security/electron-desktop-apps/electron-local-code-injection-and-snapshot-tampering.md)
+  - [Electron contextIsolation RCE via preload code](desktop-application-security/electron-desktop-apps/electron-contextisolation-rce-via-preload-code.md)
+  - [Electron contextIsolation RCE via Electron internal code](desktop-application-security/electron-desktop-apps/electron-contextisolation-rce-via-electron-internal-code.md)
+  - [Electron contextIsolation RCE via IPC](desktop-application-security/electron-desktop-apps/electron-contextisolation-rce-via-ipc.md)
 
 # ⛓️ Blockchain & Smart Contract Security
 
