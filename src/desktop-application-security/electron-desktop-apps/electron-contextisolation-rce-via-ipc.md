@@ -1,21 +1,21 @@
-# Electron contextIsolation RCE через IPC
+# Electron contextIsolation RCE via IPC
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
-Ізоляція контексту не робить небезпечний preload bridge безпечним. Якщо preload відкриває привілейований IPC для вмісту renderer, XSS або скомпрометований renderer може викликати цей bridge; RCE залежить від перевірки даних і можливостей відповідного обробника в main process. Electron рекомендує відкривати по одному вузькому методу на операцію, перевіряти відправників IPC і ніколи не відкривати безпосередньо примітиви IPC.<sup>[[3]](#references)[[4]](#references)</sup>
+Ізоляція контексту не робить небезпечний preload bridge безпечним. Якщо preload надає renderer-контенту доступ до привілейованого IPC, XSS або скомпрометований renderer може викликати цей bridge; RCE залежить від перевірки даних і можливостей відповідного обробника main process. Electron рекомендує надавати окремий вузькоспеціалізований метод для кожної операції, перевіряти відправників IPC і ніколи не відкривати доступ до примітивів IPC.<sup>[[3]](#references)[[4]](#references)</sup>
 
 **Більшість цих прикладів взято звідси** [**https://www.youtube.com/watch?v=xILfQGkLXQo**](https://www.youtube.com/watch?v=xILfQGkLXQo). Перегляньте відео, щоб дізнатися більше.<sup>[[1]](#references)</sup>
 
 ## Приклад 0
 
-Приклад із [https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21) (на цих слайдах наведено повний приклад того, як MS Teams використовував XSS для RCE; це лише дуже базовий приклад):<sup>[[2]](#references)</sup>
+Приклад із [https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21) (у цих слайдах наведено повний приклад того, як у MS Teams використали XSS для RCE; це лише дуже простий приклад):<sup>[[2]](#references)</sup>
 
-<figure><img src="../../../images/image (9) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../images/image (9) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Приклад 1
 
-Подивіться, як `main.js` слухає `getUpdate` і **завантажує та виконує будь-яку передану URL-адресу**.\
-Також подивіться, як `preload.js` **відкриває будь-яку IPC-подію** з main.
+Зверніть увагу, як `main.js` прослуховує `getUpdate` і **завантажить та виконає будь-який URL**, який буде передано.\
+Також зверніть увагу, як `preload.js` **надає доступ до будь-якої події IPC** з main.
 
 ```javascript
 // Part of code of main.js
@@ -81,7 +81,7 @@ Exploit:
 
 ## Приклад 2
 
-Якщо preload надає `shell.openExternal` без перевірки схеми й адреси призначення, контрольований renderer-ом ввід може запускати зареєстровані зовнішні обробники. Чи призведе це до виконання коду, залежить від платформи, встановлених обробників, схеми й версії Electron; обмежте це явним allowlist очікуваних адрес `https:`.<sup>[[3]](#references)</sup>
+Якщо preload надає доступ до `shell.openExternal` без перевірки схеми й адреси призначення, дані, якими керує renderer, можуть запускати зареєстровані зовнішні обробники. Чи призведе це до виконання коду, залежить від платформи, встановлених обробників, схеми та версії Electron; обмежте доступ явним списком дозволених очікуваних адрес `https:`.<sup>[[3]](#references)</sup>
 
 ```javascript
 // Part of preload.js code
@@ -92,7 +92,7 @@ window.electronOpenInBrowser = (url) => {
 
 ## Приклад 3
 
-Якщо preload надає необмежену взаємодію з main process, XSS може надсилати довільні назви каналів і дані. Наслідки залежать від зареєстрованих обробників IPC та перевірок авторизації в них.
+Якщо preload відкриває необмежену взаємодію з основним процесом, XSS може надсилати довільні назви каналів і дані. Наслідки залежать від зареєстрованих обробників IPC та їхніх перевірок авторизації.
 
 ```javascript
 window.electronListen = (event, cb) => {
@@ -107,8 +107,8 @@ window.electronSend = (event, data) => {
 
 ## References
 
-- [1] [Воркшоп зі зламу сучасних desktop-додатків за допомогою XSS і RCE](https://www.youtube.com/watch?v=xILfQGkLXQo)
+- [1] [Воркшоп із XSS і RCE у сучасних desktop-застосунках](https://www.youtube.com/watch?v=xILfQGkLXQo)
 - [2] [Як я зламав Microsoft Teams і отримав $150,000 на Pwn2Own](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own)
 - [3] [Electron — контрольний список безпеки](https://www.electronjs.org/docs/latest/tutorial/security)
 - [4] [Electron — ізоляція контексту та безпечне надання API](https://www.electronjs.org/docs/latest/tutorial/context-isolation)
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
