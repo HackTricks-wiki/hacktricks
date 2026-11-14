@@ -13,6 +13,8 @@ The goal of this phase is to obtain all the **companies owned by the main compan
 3. Use reverse whois lookups to search for other entries (organisation names, domains...) related to the first one (this can be done recursively)
 4. Use other techniques like shodan `org`and `ssl`filters to search for other assets (the `ssl` trick can be done recursively).
 
+For the staged handoff from resolved subdomains to HTTP crawling and port discovery, see the [Pentesting Methodology](../pentesting-methodology.md#11-modern-recon-pipeline).
+
 ### **Acquisitions**
 
 First of all, we need to know which **other companies are owned by the main company**.\
@@ -743,6 +745,8 @@ There are several tools out there that will perform part of the proposed actions
 - [**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)
 - [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - A little old and not updated
 
+
+
 ## References
 
 - [1] [Jason Haddix – The Bug Hunter's Methodology v4.0: Recon Edition](https://www.youtube.com/watch?v=p4JgIu1mceI)
@@ -756,5 +760,4 @@ There are several tools out there that will perform part of the proposed actions
 - [9] [Carlos Polop – Full Subdomain Discovery Workflow, Part 1](https://trickest.com/blog/full-subdomain-discovery-using-workflow/)
 - [10] [Carlos Polop – Full Subdomain Brute Force Discovery Using Automated Trickest Workflow, Part 2](https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/)
 - [11] [InfoSecMatter – favihash output screenshot](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
-
 {{#include ../../banners/hacktricks-training.md}}
