@@ -1,14 +1,14 @@
-# Zana za Reverse Engineering na Mbinu za Msingi
+# Zana za Reversing na Mbinu za Msingi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Zana za Reverse Engineering zinazotumia ImGui
+## Zana za reversing zinazotegemea ImGui
 
 Programu:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## Uendeshaji otomatiki wa WinDbg katika user-mode
+## Uendeshaji otomatiki wa WinDbg user-mode
 
 {{#ref}}
 windbg-automation.md
@@ -20,18 +20,18 @@ windbg-automation.md
 ../windows-exception-driven-control-flow.md
 {{#endref}}
 
-## Utatuzi wa hitilafu wa Windows kernel
+## Utatuzi wa hitilafu za Windows kernel
 
 {{#ref}}
 windows-kernel-debugging-kernelflirt.md
 {{#endref}}
 
-## Decompiler ya Wasm / compiler ya Wat
+## Wasm decompiler / Wat compiler
 
 Mtandaoni:
 
-- Tumia [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) **kudecompile** kutoka wasm (binary) hadi wat (maandishi yanayosomeka)
-- Tumia [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) **kukompile** kutoka wat hadi wasm
+- Tumia [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) kufanya **decompile** kutoka wasm (binary) hadi wat (maandishi ya kawaida)
+- Tumia [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) kufanya **compile** kutoka wat hadi wasm
 - Unaweza pia kujaribu [web-wasmdec](https://wwwg.github.io/web-wasmdec/) kwa ajili ya decompilation.
 
 Programu:
@@ -51,33 +51,33 @@ nodejs-v8-cached-bytecode.md
 ../../windows-hardening/virtualized-payload-execution.md
 {{#endref}}
 
-## Decompiler ya .NET
+## .NET decompiler
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek ni decompiler ambayo **hudecompile na kuchunguza fomati nyingi**, zikiwemo **libraries** (.dll), **faili za metadata za Windows** (.winmd), na **executables** (.exe). Baada ya kudecompile, assembly inaweza kuhifadhiwa kama mradi wa Visual Studio (.csproj).
+dotPeek ni decompiler inayofanya **decompile na kuchunguza miundo mbalimbali**, ikijumuisha **libraries** (.dll), **faili za metadata za Windows** (.winmd), na **executables** (.exe). Baada ya kufanyiwa decompile, assembly inaweza kuhifadhiwa kama mradi wa Visual Studio (.csproj).
 
-Faida yake ni kwamba ikiwa msimbo wa chanzo uliopotea unahitaji kurejeshwa kutoka kwa assembly ya zamani, hatua hii inaweza kuokoa muda. Zaidi ya hayo, dotPeek hutoa urambazaji rahisi ndani ya msimbo uliodecompile, na kuifanya kuwa mojawapo ya zana bora za **uchambuzi wa algorithm za Xamarin.**
+Faida yake ni kwamba ikiwa msimbo chanzo uliopotea unahitaji kurejeshwa kutoka kwenye assembly ya zamani, hatua hii inaweza kuokoa muda. Zaidi ya hayo, dotPeek hurahisisha urambazaji kwenye msimbo uliofanyiwa decompile, na kuifanya kuwa mojawapo ya zana bora kwa **uchanganuzi wa algorithm za Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-Ikiwa na mfumo mpana wa add-in na API inayopanua zana ili kukidhi mahitaji yako mahususi, .NET Reflector huokoa muda na kurahisisha uendelezaji. Hebu tuangalie huduma nyingi za reverse engineering zinazotolewa na zana hii:
+Ikiwa na modeli pana ya add-in na API inayopanua zana ili kukidhi mahitaji yako mahususi, .NET Reflector huokoa muda na kurahisisha uendelezaji. Hebu tuangalie huduma nyingi za reverse engineering ambazo zana hii hutoa:
 
 - Hutoa mwanga kuhusu jinsi data inavyopita kwenye library au component
 - Hutoa mwanga kuhusu utekelezaji na matumizi ya lugha na frameworks za .NET
-- Hugundua utendaji ambao haujaandikwa kwenye nyaraka au kufichuliwa ili kunufaika zaidi na APIs na teknolojia zinazotumika.
-- Hugundua dependencies na assemblies mbalimbali
-- Hufuatilia eneo halisi la makosa kwenye msimbo wako, components za wahusika wengine, na libraries.
-- Hufanya debug ndani ya chanzo cha msimbo wote wa .NET unaofanya nao kazi.
+- Hupata utendakazi usioandikwa kwenye nyaraka na usiofichuliwa ili kunufaika zaidi na APIs na teknolojia zinazotumika.
+- Hupata dependencies na assemblies mbalimbali
+- Hufuatilia eneo halisi la makosa kwenye msimbo wako, components za watu wengine na libraries.
+- Hufanya debug kwenye source ya msimbo wote wa .NET unaofanyia kazi.
 
-### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
+### [ILSpy](https://github.com/icsharpcode/ILSpy) na [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Plugin ya ILSpy ya Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Unaweza kuitumia kwenye OS yoyote (unaweza kuisakinisha moja kwa moja kutoka VSCode, hakuna haja ya kupakua git. Bofya **Extensions** kisha **tafuta ILSpy**).\
-Ikiwa unahitaji **kudecompile**, **kurekebisha** na **kukompile tena**, unaweza kutumia [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) au fork yake inayodumishwa kikamilifu, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Bofya kulia -> Modify Method** ili kubadilisha kitu ndani ya function).
+[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Unaweza kuitumia kwenye OS yoyote (unaweza kuisakinisha moja kwa moja kutoka VSCode; huhitaji kupakua git. Bofya **Extensions** na **utafute ILSpy**).\
+Ikiwa unahitaji kufanya **decompile**, **modify** na kufanya **recompile** tena, unaweza kutumia [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) au fork yake inayodumishwa kikamilifu, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Bofya kulia -> Modify Method** ili kubadilisha kitu ndani ya function).
 
-### Ukaguzi wa managed code bila utekelezaji kwa kutumia REA
+### Ukaguzi wa managed bila kutekeleza msimbo kwa kutumia REA
 
-**REA** inaweza kukagua metadata ya PE/CLI na CIL bila kupakia assembly. Anza kwa kutambua artifact, kisha kagua members na mipaka ya native iliyotangazwa; hii ni muhimu unapochunguza calls zinazotiliwa shaka kabla ya kutumia decompiler au kuendesha programu.<sup>[[16]](#references)[[17]](#references)</sup>
+**REA** inaweza kukagua metadata ya PE/CLI na CIL bila kupakia assembly. Anza kwa kutambua artifact, kisha kagua members na mipaka ya native iliyotangazwa; hii husaidia unapokagua calls zinazotiliwa shaka kabla ya kutumia decompiler au kuendesha programu.<sup>[[16]](#references)[[17]](#references)</sup>
 
 ```bash
 rea inspect-managed-artifact /absolute/path/Assembly.dll --json
@@ -85,11 +85,11 @@ rea inspect-managed-members /absolute/path/Assembly.dll --json
 rea inspect-managed-native-boundaries /absolute/path/Assembly.dll --json
 ```
 
-Kwa kulinganisha matoleo, `compare_managed_members` hutumia utambulisho ghafi wa CIL/signature na alama za vidole za maagizo yaliyofasiriwa, badala ya kuchukulia metadata tokens kuwa thabiti kati ya builds. Tamko la P/Invoke halithibitishi kuwa native code ilitekelezwa; `verify_managed_native_boundaries` inahitaji native export au ushahidi wa function unaolingana ili kukagua mpaka huo. Hifadhi artifact digest, MVID na mappings ambazo hazijatatuliwa pamoja na matokeo.<sup>[[17]](#references)</sup>
+Kwa kulinganisha tofauti za matoleo, `compare_managed_members` hutumia utambulisho ghafi wa CIL/signature na alama za vidole za decoded instructions, badala ya kuchukulia metadata tokens kuwa thabiti katika builds. Tangazo la P/Invoke si uthibitisho kwamba native code iliendeshwa; `verify_managed_native_boundaries` inahitaji native export au function Evidence inayolingana ili kukagua mpaka huo. Hifadhi artifact digest, MVID na mappings ambazo hazijatatuliwa pamoja na matokeo.<sup>[[17]](#references)</sup>
 
-### Uwekaji wa Kumbukumbu wa DNSpy
+### Uwekaji wa kumbukumbu katika DNSpy
 
-Ili **kuifanya DNSpy iandike taarifa fulani kwenye faili**, unaweza kutumia snippet hii:
+Ili **DNSpy iandike taarifa fulani kwenye faili**, unaweza kutumia snippet hii:
 
 ```cs
 using System.IO;
@@ -97,13 +97,13 @@ path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
 
-### Utatuzi wa hitilafu kwa DNSpy
+### Debugging kwa DNSpy
 
-Ili kutatua hitilafu za code kwa kutumia DNSpy, unahitaji:
+Ili kutatua hitilafu kwenye code kwa kutumia DNSpy, unahitaji:
 
-Kwanza, badilisha **sifa za Assembly** zinazohusiana na **utatuzi wa hitilafu**:
+Kwanza, badilisha **Assembly attributes** zinazohusiana na **debugging**:
 
-![Uwekaji kumbukumbu wa DNSpy - Utatuzi wa hitilafu kwa DNSpy: Kwanza, badilisha sifa za Assembly zinazohusiana na utatuzi wa hitilafu](<../../images/image (973).png>)
+![DNSpy Logging - Debugging kwa DNSpy: Kwanza, badilisha Assembly attributes zinazohusiana na debugging](<../../images/image (973).png>)
 
 Kutoka:
 
@@ -128,17 +128,17 @@ Kisha hifadhi faili jipya kupitia _**File >> Save module...**_:
 
 ![DNSpy Logging - DNSpy Debugging: Kisha hifadhi faili jipya kupitia File Save module](<../../images/image (602).png>)
 
-Hili ni muhimu kwa sababu usipofanya hivyo, wakati wa **runtime** **optimisations** kadhaa yatatumika kwenye code, na huenda wakati wa debugging **break-point isiwahi kugongwa** au baadhi ya **variables zisiwepo**.
+Hili ni muhimu kwa sababu usipofanya hivyo, wakati wa **runtime** **optimisations** kadhaa zitatumika kwenye code, na huenda wakati wa debugging **break-point isiwahi kufikiwa** au **variables** fulani zisiwepo.
 
-Kisha, ikiwa application yako ya .NET inaendeshwa na **IIS**, unaweza kuianzisha upya kwa:
+Kisha, ikiwa application yako ya .NET inaendeshwa na **IIS**, unaweza kuiwasha upya kwa:
 
 ```
 iisreset /noforce
 ```
 
-Kisha, ili kuanza debugging, unapaswa kufunga faili zote zilizofunguliwa na ndani ya **Debug Tab** uchague **Attach to Process...**:
+Kisha, ili kuanza kufanya debugging, funga faili zote zilizo wazi na kwenye **Debug Tab** uchague **Attach to Process...**:
 
-![DNSpy Logging - DNSpy Debugging: Kisha, ili kuanza debugging, unapaswa kufunga faili zote zilizofunguliwa na ndani ya Debug Tab uchague Attach to Process](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: Kisha, ili kuanza kufanya debugging, funga faili zote zilizo wazi na kwenye Debug Tab uchague Attach to Process](<../../images/image (318).png>)
 
 Kisha chagua **w3wp.exe** ili kuambatisha kwenye **IIS server** na ubofye **attach**:
 
@@ -154,9 +154,9 @@ Bofya module yoyote kwenye **Modules** na uchague **Open All Modules**:
 
 ![DNSpy Logging - DNSpy Debugging: Bofya module yoyote kwenye Modules na uchague Open All Modules](<../../images/image (922).png>)
 
-Bofya-kulia module yoyote kwenye **Assembly Explorer** na ubofye **Sort Assemblies**:
+Bofya kulia module yoyote kwenye **Assembly Explorer** na ubofye **Sort Assemblies**:
 
-![DNSpy Logging - DNSpy Debugging: Bofya-kulia module yoyote kwenye Assembly Explorer na ubofye Sort Assemblies](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Bofya kulia module yoyote kwenye Assembly Explorer na ubofye Sort Assemblies](<../../images/image (339).png>)
 
 ## Java decompiler
 
@@ -165,59 +165,58 @@ Bofya-kulia module yoyote kwenye **Assembly Explorer** na ubofye **Sort Assembli
 
 ## Debugging DLLs
 
-### Using IDA
+### Kwa kutumia IDA
 
-- **Pakia rundll32** (64bits iko C:\Windows\System32\rundll32.exe na 32 bits iko C:\Windows\SysWOW64\rundll32.exe)
+- **Pakia rundll32** (64bits kwenye C:\Windows\System32\rundll32.exe na 32 bits kwenye C:\Windows\SysWOW64\rundll32.exe)
 - Chagua debugger ya **Windbg**
 - Chagua "**Suspend on library load/unload**"
 
-![Debugging DLLs - Using IDA: Chagua " Suspend on library load/unload "](<../../images/image (868).png>)
+![Debugging DLLs - Kwa kutumia IDA: Chagua " Suspend on library load/unload "](<../../images/image (868).png>)
 
 - Sanidi **parameters** za utekelezaji kwa kuweka **path ya DLL** na function unayotaka kuita:
 
-![Debugging DLLs - Using IDA: Sanidi parameters za utekelezaji kwa kuweka path ya DLL na function unayotaka kuita](<../../images/image (704).png>)
+![Debugging DLLs - Kwa kutumia IDA: Sanidi parameters za utekelezaji kwa kuweka path ya DLL na function unayotaka kuita](<../../images/image (704).png>)
 
-Kisha, unapoanza debugging, **utekelezaji utasimamishwa kila DLL inapopakiwa**. Hivyo, rundll32 itakapopakia DLL yako, utekelezaji utasimamishwa.
+Kisha, unapoanza debugging, **utekelezaji utasimamishwa kila DLL inapopakiwa**. Kwa hiyo, rundll32 itakapopakia DLL yako, utekelezaji utasimamishwa.
 
 Njia hii husimamisha utekelezaji kwenye matukio ya kupakiwa kwa module, lakini kufikia entry point ya DLL iliyopakiwa si rahisi kama ilivyo kwenye mtiririko wa kazi wa x64dbg hapa chini.
 
-### Using x64dbg/x32dbg
+### Kwa kutumia x64dbg/x32dbg
 
-- **Pakia rundll32** (64bits iko C:\Windows\System32\rundll32.exe na 32 bits iko C:\Windows\SysWOW64\rundll32.exe)
+- **Pakia rundll32** (64bits kwenye C:\Windows\System32\rundll32.exe na 32 bits kwenye C:\Windows\SysWOW64\rundll32.exe)
 - **Badilisha Command Line** ( _File --> Change Command Line_ ) na uweke path ya dll na function unayotaka kuita, kwa mfano: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Badilisha _Options --> Settings_ na uchague "**DLL Entry**".
-- Kisha **anza utekelezaji**; debugger itasimama kwenye kila dll main. Wakati fulani **utasimama kwenye Entry ya dll yako**. Kuanzia hapo, tafuta sehemu unazotaka kuweka breakpoint.
+- Kisha **anza utekelezaji**; debugger itasimama kwenye kila dll main. Wakati fulani **utasimama kwenye Entry ya dll yako**. Kuanzia hapo, tafuta tu sehemu unazotaka kuweka breakpoint.
 
-Kumbuka kwamba utekelezaji ukisimama kwa sababu yoyote katika win64dbg, unaweza kuona **ni code gani unayoangalia** juu ya dirisha la win64dbg:
+Kumbuka kwamba utekelezaji unaposimama kwa sababu yoyote kwenye win64dbg, unaweza kuona **code unayoiangalia** juu ya **dirisha la win64dbg**:
 
-![Using IDA - Using x64dbg/x32dbg: Kumbuka kwamba utekelezaji ukisimama kwa sababu yoyote katika win64dbg, unaweza kuona ni code gani unayoangalia juu ya dirisha la win64dbg](<../../images/image (842).png>)
+![Kwa kutumia IDA - Kwa kutumia x64dbg/x32dbg: Kumbuka kwamba utekelezaji unaposimama kwa sababu yoyote kwenye win64dbg, unaweza kuona code unayoiangalia juu ya dirisha la win64dbg](<../../images/image (842).png>)
 
-Kiashiria hiki kinathibitisha kwamba utekelezaji umesimama ndani ya DLL unayotaka kufanya debugging yake.
+Kiashiria hiki kinathibitisha kwamba utekelezaji umesimama ndani ya DLL unayotaka kufanya debugging.
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) ni programu muhimu ya kutafuta mahali ambapo values muhimu zimehifadhiwa kwenye memory ya game inayoendeshwa na kuzibadilisha. Maelezo zaidi katika:
-
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) ni programu muhimu ya kutafuta sehemu ambazo thamani muhimu zimehifadhiwa kwenye memory ya game inayoendeshwa na kuzibadilisha. Maelezo zaidi kwenye:
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ni front-end/tool ya reverse engineering ya GNU Project Debugger (GDB), inayolenga games. Hata hivyo, inaweza kutumika kwa kazi yoyote inayohusiana na reverse engineering.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ni zana ya front-end/reverse engineering ya GNU Project Debugger (GDB), inayolenga games. Hata hivyo, inaweza kutumika kwa kazi yoyote inayohusiana na reverse engineering.
 
-[**Decompiler Explorer**](https://dogbolt.org/) ni front-end ya wavuti inayotumia decompilers kadhaa. Huduma hii ya wavuti hukuwezesha kulinganisha matokeo ya decompilers tofauti kwenye executables ndogo.
+[**Decompiler Explorer**](https://dogbolt.org/) ni front-end ya wavuti ya decompilers kadhaa. Huduma hii ya wavuti hukuwezesha kulinganisha matokeo ya decompilers tofauti kwenye executables ndogo.
 
-### Kusimbua Godot PCK na kurejesha project
+### Usimbuaji wa Godot PCK na urejeshaji wa project
 
-Kwa game ya Godot iliyosambazwa, tafuta PCK yake ikiwa katika faili ya `.pck` inayojitegemea, pack iliyoongezwa au kupachikwa kwenye executable, au directory ya `assets` ya APK. [gore](https://github.com/figurophobia/gore) inaweza kukagua na kutoa pack, ilhali kurejesha scripts na resources kikamilifu kunahitaji GDRE Tools (`gore setup` huisakinisha, au tumia `--gdre`). Kwa mtiririko huu wa kazi, tool hii inatumia fomati za Godot 4.x PCK v2–v4; inaweza kutambua headers za v1 lakini inahitaji key iliyotolewa kwa v1.<sup>[[25]](#references)</sup>
+Kwa game ya Godot inayosambazwa, tafuta PCK yake kwenye `.pck` inayojitegemea, kwenye executable pack iliyoambatishwa au kupachikwa, au kwenye directory ya `assets` ya APK. [gore](https://github.com/figurophobia/gore) inaweza kukagua na kutoa yaliyomo kwenye pack, huku ujenzi kamili wa scripts na resources ukihitaji GDRE Tools (`gore setup` huisakinisha, au tumia `--gdre`). Zana hii inasaidia miundo ya Godot 4.x PCK v2–v4 kwa mtiririko huu wa kazi; inaweza kutambua vichwa vya v1 lakini inahitaji ufunguo uliotolewa kwa v1.<sup>[[25]](#references)</sup>
 
-Urejeshaji wa key kiotomatiki unahitaji jedwali la faili lililosimbwa; ikiwa maudhui ya faili pekee ndiyo yaliyosimbwa, toa key inayojulikana badala yake. Kushindwa kwa urejeshaji hakuthibitishi kwamba pack haijasimbwa.<sup>[[28]](#references)</sup>
+Urejeshaji wa ufunguo kiotomatiki unahitaji jedwali la faili lililosimbwa; ikiwa yaliyomo kwenye faili pekee ndiyo yaliyosimbwa, toa ufunguo unaojulikana badala yake. Kushindwa kwa urejeshaji hakuthibitishi kwamba pack haijasimbwa.<sup>[[28]](#references)</sup>
 
-Utafutaji wa key **si** shambulio la keyspace ya AES-256. Jedwali la faili lililosimbwa lina MD5 ya maandishi yake ya awali, urefu wa maandishi hayo, IV na ciphertext ya AES-256-CFB.<sup>[[27]](#references)</sup> `gore` hujaribu madirisha ya byte 32 kutoka kwenye executable ya game au faili za karibu kama keys zinazowezekana. Huchuja candidates kwa kuangalia urefu na kiambishi awali kinachowezekana cha path iliyosimbuliwa, kisha huthibitisha matokeo yaliyopatikana kwa binary-scan kwa kusimbua jedwali lote na kukagua MD5 yake.<sup>[[26]](#references)[[28]](#references)</sup> Hutafuta kwanza sehemu za data za PE/ELF zilizoinitialishwa na, zisipopatikana, huchanganua faili nzima; `--scan` huongeza faili nyingine zinazoweza kuwa candidates.<sup>[[28]](#references)</sup>
+Utafutaji wa ufunguo **si shambulio la keyspace ya AES-256**. Jedwali la faili lililosimbwa hufichua MD5 ya maandishi yake yasiyosimbwa, urefu wa maandishi hayo, IV na ciphertext ya AES-256-CFB.<sup>[[27]](#references)</sup> `gore` hujaribu madirisha ya baiti 32 kutoka kwenye executable ya game au faili zilizo karibu kama funguo zinazowezekana. Huchuja wagombea kwa kuangalia urefu na kiambishi awali kinachowezekana cha path iliyofumbuliwa, kisha huthibitisha matokeo ya binary-scan kwa kufumbua jedwali zima na kukagua MD5 yake.<sup>[[26]](#references)[[28]](#references)</sup> Hutafuta kwanza sehemu za data za PE/ELF zilizoanzishwa, kisha hutafuta faili nzima; `--scan` huongeza faili nyingine zinazoweza kuwa na wagombea.<sup>[[28]](#references)</sup>
 
-Ikiwa hakuna key iliyopachikwa inayopatikana, hujaribiwa orodha ndogo ya passwords iliyojengewa ndani; `--wordlist` hutoa candidates nyingine. Kila password hujaribiwa kama uwakilishi wa key unaotokana na password wa engine, literal iliyojazwa zero, au key ya herufi 64 za hex. Tofauti na matokeo yaliyopatikana kwa binary-scan, matokeo ya wordlist hupita tu kwenye kichujio cha muundo wa path katika implementation hii. Yathibitishe kwa kufungua pack na kuthibitisha assets zilizotolewa.<sup>[[26]](#references)[[28]](#references)</sup>
+Ikiwa ufunguo uliopachikwa haupatikani, orodha ndogo ya manenosiri iliyojengewa ndani hujaribiwa; `--wordlist` hutoa wagombea wengine. Kila nenosiri hujaribiwa kama uwakilishi wa ufunguo unaotokana na nenosiri wa engine, thamani halisi iliyojazwa sufuri, au ufunguo wenye herufi 64 za hex. Tofauti na matokeo ya binary-scan, matokeo ya wordlist katika utekelezaji huu hupitishwa tu kwenye kichujio cha muundo wa path. Yathibitishe kwa kufungua pack na kuthibitisha assets zilizotolewa.<sup>[[26]](#references)[[28]](#references)</sup>
 
-Ukiwa na artifact ya game kwenye kifaa cha ndani, chagua hatua inayohitajika kwa uchanganuzi. `recover` hutumia GDRE kujenga upya project inayoweza kufunguliwa, ilhali `extract` hufungua faili ghafi pekee. `key` huchapisha key inayowezekana kwa matumizi na tool nyingine.<sup>[[25]](#references)[[28]](#references)</sup>
+Baada ya kupata kifaa cha game kwenye mfumo wa karibu, chagua hatua inayohitajika kwa uchanganuzi. `recover` hutumia GDRE kujenga upya project inayoweza kufunguliwa, huku `extract` ikifungua tu faili ghafi. `key` huchapisha ufunguo unaowezekana ili utumike na zana nyingine.<sup>[[25]](#references)[[28]](#references)</sup>
 
 ```bash
 gore info game.exe
@@ -229,7 +228,7 @@ gore recover game.exe -o ./game_project
 
 ## Uchunguzi wa native unaoungwa mkono na ushahidi kwa kutumia REA
 
-**REA** hutoa uchanganuzi wa Hopper, Ghidra na IDA kupitia CLI na MCP. Inahitaji Node.js 22.x (angalau 22.19), 24.x (angalau 24.11), au 26+, pamoja na npm. Sanidi kwanza provider ya native iliyopo; angalia `rea providers --json` na uchague provider wazi ikiwa zaidi ya mmoja anaweza kusaidia target. Tumia jina la function au anwani iliyozingatiwa kwenye inventory badala ya `0x1000` hapa chini.<sup>[[16]](#references)[[18]](#references)</sup>
+**REA** hutoa uchanganuzi wa Hopper, Ghidra na IDA kupitia CLI na MCP. Inahitaji Node.js 22.x (angalau 22.19), 24.x (angalau 24.11), au 26+, pamoja na npm. Kwanza sanidi provider ya native iliyopo; angalia `rea providers --json` na uchague provider waziwazi ikiwa zaidi ya mmoja anaunga mkono lengo. Tumia jina la function au anwani iliyoonekana kwenye orodha badala ya `0x1000` hapa chini.<sup>[[16]](#references)[[18]](#references)</sup>
 
 ```bash
 npm install --global rea-agents
@@ -241,15 +240,15 @@ rea xrefs /absolute/path/to/program 0x1000 --provider ghidra --json
 rea function /absolute/path/to/program 0x1000 --provider ghidra --json
 ```
 
-Anza na feature string au symbol, fuata references na callers, kisha kagua dossier ya function iliyochaguliwa na pseudocode kwa `rea decompile`. REA hufunga session kwa provider iliyochaguliwa badala ya kuibadilisha kimyakimya baada ya hitilafu. Kwa queries zinazoweza kurudiwa, `--snapshot PATH` hutumia tena tu bytes za artifact, provider, settings, operation na parameters zinazolingana; snapshot ni local cache, si database iliyohifadhiwa ya provider. Hifadhi Evidence iliyorudishwa na unknowns zilizo wazi badala ya kuchukulia paths zilizokisiwa au maandishi ya decompiler kama source asilia.<sup>[[16]](#references)[[18]](#references)</sup>
+Anza na mfuatano wa feature au alama, fuata marejeleo na callers, kisha kagua dossier ya function iliyochaguliwa na pseudocode kwa `rea decompile`. REA hufungamanisha session na provider iliyochaguliwa badala ya kuibadilisha kimyakimya baada ya hitilafu. Kwa queries zinazoweza kurudiwa, `--snapshot PATH` hutumia tena tu bytes za artifact, provider, settings, operation na parameters zinazolingana; snapshot ni cache ya ndani, si database ya provider iliyohifadhiwa. Hifadhi Evidence iliyorejeshwa na mambo yasiyojulikana yaliyo wazi badala ya kuchukulia paths zilizokisiwa au maandishi ya decompiler kuwa source asilia.<sup>[[16]](#references)[[18]](#references)</sup>
 
-Kwa entry points za JavaScript/Electron zinazoelekeza kwenye native add-ons, angalia [Electron Desktop Apps](../../network-services-pentesting/pentesting-web/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea).
+Kwa entry points za JavaScript/Electron zinazoelekeza kwenye native add-ons, tazama [Electron Desktop Apps](../../desktop-application-security/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea).
 
-## Uchambuzi wa IDA na Ghidra kwa script kupitia bridge ya TCP ya ndani
+## Uchambuzi wa IDA na Ghidra kwa scripts kupitia daraja la TCP la ndani
 
-[IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge) huendeshwa ndani ya database ya IDA au program ya Ghidra CodeBrowser ambayo **tayari imefunguliwa**, na huruhusu script tofauti kuuliza na kurekebisha database hiyo ya uchambuzi. Endesha `ID_Server.py` kutoka IDA's Python CLI (`import ID_Server`) au `Ghidra_Server.py` kutoka Ghidra's Script Manager. IDA hufunga kwenye `127.0.0.1` kuanzia port `5073` na kukagua ports za juu zaidi. Script ya sasa ya Ghidra huanza kwenye port `5093` na kujaribu ports kumi hadi `5102`; Java socket yake hufunga kwenye wildcard address, si loopback pekee. Angalia port iliyochapishwa na instance kabla ya kuunganisha. Tofauti na headless analyzer, bridge hii hufanya kazi kwenye program iliyofunguliwa kwa sasa kwenye instance hiyo ya GUI.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+[IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge) huendeshwa ndani ya database ya IDA au programu ya Ghidra CodeBrowser ambayo **tayari imefunguliwa**, na huwezesha script tofauti kuuliza na kurekebisha database hiyo ya uchambuzi. Endesha `ID_Server.py` kutoka IDA Python CLI (`import ID_Server`) au `Ghidra_Server.py` kutoka Ghidra Script Manager. IDA hufungamanisha na `127.0.0.1` kuanzia port `5073` na hukagua ports za juu zaidi. Script ya sasa ya Ghidra huanza port `5093` na kujaribu ports kumi hadi `5102`; Java socket yake hufungamanisha na wildcard address, si loopback pekee. Angalia port iliyochapishwa na instance kabla ya kuunganisha. Tofauti na headless analyzer, bridge hii hufanya kazi kwenye programu iliyo wazi kwa sasa katika instance hiyo ya GUI.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
-Tuma **command moja inayoishia kwa newline kwa kila connection** na usome response inayoishia kwa newline. Matokeo kwa kawaida huwa JSON. Kwa mfano, baada ya kupata API iliyoingizwa ambayo inahusiana na input path, `IMPORTXREF` hupata sehemu za code inakoitwa; kisha `DECOMP_XREF` hudecompile kwa batch callers wa address iliyochaguliwa. `FUNC` hukagua function, huku `PCODE` ikirudisha intermediate representation ya decompiler. Tumia address kutoka kwenye database inayotumika, si address iliyonakiliwa kutoka kwenye binary iliyorebase tofauti. Mfano hapa chini unatumia port chaguomsingi ya IDA; kwa Ghidra, tumia port iliyochapishwa na script yake.<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
+Tuma **amri moja inayoishia kwa newline kwa kila connection** na usome jibu linaloishia kwa newline. Kwa kawaida matokeo huwa JSON. Kwa mfano, baada ya kupata API iliyoingizwa ambayo inahusiana na input path, `IMPORTXREF` hupata call sites zake; kisha `DECOMP_XREF` hufanya decompile kwa kundi la callers wa address iliyochaguliwa. `FUNC` hukagua function, huku `PCODE` ikirejesha intermediate representation ya decompiler. Tumia address kutoka kwenye database inayotumika sasa, si address iliyonakiliwa kutoka kwenye binary iliyorebasewa tofauti. Mfano ulio hapa chini hutumia port chaguomsingi ya IDA; kwa Ghidra, tumia port iliyochapishwa na script yake.<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
 
 ```python
 import socket
@@ -259,7 +258,7 @@ with socket.create_connection(("127.0.0.1", 5073)) as sock:
     print(sock.makefile("r", encoding="utf-8").readline())
 ```
 
-Channel hiyo hiyo inaweza **kubadilisha hifadhidata ya uchanganuzi**: `RENAME_FUNC`, `RETYPE`, `SETCONV`, `DEFSTRUCT`/`SETFIELD`, `MAKEFUNC`, na `PATCH` hubadilisha majina, aina, fasili za miundo, mipaka ya functions, au bytes zilizohifadhiwa. `PATCH` ni uhariri wa hifadhidata, **si** ushahidi wa patch kwenye mchakato unaoendelea. Hakuna listener inayotaja uthibitishaji. IDA inapatikana kupitia loopback pekee, lakini Ghidra inaweza kufikiwa kupitia interfaces za mtandao; zuia ufikiaji wa listener ya Ghidra unapoitumia. `QUIT` husimamisha listener yoyote kati ya hizo, na IDA pia hutoa `ida_bridge_stop()`.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+Kituo hicho hicho kinaweza **kubadilisha hifadhidata ya uchanganuzi**: `RENAME_FUNC`, `RETYPE`, `SETCONV`, `DEFSTRUCT`/`SETFIELD`, `MAKEFUNC`, na `PATCH` hubadilisha majina, aina, ufafanuzi wa miundo, mipaka ya functions, au bytes zilizohifadhiwa. `PATCH` ni uhariri wa hifadhidata, **si** ushahidi wa patch kwenye mchakato unaoendelea. Hakuna listener kati ya hizo inayoeleza kuhusu uthibitishaji. IDA inaruhusu miunganisho ya loopback pekee, lakini Ghidra inaweza kufikiwa kupitia network interfaces; zuia ufikiaji wa listener ya Ghidra unapoitumia. `QUIT` husimamisha listener yoyote kati ya hizo, na IDA pia hutoa `ida_bridge_stop()`.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
 ## ARM & MIPS
 
@@ -270,40 +269,40 @@ https://github.com/nongiach/arm_now
 
 ## Shellcodes
 
-### Kutatua hitilafu za shellcode kwa kutumia blobrunner
+### Kutatua shellcode kwa kutumia blobrunner
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) hutenga **shellcode**, huchapisha **anwani yake ya memory**, kisha husitisha utekelezaji.\
-Ambatisha debugger kama IDA au x64dbg, weka breakpoint kwenye anwani iliyochapishwa, kisha endeleza utekelezaji ili kutatua hitilafu za shellcode.
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) hutenga **shellcode**, huchapisha **anwani yake ya kumbukumbu**, kisha husitisha utekelezaji.\
+Ambatisha debugger kama IDA au x64dbg, weka breakpoint kwenye anwani iliyochapishwa, kisha endeleza utekelezaji ili kutatua shellcode.
 
-Ukurasa wa GitHub wa releases una zips zenye matoleo yaliyokompailiwa: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Unaweza kupata toleo lililorekebishwa kidogo la Blobrunner kwenye link ifuatayo. Ili kulikompaili, **tengeneza mradi wa C/C++ katika Visual Studio Code, nakili na ubandike code, kisha uijenge**.
+Ukurasa wa matoleo kwenye GitHub una zips zilizo na matoleo yaliyokompiliwa: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Unaweza kupata toleo lililorekebishwa kidogo la Blobrunner kwenye kiungo kifuatacho. Ili kulikompili, **unda mradi wa C/C++ katika Visual Studio Code, nakili na ubandike code, kisha ujenge mradi huo**.
 
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Kutatua hitilafu za shellcode kwa kutumia jmp2it
+### Kutatua shellcode kwa kutumia jmp2it
 
-[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) inafanana na BlobRunner. Hutenga shellcode na kuingia kwenye kitanzi kisichoisha. Ambatisha debugger, endeleza utekelezaji kwa **sekunde 2–5**, sitisha utekelezaji ukiwa ndani ya kitanzi hicho, kisha songa hadi kwenye call inayofuata ambayo huhamishia utekelezaji kwenye shellcode iliyotengwa.
+[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) inafanana na BlobRunner. Hutenga shellcode na kuingia kwenye infinite loop. Ambatisha debugger, endeleza utekelezaji kwa **sekunde 2–5**, sitisha ndani ya loop hiyo, kisha endelea hatua kwa hatua hadi call inayofuata inayohamisha utekelezaji kwenda kwenye shellcode iliyotengwa.
 
-![Debugger imesitishwa ndani ya kitanzi kisichoisha cha jmp2it, mara moja kabla ya call ya shellcode iliyotengwa](<../../images/image (509).png>)
+![Debugger imesitishwa ndani ya infinite loop ya jmp2it mara moja kabla ya call kwenda kwenye shellcode iliyotengwa](<../../images/image (509).png>)
 
-Unaweza kupakua toleo lililokompailiwa la [jmp2it kwenye ukurasa wa releases](https://github.com/adamkramer/jmp2it/releases/).
+Unaweza kupakua toleo lililokompiliwa la [jmp2it kwenye ukurasa wa matoleo](https://github.com/adamkramer/jmp2it/releases/).
 
-### Kutatua hitilafu za shellcode kwa kutumia Cutter
+### Kutatua shellcode kwa kutumia Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) ni GUI ya radare. Kwa kutumia Cutter unaweza kuiga utekelezaji wa shellcode na kuichunguza wakati inaendeshwa.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) ni GUI ya radare. Kwa kutumia Cutter unaweza kuiga shellcode na kuichunguza wakati inaendelea kutekelezwa.
 
-Kumbuka kuwa Cutter hukuruhusu kuchagua "Open File" na "Open Shellcode". Katika jaribio langu, nilipofungua shellcode kama faili, iliidecompile kwa usahihi; lakini nilipoifungua kama shellcode, haikuweza:
+Kumbuka kuwa Cutter inaruhusu "Open File" na "Open Shellcode". Katika hali yangu, nilipofungua shellcode kama faili, iliidecompile kwa usahihi, lakini nilipoifungua kama shellcode haikufanya hivyo:
 
-![Cutter ikionyesha matokeo tofauti ya uchanganuzi ilipofungua bytes zilezile kama faili au shellcode](<../../images/image (562).png>)
+![Cutter ikionyesha matokeo tofauti ya uchanganuzi wakati bytes zilezile zinafunguliwa kama faili au shellcode](<../../images/image (562).png>)
 
-Ili kuanza uigaji mahali unapotaka, weka bp hapo, na inaonekana Cutter itaanza uigaji moja kwa moja kutoka hapo:
+Ili kuanza emulation kwenye sehemu unayotaka, weka bp hapo; inaonekana Cutter itaanza emulation hapo moja kwa moja:
 
-![Kuweka breakpoint kwenye mwanzo unaotakiwa wa shellcode kabla ya kuanza uigaji wa Cutter](<../../images/image (589).png>)
+![Kuweka breakpoint kwenye sehemu inayotakiwa ya kuanzia ya shellcode kabla ya kuanza emulation ya Cutter](<../../images/image (589).png>)
 
-![Kiigaji cha Cutter kimesitishwa kwenye breakpoint iliyochaguliwa ya shellcode](<../../images/image (387).png>)
+![Emulator ya Cutter imesitishwa kwenye breakpoint iliyochaguliwa ya shellcode](<../../images/image (387).png>)
 
 Kwa mfano, unaweza kuona stack ndani ya hex dump:
 
@@ -312,7 +311,7 @@ Kwa mfano, unaweza kuona stack ndani ya hex dump:
 ### Kuondoa obfuscation ya shellcode na kupata functions zilizotekelezwa
 
 Unapaswa kujaribu [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Itakuambia mambo kama vile shellcode inatumia **functions zipi** na kama shellcode **inajidecode** kwenye memory.
+Itakuonyesha mambo kama **ni functions zipi** zinazotumiwa na shellcode na kama shellcode **inajidecode** yenyewe kwenye kumbukumbu.
 
 ```bash
 scdbg.exe -f shellcode # Get info
@@ -323,48 +322,48 @@ scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
 
-scDbg pia ina graphical launcher ambapo unaweza kuchagua chaguo unazotaka na kutekeleza shellcode
+scDbg pia ina launcher ya picha ambapo unaweza kuchagua chaguo unazotaka na kutekeleza shellcode
 
-![Kizindua cha picha cha scDbg cha kuchagua chaguo za uigaji na ufuatiliaji wa shellcode](<../../images/image (258).png>)
+![Launcher ya picha ya scDbg ya kuchagua chaguo za kuiga na kufuatilia shellcode](<../../images/image (258).png>)
 
-Chaguo la **Create Dump** litadump shellcode ya mwisho ikiwa mabadiliko yoyote yatafanywa kwa shellcode dynamically kwenye memory (ni muhimu kwa kupakua shellcode iliyodecodeiwa). **start offset** inaweza kusaidia kuanzisha shellcode kwenye offset maalum. Chaguo la **Debug Shell** linafaa kwa ku-debug shellcode ukitumia terminal ya scDbg (hata hivyo, ninaona chaguo zozote kati ya zilizoelezwa awali kuwa bora zaidi kwa hili, kwani utaweza kutumia Ida au x64dbg).
+Chaguo la **Create Dump** litatoa dump ya shellcode ya mwisho ikiwa mabadiliko yoyote yatafanywa kwa shellcode kwa nguvu kwenye memory (ni muhimu kwa kupakua shellcode iliyodecodewa). **start offset** inaweza kusaidia kuanzisha shellcode kwenye offset mahususi. Chaguo la **Debug Shell** ni muhimu kwa kutatua hitilafu kwenye shellcode kupitia terminal ya scDbg (hata hivyo, naona chaguo lolote kati ya yale yaliyoelezwa awali ni bora zaidi kwa jambo hili kwa sababu utaweza kutumia Ida au x64dbg).
 
-### Ku-disassemble kwa kutumia CyberChef
+### Kutenganisha instructions kwa kutumia CyberChef
 
-Pakia faili yako ya shellcode kama input na utumie recipe ifuatayo kuidecompile: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Pakia faili yako ya shellcode kama input na utumie recipe ifuatayo kuitenganisha: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## Kuondoa obfuscation ya MBA
 
-**Mixed Boolean-Arithmetic (MBA)** obfuscation huficha expressions rahisi kama `x + y` kwa kutumia fomula zinazochanganya arithmetic (`+`, `-`, `*`) na bitwise operators (`&`, `|`, `^`, `~`, shifts). Jambo muhimu ni kwamba identities hizi kwa kawaida huwa sahihi tu chini ya **fixed-width modular arithmetic**, kwa hiyo carries na overflows ni muhimu:
+**Mixed Boolean-Arithmetic (MBA)** obfuscation huficha expressions rahisi kama `x + y` nyuma ya fomula zinazochanganya arithmetic (`+`, `-`, `*`) na waendeshaji wa bitwise (`&`, `|`, `^`, `~`, shifts). Jambo muhimu ni kwamba identity hizi kwa kawaida huwa sahihi tu chini ya **hesabu za modular zenye upana usiobadilika**, kwa hiyo carry na overflow ni muhimu:
 
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
 
-Ukirahisisha aina hii ya usemi kwa kutumia zana za jumla za aljebra, unaweza kupata matokeo yasiyo sahihi kwa urahisi kwa sababu semantiki za upana wa biti zilipuuzwa.<sup>[[1]](#references)</sup>
+Ukirahisisha aina hii ya usemi kwa kutumia zana za aljebra za jumla, unaweza kupata matokeo yasiyo sahihi kwa urahisi kwa sababu semantiki za upana wa biti zilipuuzwa.<sup>[[1]](#references)</sup>
 
 ### Mtiririko wa kazi wa vitendo
 
-1. **Hifadhi upana asilia wa biti** kutoka kwenye msimbo/IR/decompiler iliyoinuliwa (`8/16/32/64` bits).
+1. **Hifadhi upana wa awali wa biti** kutoka kwenye matokeo ya lifted code/IR/decompiler (`8/16/32/64` bits).
 2. **ainisha usemi** kabla ya kujaribu kuurahisisha:
-   - **Linear**: jumla zenye uzani za atomu za bitwise
-   - **Semilinear**: linear pamoja na masks za kudumu kama vile `x & 0xFF`
-   - **Polynomial**: bidhaa zinajitokeza
+   - **Linear**: jumla zenye uzani za biti atomiki
+   - **Semilinear**: linear pamoja na masks zisizobadilika kama `x & 0xFF`
+   - **Polynomial**: kuna bidhaa
    - **Mixed**: bidhaa na mantiki ya bitwise zimechanganywa, mara nyingi zikiwa na subexpressions zinazojirudia
-3. **Thibitisha kila rewrite inayowezekana** kwa majaribio ya nasibu au uthibitisho wa SMT. Ikiwa ulinganifu hauwezi kuthibitishwa, hifadhi usemi asilia badala ya kubahatisha.
+3. **Thibitisha kila rewrite inayopendekezwa** kwa kutumia majaribio ya nasibu au uthibitisho wa SMT. Ikiwa equivalence haiwezi kuthibitishwa, hifadhi usemi wa awali badala ya kubahatisha.
 
-### Bypass control flow iliyoflatteniwa kwa kutumia execution slice finyu
+### Epuka control flow iliyoflatteniwa kwa kutumia execution slice finyu
 
-Mara nyingi si lazima kurejesha control-flow graph nzima. Katika control-flow flattening, opaque predicates, dispatchers kubwa, au msimbo mzito wa MBA, fuata marejeleo kutoka kwenye blobs zilizosimbwa kwa njia fiche na output buffers hadi kwenye routine ndogo zaidi inayozibadilisha. Kisha tengeneza upya data-flow slice hiyo pekee, au iendeshe kivyake; dispatcher si sehemu ya suluhisho linalohitajika ikiwa hali husika inaweza kuanzishwa moja kwa moja.<sup>[[7]](#references)</sup>
+Mara nyingi si lazima kurejesha control-flow graph nzima. Ikiwa kuna control-flow flattening, opaque predicates, dispatchers kubwa, au code yenye MBA nyingi, fuata marejeo kutoka kwenye encrypted blobs na output buffers hadi kwenye routine ndogo zaidi inayozibadilisha. Kisha rudia tu data-flow slice hiyo, au iendeshe kivyake; dispatcher si sehemu ya suluhisho linalohitajika ikiwa state husika inaweza kuanzishwa moja kwa moja.<sup>[[7]](#references)</sup>
 
 Mtiririko wa kazi wa vitendo ni:<sup>[[7]](#references)</sup>
 
-1. Orodhesha executable na data sections, relocations, na cross-references. Dump candidate tables kutoka `.rodata` huku ukihifadhi mpangilio wa byte na upana wa kila element.
-2. Tambua routine ya mwisho inayoandika plaintext au output buffer. Rekodi inputs zake, tables zinazorejelewa, imported calls, na global state inayohitajika.
-3. Inua operations hizo pekee kuwa fixed-width Python model. Ikiwa slice bado inategemea state nyingi mno, iite routine hiyo chini ya Unicorn, QEMU, au debugger na hook imports zisizohusika badala ya kuemulate programu nzima.
-4. Thibitisha kuwa extractor inapata output yake kutoka kwenye binary iliyotolewa: ondoa silent fallbacks, itafute majibu yaliyopachikwa ndani yake, na iendeshe dhidi ya builds ambazo hazijaonekana zenye strings, keys, identifiers, layouts, na obfuscation seeds zilizobadilishwa.
+1. Orodhesha executable na data sections, relocations, na cross-references. Dump candidate tables kutoka `.rodata` huku ukihifadhi mpangilio wake wa byte na upana wa element.
+2. Tambua routine ya mwisho inayoweka plaintext au output buffer. Rekodi inputs zake, tables inazorejelea, imported calls, na global state inayohitajika.
+3. Lift operations hizo pekee kwenye fixed-width Python model. Ikiwa slice bado inategemea state nyingi mno, iite routine hiyo chini ya Unicorn, QEMU, au debugger, na hook imports zisizo muhimu badala ya kuiga program nzima.
+4. Thibitisha kuwa extractor inapata output yake kutoka kwenye binary iliyotolewa: ondoa silent fallbacks, itafute majibu yaliyopachikwa ndani yake, na iendeshe dhidi ya builds ambazo hazijaonekana zikiwa na strings, keys, identifiers, layouts, na obfuscation seeds zilizobadilishwa.
 
-Amri muhimu za hatua ya kwanza ni:<sup>[[7]](#references)</sup>
+Amri muhimu za ukaguzi wa awali ni:<sup>[[7]](#references)</sup>
 
 ```bash
 readelf -SW target
@@ -372,9 +371,9 @@ objdump -s -j .rodata target > rodata.txt
 objdump -d target | rg 'adrp|add|ldr|str'
 ```
 
-#### Tambua misemo ya MBA inayoficha thamani zisizobadilika
+#### Gundua expressions za MBA zilizofichwa kama thamani zisizobadilika
 
-Usemi wa byte unaoonekana kutegemea ingizo unaweza kufuta kabisa athari ya ingizo lake. Baada ya kutoa majedwali yake, tathmini usemi huo katika kikoa kizima cha biti 8; seti ya matokeo yenye thamani moja inathibitisha kuwa byte hiyo haibadiliki, bila kuhitaji kurejesha mashine ya hali inayouzunguka.<sup>[[7]](#references)</sup>
+Expression ya byte inayoonekana kutegemea input inaweza kufuta kabisa utegemezi wake kwa input. Baada ya kutoa tables zake, tathmini expression katika domain nzima ya 8-bit; seti ya matokeo yenye thamani moja inathibitisha kuwa byte hiyo ni thamani isiyobadilika, bila kuhitaji kurejesha mashine ya hali inayoizunguka.<sup>[[7]](#references)</sup>
 
 ```python
 def mba(a, b, c, d, e, x):
@@ -390,15 +389,15 @@ for row in zip(A, B, C, D, E):
 print(decoded)
 ```
 
-Hifadhi mask ya mwisho kwa sababu addition ya awali ina wraparound ya upana wa byte. Kwa domain pana zaidi, iulize SMT solver ikiwa `f(x1) != f(x2)` inaweza kutimizwa kwa symbolic inputs mbili zenye upana sawa: `unsat` huthibitisha invariance, huku `sat` ikitoa counterexample na kumaanisha kuwa input haiwezi kutupwa.<sup>[[7]](#references)</sup>
+Hifadhi mask ya mwisho kwa sababu addition ya awali ina wraparound ya upana wa byte. Kwa domain pana zaidi, iulize SMT solver kama `f(x1) != f(x2)` inaweza kuridhishwa kwa inputs mbili za symbolic zenye upana sawa: `unsat` huthibitisha invariance, huku `sat` ikitoa counterexample na kumaanisha kuwa input haiwezi kutupiliwa mbali.<sup>[[7]](#references)</sup>
 
 #### Tambua decoding inayotegemea mazingira
 
-Ukaguzi wa anti-analysis si lazima ufanye branch au kusababisha crash. Decoder inaweza kuchanganya matokeo ya sensor kwenye biti ya key, constant ya opaque-predicate, au state ya flattened-dispatcher, kuendelea kama kawaida, na kutoa plaintext inayofanana na sahihi lakini si ya kweli ndani ya emulator. Kwa hiyo, kupachika patch kwenye failure branches zinazoonekana pekee hakutoshi; fuatilia data dependencies kutoka kwa environment probes hadi kwenye state ya decoder, linganisha slice hiyo hiyo kwenye kifaa halisi na emulator, na ujaribu jinsi kulazimisha kila matokeo ya sensor kunavyobadilisha buffer ya mwisho.<sup>[[7]](#references)</sup>
+Ukaguzi wa anti-analysis si lazima ufanye branch au kusababisha crash. Decoder inaweza kuchanganya matokeo ya sensor kwenye bit ya key, constant ya opaque-predicate, au hali ya flattened-dispatcher, kisha iendelee kawaida na kutoa plaintext inayoonekana kuwa sahihi lakini si ya kweli ndani ya emulator. Kwa hiyo, kurekebisha branches za failure zinazoonekana pekee hakutoshi; fuatilia utegemezi wa data kutoka kwa ukaguzi wa mazingira hadi kwenye hali ya decoder, linganisha sehemu hiyo hiyo kwenye kifaa halisi na emulator, na ujaribu jinsi kulazimisha kila matokeo ya sensor kunavyobadilisha buffer ya mwisho.<sup>[[7]](#references)</sup>
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) ni MBA simplifier ya vitendo kwa ajili ya malware analysis na reversing ya protected binaries. Huainisha expression na kuipitisha kwenye pipelines maalum badala ya kutumia rewrite pass moja ya jumla kwa kila kitu.<sup>[[2]](#references)</sup>
+[**CoBRA**](https://github.com/trailofbits/CoBRA) ni MBA simplifier ya vitendo kwa ajili ya uchanganuzi wa malware na reversing ya protected binary. Huainisha expression na kuielekeza kupitia pipelines maalum badala ya kutumia rewrite pass moja ya jumla kwa kila kitu.<sup>[[2]](#references)</sup>
 
 Matumizi ya haraka:
 
@@ -415,11 +414,11 @@ cobra-cli --mba "(x&0xFF)+(x&0xFF00)" --bitwidth 16
 cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 ```
 
-Hali zinazofaa:
+Kesi muhimu:
 
-- **Linear MBA**: CoBRA hutathmini usemi kwa ingizo za Boolean, hupata signature, na huendesha kwa wakati mmoja mbinu kadhaa za urejeshaji, kama vile pattern matching, ubadilishaji wa ANF, na coefficient interpolation.
-- **Semilinear MBA**: atomu zilizofichwa kwa constant hujengwa upya kwa kutumia bit-partitioned reconstruction ili maeneo yaliyofichwa yabaki sahihi.
-- **Polynomial/Mixed MBA**: bidhaa hugawanywa katika cores, na subexpression zinazorudiwa zinaweza kuhamishiwa kwenye temporaries kabla ya kurahisisha uhusiano wa nje.
+- **Linear MBA**: CoBRA hutathmini expression kwa ingizo za Boolean, hupata signature, kisha hujaribu kwa wakati mmoja mbinu kadhaa za recovery, kama pattern matching, ubadilishaji wa ANF, na coefficient interpolation.
+- **Semilinear MBA**: atomu zilizofichwa kwa constant hujengwa upya kwa reconstruction iliyogawanywa kwa bit ili maeneo yaliyofichwa yabaki sahihi.
+- **Polynomial/Mixed MBA**: products hugawanywa katika cores, na subexpressions zinazojirudia zinaweza kuinuliwa kuwa temporaries kabla ya kurahisisha outer relation.
 
 Mfano wa mixed identity ambayo kwa kawaida inafaa kujaribu kuirejesha:
 
@@ -427,7 +426,7 @@ Mfano wa mixed identity ambayo kwa kawaida inafaa kujaribu kuirejesha:
 (x & y) * (x | y) + (x & ~y) * (~x & y)
 ```
 
-Hili linaweza kurahisishwa kuwa:
+Hii inaweza kurahisishwa kuwa:
 
 ```c
 x * y
@@ -435,61 +434,62 @@ x * y
 
 ### Vidokezo vya reversing
 
-- Pendelea kuendesha CoBRA kwenye **lifted IR expressions** au matokeo ya decompiler baada ya kutenga hesabu husika.
-- Tumia `--bitwidth` waziwazi ikiwa expression imetokana na masked arithmetic au narrow registers.
-- Ikiwa unahitaji hatua ya uthibitisho yenye nguvu zaidi, angalia vidokezo vya Z3 hapa:
+- Pendelea kuendesha CoBRA kwenye **miundo ya IR iliyoinuliwa** au matokeo ya decompiler baada ya kutenga hesabu husika.
+- Tumia `--bitwidth` moja kwa moja ikiwa usemi umetokana na masked arithmetic au rejista nyembamba.
+- Ikiwa unahitaji hatua thabiti zaidi ya uthibitisho, angalia maelezo ya Z3 hapa:
+
 
 {{#ref}}
 satisfiability-modulo-theories-smt-z3.md
 {{#endref}}
 
-- CoBRA pia inapatikana kama **LLVM pass plugin** (`libCobraPass.so`), ambayo ni muhimu unapotaka kufanya normalization ya LLVM IR iliyojaa MBA kabla ya passes za baadaye za uchanganuzi.
-- Residuals mchanganyiko wa domains zisizotumika na zinazoathiriwa na carry zichukulie kama ishara ya kuhifadhi expression asilia na kuchanganua carry path kwa mikono.
+- CoBRA pia huja kama **plugin ya LLVM pass** (`libCobraPass.so`), ambayo ni muhimu unapotaka kurekebisha IR ya LLVM yenye MBA nyingi kabla ya passes za uchanganuzi zinazofuata.
+- Mabaki mchanganyiko wa domain yasiyotumika na yanayoathiriwa na carry yanapaswa kuchukuliwa kama ishara ya kuhifadhi usemi asilia na kuchanganua njia ya carry kwa mkono.
 
-## Kurejesha control-flow flattening ya XOR-state
+## Kurejesha mtiririko wa udhibiti uliolazwa kwa XOR-state
 
-Flattener ya mtindo wa OLLVM inaweza kuhifadhi state ya basic block ya sasa kwenye registers mbili za 64-bit na kuijenga upya kwa kutumia XOR kwenye dispatcher. Kila block asilia huandika jozi ya state ya block inayofuata kisha huruka kurudi kwenye dispatcher. Block yenye masharti inaweza kutumia `CMOVcc` kubadilisha nusu moja ya jozi kulingana na CPU flags, kwa hiyo kufuata maagizo ya branch yanayoonekana pekee hukosa successors hao wawili. Tofauti na indirect-jump dispatcher, muundo huu unaweza kutumia direct back-edges kila mahali.<sup>[[19]](#references)[[20]](#references)</sup>
+Flattener ya mtindo wa OLLVM inaweza kuhifadhi hali ya basic block ya sasa katika rejista mbili za biti 64 na kuijenga upya kwa kutumia XOR kwenye dispatcher. Kila block asilia huandika jozi ya hali inayofuata na kuruka kurudi kwenye dispatcher. Block yenye masharti inaweza kutumia `CMOVcc` kubadilisha nusu moja ya jozi kulingana na CPU flags, kwa hiyo kufuata maagizo ya tawi yanayoonekana pekee hukosa successors wote wawili. Tofauti na dispatcher ya indirect-jump, muundo huu unaweza kutumia direct back-edges kila mahali.<sup>[[19]](#references)[[20]](#references)</sup>
 
-Ili kurejesha graph, tambua comparison tree ya dispatcher na registers mbili za state, ramani kila XOR state iliyolinganishwa kwa target block yake, kisha fuatilia writes zinazofika kwenye jozi ya registers katika kila block asilia. Kwa writes zenye masharti, jumuisha instruction inayoweka flags na matokeo yote mawili ya `CMOVcc`. Andika upya exit ya dispatcher ya kila block iwe direct successor au conditional branch iliyotatuliwa; baada ya hapo dispatcher haitafikiwa tena bila ku-patch binary. Hii ni mbinu ya full-CFG; ikiwa decoder moja tu ndiyo muhimu, workflow ya [narrow execution-slice](#bypass-flattened-control-flow-with-a-narrow-execution-slice) hapo juu inaweza kuwa ya haraka zaidi.<sup>[[19]](#references)[[20]](#references)</sup>
+Ili kurejesha graph, tambua mti wa ulinganishaji wa dispatcher na rejista mbili za hali, linganisha kila hali ya XOR iliyolinganishwa na target block yake, kisha fuatilia writes zinazofikia jozi ya rejista katika kila block asilia. Kwa writes zenye masharti, jumuisha agizo linaloweka flags na matokeo yote mawili ya `CMOVcc`. Badilisha dispatcher exit ya kila block iwe successor yake ya moja kwa moja iliyobainishwa au tawi lenye masharti; dispatcher basi haitafikiwa tena bila kurekebisha binary. Hii ni mbinu ya full-CFG; ikiwa decoder moja tu ndiyo muhimu, [mchakato wa narrow execution-slice](#bypass-flattened-control-flow-with-a-narrow-execution-slice) hapo juu unaweza kuwa wa haraka zaidi.<sup>[[19]](#references)[[20]](#references)</sup>
 
-[DispatchThis](https://github.com/YungBinary/DispatchThis) huendesha automation ya muundo huu katika Binary Ninja. Nakili `plugins/DispatchThis` kwenye saraka ya user plugin ya Binary Ninja kisha uwashe upya. Kwenye function iliyoathiriwa, fungua **Function Settings** na uchague `OLLVM_XOR_64`; ikiwa uchanganuzi hautaanza, tumia **Analysis → Reanalyze All Functions**. Mode hii huandika upya control-flow edges za MLIL, si bytes za faili, na haihitaji Z3 wala indirect-jump resolver. Imejaribiwa kwenye Binary Ninja 5.3.9757+; haiondoi state writes zilizokufa za kila block, kwa hiyo usizichanganye na transitions zinazotumika bado.<sup>[[19]](#references)</sup>
+[DispatchThis](https://github.com/YungBinary/DispatchThis) huweka kiotomatiki muundo huu katika Binary Ninja. Nakili `plugins/DispatchThis` kwenye saraka ya plugin za mtumiaji ya Binary Ninja kisha uanze upya. Katika function iliyoathiriwa, fungua **Function Settings** na uchague `OLLVM_XOR_64`; ikiwa uchanganuzi hautaanza, tumia **Analysis → Reanalyze All Functions**. Hali hii hubadilisha edges za mtiririko wa udhibiti wa MLIL, si baiti za faili, na haihitaji Z3 wala indirect-jump resolver. Imejaribiwa kwenye Binary Ninja 5.3.9757+; haiondoi state writes zilizokufa za kila block, kwa hiyo usizichukulie kimakosa kuwa ni transitions hai zilizobaki.<sup>[[19]](#references)</sup>
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Obfuscator hii hubadilisha operations za programu kuwa instruction sequences zinazotumia `mov` na hutumia signal/exception handling kubadilisha control flow. Kwa maelezo zaidi:
+Obfuscator hii hubadilisha operations za programu kuwa mfuatano wa maagizo unaotegemea `mov` na hutumia signal/exception handling kubadilisha mtiririko wa udhibiti. Kwa maelezo zaidi:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-Kwa binaries zinazoungwa mkono, [demovfuscator](https://github.com/kirschju/demovfuscator) inaweza kuondoa obfuscation kwenye matokeo. Ina dependencies kadhaa.
+Kwa binary zinazotumika, [demovfuscator](https://github.com/kirschju/demovfuscator) inaweza kuondoa obfuscation ya matokeo. Ina dependencies kadhaa.
 
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
 
-Na [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
+Na [sakinisha keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-Ikiwa unashiriki kwenye **CTF, njia hii ya kutafuta flag** inaweza kuwa na manufaa sana: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Ikiwa unacheza **CTF, workaround hii ya kupata flag** inaweza kuwa muhimu sana: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-Ili kupata **entry point**, tafuta kwenye functions kwa kutumia `::main` kama ilivyo hapa:
+Ili kupata **entry point**, tafuta functions kwa kutumia `::main` kama ilivyo hapa:
 
-![Kupata entry point ya Rust katika Ghidra kwa kutafuta majina ya function yenye double-colon main](<../../images/image (1080).png>)
+![Kutafuta entry point ya Rust katika Ghidra kwa kutafuta majina ya functions yenye double-colon main](<../../images/image (1080).png>)
 
-Katika hali hii, binary iliitwa authenticator, kwa hiyo ni wazi kabisa kwamba hii ndiyo main function inayovutia.\
-Ukiwa na **majina** ya **functions** zinazoitwa, zitafute kwenye **Internet** ili ujifunze kuhusu **inputs** na **outputs** zake.
+Katika hali hii binary iliitwa authenticator, kwa hivyo ni dhahiri kabisa kwamba hii ndiyo main function inayovutia.\
+Kwa kuwa na **jina** la **functions** zinazotumiwa, zitafute kwenye **Internet** ili kujifunza kuhusu **inputs** na **outputs** zake.
 
 ### Kurejesha strings za Rust kutoka firmware ya ELF
 
-Katika binary za **Rust ELF**, strings nyingi tuli hazirejelewi kama pointers za mtindo wa C zilizokomeshwa kwa NUL. Mpangilio wa kawaida wa `rustc` ni **pointer/length tuple** ndani ya **`.data.rel.ro`** inayoelekeza kwenye blob halisi ya string iliyohifadhiwa katika **`.rodata`**:
+Katika binaries za **Rust ELF**, strings nyingi tuli hazirejelewi kama pointers za C-style zinazokoma kwa NUL. Muundo wa kawaida wa `rustc` ni **pointer/length tuple** ndani ya **`.data.rel.ro`** inayoelekeza kwenye blob halisi ya string iliyohifadhiwa katika **`.rodata`**:
 
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
 
-Hii inamaanisha kuwa `strings` au uchanganuzi chaguomsingi wa Ghidra unaweza kuunganisha strings zilizo karibu au kukosa kabisa cross-references.<sup>[[3]](#references)</sup>
+Hii inamaanisha kwamba `strings` au uchanganuzi chaguomsingi wa Ghidra unaweza kuunganisha mifuatano iliyo karibu au kukosa kabisa marejeleo mtambuka.<sup>[[3]](#references)</sup>
 
 Mtiririko wa kazi wa haraka:
 
@@ -500,12 +500,12 @@ objdump -h <bin>
 
 1. Pata anwani pepe na ukubwa wa **`.rodata`**.
 2. Orodhesha **`.data.rel.ro`** neno moja kwa wakati.
-3. Chukulia thamani yoyote iliyo ndani ya masafa ya anwani ya `.rodata` kuwa pointer ya string inayoweza kufaa.
-4. Chukulia neno linalofuata kuwa urefu unaoweza kufaa.
-5. Tumia vichujio vya uhalali (kwa mfano, hifadhi urefu kati ya **4** na **100** bytes).
-6. Soma bytes `length` hasa kutoka `.rodata` badala ya kusoma hadi `0x00`.
+3. Chukulia thamani yoyote iliyo ndani ya masafa ya anwani ya `.rodata` kuwa pointer inayoweza kuelekeza kwenye string.
+4. Chukulia neno linalofuata kuwa urefu unaowezekana.
+5. Tumia vichujio vya ukaguzi wa uhalali (kwa mfano, hifadhi urefu kati ya **4** na **100** bytes).
+6. Soma bytes `length` haswa kutoka `.rodata` badala ya kuchanganua hadi `0x00`.
 
-Mantiki ndogo ya extractor:
+Mantiki ya msingi ya extractor:
 
 ```python
 for off in range(0, len(data_rel_ro), 8):
@@ -516,52 +516,52 @@ for off in range(0, len(data_rel_ro), 8):
         print(rodata[start:start+length])
 ```
 
-Hili ni muhimu hasa katika firmware reversing kwa sababu strings za Rust zilizorejeshwa mara nyingi hufichua **HTTP routes, majina ya RPC, ujumbe wa log, assertions, majina ya faili, config keys, command handlers, na logic inayohusiana na auth**.
+Hili ni muhimu hasa katika firmware reversing kwa sababu strings za Rust zilizorejeshwa mara nyingi hufichua **njia za HTTP, majina ya RPC, ujumbe wa log, assertions, majina ya faili, funguo za config, handlers za command, na logic inayohusiana na auth**.
 
-Ghidra ikikosa strings hizo, endesha script/plugin maalum inayotumia heuristic hiyo hiyo na kuunda data ya string kwenye offsets za `.rodata` zilizorejelewa. Zana zilizochapishwa za `rust-strings` na `RustStrings.py` kutoka Pen Test Partners ni marejeo mazuri ya kurekebisha wazo hilo kwa **ukubwa mwingine wa word, endianness, na miundo tofauti ya section**.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
+Ghidra ikikosa strings hizo, endesha script/plugin maalum inayotumia heuristic hiyo hiyo na kuunda data ya string kwenye offsets za `.rodata` zinazorejelewa. Zana za `rust-strings` na `RustStrings.py` zilizochapishwa na Pen Test Partners ni marejeleo mazuri ya kurekebisha wazo hilo ili litumike kwa **ukubwa mwingine wa word, endianness, na mipangilio ya section**.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
 
 ## **Delphi**
 
-Kwa binary zilizokompailiwa za Delphi unaweza kutumia [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+Kwa binaries zilizokusanywa kwa Delphi, unaweza kutumia [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Ikiwa itabidi ureverse binary ya Delphi, ningependekeza utumie IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Ikiwa unahitaji kufanya reverse engineering ya binary ya Delphi, ningependekeza utumie IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
-Bonyeza **Alt+F7** katika IDA ili kupakia Python plugin, kisha uchague faili ya plugin.
+Bonyeza **Alt+F7** kwenye IDA ili kupakia Python plugin, kisha uchague faili ya plugin.
 
-Plugin hii itaendesha binary na kutatua majina ya functions kwa nguvu mwanzoni mwa debugging. Baada ya kuanza debugging, bonyeza tena kitufe cha Start (kile cha kijani au f9), na breakpoint itafikiwa mwanzoni mwa code halisi.
+Plugin hii itaendesha binary na kutatua majina ya function kwa nguvu wakati debugging inaanza. Baada ya kuanza debugging, bonyeza tena kitufe cha Start (kile cha kijani au f9), na breakpoint itasimama mwanzoni mwa code halisi.
 
-Ukibonyeza kitufe katika programu ya picha, debugger inaweza kusimama kwenye function iliyoitwa na kitufe hicho.
+Ukibonyeza kitufe kwenye programu ya picha, debugger inaweza kusimama kwenye function inayoitwa na kitufe hicho.
 
 ## Golang
 
-Kwa binary za kawaida za Go, [IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) inaweza kurejesha runtime structures na kuboresha majina ya functions katika IDA. Pakia Python plugin yake kwa **Alt+F7**.
+Kwa binaries za kawaida za Go, [IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) inaweza kurejesha miundo ya runtime na kuboresha majina ya function katika IDA. Pakia Python plugin yake kwa kubonyeza **Alt+F7**.
 
-Ikiwa itabidi ureverse binary ya Golang, ningependekeza utumie IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Ikiwa unahitaji kufanya reverse engineering ya binary ya Golang, ningependekeza utumie IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
-Bonyeza **Alt+F7** katika IDA ili kupakia Python plugin, kisha uchague faili ya plugin.
+Bonyeza **Alt+F7** kwenye IDA ili kupakia Python plugin, kisha uchague faili ya plugin.
 
-Hii itatatua majina ya functions.
+Hii itatatua majina ya function.
 
-### Rejesha metadata bila symbol table
+### Rejesha metadata bila jedwali la symbol
 
-Go executable iliyostripiwa bado inahitaji runtime metadata ili kuoanisha program counters na functions. [GoReSym](https://github.com/mandiant/GoReSym) hupata na kuchanganua structures kama `pclntab` na `moduledata` kwa kutumia code iliyotokana na Go runtime. Hii inaweza kurejesha mipaka ya functions, majina, source paths, types na maelezo ya build bila kutegemea symbol table ya kawaida.<sup>[[9]](#references)[[13]](#references)</sup>
+Executable ya Go ambayo symbols zake zimeondolewa bado inahitaji metadata ya runtime ili kuunganisha program counter na function. [GoReSym](https://github.com/mandiant/GoReSym) hutafuta na kuchanganua miundo kama `pclntab` na `moduledata` kwa kutumia code iliyotokana na Go runtime. Hii inaweza kurejesha mipaka ya function, majina, njia za source, aina na maelezo ya build bila kutegemea jedwali la kawaida la symbol.<sup>[[9]](#references)[[13]](#references)</sup>
 
 ```bash
 GoReSym.exe -t -d -p /path/to/sample.exe > goresym.json
 ```
 
-Obfuscator inaweza kuacha miundo hiyo ikiendelea kutumika huku ikibadilisha majina yaliyorejeshwa. Kwa mfano, Garble huhash vitambulishi na njia za package, na huondoa taarifa za build, module na debug.<sup>[[12]](#references)</sup> Tokeni ya package iliyofichwa lazima ibaki ileile katika functions kutoka package hiyo. Panga functions kwa tokeni inayojirudia, bainisha package moja kutokana na callees, strings na APIs zake, kisha sambaza lebo hiyo ya package kwa kundi lote.<sup>[[13]](#references)</sup>
+Obfuscator inaweza kuacha miundo hiyo ikiwa inatumika huku ikibadilisha majina yaliyorejeshwa. Garble, kwa mfano, huhash vitambulishi na njia za package na huondoa maelezo ya build, module na debug.<sup>[[12]](#references)</sup> Tokeni ya package iliyofichwa lazima ibaki ileile katika functions kutoka package hiyo. Panga functions kulingana na tokeni inayojirudia, bainisha package moja kutokana na callees, strings na APIs zake, kisha tumia lebo hiyo ya package kwa kundi lote.<sup>[[13]](#references)</sup>
 
 ### Rejesha majina ya Garble kwa GoResolver
 
-[GoResolver](https://github.com/volexity/GoResolver) huunganisha uchimbaji wa runtime symbols na utengenezaji wa marejeo safi pamoja na ulinganishaji wa control-flow-graph (CFG). Tumia mfuatano huu:<sup>[[10]](#references)[[13]](#references)</sup>
+[GoResolver](https://github.com/volexity/GoResolver) huchanganya utoaji wa runtime-symbols na utengenezaji wa marejeleo safi pamoja na ulinganishaji wa control-flow-graph (CFG). Tumia mfuatano huu:<sup>[[10]](#references)[[13]](#references)</sup>
 
-1. **Tambua toleo la compiler.** Jaribu `BuildInfo` na strings za toleo zilizopachikwa kwanza. Ikiwa obfuscator iliziondoa, linganisha sehemu za Go runtime iliyojumuishwa na runtime za marejeo zenye matoleo maalum. Katika majaribio ya Volexity, takriban `2%` ya runtime ilitosha kutofautisha matoleo makuu ya Go. Ichukulie hii kama uboreshaji uliothibitishwa kwa majaribio, si kizingiti cha jumla.<sup>[[13]](#references)</sup>
-2. **Tengeneza marejeo yanayolingana.** Tengeneza binaries safi za toleo la Go lililotambuliwa, usanifu lengwa na libraries zinazowezekana. Kulinganisha toolchain hupunguza tofauti za CFG zinazotengenezwa na compiler.<sup>[[10]](#references)[[13]](#references)</sup>
-3. **Linganisha functions.** GoGrapher hulinganisha CFG za functions na kutoa alama zilizosanifishwa kuanzia `0.0` hadi `1.0`. Ulinganishaji wake wa basic blocks unategemea ulinganishaji wenye uzito wa instructions zinazofanana. Ulinganishaji wenye uhakika mkubwa huunganisha functions zilizobadilishiwa majina nasibu na implementation safi. Ulinganishaji wenye uhakika mdogo bado unaweza kutambua package au module.<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
-4. **Thibitisha na uingize.** Thibitisha majina yaliyopendekezwa kwa kutumia uhusiano wa calls, constants, strings na athari za pembeni, kisha ingiza ripoti ya JSON kwa kutumia plugin ya GoResolver ya IDA au Ghidra.<sup>[[10]](#references)[[13]](#references)</sup>
+1. **Bainisha toleo la compiler.** Jaribu `BuildInfo` na strings za toleo zilizopachikwa kwanza. Ikiwa obfuscator iliziondoa, linganisha sehemu za Go runtime iliyojumuishwa na reference runtimes zenye matoleo tofauti. Katika majaribio ya Volexity, takriban `2%` ya runtime ilitosha kutofautisha matoleo makuu ya Go. Chukulia hili kama uboreshaji uliothibitishwa kwa majaribio, si kiwango cha jumla.<sup>[[13]](#references)</sup>
+2. **Tengeneza marejeleo yanayolingana.** Tengeneza binaries safi kwa toleo la Go lililotambuliwa, target architecture na libraries zinazowezekana. Kulinganisha toolchain hupunguza tofauti za CFG zinazozalishwa na compiler.<sup>[[10]](#references)[[13]](#references)</sup>
+3. **Linganisha functions.** GoGrapher hulinganisha CFG za functions na kutoa alama zilizosanifishwa kutoka `0.0` hadi `1.0`. Ulinganishaji wake wa basic-blocks unategemea ulinganishaji wenye uzani wa instructions zinazofanana. Matches zenye uhakika mkubwa huunganisha functions zilizobadilishwa majina kwa utekelezaji safi. Matches dhaifu zaidi bado zinaweza kutambua package au module.<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
+4. **Thibitisha na uingize.** Thibitisha majina yaliyopendekezwa kwa kutumia mahusiano ya calls, constants, strings na side effects, kisha ingiza ripoti ya JSON kwa kutumia plugin ya GoResolver ya IDA au Ghidra.<sup>[[10]](#references)[[13]](#references)</sup>
 
-Sakinisha toolchain na uendeshe extractor na graph matcher kwa pamoja:<sup>[[10]](#references)</sup>
+Sakinisha toolchain na uendeshe extractor pamoja na graph matcher:<sup>[[10]](#references)</sup>
 
 ```bash
 python3 -m venv goresolver-env
@@ -576,34 +576,34 @@ goresolver resolve -v go1.23.4 -l os/exec net/http \
   -t 0.9 -o report.json /path/to/sample.exe
 ```
 
-Kizingiti chaguomsingi cha ulinganifu muhimu ni `0.9`. Swichi za `--extract` na `--graph` zinaweza kutenga hatua yoyote kati ya hizo, huku utekelezaji chaguomsingi ukiendesha zote mbili kwa sababu metadata ya runtime iliyorejeshwa na ushahidi wa CFG hukamilishana.<sup>[[10]](#references)</sup> Alama za CFG ni za kihisabati: inlining, build flags, usanifu na tofauti za matoleo ya library zinaweza kubadilisha umbo la grafu, kwa hiyo hifadhi functions ambazo hazijatatuliwa badala ya kulazimisha majina yenye kiwango cha chini cha uhakika.<sup>[[13]](#references)</sup>
+Kizingiti chaguomsingi cha match muhimu ni `0.9`. Swichi za `--extract` na `--graph` zinaweza kutenga mojawapo ya hatua hizo, huku mipangilio chaguomsingi ikiendesha zote mbili kwa sababu metadata ya runtime iliyorejeshwa na ushahidi wa CFG hukamilishana.<sup>[[10]](#references)</sup> Alama za CFG ni za kihesabu cha heuristic: inlining, build flags, usanifu na tofauti za matoleo ya library zinaweza kubadilisha umbo la graph, kwa hiyo hifadhi functions ambazo hazijatatuliwa badala ya kuzipa majina yenye uhakika mdogo.<sup>[[13]](#references)</sup>
 
-### Kurejesha jedwali la strings la Go
+### Kurejesha Go string table
 
-Binaries za Go huweka bytes za strings kutoka kila package iliyounganishwa kwenye jedwali moja linaloendelea. Entries hazimalizwi kwa NUL na miundo ya runtime haionyeshi msingi au ukubwa wa jedwali. Hata hivyo, compiler hupanga entries kwanza kwa urefu, kisha kwa alfabeti, katika mifumo ya uendeshaji na usanifu mbalimbali. Kwa hiyo, baada ya kupata entry moja, mchambuzi anaweza kupitia entries zilizo karibu na kutumia marejeleo mtambuka ya data kuhusisha strings na code.<sup>[[15]](#references)</sup>
+Binaries za Go huweka bytes za string kutoka kila package iliyounganishwa katika jedwali moja linaloendelea. Entries hazina NUL mwishoni, na miundo ya runtime haionyeshi base wala ukubwa wa jedwali. Hata hivyo, compiler hupanga entries kwanza kulingana na urefu, kisha alfabeti, katika mifumo ya uendeshaji na usanifu mbalimbali. Kwa hiyo, baada ya kupata entry moja, mchambuzi anaweza kupitia entries zilizo karibu na kutumia marejeleo ya data yanayoelekeza kwenye hizo ili kuhusisha strings na code.<sup>[[15]](#references)</sup>
 
-[GoStringExtractor](https://github.com/volexity/GoStringExtractor) huendesha workflow hii kiotomatiki katika IDA Pro na Ghidra. Subiri auto-analysis ikamilike kwanza kwa sababu plugin hutegemea marejeleo mtambuka ya data-segment. Nanga yake chaguomsingi ni string ya runtime `entersyscall`; kisha inaweza kuchanganua kuelekea upande wowote, kufafanua strings zilizorejeshwa kwenye database, na kuhamisha JSON inayohusisha strings na functions zinazozirejelea.<sup>[[14]](#references)</sup>
+[GoStringExtractor](https://github.com/volexity/GoStringExtractor) huendesha workflow hii kiotomatiki katika IDA Pro na Ghidra. Acha auto-analysis imalizike kwanza kwa sababu plugin hutegemea marejeleo ya data katika data segment. Anchor yake chaguomsingi ni runtime string `entersyscall`; baada ya hapo, inaweza kuchanganua kuelekea upande wowote, kufafanua strings zilizorejeshwa katika database na kuhamisha JSON mapping ya strings na functions zinazozirejelea.<sup>[[14]](#references)</sup>
 
-Chuja ripoti kwa package ya function inayorejelea ili kutenganisha code ya application au malware na kelele za library zilizounganishwa. Mbinu hii haiwezi kurejesha literals zilizoharibiwa na obfuscation kama vile mabadiliko ya Garble ya `-literals`. Bado inaweza kupanga strings za runtime ambazo hazijafichwa kwa obfuscation.<sup>[[14]](#references)[[15]](#references)</sup>
+Chuja ripoti kwa package ya function inayorejelea string ili kutenganisha code ya application au malware na kelele ya library zilizounganishwa. Mbinu hii haiwezi kurejesha literals zilizoharibiwa na obfuscation kama vile mabadiliko ya `-literals` ya Garble. Hata hivyo, inaweza kupanga runtime strings ambazo hazijafichwa kwa obfuscation.<sup>[[14]](#references)[[15]](#references)</sup>
 
-### Kurejesha aina za runtime za Go
+### Kurejesha aina za Go runtime
 
-Go hujumuisha taarifa za aina za runtime zinazotumiwa na vipengele kama garbage collection. Build information inapofutwa au disassembler isipoweza kuchanganua metadata hii, instructions zinaweza kuonekana kana kwamba zinapakia anwani za data zisizohusiana na eneo lengwa hubaki bila aina. Kurejesha metadata hubadilisha anwani hizo kuwa marejeleo ya aina yanayosomeka na kurahisisha kuelewa uwezo wa package.<sup>[[15]](#references)</sup>
+Go hujumuisha taarifa za aina za runtime zinazotumiwa na vipengele kama garbage collection. Build information inapofutwa au disassembler inaposhindwa kuchanganua metadata hii, maagizo yanaweza kuonekana kana kwamba yanapakia anwani za data zisizohusiana, na eneo lengwa hubaki bila aina iliyobainishwa. Kurejesha metadata hubadilisha anwani hizo kuwa marejeleo ya aina yanayosomeka na kurahisisha kuelewa uwezo wa package.<sup>[[15]](#references)</sup>
 
-[GoResolver](https://github.com/volexity/GoResolver) inaweza kutoa symbols na kuchanganua aina za runtime ili kuunda ripoti ya JSON. CLI ya sasa hutumia subcommand ya `resolve`:<sup>[[10]](#references)</sup>
+[GoResolver](https://github.com/volexity/GoResolver) inaweza kutoa symbols na kuchanganua aina za runtime ili kutengeneza ripoti ya JSON. CLI ya sasa hutumia subcommand ya `resolve`:<sup>[[10]](#references)</sup>
 
 ```bash
 pip install goresolver
 goresolver resolve -x -y -o report.json sample_bin.exe
 ```
 
-Chaguo la `-y`/`--types` huwasha uchanganuzi wa aina. Ingiza ripoti kwa kutumia plugin ya IDA Pro au Ghidra ya GoResolver ili kufafanua aina zilizorejeshwa na kutumia marejeleo yake katika hifadhidata ya uchanganuzi. Katika muundo wa ripoti ulioanzishwa na kipengele hiki, ukiacha `-y`, sehemu za anwani ya RTTI na aina zilizorejeshwa hubaki null.<sup>[[10]](#references)[[15]](#references)</sup>
+Chaguo la `-y`/`--types` huwasha uchanganuzi wa aina. Ingiza report kwa kutumia plugin ya IDA Pro au Ghidra ya GoResolver ili kufafanua aina zilizorejeshwa na kutumia marejeleo yake kwenye database ya uchanganuzi. Katika umbizo la report lililoanzishwa na kipengele hiki, kutotumia `-y` huacha washiriki wa anwani ya RTTI na aina zilizorejeshwa wakiwa null.<sup>[[10]](#references)[[15]](#references)</sup>
 
-GoResolver hutumia sampuli za PE, ELF na Mach-O za x86, AMD64, ARM na ARM64, kwa hivyo mtiririko huohuo wa kazi unatumika kwa binary za Go kutoka Windows, Linux na macOS.<sup>[[10]](#references)</sup>
+GoResolver hutumia sampuli za PE, ELF na Mach-O za x86, AMD64, ARM na ARM64, kwa hivyo workflow ileile inatumika kwa Go binaries za Windows, Linux na macOS.<sup>[[10]](#references)</sup>
 
-## Python Iliyokompiliwa
+## Python Iliyokompailiwa
 
-Katika ukurasa huu unaweza kupata maelezo ya jinsi ya kupata msimbo wa python kutoka kwenye binary ya python iliyokompiliwa ya ELF/EXE:
+Katika ukurasa huu unaweza kujifunza jinsi ya kupata code ya python kutoka kwenye binary ya ELF/EXE iliyokompailiwa ya python:
 
 
 {{#ref}}
@@ -612,7 +612,7 @@ Katika ukurasa huu unaweza kupata maelezo ya jinsi ya kupata msimbo wa python ku
 
 ## GBA - Game Boy Advance
 
-Ukipata **binary** ya mchezo wa GBA, unaweza kutumia zana mbalimbali ku **emulate** na **debug** mchezo huo:
+Ukipata **binary** ya mchezo wa GBA unaweza kutumia zana tofauti kuufanya **emulate** na kuufanyia **debug**:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_Pakua toleo la debug_) - Ina debugger yenye interface
 - [**mgba** ](https://mgba.io)- Ina debugger ya CLI
@@ -621,9 +621,9 @@ Ukipata **binary** ya mchezo wa GBA, unaweza kutumia zana mbalimbali ku **emulat
 
 Katika [**no$gba**](https://problemkaputt.de/gba.htm), kwenye _**Options --> Emulation Setup --> Controls**_** ** unaweza kuona jinsi ya kubonyeza **vitufe** vya Game Boy Advance
 
-![Mipangilio ya vidhibiti vya no$gba inayoonyesha ulinganifu wa vitufe vya Game Boy Advance](<../../images/image (581).png>)
+![no$gba controls configuration showing Game Boy Advance button mappings](<../../images/image (581).png>)
 
-Unapobonyeza, kila **kitufe kina thamani** inayokitambulisha:
+Kila **kitufe huwa na thamani** ya kukitambulisha kinapobonyezwa:
 
 ```
 A = 1
@@ -638,13 +638,13 @@ R = 256
 L = 256
 ```
 
-Kwa hiyo, katika aina hii ya programu, sehemu ya kuvutia itakuwa **jinsi programu inavyoshughulikia ingizo la mtumiaji**. Katika anwani **0x4000130** utapata function inayopatikana mara nyingi: **KEYINPUT**.
+Kwa hiyo, katika aina hii ya programu, sehemu ya kuvutia itakuwa **jinsi programu inavyoshughulikia ingizo la mtumiaji**. Katika anwani **0x4000130** utapata function inayopatikana kwa kawaida: **KEYINPUT**.
 
-![Mwonekano wa Ghidra wa binary ya GBA unaorejelea KEYINPUT kwenye anwani 0x4000130](<../../images/image (447).png>)
+![Mwonekano wa Ghidra wa binary ya GBA unaorejelea KEYINPUT katika anwani 0x4000130](<../../images/image (447).png>)
 
-Katika picha iliyotangulia, unaweza kuona kwamba function inaitwa kutoka **FUN_080015a8** (anwani: _0x080015fa_ na _0x080017ac_).
+Katika picha iliyotangulia unaweza kuona kwamba function inaitwa kutoka **FUN_080015a8** (anwani: _0x080015fa_ na _0x080017ac_).
 
-Katika function hiyo, baada ya baadhi ya shughuli za init (zisizo na umuhimu wowote):
+Katika function hiyo, baada ya shughuli za awali za uanzishaji (zisizo na umuhimu wowote):
 
 ```c
 void FUN_080015a8(void)
@@ -681,7 +681,7 @@ Imepata msimbo huu:
       if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
 
-`if` ya mwisho inakagua kama **`uVar4`** imo kwenye **Keys** za awali na si ufunguo wa sasa. Hii pia huitwa kuachia kitufe (ufunguo wa sasa umehifadhiwa kwenye **`uVar1`**).
+`if` ya mwisho inakagua ikiwa **`uVar4`** iko kwenye **Keys za mwisho** na si key ya sasa; hii pia huitwa kuachia kitufe (key ya sasa imehifadhiwa kwenye **`uVar1`**).
 
 ```c
         if (uVar1 == 4) {
@@ -711,17 +711,17 @@ Imepata msimbo huu:
                 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 
-Katika code iliyotangulia unaweza kuona kwamba tunalinganisha **uVar1** (mahali ambapo **thamani ya kitufe kilichobonyezwa** ipo) na baadhi ya thamani:
+Katika msimbo uliotangulia, tunaweza kuona kwamba tunalinganisha **uVar1** (mahali ambapo **thamani ya kitufe kilichobonyezwa** huhifadhiwa) na baadhi ya thamani:
 
-- Kwanza, inalinganishwa na **thamani 4** (kitufe cha **SELECT**): Katika changamoto hii, kitufe hiki hufuta skrini
-- Kisha thamani inalinganishwa na **8** (kitufe cha **START**); katika changamoto hii, njia hiyo hukagua kama code iliyoingizwa ni halali.
-  - Katika hali hii, var **`DAT_030000d8`** inalinganishwa na 0xf3 na ikiwa thamani ni sawa, code fulani hutekelezwa.
+- Kwanza, inalinganishwa na **thamani 4** (kitufe cha **SELECT**): Katika changamoto hii, kitufe hiki husafisha skrini
+- Kisha inalinganisha thamani na **8** (kitufe cha **START**); katika changamoto hii, njia hiyo hukagua kama msimbo ulioingizwa ni halali.
+  - Katika hali hii, var **`DAT_030000d8`** inalinganishwa na 0xf3 na msimbo fulani hutekelezwa ikiwa thamani zinafanana.
 - Katika hali nyingine zote, kaunta (`DAT_030000d4`) hukaguliwa na kuongezwa.\
-  Kaunta ikiwa chini ya 8, thamani za vitufe vilivyobonyezwa hukusanywa katika `DAT_030000d8`.
+  Mradi tu kaunta iko chini ya 8, thamani za vitufe vilivyobonyezwa hujumlishwa kwenye `DAT_030000d8`.
 
-Kwa hiyo, katika changamoto hii, kwa kujua thamani za vitufe, ulihitaji **kubonyeza mchanganyiko wenye urefu wa chini ya 8 ambao jumla yake ni 0xf3.**
+Kwa hiyo, katika changamoto hii, kwa kujua thamani za vitufe, ulihitaji **kubonyeza mfuatano wenye urefu wa chini ya 8, ambao jumla yake ni 0xf3.**
 
-**Marejeleo ya mafunzo haya:** [maelezo ya changamoto ya Nostalgia yaliyohifadhiwa](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
+**Marejeleo ya mafunzo haya:** [maandishi ya changamoto ya Nostalgia yaliyohifadhiwa kwenye kumbukumbu](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
 
 ## Game Boy
 
@@ -733,36 +733,36 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 ## Kozi
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (kuondoa obfuscation ya binary)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Uondoaji wa ufichaji wa binary)
 
 ## References
 
-- [1] [Kurahisisha obfuscation ya MBA kwa CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [1] [Kurahisisha ufichaji wa MBA kwa CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
 - [2] [Hifadhi ya Trail of Bits CoBRA](https://github.com/trailofbits/CoBRA)
-- [3] [Kudecode strings za Rust - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [3] [Kufasiri strings za Rust - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
 - [4] [pentestpartners/reverse-engineering - strings za Rust](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
-- [6] [Nostalgia - mafunzo ya GBA reversing (yaliyohifadhiwa)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
-- [7] [Kushinda Reverse Engineering inayosaidiwa na AI, au Angalau Kujaribu](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
-- [8] [Mbinu ya Kulinganisha Control Flow Graphs kwa Kutumia Ulinganishaji wa Basic Block](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
+- [6] [Nostalgia - mafunzo ya GBA reversing (yaliyohifadhiwa kwenye kumbukumbu)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
+- [7] [Kushinda Reverse Engineering inayosaidiwa na AI, au angalau kujaribu](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
+- [8] [Mbinu ya kulinganisha Control Flow Graphs kwa kutumia ulinganishaji wa Basic Block](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
 - [9] [Mandiant GoReSym](https://github.com/mandiant/GoReSym)
 - [10] [Hifadhi ya Volexity GoResolver](https://github.com/volexity/GoResolver)
 - [11] [Volexity GoGrapher](https://github.com/volexity/GoGrapher)
-- [12] [Utaratibu wa obfuscation wa Garble](https://github.com/burrowers/garble#mechanism)
-- [13] [GoResolver: Kutumia Ufanano wa Control-Flow Graph ili Kuondoa Obfuscation ya Golang Binaries Kiotomatiki](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
+- [12] [Mbinu ya ufichaji ya Garble](https://github.com/burrowers/garble#mechanism)
+- [13] [GoResolver: Kutumia mfanano wa Control-Flow Graph ili kuondoa ufichaji wa binary za Golang kiotomatiki](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
 - [14] [Hifadhi ya Volexity GoStringExtractor](https://github.com/volexity/GoStringExtractor)
-- [15] [Go Get 'Em: Maboresho ya Zana za Golang za Volexity](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
-- [16] [REA: Reverse Engineer Chochote](https://github.com/morluto/rea)
-- [17] [Uchambuzi wa managed-code wa REA](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
-- [18] [Mwongozo wa REA CLI na Evidence](https://github.com/morluto/rea/blob/main/docs/cli.md)
-- [19] [DispatchThis: Mchakato wa Binary Ninja wa kuondoa control-flow flattening](https://github.com/YungBinary/DispatchThis)
-- [20] [eSentire: Uvamizi wa PaperCut MF Zero-Day, Java Loader, Web Shell na AdaptixC2](https://esentire.com/blog/papercut-mf-zero-day-intrusion-java-loader-web-shell-and-adaptixc2-via-cve-2026-82078-and-cve-2026-81578)
+- [15] [Go Get 'Em: Masasisho ya zana za Golang za Volexity](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
+- [16] [REA: Reverse Engineer Anything](https://github.com/morluto/rea)
+- [17] [Uchambuzi wa managed code wa REA](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
+- [18] [Mwongozo wa CLI na Evidence wa REA](https://github.com/morluto/rea/blob/main/docs/cli.md)
+- [19] [DispatchThis: Mtiririko wa kazi wa kuondoa control-flow flattening kwa Binary Ninja](https://github.com/YungBinary/DispatchThis)
+- [20] [eSentire: Uvamizi wa PaperCut MF Zero-Day, Java Loader, Web Shell, na AdaptixC2](https://esentire.com/blog/papercut-mf-zero-day-intrusion-java-loader-web-shell-and-adaptixc2-via-cve-2026-82078-and-cve-2026-81578)
 - [21] [README ya IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge)
-- [22] [Utekelezaji wa IDA bridge server](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
-- [23] [Utekelezaji wa Ghidra bridge server](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
-- [24] [Oracle - InetSocketAddress(int) hufunga kwenye anwani ya wildcard](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
-- [25] [gore: zana za Godot reverse engineering](https://github.com/figurophobia/gore)
-- [26] [Utekelezaji wa kurejesha key wa gore](https://github.com/figurophobia/gore/blob/master/src/keyfind.rs)
+- [22] [Utekelezaji wa seva ya IDA bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
+- [23] [Utekelezaji wa seva ya Ghidra bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
+- [24] [Oracle - InetSocketAddress(int) hufunga kwenye anwani wildcard](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
+- [25] [gore: Zana ya Godot reverse engineering](https://github.com/figurophobia/gore)
+- [26] [Utekelezaji wa urejeshaji wa key wa gore](https://github.com/figurophobia/gore/blob/master/src/keyfind.rs)
 - [27] [Muundo wa encrypted-blob wa gore](https://github.com/figurophobia/gore/blob/master/src/crypto.rs)
-- [28] [Utekelezaji wa command na recovery wa gore](https://github.com/figurophobia/gore/blob/master/src/main.rs)
+- [28] [Utekelezaji wa amri na urejeshaji wa gore](https://github.com/figurophobia/gore/blob/master/src/main.rs)
 {{#include ../../banners/hacktricks-training.md}}
