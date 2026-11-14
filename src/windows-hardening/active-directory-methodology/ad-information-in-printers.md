@@ -2,14 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-インターネット上には、LDAP を設定したプリンターにデフォルトまたは弱いログイン認証情報を残す危険性を**指摘する**ブログがいくつもあります。  \
-これは、攻撃者が**プリンターを騙して不正な LDAP server に対して認証させ**（通常は `nc -vv -l -p 389` または `slapd -d 2` で十分です）、プリンターの**認証情報を平文で**取得できるためです。
+LDAP credentialsを保存したプリンターは、サーバー設定を変更し、不正なエンドポイントに認証させることで、それらを漏えいする可能性があります。<sup>[[2]](#references)</sup> 結果はbind方式によって異なります。保護されていないsimple bindではパスワードが漏えいしますが、SASL challenge-response bindでは平文のパスワードは漏えいしません。<sup>[[8]](#references)</sup> [LDAP authentication and transport security](../../network-services-pentesting/pentesting-ldap.md#cleartext-credentials-and-tls-downgrade-risks)を参照してください。
 
-また、多くのプリンターには**ユーザー名を含むログ**が保存されており、Domain Controller からすべてのユーザー名を**ダウンロード**できる場合もあります。
+また、複数のプリンターには**ユーザー名を含むログ**が保存されていたり、Domain Controllerから**すべてのユーザー名をダウンロード**できたりすることがあります。
 
-こうした**機密情報**と、一般的な**セキュリティの欠如**により、プリンターは攻撃者にとって非常に興味深い対象です。
+このような**機密情報**と、一般的な**セキュリティ対策の不足**により、プリンターは攻撃者にとって非常に興味深い標的です。
 
-このトピックに関する入門ブログ:
+このトピックについては、次の入門ブログを参照してください。
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)<sup>[[4]](#references)</sup>
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)<sup>[[5]](#references)</sup>
@@ -18,79 +17,83 @@
 
 ## プリンターの設定
 
-- **場所**: LDAP server の一覧は通常、Web インターフェースにあります（例: *Network ➜ LDAP Setting ➜ Setting Up LDAP*）。
-- **動作**: 多くの組み込み Web server では、認証情報を再入力せずに LDAP server を変更できます（使いやすさのための機能 → セキュリティリスク）。
-- **悪用方法**: LDAP server のアドレスを攻撃者が管理するホストにリダイレクトし、*Test Connection* / *Address Book Sync* ボタンを使ってプリンターに自分の server への bind を強制します。
+- **場所**: LDAPサーバーのリストは通常、Webインターフェースにあります（例: *Network ➜ LDAP Setting ➜ Setting Up LDAP*）。
+- **動作**: 多くの組み込みWebサーバーでは、**credentialsを再入力せずに**LDAPサーバーを変更できます（利便性のための機能 → セキュリティリスク）。
+- **Exploit**: LDAPサーバーのアドレスを攻撃者が制御するホストにリダイレクトし、*Test Connection* / *Address Book Sync*ボタンを使って、プリンターから自分のホストにbindさせます。
 
 ---
 
-## 認証情報の取得
+## Credentialsの取得
 
-### 方法 1 – Netcat Listener
+### Method 1 – Netcatリスナー
 
 ```bash
 sudo nc -k -v -l -p 389     # Plain LDAP only
 ```
 
-小型／旧型の MFP は、bind DN とパスワードが raw BER stream 上で可視の単純な *simple-bind* を送信する場合があります。最新のデバイスは通常、最初に anonymous query を実行してから bind を試みるため、結果は異なります。<sup>[[1]](#references)</sup>
+単純な BindRequest では、サーバーが後でログインを拒否した場合でも、BER stream に bind DN と password が露出する可能性があります。匿名 lookup や SASL negotiation だけでは、保存された password は露出しません。<sup>[[8]](#references)</sup>
 
-636/3269 で単純な `nc` listener を起動しても TLS ciphertext を受信するだけです。LDAPS のテストには TLS に対応した LDAP endpoint が必要であり、デバイスがサーバー証明書を正しく検証する場合、リダイレクトは失敗します。
+636/3269 で `nc` の listener を立てても、LDAP bind ではなく TLS handshake が見えるだけです。LDAPS には TLS 対応の endpoint が必要です。証明書の検証だけでは、プリンターが変更された hostname を受け入れ、新しい endpoint がその hostname に対する有効な証明書を持っている場合、pass-back を防げません。クライアントは、保存された credential の送信先として許可するサーバーも制限する必要があります。<sup>[[8]](#references)</sup>
 
-### 方法 2 – 完全な Rogue LDAP server（推奨）
+### Method 2 – Full Rogue LDAP server（推奨）
 
-多くのデバイスは認証前に anonymous search を実行するため、実際の LDAP daemon を起動すると、はるかに確実な結果が得られます。<sup>[[1]](#references)</sup>
+プリンターは、bind を試みる前に有効な LDAP response を要求する場合があります。<sup>[[10]](#references)</sup> Full LDAP server でこの予備的なやり取りに対応できますが、強力な SASL mechanism または意図された TLS server に pinning されたクライアントに password を明かさせることはできません。<sup>[[8]](#references)[[10]](#references)</sup>
 
 ```bash
 # Debian/Ubuntu example
 sudo apt install slapd ldap-utils
-sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
+sudo dpkg-reconfigure slapd   # use a base DN compatible with the printer lookup
 
 # run slapd in foreground / debug 2
 slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
 
-プリンターが検索を実行すると、デバッグ出力に平文の認証情報が表示されます。
+lookupは接続の証拠として扱い、passwordが漏えいした証明とは見なさないでください。passwordが露出するのは、クライアントがpasswordを含む平文bindを送信した場合のみです。実際のbindメカニズムとTLSの状態を確認してください。<sup>[[8]](#references)</sup>
 
-> 💡 Responderには、偽装LDAPおよびSMB認証サービスが含まれています。単純なLDAP bindでは設定済みパスワードが漏えいする可能性があります。一方、NTLM認証で得られるのはチャレンジレスポンス情報です。どちらの場合も平文パスワードが得られるとは説明しないでください。
+> 💡  Responderには、rogue LDAPおよびSMB認証サービスが含まれています。単純なLDAP bindでは設定済みpasswordが露出する可能性がありますが、NTLM認証で生成されるのはchallenge-responseデータです。どちらもclear-text passwordとして説明しないでください。
+
+### SASLメカニズムの選択
+
+一部のプリンターのLDAPクライアントは、LDAPサーバーが通知するメカニズムから選択します。<sup>[[8]](#references)[[10]](#references)</sup> 調査によると、通知された平文SASLメカニズムを受け入れるクライアントは、通常のNTLMネゴシエーションならchallenge-responseデータしか得られないところで、passwordを送信する可能性があります。<sup>[[9]](#references)[[10]](#references)</sup> これは**クライアントポリシーの不備**であり、すべてのSASL bindに当てはまる性質ではありません。より強力なメカニズムを要求するクライアントや、意図したTLSサーバーをピン留めするクライアントなら、代わりに接続を拒否するはずです。<sup>[[8]](#references)</sup> OpenLDAPでは、平文に対応するSASLメカニズムはデフォルトで無効になっているため、標準状態のデーモンを使っても、この挙動がプリンターに存在する証明にはなりません。<sup>[[11]](#references)</sup>
 
 ---
 
 ## 最近のPass-Back脆弱性（2024-2025）
 
-Pass-backは*理論上の問題ではありません*。ベンダーは2024年から2025年にかけて、この攻撃クラスを正確に説明するアドバイザリを公開し続けています。
+Pass-Backは理論上の問題ではありません。ベンダーは2024年と2025年にも、この攻撃クラスを正確に説明するアドバイザリを公開し続けています。
 
 ### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
 
-Xerox VersaLink C70xx MFPのファームウェアバージョン57.69.91以下では、認証済みの管理者（またはデフォルトの認証情報が変更されていない場合は誰でも）が、次の操作を実行できました。
+Xerox VersaLink C70xx MFPのファームウェア≤ 57.69.91では、認証済みの管理者（またはデフォルトの認証情報が変更されていない場合は誰でも）が、次の操作を実行できました。
 
-* **CVE-2024-12510 – LDAP pass-back**: LDAPサーバーアドレスを変更して検索を実行させると、デバイスから攻撃者が制御するホストへ設定済みのWindows認証情報が漏えいします。
-* **CVE-2024-12511 – SMB/FTP pass-back**: *scan-to-folder*の宛先を使った同一の問題で、NetNTLMv2またはFTPの平文認証情報が漏えいします。<sup>[[2]](#references)</sup>
+* **CVE-2024-12510 – LDAP pass-back**: LDAPサーバーのアドレスを変更してlookupを実行すると、デバイスが設定済みのWindows認証情報を攻撃者が管理するホストにleakする。
+* **CVE-2024-12511 – SMB/FTP pass-back**: *scan-to-folder*の宛先を介した同様の問題で、NetNTLMv2またはFTPの平文認証情報がleakする。<sup>[[2]](#references)</sup>
 
-次のような単純なリスナーで対応できます。
+次のような単純なlistenerを使えます。
 
 ```bash
 sudo nc -k -v -l -p 389     # capture LDAP bind
 ```
 
-または、不正な SMB server（`impacket-smbserver`）を用意すれば、認証情報を収集できます。  
+または不正な SMB server（`impacket-smbserver`）を用意するだけで、認証情報を収集できます。  
 
 ### Canon imageRUNNER / imageCLASS – 2025年5月20日のアドバイザリ
 
-Canonは、数十種類の Laser および MFP 製品ラインにおける **SMTP/LDAP pass-back** の脆弱性を確認しました。管理者アクセス権を持つ攻撃者は、サーバー設定を変更して、LDAP **または** SMTP の保存済み認証情報を取得できます（多くの組織では、スキャンした文書をメール送信するために、特権アカウントを使用しています）。<sup>[[3]](#references)</sup>
+Canonは、数十のレーザーおよびMFP製品ラインにおける **SMTP/LDAP pass-back** の脆弱性を確認しました。管理者アクセス権を持つ攻撃者はサーバー設定を変更し、LDAP **または** SMTPに保存された認証情報を取得できます（多くの組織では、スキャンしてメールを送信するために特権アカウントを使用しています）。<sup>[[3]](#references)</sup>
 
-ベンダーのガイダンスでは、次の対策が明示的に推奨されています。
+ベンダーのガイダンスでは、次の対策を明確に推奨しています。
 
 1. パッチ適用済みファームウェアが利用可能になり次第、更新する。
-2. 強固で一意な管理者パスワードを使用する。
-3. プリンター連携に特権 AD アカウントを使用しない。
+2. 強力で一意の管理者パスワードを使用する。
+3. プリンター連携に特権ADアカウントを使用しない。
 
 ---
 
-### Brother デバイスおよび OEM 製品 – シリアル番号から管理者アクセスを取得し、サービス認証情報を入手
+### Brother製デバイスおよびOEM製品 – シリアル番号から管理者アクセスを取得し、サービス認証情報を窃取
 
-2025年の協調的な脆弱性開示により、影響を受ける Brother デバイスで特に有用な攻撃チェーンが実証されました。この脆弱性群の一部は OEM モデルにも影響するため、ベンダーのアドバイザリで正確なモデルを確認してください。脆弱なファームウェアでは、認証されていない攻撃者が HTTP/HTTPS/IPP 経由でデバイスのシリアル番号を取得できます。また、SNMP や PJL などの管理プロトコルからシリアル番号を取得できる場合もあります。初期パスワードが変更されていなければ、シリアル番号から管理者パスワードを確定的に導き出せます。認証後、別の pass-back の脆弱性 CVE-2024-51984 により、LDAP や FTP などの外部サービス用に設定されたパスワードが平文で漏えいし、プリンター管理アクセスが再利用可能なネットワーク認証情報の取得につながります。ファームウェア更新によりサービスパスワードの漏えいは修正されますが、すでに製造されたデバイスでは、シリアル番号から導かれる初期管理者パスワードを管理者が変更する必要があります。<sup>[[6]](#references)</sup>
+2025年の協調的な脆弱性開示により、影響を受けるBrother製デバイスで特に有用な攻撃チェーンが実証されました。脆弱性の一部はOEMモデルにも影響するため、ベンダーのアドバイザリで正確なモデルを確認してください。脆弱なファームウェアでは、認証されていない攻撃者がHTTP/HTTPS/IPP経由でデバイスのシリアル番号を取得できます。シリアル番号は、SNMPやPJLなどの管理プロトコルからも取得できる場合があります。工場出荷時のパスワードが変更されていない場合、シリアル番号から管理者パスワードを特定できます。認証後、別のpass-back脆弱性であるCVE-2024-51984により、LDAPやFTPなどの設定済み外部サービスのパスワードが平文で露呈し、プリンターの管理アクセスが再利用可能なネットワーク認証情報につながります。ファームウェアの更新でサービスパスワードの漏えいは修正されますが、既に製造されたデバイスでは、シリアル番号から導出される初期管理者パスワードを引き続き変更する必要があります。<sup>[[6]](#references)</sup>
 
-現在の Metasploit には、HTTP、SNMP、または PJL 経由でシリアル番号を特定し、初期パスワードの候補を生成して、オプションで Web コンソールに対して検証する auxiliary module が含まれています。`DiscoverSerialVia=AUTO` は、サポートされている検出方法を順に試します。資産管理台帳にシリアル番号が記録されている場合は、代わりに `TargetSerial` を指定してください。<sup>[[7]](#references)</sup>
+現行のMetasploitには、HTTP、SNMP、またはPJL経由でシリアル番号を特定し、初期パスワード候補を生成して、オプションでWebコンソールに対して検証するauxiliary moduleが含まれています。`DiscoverSerialVia=AUTO`は、サポートされている検出方法を試します。資産台帳にシリアル番号が記録されている場合は、代わりに`TargetSerial`を指定してください。<sup>[[7]](#references)</sup>
 
 ```text
 msfconsole -q
@@ -100,46 +103,52 @@ set DiscoverSerialVia AUTO
 run
 ```
 
-認可された資産の検証にのみ使用してください。パスワードが機能するかどうかは、正確なモデルと、特に工場出荷時の管理者パスワードがすでに変更されているかどうかに左右されます。<sup>[[6]](#references)[[7]](#references)</sup>
+結果は、許可された資産の検証にのみ使用してください。パスワードが機能するかどうかは正確なモデルに依存し、特に、工場出荷時の管理者パスワードがすでに変更されているかどうかが重要です。<sup>[[6]](#references)[[7]](#references)</sup>
 
 ---
 
 ## 自動列挙 / Exploitation Tools
 
-| Tool | 目的 | 例 |
+| ツール | 目的 | 例 |
 |------|---------|---------|
-| **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL の悪用、ファイルシステムへのアクセス、デフォルト認証情報の確認、*SNMP discovery* | `python pret.py 192.168.1.50 pjl` |
+| **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL の悪用、ファイルシステムへのアクセス、デフォルト認証情報の確認、*SNMP の探索*。[PJL assessment](../../network-services-pentesting/9100-pjl.md) を参照 | `python pret.py 192.168.1.50 pjl` |
 | **Praeda** | HTTP/HTTPS 経由で設定情報（アドレス帳や LDAP 認証情報を含む）を収集 | `perl praeda.pl -t 192.168.1.50` |
 | **Responder / ntlmrelayx** | 不正な認証サービスを実行し、SMB コールバックから NetNTLM を取得 / リレー | `sudo responder -I eth0 -v` |
 | **Metasploit Brother auxiliary** | シリアル番号を特定し、工場出荷時の管理者パスワード候補を導出して、Web コンソールへのアクセスを検証 | `use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978` |
 
 ---
 
-## ハードニングと検知
+## Hardening & Detection
 
-1. **パッチ適用 / ファームウェア更新** – MFP に速やかに適用します（ベンダーの PSIRT 公報を確認してください）。
-2. **工場出荷時の管理者パスワードを変更** – ファームウェアだけでは、すでに製造された該当する Brother / OEM デバイスのシリアル番号由来の初期パスワードは削除されません。<sup>[[6]](#references)</sup>
-3. **最小権限のサービスアカウント** – LDAP/SMB/SMTP に Domain Admin を使用せず、*読み取り専用*の OU スコープに制限します。
-4. **管理アクセスを制限** – プリンターの Web/IPP/SNMP インターフェースを管理 VLAN または ACL/VPN の背後に配置します。
-5. **プリンターの外向き通信を制限** – 各デバイスが、想定される DC/LDAP、メール、DNS/NTP、印刷、スキャンファイルの宛先とのみ通信できるようにします。Pass-back には、攻撃者が選択したエンドポイントへのコールバックが必要です。
-6. **未使用のプロトコルを無効化** – FTP、Telnet、raw-9100、古い SSL 暗号スイート。
-7. **監査ログを有効化** – LDAP/SMTP の失敗を syslog に記録できるデバイスもあります。予期しない bind を関連付けて確認します。
-8. **認証先を監視** – プリンターが許可リスト外のホストへ LDAP、SMB、SMTP、FTP を開始した場合、特に管理ログインや設定変更の直後はアラートを出します。
-9. **SNMPv3 を使用するか、SNMP を無効化** – community `public` はデバイス情報やシリアル番号を漏らすことがよくあります。
+1. **速やかに MFP にパッチを適用 / firmware-update する**（ベンダーの PSIRT 公告を確認）。
+2. **工場出荷時の管理者パスワードを変更する** – firmware だけでは、以前に製造された影響対象の Brother / OEM デバイスに設定された、シリアル番号から導出される初期パスワードは削除されません。<sup>[[6]](#references)</sup>
+3. **サービスアカウントに最小権限を適用する** – LDAP/SMB/SMTP で Domain Admin を使用せず、対象 OU の範囲を *読み取り専用* に制限する。
+4. **管理アクセスを制限する** – プリンターの Web/IPP/SNMP インターフェースを管理 VLAN 内に配置するか、ACL/VPN の背後に置く。
+5. **プリンターの外向き通信を制限する** – 各デバイスが、想定される DC/LDAP、メール、DNS/NTP、印刷、スキャンファイルの宛先にのみ接続できるようにする。Pass-back には、攻撃者が選択したエンドポイントへのコールバックが必要です。
+6. **未使用のプロトコルを無効にする** – FTP、Telnet、raw-9100、古い SSL 暗号スイート。
+7. **監査ログを有効にする** – 一部のデバイスでは LDAP/SMTP の失敗を syslog に記録できます。不審な bind を関連付けて確認してください。
+8. **認証先を監視する** – プリンターが許可リスト外のホストに LDAP、SMB、SMTP、FTP 接続を開始した場合、特に管理者ログインや設定変更の直後はアラートを発報する。
+9. **SNMPv3 を使用するか、SNMP を無効にする** – community `public` は、デバイスやシリアル番号の情報を漏えいさせることがよくあります。
+
+---
+
+
 
 ---
 
 
-
----
 
 ## References
 
-- [1] [プリンターにすぎない…最悪何が起こる？](https://grimhacker.com/2018/03/09/just-a-printer/)
-- [2] [Xerox Versalink C7025 複合機：Pass-Back 攻撃の脆弱性（修正済み）](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
-- [3] [CP2025-004 製造用プリンター、オフィス / 小規模オフィス向け複合機、レーザープリンターの脆弱性緩和 / 修正](https://psirt.canon/advisory-information/cp2025-004/)
+- [1] [単なるプリンターなのに……最悪、何が起こるというのか？](https://grimhacker.com/2018/03/09/just-a-printer/)
+- [2] [Xerox Versalink C7025 多機能プリンター：Pass-Back Attack の脆弱性（修正済み）](https://www.rapid7.com/blog/post/2025/02/14/xerox-versalink-c7025-multifunction-printer-pass-back-attack-vulnerabilities-fixed/)
+- [3] [CP2025-004：業務用プリンター、オフィス / 小規模オフィス向け多機能プリンター、レーザープリンターの脆弱性緩和 / 修正](https://psirt.canon/advisory-information/cp2025-004/)
 - [4] [Netcat を使用してプリンター経由でドメイン認証情報を取得する](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
-- [5] [ペネトレーションテスト中に複合機を悪用する](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- [5] [ペネトレーションテスト中に多機能プリンターを悪用する](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [6] [複数の Brother デバイス：複数の脆弱性（修正済み）](https://www.rapid7.com/blog/post/multiple-brother-devices-multiple-vulnerabilities-fixed/)
 - [7] [Metasploit：Brother のデフォルト管理者認証バイパスモジュール](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978.rb)
+- [8] [RFC 4513 – LDAP 認証方式とセキュリティメカニズム](https://datatracker.ietf.org/doc/html/rfc4513)
+- [9] [LDAP passback Docker サーバー](https://github.com/cybertrinchera/ldap-passback-docker)
+- [10] [LDAP pass back attack – ACCEIS](https://www.acceis.fr/ldap-pass-back-attack/)
+- [11] [slapd-config(5) – SASL セキュリティプロパティ](https://man7.org/linux/man-pages/man5/slapd-config.5.html)
 {{#include ../../banners/hacktricks-training.md}}
