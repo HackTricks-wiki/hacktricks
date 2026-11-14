@@ -2,8 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.  \
-This is because an attacker could **trick the printer to authenticate against a rogue LDAP server** (typically a `nc -vv -l -p 389` or `slapd -d 2` is enough) and capture the printer **credentials in clear-text**.
+A printer with saved LDAP credentials can expose them if its server setting is changed and it then authenticates to a rogue endpoint.<sup>[[2]](#references)</sup> The result depends on the bind method: an unprotected simple bind reveals the password, while a SASL challenge-response bind does not reveal it as plaintext.<sup>[[8]](#references)</sup> See [LDAP authentication and transport security](../../network-services-pentesting/pentesting-ldap.md#cleartext-credentials-and-tls-downgrade-risks).
 
 Also, several printers will contain **logs with usernames** or could even be able to **download all usernames** from the Domain Controller.
 
@@ -32,26 +31,30 @@ Some introductory blogs about the topic:
 sudo nc -k -v -l -p 389     # Plain LDAP only
 ```
 
-Small/old MFPs may send a simple *simple-bind* whose bind DN and password are visible in the raw BER stream. Modern devices usually perform an anonymous query first and then attempt the bind, so results vary.<sup>[[1]](#references)</sup>
+A simple BindRequest can expose the bind DN and password in the BER stream even if the server later rejects the login. An anonymous lookup or SASL negotiation alone does not expose that stored password.<sup>[[8]](#references)</sup>
 
-A plain `nc` listener on 636/3269 only receives TLS ciphertext; testing LDAPS requires a TLS-capable LDAP endpoint, and redirection should fail when the device correctly validates the server certificate.
+A plain `nc` listener on 636/3269 sees a TLS handshake, not an LDAP bind. LDAPS requires a TLS-capable endpoint. Certificate validation alone does not stop pass-back if the printer accepts a changed hostname and the new endpoint has a valid certificate for that hostname; the client must also restrict which server is authorized to receive the stored credential.<sup>[[8]](#references)</sup>
 
 ### Method 2 – Full Rogue LDAP server (recommended)
 
-Because many devices will issue an anonymous search *before* authenticating, standing up a real LDAP daemon yields much more reliable results:<sup>[[1]](#references)</sup>
+A printer may require a valid LDAP response before it attempts a bind.<sup>[[10]](#references)</sup> A full LDAP server can handle that preliminary exchange, but it cannot make a client pinned to a strong SASL mechanism or the intended TLS server reveal its password.<sup>[[8]](#references)[[10]](#references)</sup>
 
 ```bash
 # Debian/Ubuntu example
 sudo apt install slapd ldap-utils
-sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
+sudo dpkg-reconfigure slapd   # use a base DN compatible with the printer lookup
 
 # run slapd in foreground / debug 2
 slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
 
-When the printer performs its lookup you will see the clear-text credentials in the debug output.
+Treat a lookup as evidence of a connection, not proof of password disclosure. A password is exposed only if the client sends a plaintext password-bearing bind; check the actual bind mechanism and TLS state.<sup>[[8]](#references)</sup>
 
 > 💡  Responder includes rogue LDAP and SMB authentication services. A simple LDAP bind can expose the configured password, whereas NTLM authentication produces challenge-response material; do not describe both outcomes as a clear-text password.
+
+### SASL mechanism selection
+
+Some printer LDAP clients choose from the mechanisms an LDAP server advertises.<sup>[[8]](#references)[[10]](#references)</sup> Research showed that a client willing to accept an advertised plaintext SASL mechanism could send a password where its usual NTLM negotiation would only yield challenge-response data.<sup>[[9]](#references)[[10]](#references)</sup> This is a **client-policy failure**, not a property of all SASL binds: a client that requires a stronger mechanism or pins the intended TLS server should fail closed instead.<sup>[[8]](#references)</sup> OpenLDAP disables plaintext-capable SASL mechanisms by default, so a stock daemon does not establish that this behavior exists on a printer.<sup>[[11]](#references)</sup>
 
 ---
 
@@ -108,7 +111,7 @@ Use the result only to validate authorized assets. Whether the password works de
 
 | Tool | Purpose | Example |
 |------|---------|---------|
-| **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL abuse, file-system access, default-creds check, *SNMP discovery* | `python pret.py 192.168.1.50 pjl` |
+| **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL abuse, file-system access, default-creds check, *SNMP discovery*; see [PJL assessment](../../network-services-pentesting/9100-pjl.md) | `python pret.py 192.168.1.50 pjl` |
 | **Praeda** | Harvest configuration (including address books & LDAP creds) via HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
 | **Responder / ntlmrelayx** | Run rogue authentication services and capture/relay NetNTLM from SMB callbacks | `sudo responder -I eth0 -v` |
 | **Metasploit Brother auxiliary** | Discover a serial, derive the candidate factory administrator password, and verify web-console access | `use auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978` |
@@ -133,6 +136,8 @@ Use the result only to validate authorized assets. Whether the password works de
 
 ---
 
+
+
 ## References
 
 - [1] [It's just a printer… What's the worst that could happen?](https://grimhacker.com/2018/03/09/just-a-printer/)
@@ -142,4 +147,8 @@ Use the result only to validate authorized assets. Whether the password works de
 - [5] [Exploiting Multifunction Printers During A Penetration Test Engagement](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [6] [Multiple Brother Devices: Multiple Vulnerabilities (FIXED)](https://www.rapid7.com/blog/post/multiple-brother-devices-multiple-vulnerabilities-fixed/)
 - [7] [Metasploit: Brother default administrator authentication bypass module](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/admin/misc/brother_default_admin_auth_bypass_cve_2024_51978.rb)
+- [8] [RFC 4513 – LDAP authentication methods and security mechanisms](https://datatracker.ietf.org/doc/html/rfc4513)
+- [9] [LDAP passback Docker server](https://github.com/cybertrinchera/ldap-passback-docker)
+- [10] [LDAP pass back attack – ACCEIS](https://www.acceis.fr/ldap-pass-back-attack/)
+- [11] [slapd-config(5) – SASL security properties](https://man7.org/linux/man-pages/man5/slapd-config.5.html)
 {{#include ../../banners/hacktricks-training.md}}
