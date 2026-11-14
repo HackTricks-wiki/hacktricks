@@ -1,134 +1,140 @@
-# Side-Channel napadi putem potvrda isporuke u E2EE Messenger aplikacijama
+# Napadi bočnim kanalom preko potvrda isporuke u E2EE messengerima
 
 {{#include ../banners/hacktricks-training.md}}
 
-Potvrde isporuke su obavezne u modernim end-to-end encrypted (E2EE) Messenger aplikacijama, jer klijenti moraju da znaju kada je ciphertext dešifrovan kako bi mogli da odbace ratcheting state i ephemeral keys. Server prosleđuje opaque blobs, pa acknowledgements uređaja (dvostruke kvačice) emituje primalac nakon uspešnog dešifrovanja. Merenje round-trip time (RTT) između akcije koju je pokrenuo attacker i odgovarajuće potvrde isporuke otkriva timing channel visoke rezolucije koji leakuje stanje uređaja i online prisustvo i može se zloupotrebiti za covert DoS. Multi-device "client-fanout" deployment-i povećavaju leakage jer svaki registrovani uređaj dešifruje probe i vraća sopstvenu potvrdu.<sup>[[1]](#references)</sup>
+Potvrde isporuke su obavezne u modernim end-to-end enkriptovanim (E2EE) messengerima jer klijenti moraju da znaju kada je šifrat dekriptovan kako bi mogli da odbace stanje ratchet-a i ephemeral ključeve. Server prosleđuje neprozirne blobove, pa uređaj primaoca šalje potvrde (dvostruke kvačice) nakon uspešne dekripcije. Merenje vremena povratnog puta (RTT) između radnje koju pokrene napadač i odgovarajuće potvrde isporuke otkriva kanal za vremensko merenje visoke rezolucije koji odaje stanje uređaja i prisustvo na mreži, a može se zloupotrebiti i za covert DoS. Implementacije sa više uređaja i „client-fanout“ pojačavaju curenje jer svaki registrovani uređaj dekriptuje probu i vraća sopstvenu potvrdu.<sup>[[1]](#references)</sup>
 
-## Izvori potvrda isporuke nasuprot signalima vidljivim korisniku
+## Izvori potvrda isporuke naspram signala vidljivih korisniku
 
-Izaberite tipove poruka koji uvek emituju potvrdu isporuke, ali ne prikazuju UI artefakte na uređaju victim-a. Tabela u nastavku prikazuje empirijski potvrđeno ponašanje:<sup>[[1]](#references)</sup>
+Birajte tipove poruka koji uvek šalju potvrdu isporuke, ali ne stvaraju vidljive UI artefakte na uređaju žrtve. Tabela u nastavku sumira empirijski potvrđeno ponašanje:<sup>[[1]](#references)</sup>
 
-| Messenger | Akcija | Potvrda isporuke | Obaveštenje victim-a | Napomene |
+| Messenger | Radnja | Potvrda isporuke | Obaveštenje žrtve | Napomene |
 |-----------|--------|------------------|---------------------|-------|
-| **WhatsApp** | Text message | ● | ● | Uvek noisy → korisno samo za bootstrap state-a. |
-| | Reaction | ● | ◐ (samo kada se reaguje na poruku victim-a) | Self-reactions i uklanjanja ostaju nevidljivi. |
-| | Edit | ● | Platform-dependent silent push | Edit window ≈20 min; ack se i dalje šalje nakon isteka. |
-| | Delete for everyone | ● | ○ | UI dozvoljava ~60 h, ali se kasniji packet-i i dalje ack-uju. |
-| **Signal** | Text message | ● | ● | Ista ograničenja kao kod WhatsApp-a. |
-| | Reaction | ● | ◐ | Self-reactions su nevidljive victim-u. |
-| | Edit/Delete | ● | ○ | Server nameće ~48 h window, dozvoljava do 10 edit-a, ali se kasni packet-i i dalje ack-uju. |
-| **Threema** | Text message | ● | ● | Multi-device potvrde se agregiraju, pa je vidljiv samo jedan RTT po probe-u. |
+| **WhatsApp** | Tekstualna poruka | ● | ● | Uvek upadljivo → korisno samo za početno utvrđivanje stanja. |
+| | Reakcija | ● | ◐ (samo ako se reaguje na poruku žrtve) | Sopstvene reakcije i njihovo uklanjanje ostaju nevidljivi. |
+| | Izmena | ● | Tiha push notifikacija, zavisno od platforme | Vreme za izmenu ≈20 min; potvrda se i dalje šalje nakon isteka. |
+| | Brisanje za sve | ● | ○ | UI dozvoljava ~60 h, ali se potvrde i dalje šalju za kasnije pakete. |
+| **Signal** | Tekstualna poruka | ● | ● | Ista ograničenja kao kod WhatsApp-a. |
+| | Reakcija | ● | ◐ | Sopstvene reakcije su nevidljive žrtvi. |
+| | Izmena/brisanje | ● | ○ | Server sprovodi ograničenje od ~48 h, dozvoljava do 10 izmena, ali se potvrde i dalje šalju za zakašnjele pakete. |
+| **Threema** | Tekstualna poruka | ● | ● | Potvrde sa više uređaja se objedinjuju, pa je vidljiv samo jedan RTT po probi. |
 
-Legenda: ● = uvek, ◐ = uslovno, ○ = nikada. Platform-dependent UI ponašanje je navedeno u tekstu. Isključite read receipts ako je potrebno, ali delivery receipts ne mogu da se isključe u WhatsApp-u ili Signal-u.<sup>[[1]](#references)</sup>
+Legenda: ● = uvek, ◐ = uslovno, ○ = nikad. Ponašanje UI-ja koje zavisi od platforme navedeno je u napomenama. Po potrebi isključite potvrde čitanja, ali potvrde isporuke ne mogu da se isključe u WhatsApp-u ili Signalu.<sup>[[1]](#references)</sup>
 
-## Ciljevi i modeli attacker-a
+## Ciljevi i modeli napadača
 
-* **G1 – Fingerprinting uređaja:** Prebrojte koliko potvrda stiže po probe-u, grupišite RTT-ove da biste zaključili OS/client (Android nasuprot iOS-u nasuprot desktop-u) i pratite prelaze online/offline stanja.
-* **G2 – Behavioural monitoring:** Posmatrajte high-frequency RTT seriju (≈1 Hz je stabilan) kao time-series i zaključujte da li je ekran uključen/isključen, da li je aplikacija u foreground/background-u, vreme putovanja nasuprot radnom vremenu itd.
-* **G3 – Resource exhaustion:** Održavajte radio/CPU svakog uređaja victim-a aktivnim slanjem neprekidnih silent probe-ova, čime se prazni baterija, troši data i smanjuje kvalitet video-poziva.<sup>[[1]](#references)</sup>
+* **G1 – Otisak uređaja:** Prebrojite koliko potvrda stiže po probi, grupišite RTT-ove da biste zaključili koji se OS/klijent koristi (Android naspram iOS-a ili desktopa) i pratite prelaze između stanja na mreži i van mreže.
+* **G2 – Praćenje ponašanja:** Tretirajte seriju RTT-ova visoke frekvencije (≈1 Hz je stabilno) kao vremenski niz i zaključujte da li je ekran uključen/isključen, da li je aplikacija u prvom planu ili pozadini, da li je žrtva na putu ili radi u uobičajeno vreme i slično.
+* **G3 – Iscrpljivanje resursa:** Održavajte radio-veze/CPU-e svih uređaja žrtve aktivnim slanjem beskonačnih tihih proba, trošeći bateriju/podatke i pogoršavajući kvalitet video-poziva.<sup>[[1]](#references)</sup>
 
-Dva threat actor-a dovoljna su za opis abuse surface-a:<sup>[[1]](#references)</sup>
+Dva aktera pretnje dovoljna su da opišu površinu zloupotrebe:<sup>[[1]](#references)</sup>
 
-1. **Creepy companion:** već deli chat sa victim-om i zloupotrebljava self-reactions, uklanjanja reakcija ili ponovljene edit/delete akcije povezane sa postojećim message ID-jevima.
-2. **Spooky stranger:** registruje burner account i šalje reakcije koje referenciraju message ID-jeve koji nikada nisu postojali u lokalnoj konverzaciji; WhatsApp i Signal ih i dalje dešifruju i acknowledge-uju iako UI odbacuje promenu state-a, pa prethodna konverzacija nije potrebna.
+1. **Jezivi pratilac:** Već deli razgovor sa žrtvom i zloupotrebljava sopstvene reakcije, uklanjanje reakcija ili ponovljene izmene/brisanja vezane za postojeće ID-jeve poruka.
+2. **Sablasni stranac:** Registruje burner nalog i šalje reakcije koje referenciraju ID-jeve poruka koje nikad nisu postojale u lokalnom razgovoru; WhatsApp i Signal ih i dalje dekriptuju i potvrđuju iako UI odbacuje promenu stanja, pa prethodni razgovor nije potreban.
 
-## Tooling za raw protocol access
+## Alati za pristup sirovom protokolu
 
-Oslonite se na klijente koji izlažu dovoljno underlying E2EE protocol-a za kreiranje podržanih packet-a izvan UI ograničenja i logovanje preciznih timestamp-ova; arbitrary message ID-jeve treba proveriti za svaku implementaciju:
+Koristite klijente koji izlažu dovoljno osnovnog E2EE protokola da biste mogli da kreirate podržane pakete izvan UI ograničenja i beležite precizne vremenske oznake; podršku za proizvoljne ID-jeve poruka potrebno je proveriti u svakoj implementaciji:
 
-* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web multidevice API) dokumentuje slanje i prijem delivery receipt-a; [Cobalt](https://github.com/Auties00/Cobalt) (unofficial Java/Kotlin Web i mobile API) dokumentuje message operacije kao što su reacting, editing i deleting. Koristite njihove dokumentovane API-je umesto pretpostavke da je svaki internal frame izložen.<sup>[[3]](#references)[[4]](#references)</sup>
-* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) izlaže CLI, JSON-RPC i D-Bus interfejse, dok je [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) Java biblioteka za komunikaciju sa Signal-om.<sup>[[5]](#references)[[7]](#references)</sup> Trenutna `signal-cli` sintaksa koristi `sendReaction RECIPIENT --target-author --target-timestamp`; održavajte `receive` ili `daemon` aktivnim kako bi se protocol updates i dalje obrađivali.<sup>[[6]](#references)</sup> Primer self-reaction toggle-a:
-```bash
-signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
---target-timestamp 1712345678901 --emoji "👍"
-signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
---target-timestamp 1712345678901 --remove
-```
-* **Threema:** Merenja u Careless Whisper radu pokazala su da su delivery receipt-i sinhronizovani između uređaja, pa se izlaže samo jedna potvrda po poruci čak i u multi-device setup-u.<sup>[[1]](#references)</sup>
-* **Turnkey PoC-ovi:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) sadrži WhatsApp/Signal backende, podrazumevano koristi silent delete probe-ove i označava `active` nasuprot `standby` stanju pomoću rolling-median threshold-a (`RTT < 0.9 * median`).<sup>[[8]](#references)</sup> [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) je jednostavniji WhatsApp-first CLI sa opcijama `--delay`, `--concurrent`, CSV/Prometheus exporter-ima i output-om prilagođenim za Grafana-u.<sup>[[9]](#references)</sup> Oba alata tretirajte kao reconnaissance helpers, a ne kao protocol references; važan zaključak je koliko je malo koda potrebno kada postoji raw client access.
+* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web API za više uređaja) dokumentuje slanje i prijem potvrda isporuke; [Cobalt](https://github.com/Auties00/Cobalt) (nezvanični Java/Kotlin Web i mobilni API) dokumentuje radnje nad porukama kao što su reagovanje, izmena i brisanje. Koristite njihove dokumentovane API-je umesto da pretpostavljate da je svaki interni frame dostupan.<sup>[[3]](#references)[[4]](#references)</sup>
+* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) nudi CLI, JSON-RPC i D-Bus interfejse, dok je [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) Java biblioteka za komunikaciju sa Signalom.<sup>[[5]](#references)[[7]](#references)</sup> Trenutna sintaksa za `signal-cli` koristi `sendReaction RECIPIENT --target-author --target-timestamp`; ostavite `receive` ili `daemon` pokrenutim kako bi se ažuriranja protokola i dalje obrađivala.<sup>[[6]](#references)</sup> Primer prebacivanja sopstvene reakcije:
+  ```bash
+  signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+      --target-timestamp 1712345678901 --emoji "👍"
+  signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+      --target-timestamp 1712345678901 --remove
+  ```
+* **Threema:** Merenja iz rada Careless Whisper pokazala su da se potvrde o isporuci sinhronizuju na svim uređajima, pa se otkriva samo jedna potvrda po poruci, čak i u konfiguraciji sa više uređaja.<sup>[[1]](#references)</sup>
+* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) isporučuje WhatsApp/Signal backende, podrazumevano koristi tihe probe brisanja i označava `active` naspram `standby` pomoću praga zasnovanog na kliznoj medijani (`RTT < 0.9 * median`).<sup>[[8]](#references)</sup> [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) je jednostavniji CLI prvenstveno za WhatsApp, sa opcijama `--delay`, `--concurrent`, CSV/Prometheus izvozom i izlazom pogodnim za Grafana.<sup>[[9]](#references)</sup> Obe alatke smatrajte pomoćnim alatkama za izviđanje, a ne referencama za protokol; važno je to koliko je malo koda potrebno kada je dostupan direktan pristup klijentu.
 
-Kada custom tooling nije dostupan, official client-i ili browser developer tools i dalje mogu da pokrenu silent akcije i izlože timing encrypted traffic-a; raw API-ji uklanjaju UI delays i dozvoljavaju invalid operations.<sup>[[1]](#references)</sup>
+Kada prilagođeni alati nisu dostupni, zvanični klijenti ili razvojni alati pregledača i dalje mogu da pokrenu tihe radnje i otkriju vremenske karakteristike šifrovanog saobraćaja; direktni API-ji uklanjaju kašnjenja UI-ja i omogućavaju nevažeće operacije.<sup>[[1]](#references)</sup>
 
-## Creepy companion: silent sampling loop
+## Jezivi pratilac: petlja tihog uzorkovanja
 
-1. Izaberite bilo koju istorijsku poruku koju ste vi poslali u chatu, tako da victim nikada ne vidi promenu "reaction" balloons.
-2. Naizmenično šaljite vidljivi emoji i prazan reaction payload (kodiran kao `""` u WhatsApp protobuf-ovima ili `--remove` u signal-cli). Svaki transmission daje device ack uprkos tome što za victim-a nema UI delta-e.
-3. Zabeležite vreme slanja i svaki dolazak delivery receipt-a. 1 Hz loop poput sledećeg daje RTT trace-ove po uređaju neograničeno:
-```python
-while True:
-send_reaction(msg_id, "👍")
-log_receipts()
-send_reaction(msg_id, "")  # removal
-log_receipts()
-time.sleep(0.5)
-```
-4. Pošto WhatsApp/Signal prihvataju neograničene reaction updates, attacker nikada ne mora da objavi novi chat content niti da brine o edit window-ovima.<sup>[[1]](#references)</sup>
+1. Izaberite bilo koju stariju poruku koju ste poslali u razgovoru kako žrtva nikada ne bi videla da se balončići za „reakcije“ menjaju.
+2. Naizmenično šaljite vidljivi emoji i prazan sadržaj reakcije (kodiran kao `""` u WhatsApp protobufovima ili kao `--remove` u signal-cli). Svako slanje daje potvrdu uređaja, iako žrtva ne vidi nikakvu promenu u UI-ju.
+3. Zabeležite vreme slanja i dolazak svake potvrde o isporuci. Petlja od 1 Hz, poput sledeće, daje neprekidne RTT tragove po uređaju:
+   ```python
+   while True:
+       send_reaction(msg_id, "👍")
+       log_receipts()
+       send_reaction(msg_id, "")  # removal
+       log_receipts()
+       time.sleep(0.5)
+   ```
+4. Pošto WhatsApp/Signal prihvataju neograničen broj ažuriranja reakcija, napadač nikada ne mora da objavljuje novi sadržaj u razgovoru niti da brine o vremenskim ograničenjima za izmenu.<sup>[[1]](#references)</sup>
 
-## Spooky stranger: probing arbitrary phone numbers
+## Sablasni stranac: ispitivanje proizvoljnih telefonskih brojeva
 
-1. Registrujte svež WhatsApp/Signal account i preuzmite public identity keys za ciljni broj (to se automatski obavlja tokom session setup-a).
-2. Kreirajte reaction packet koji referencira nasumični `message_id` koji nijedna strana nikada nije videla; rad navodi da WhatsApp i Signal prihvataju takve reakcije i i dalje generišu delivery receipt-e.<sup>[[1]](#references)</sup>
-3. Pošaljite packet iako thread ne postoji. Uređaji victim-a ga dešifruju, ne uspevaju da pronađu osnovnu poruku, odbacuju state change, ali i dalje acknowledge-uju incoming ciphertext i šalju device receipt-e attacker-u.
-4. Ponavljajte kontinuirano kako biste izgradili RTT serije bez prethodne konverzacije ili vidljivog obaveštenja.<sup>[[1]](#references)</sup>
+1. Registrujte novi WhatsApp/Signal nalog i preuzmite javne ključeve identiteta za ciljni broj (to se automatski obavlja tokom podešavanja sesije).
+2. Napravite paket reakcije koji upućuje na nasumični `message_id` koji nijedna strana nikada nije videla; rad navodi da i WhatsApp i Signal prihvataju takve reakcije i ipak generišu potvrde isporuke.<sup>[[1]](#references)</sup>
+3. Pošaljite paket iako ne postoji nijedna nit razgovora. Uređaji žrtve ga dešifruju, ne uspevaju da pronađu osnovnu poruku, odbacuju promenu stanja, ali ipak potvrđuju prijem dolaznog šifratnog teksta slanjem potvrda uređaja napadaču.
+4. Ponavljajte postupak da biste prikupili nizove RTT-a bez prethodnog razgovora ili vidljivog obaveštenja.<sup>[[1]](#references)</sup>
 
-Ako prvo treba da otkrijete koji su brojevi registrovani ili želite da unapred prikupite device inventories at scale, povežite ovo sa [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md), umesto ručnog pogađanja nasumičnih E.164 opsega.
+Ako prvo treba da otkrijete koji su brojevi registrovani ili želite da unapred prikupite inventare uređaja u velikom obimu, povežite ovo sa [otkrivanjem kontakata / registration oracles](../pentesting-web/registration-vulnerabilities.md), umesto da ručno nagađate nasumične E.164 opsege.
 
-Objavljeni rad o contact-discovery-ju pokazao je zašto je ovo operativno važno: sa preciznim phone-prefix tabelama i umerenim resursima, istraživači su mogli da upitaju približno `10%` US mobilnih brojeva na WhatsApp-u i `100%` na Signal-u pre nego što pređu na targeted probing.<sup>[[11]](#references)</sup> U praksi, predfiltriranje aktivnih account-a održava budžet za silent probe usmerenim na brojeve koji će zaista dešifrovati packet-e.
+Objavljeni radovi o otkrivanju kontakata pokazali su zašto je to operativno važno: uz tačne tabele telefonskih prefiksa i skromne resurse, istraživači su mogli da upitaju približno `10%` američkih mobilnih brojeva na WhatsApp-u i `100%` na Signal-u pre nego što pređu na ciljano ispitivanje.<sup>[[11]](#references)</sup> U praksi, prethodno filtriranje aktivnih naloga usmerava budžet za tihe probe na brojeve koji će zaista dešifrovati pakete.
 
-Noviji WhatsApp build-ovi takođe izlažu `Settings -> Privacy -> Advanced -> Block unknown account messages`.<sup>[[10]](#references)</sup> Tretirajte ovo kao throughput limiter: tracker documentation navodi da WhatsApp blokira high-volume poruke sa unknown account-a, ali ne otkriva threshold, pa to ne sprečava u potpunosti probe reactions.<sup>[[8]](#references)</sup>
+Novije verzije WhatsApp-a takođe nude `Settings -> Privacy -> Advanced -> Block unknown account messages`.<sup>[[10]](#references)</sup> Posmatrajte ovo kao ograničenje protoka: dokumentacija trackera navodi da WhatsApp blokira veliki broj poruka sa nepoznatih naloga, ali ne otkriva prag, tako da ova opcija ne sprečava u potpunosti probe reakcijama.<sup>[[8]](#references)</sup>
 
-## Recycling edits i deletes kao covert triggers
+## Recikliranje izmena i brisanja kao skrivenih okidača
 
-* **Repeated deletes:** Nakon što je poruka jednom obrisana opcijom delete-for-everyone, naredni delete packet-i koji referenciraju isti `message_id` nemaju UI effect, ali ih svaki uređaj i dalje dešifruje i acknowledge-uje.
-* **Out-of-window operations:** WhatsApp nameće ~60 h delete / ~20 min edit window u UI-ju; Signal nameće ~48 h. Crafted protocol messages izvan ovih window-ova se na uređaju victim-a tiho ignorišu, ali se receipt-i ipak šalju, pa attacker može neograničeno da probe-uje dugo nakon završetka konverzacije.
-* **Invalid payloads:** Rad navodi da invalid messages i dalje mogu biti acknowledge-ovani; konkretno ponašanje za malformed bodies ili purged ID-jeve zavisi od implementacije, pa ga testirajte pre oslanjanja na njega.<sup>[[1]](#references)</sup>
+* **Ponovljena brisanja:** Kada je poruka jednom obrisana za sve, dodatni paketi za brisanje koji upućuju na isti `message_id` nemaju efekta u UI-ju, ali ih svaki uređaj i dalje dešifruje i potvrđuje.
+* **Operacije van vremenskog ograničenja:** WhatsApp u UI-ju nameće vremenske rokove od ~60 h za brisanje i ~20 min za izmenu; Signal nameće rok od ~48 h. Napravljene protokolarne poruke van ovih rokova tiho se ignorišu na uređaju žrtve, ali se potvrde ipak šalju, pa napadači mogu da vrše probe neograničeno dugo nakon završetka razgovora.
+* **Nevažeći payload-i:** Rad navodi da se nevažeće poruke i dalje mogu potvrditi; tačno ponašanje za neispravna tela poruka ili uklonjene ID-jeve zavisi od implementacije, zato testirajte pre nego što se oslonite na to.<sup>[[1]](#references)</sup>
 
-## Multi-device amplification & fingerprinting
+## Umnožavanje na više uređaja i fingerprinting
 
-* Na WhatsApp-u i Signal-u svaki povezani uređaj (telefon, desktop app, browser companion) nezavisno dešifruje probe i vraća sopstveni ack. Brojanje receipt-a po probe-u otkriva tačan broj uređaja.<sup>[[1]](#references)</sup>
-* Ako je uređaj offline, njegov receipt se stavlja u queue i emituje pri ponovnom povezivanju. Gaps zato leak-uju online/offline cycles, pa čak i commuting schedules (npr. desktop receipt-i prestaju tokom putovanja).
-* RTT distributions se razlikuju po platformi i okruženju jer OS, model, client i network conditions utiču na timing. Grupisanje RTT-ova (npr. k-means na median/variance features) omogućava označavanje uređaja kao „Android handset“, „iOS handset“, „Electron desktop“ itd.
-* Pošto sender mora da preuzme key inventory primaoca pre encrypting-a, attacker takođe može da prati kada se uparuju novi uređaji; nagli porast broja uređaja ili novi RTT cluster snažan je indikator.<sup>[[1]](#references)</sup>
+* Na WhatsApp-u i Signal-u svaki povezani uređaj (telefon, desktop aplikacija, prateći pregledač) nezavisno dešifruje probu i vraća sopstveni ack. Brojanje potvrda za svaku probu otkriva tačan broj uređaja.<sup>[[1]](#references)</sup>
+* Ako je uređaj van mreže, njegova potvrda se stavlja u red čekanja i šalje po ponovnom povezivanju. Zato prekidi otkrivaju cikluse povezanosti i nepovezanosti, pa čak i raspored kretanja (npr. potvrde sa desktop računara prestaju tokom putovanja).
+* Raspodele RTT-a razlikuju se u zavisnosti od platforme i okruženja jer OS, model, klijent i uslovi mreže utiču na vreme odziva. Grupisanje RTT-a (npr. k-means nad karakteristikama medijane/varijanse) može da označi uređaje kao „Android telefon“, „iOS telefon“, „Electron desktop“ itd.
+* Pošto pošiljalac mora da preuzme inventar ključeva primaoca pre šifrovanja, napadač može da prati i kada se uparuju novi uređaji; nagli porast broja uređaja ili pojava novog RTT klastera snažan je pokazatelj.<sup>[[1]](#references)</sup>
 
-## Sampling cadence, queueing i stacked receipts
+**Fingerprinting na osnovu potvrda iz reda čekanja:** Pošaljite nekoliko proba sa različitim ID-jevima poruka dok je ciljni uređaj van mreže. Kada se ponovo poveže, povežite ID-jeve iz vraćenih potvrda isporuke i proverite da li su odvojene ili grupisane u jednoj potvrdi, kao i da li grupisani ID-jevi zadržavaju ili obrću redosled slanja. U testiranim klijentima, WhatsApp za Android/iOS vraćao je odvojene potvrde isporuke, dok su ih Web, Windows i macOS grupisali; macOS je obrtao redosled grupisanih ID-jeva. Signal Desktop je grupisao potvrde, za razliku od svojih mobilnih klijenata. Ovo može da klasifikuje klijent koji se ponovo povezuje čak i kada se raspodele RTT-a preklapaju. Nemojte mešati potvrde isporuke sa potvrdama čitanja, koje imaju drugačija pravila grupisanja.<sup>[[1]](#references)</sup>
 
-* **WhatsApp burst tolerance:** Objavljena merenja navode da je WhatsApp prihvatao silent-reaction burst-ove brzinom od jednog probe-a na svakih `50 ms` bez očiglednog server-side queueing-a. To je korisno za kratke calibration burst-ove, brzo prebrojavanje uređaja ili brzo pokretanje drain attack-a.
-* **Signal long-run queueing:** Signal je tolerisao kratke burst-ove, ali je počinjao da queue-uje sustained traffic sa više probe-ova u sekundi. Za dugotrajni monitoring održavajte cadence oko `1 Hz` (ili niže), tako da svaki receipt i dalje odražava trenutno stanje uređaja umesto pražnjenja backlog-a.
-* **Reconnect artefacts:** Kada se uređaj vrati online, neki klijenti batch-uju ili brzo flush-uju više odloženih receipt-a. Tretirajte te receipt burst-ove kao state-transition marker, a ne kao nezavisne RTT samples, inače će vaš clustering / `active` nasuprot `idle` classifier overfit-ovati reconnect noise.<sup>[[1]](#references)</sup>
+Za odvojenu WhatsApp probu koja čita **server-side dopunjavanja prekey-a** bez isporuke poruka, pogledajte [Side Channel pražnjenja i dopunjavanja Prekey Bundle-a](whatsapp-prekey-bundle-side-channel.md).
 
-## Zaključivanje ponašanja iz RTT trace-ova
+## Učestalost uzorkovanja, redovi čekanja i grupisane potvrde
 
-1. Uzimajte samples frekvencijom ≥1 Hz kako biste obuhvatili efekte OS scheduling-a. Kod WhatsApp-a na iOS-u, RTT-ovi <1 s snažno koreliraju sa uključenim ekranom/foreground-om, a >1 s sa screen-off/background throttling-om.
-2. Napravite jednostavne classifiers (thresholding ili two-cluster k-means) koji svaki RTT označavaju kao "active" ili "idle". Grupisanje oznaka u streaks omogućava zaključivanje vremena spavanja, putovanja, radnog vremena ili aktivnosti desktop companion-a.
-3. Korelišite simultane probe-ove ka svakom uređaju da biste videli kada korisnici prelaze sa mobile-a na desktop, kada companions odlaze offline i da li je aplikacija rate limited push-om nasuprot persistent socket-om.
-4. U realnim networks izbegavajte jedan hardcoded `1 s` threshold. Bootstrap-ujte svaki uređaj kratkim warm-up window-om i održavajte rolling baseline (na primer, device-activity-tracker PoC koristi `threshold = 0.9 * median RTT`), tako da Wi-Fi/cellular drift ne uruši vaš classifier.<sup>[[1]](#references)[[8]](#references)</sup>
+* **Tolerancija WhatsApp-a na burst:** Objavljena merenja navode da je WhatsApp prihvatao burst-e tihih reakcija brzinom do jedne probe na svakih `50 ms` bez očiglednog server-side čekanja u redu. To je korisno za kratke burst-e za kalibraciju, brzo brojanje uređaja ili brzo pokretanje drain attack-a.
+* **Dugotrajno čekanje u redu na Signal-u:** Signal je podnosio kratke burst-e, ali je počinjao da stavlja saobraćaj od više proba u sekundi u red čekanja kada bi se takav saobraćaj održavao. Za dugotrajno praćenje, održavajte učestalost oko `1 Hz` (ili nižu) kako bi svaka potvrda odražavala trenutno stanje uređaja, a ne pražnjenje reda.
+* **Artefakti ponovnog povezivanja:** Kada se uređaj ponovo poveže, neki klijenti grupišu ili brzo šalju više odloženih potvrda. Tretirajte te burst-e potvrda kao oznaku promene stanja, a ne kao nezavisne RTT uzorke, jer će se u suprotnom vaše grupisanje / klasifikator `active` naspram `idle` previše prilagoditi šumu pri ponovnom povezivanju.<sup>[[1]](#references)</sup>
 
-## Zaključivanje lokacije iz delivery RTT-a
+## Zaključivanje o ponašanju iz RTT tragova
 
-Isti timing primitive može se ponovo upotrebiti za zaključivanje gde se recipient nalazi, a ne samo da li je active. `Hope of Delivery` rad pokazao je da training na RTT distributions za poznate lokacije recipient-a omogućava attacker-u da kasnije klasifikuje lokaciju victim-a samo na osnovu delivery confirmations:<sup>[[2]](#references)</sup>
+1. Uzorkujte frekvencijom ≥1 Hz da biste obuhvatili efekte raspoređivanja OS-a. Na WhatsApp-u za iOS, RTT ispod 1 s snažno korelira sa uključenim ekranom/aplikacijom u prvom planu, a RTT iznad 1 s sa isključenim ekranom/ograničavanjem rada u pozadini.
+2. Napravite jednostavne klasifikatore (pragovanje ili k-means sa dva klastera) koji svaki RTT označavaju kao „aktivan“ ili „neaktivan“. Grupisanje oznaka u nizove može da otkrije vreme spavanja, putovanja na posao, radno vreme ili periode aktivnosti pratećeg desktop uređaja.
+3. Uporedite istovremene probe upućene svakom uređaju da biste utvrdili kada korisnici prelaze sa mobilnog na desktop, kada prateći uređaji izlaze iz mreže i da li se aplikacija ograničava preko push-a ili trajnog socket-a.
+4. U stvarnim mrežama izbegavajte jedan fiksni prag od `1 s`. Inicijalizujte svaki uređaj kratkim periodom zagrevanja i održavajte pokretnu osnovnu vrednost (na primer, PoC device-activity-tracker koristi `threshold = 0.9 * median RTT`) da promene između Wi-Fi-ja i mobilne mreže ne bi poremetile klasifikator.<sup>[[1]](#references)[[8]](#references)</sup>
 
-* Napravite baseline za isti target dok se nalazi na nekoliko poznatih mesta (kuća, kancelarija, kampus, država A nasuprot državi B itd.).
-* Za svaku lokaciju prikupite mnogo normalnih message RTT-ova i izdvojite jednostavne features kao što su median, variance ili percentile buckets.
-* Tokom realnog attack-a uporedite novu probe seriju sa trained cluster-ima. Rad navodi da se često mogu razlikovati čak i lokacije u istom gradu, sa tačnošću `>80%` u postavci sa 3 lokacije.
-* Ovo najbolje funkcioniše kada attacker kontroliše sender environment i probe-uje pod sličnim network conditions, jer izmerena putanja uključuje access network recipient-a, wake-up latency i Messenger infrastructure.<sup>[[2]](#references)</sup>
+## Zaključivanje o lokaciji iz RTT-a isporuke
 
-Za razliku od prethodno opisanih silent reaction/edit/delete attack-a, location inference ne zahteva invalid message ID-jeve ili stealthy state-changing packet-e. Obične poruke sa normalnim delivery confirmations dovoljne su, pa je tradeoff manja stealthiness, ali šira primenljivost kroz različite Messenger aplikacije.
+Isti vremenski mehanizam može da se iskoristi za zaključivanje o tome gde se primalac nalazi, a ne samo o tome da li je aktivan. Rad `Hope of Delivery` pokazao je da obučavanje na raspodelama RTT-a za poznate lokacije primaoca omogućava napadaču da kasnije klasifikuje lokaciju žrtve samo na osnovu potvrda isporuke:<sup>[[2]](#references)</sup>
 
-## Stealthy resource exhaustion
+* Napravite osnovnu vrednost za istu ciljnu osobu dok se nalazi na nekoliko poznatih mesta (kod kuće, u kancelariji, na kampusu, u zemlji A naspram zemlje B itd.).
+* Za svaku lokaciju prikupite mnogo uobičajenih RTT-ova poruka i izdvojte jednostavne karakteristike kao što su medijana, varijansa ili percentilni opsezi.
+* Tokom stvarnog napada uporedite novi niz proba sa obučenim klasterima. Rad navodi da se često mogu razlikovati čak i lokacije u istom gradu, uz tačnost od `>80%` u scenariju sa 3 lokacije.
+* Ovo najbolje funkcioniše kada napadač kontroliše okruženje pošiljaoca i šalje probe u sličnim mrežnim uslovima, jer izmerena putanja obuhvata pristupnu mrežu primaoca, kašnjenje pri buđenju i infrastrukturu aplikacije za razmenu poruka.<sup>[[2]](#references)</sup>
 
-Pošto svaki silent probe mora biti dešifrovan i acknowledge-ovan, kontinuirano slanje reaction toggle-ova, invalid edit-a ili delete-for-everyone packet-a stvara application-layer DoS:<sup>[[1]](#references)</sup>
+Za razliku od tihih napada reakcijama/izmenama/brisanjima opisanih iznad, zaključivanje o lokaciji ne zahteva nevažeće ID-jeve poruka niti prikrivene pakete koji menjaju stanje. Dovoljne su obične poruke sa uobičajenim potvrdama isporuke, pa je kompromis manja prikrivenost, ali šira primenljivost na različite aplikacije za razmenu poruka.
 
-* Prisiljava radio/modem da šalje/prima svake sekunde → primetno trošenje baterije, naročito na idle handset-ima.
-* Generiše upstream/downstream traffic koji troši mobile data planove i može da se takmiči sa latency-sensitive funkcijama kao što su video-pozivi.<sup>[[1]](#references)</sup>
-* Veliki invalid payload-i povećavaju processing work, ali rad navodi da je sama cryptography zanemarljiv deo troška baterije.<sup>[[1]](#references)</sup>
-* Na WhatsApp-u invalid reactions prihvataju mnogo više data nego što bi normalan emoji sugerisao: objavljena merenja pokazala su server-side acceptance do približno `1 MB` po reakciji.
-* Oversized reactions prestaju da proizvode pouzdane delivery receipt-e kada body naraste iznad približno `30 bytes`, ali se i dalje prosleđuju i obrađuju pre discard-a. Reaction bodies neka budu mali kada su vam potrebni ACK-ovi; povećajte ih samo kada je cilj pure drain ili covert one-way transport.
-* Javna merenja dostigla su približno `3.7 MB/s` (`~13.3 GB/h`) victim traffic-a u ovom modu.
+## Prikriveno iscrpljivanje resursa
+
+Pošto svaku tihu probu treba dešifrovati i potvrditi, neprekidno slanje promena reakcija, nevažećih izmena ili paketa za brisanje za sve izaziva DoS na aplikacionom sloju:<sup>[[1]](#references)</sup>
+
+* Primorava radio/modem da svake sekunde šalje/prima podatke → primetno pražnjenje baterije, naročito na telefonima u stanju mirovanja.
+* Stvara odlazni/dolazni saobraćaj koji troši mobilni internet i može da ometa funkcije osetljive na kašnjenje, kao što su video-pozivi.<sup>[[1]](#references)</sup>
+* Veliki nevažeći payload-i povećavaju obim obrade, ali rad navodi da kriptografija čini zanemarljiv deo troška baterije.<sup>[[1]](#references)</sup>
+* Na WhatsApp-u nevažeće reakcije prihvataju mnogo više podataka nego što bi se očekivalo od običnog emoji-ja: objavljena merenja utvrdila su da prihvatanje na serverskoj strani ide do približno `1 MB` po reakciji.
+* Prevelike reakcije prestaju da daju pouzdane potvrde isporuke kada telo poruke pređe približno `30 bytes`, ali se i dalje prosleđuju i obrađuju pre odbacivanja. Neka tela reakcija budu mala kada su vam potrebni ACK-ovi; povećajte ih samo kada je cilj isključivo pražnjenje resursa ili prikriveni jednosmerni prenos.
+* Javna merenja dostigla su oko `3.7 MB/s` (`~13.3 GB/h`) saobraćaja na uređaju žrtve u ovom režimu.
+
+
 
 ## References
 
-- [1] [Careless Whisper: Exploatacija silent delivery receipt-a za monitoring korisnika na mobilnim instant Messenger aplikacijama](https://arxiv.org/html/2411.11194v4)
-- [2] [Hope of Delivery: Izdvajanje lokacija korisnika iz mobilnih instant Messenger aplikacija](https://www.ndss-symposium.org/wp-content/uploads/2023-188-paper.pdf)
+- [1] [Careless Whisper: Iskorišćavanje tihih potvrda isporuke za praćenje korisnika u mobilnim aplikacijama za razmenu trenutnih poruka](https://arxiv.org/html/2411.11194v4)
+- [2] [Hope of Delivery: Izdvajanje lokacija korisnika iz mobilnih aplikacija za razmenu trenutnih poruka](https://www.ndss-symposium.org/wp-content/uploads/2023-188-paper.pdf)
 - [3] [whatsmeow](https://github.com/tulir/whatsmeow)
 - [4] [Cobalt](https://github.com/Auties00/Cobalt)
 - [5] [signal-cli](https://github.com/AsamK/signal-cli)
@@ -136,6 +142,6 @@ Pošto svaki silent probe mora biti dešifrovan i acknowledge-ovan, kontinuirano
 - [7] [libsignal-service-java](https://github.com/signalapp/libsignal-service-java)
 - [8] [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker)
 - [9] [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python)
-- [10] [Kako blokirati velike količine nepoznatih poruka | WhatsApp Help Center](https://faq.whatsapp.com/3379690015658337)
-- [11] [Svi brojevi su iz SAD: Abuse contact-discovery-ja velikih razmera u mobilnim Messenger aplikacijama](https://www.ndss-symposium.org/ndss-paper/all-the-numbers-are-us-large-scale-abuse-of-contact-discovery-in-mobile-messengers/)
+- [10] [Kako blokirati veliki broj poruka sa nepoznatih naloga | WhatsApp Help Center](https://faq.whatsapp.com/3379690015658337)
+- [11] [Svi brojevi su iz SAD: Zloupotreba otkrivanja kontakata velikih razmera u mobilnim aplikacijama za razmenu trenutnih poruka](https://www.ndss-symposium.org/ndss-paper/all-the-numbers-are-us-large-scale-abuse-of-contact-discovery-in-mobile-messengers/)
 {{#include ../banners/hacktricks-training.md}}
