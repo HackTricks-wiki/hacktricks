@@ -1,20 +1,20 @@
 # Electron contextIsolation RCE via IPC
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
-Context isolation maak nie ’n onveilige preload bridge veilig nie. As ’n preload bevoorregte IPC aan renderer-inhoud blootstel, kan ’n XSS of gekompromitteerde renderer daardie bridge aanroep; RCE hang dan af van die validasie en vermoëns van die ooreenstemmende main-process-handler. Electron beveel aan dat jy een beperkte metode per bewerking blootstel, IPC-senders valideer en nooit rou IPC-primitiewe blootstel nie.<sup>[[3]](#references)[[4]](#references)</sup>
+Context isolation maak nie ’n onveilige preload bridge veilig nie. As ’n preload privileged IPC aan renderer-inhoud blootstel, kan ’n XSS of gekompromitteerde renderer daardie bridge aanroep; RCE hang dan af van die validasie en vermoëns van die ooreenstemmende main-process handler. Electron beveel aan dat een beperkte metode per bewerking blootgestel word, IPC-senders gevalideer word en raw IPC-primitiewe nooit blootgestel word nie.<sup>[[3]](#references)[[4]](#references)</sup>
 
-**Die meeste van hierdie voorbeelde is hier vandaan geneem** [**https://www.youtube.com/watch?v=xILfQGkLXQo**](https://www.youtube.com/watch?v=xILfQGkLXQo). Kyk na die video vir verdere inligting.<sup>[[1]](#references)</sup>
+**Die meeste van hierdie voorbeelde kom hiervandaan** [**https://www.youtube.com/watch?v=xILfQGkLXQo**](https://www.youtube.com/watch?v=xILfQGkLXQo). Kyk na die video vir meer inligting.<sup>[[1]](#references)</sup>
 
 ## Voorbeeld 0
 
-Voorbeeld van [https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21) (die volledige voorbeeld van hoe MS Teams van XSS na RCE misbruik is, is in daardie skyfies; dit is net ’n baie basiese voorbeeld):<sup>[[2]](#references)</sup>
+Voorbeeld van [https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21) (die volledige voorbeeld van hoe MS Teams XSS misbruik het om RCE te kry, is in daardie skyfies; hierdie is net ’n baie basiese voorbeeld):<sup>[[2]](#references)</sup>
 
-<figure><img src="../../../images/image (9) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../images/image (9) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Voorbeeld 1
 
-Kyk hoe `main.js` na `getUpdate` luister en **enige URL wat deurgegee word, aflaai en uitvoer**.\
+Kyk hoe `main.js` na `getUpdate` luister en **enige URL sal aflaai en uitvoer** wat deurgegee word.\
 Kyk ook hoe `preload.js` **enige IPC**-gebeurtenis vanaf main blootstel.
 
 ```javascript
@@ -81,7 +81,7 @@ Exploit:
 
 ## Voorbeeld 2
 
-As die preload `shell.openExternal` blootstel sonder scheme- en bestemmingvalidering, kan renderer-beheerde invoer geregistreerde eksterne handlers laat begin. Of dit tot code execution lei, hang af van die platform, geïnstalleerde handlers, scheme en Electron-weergawe; beperk dit tot ’n eksplisiete allowlist van verwagte `https:`-bestemmings.<sup>[[3]](#references)</sup>
+As die preload `shell.openExternal` blootstel sonder skemavalidering en bestemmingvalidering, kan renderer-beheerde invoer geregistreerde eksterne hanteerders begin. Of dit tot kode-uitvoering lei, hang af van die platform, geïnstalleerde hanteerders, skema en Electron-weergawe; beperk dit tot ’n eksplisiete allowlist van verwagte `https:`-bestemmings.<sup>[[3]](#references)</sup>
 
 ```javascript
 // Part of preload.js code
@@ -107,8 +107,8 @@ window.electronSend = (event, data) => {
 
 ## References
 
-- [1] [Werkswinkel oor hacking van moderne desktop-toepassings met XSS en RCE](https://www.youtube.com/watch?v=xILfQGkLXQo)
-- [2] [Hoe ek Microsoft Teams gehack het en $150,000 by Pwn2Own gekry het](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own)
+- [1] [Hacking van moderne rekenaartoepassings met XSS en RCE-werkswinkel](https://www.youtube.com/watch?v=xILfQGkLXQo)
+- [2] [Hoe ek Microsoft Teams gehack het en $150,000 by Pwn2Own gewen het](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own)
 - [3] [Electron — Sekuriteitskontrolelys](https://www.electronjs.org/docs/latest/tutorial/security)
-- [4] [Electron — Konteksisolering en veilige API-blootstelling](https://www.electronjs.org/docs/latest/tutorial/context-isolation)
-{{#include ../../../banners/hacktricks-training.md}}
+- [4] [Electron — Konteksisolasie en veilige API-blootstelling](https://www.electronjs.org/docs/latest/tutorial/context-isolation)
+{{#include ../../banners/hacktricks-training.md}}
