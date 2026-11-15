@@ -1105,7 +1105,7 @@
     "src/windows-hardening/active-directory-methodology/printnightmare.md": "191a75a4c3446bb1faa7402134e077787b8afb09",
     "src/windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges.md": "ccd21727ab56e7435169e0615b3fc945deeb0cb3",
     "src/windows-hardening/active-directory-methodology/rdp-sessions-abuse.md": "e57860cffc394386574809eab2509e77189e7620",
-    "src/windows-hardening/active-directory-methodology/resource-based-constrained-delegation.md": "aa7af437c3f143598baa0adcfa5a4c5ab44e8513",
+    "src/windows-hardening/active-directory-methodology/resource-based-constrained-delegation.md": "62dac461b83e00d4d09408642cdcb919572429a0",
     "src/windows-hardening/active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md": "98da030b0d93e8cf93e648cc7611f3087b7b904e",
     "src/windows-hardening/active-directory-methodology/security-descriptors.md": "929dc388df50fdcc983a15bcd82581f1f85d0984",
     "src/windows-hardening/active-directory-methodology/sid-history-injection.md": "46c648c1d3fdd80f390ccf768ec5e76481cd31ea",
