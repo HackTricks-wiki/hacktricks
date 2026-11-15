@@ -76,9 +76,9 @@ Practical notes:
 
 ### Signed AppDomainManager type as a configuration-file gadget
 
-The usual AppDomainManager config hijack above points at an attacker assembly. A different .NET Framework path uses a **signed assembly**, staged alongside the host or otherwise resolvable, whose manager type reads attacker-controlled sidecar data. The attacker still needs control of the managed host's adjacent `.exe.config` and the secondary files; a signature on the selected assembly does not make its configuration input safe. The config mechanism is established AppDomainManager behavior, while the signed-type chaining below was observed in the NetamLoader analysis.<sup>[[35]](#references)[[36]](#references)</sup>
+The usual AppDomainManager config hijack above points at an attacker assembly. A different .NET Framework path uses a **signed assembly**, staged alongside the host or otherwise resolvable, whose manager type reads attacker-controlled sidecar data. The attacker still needs control of the managed host's adjacent `.exe.config` and the secondary files; a signature on the selected assembly does not make its configuration input safe. The config mechanism is established AppDomainManager behavior, while the signed-type chaining below was observed in the NetamLoader analysis.<sup>[[16]](#references)[[17]](#references)[[35]](#references)</sup>
 
-In that chain, the configuration selects `Microsoft.ApplicationServer.Caching.DataCacheFactoryConfiguration` from `Microsoft.HostIntegration.Connectors`. Its initialization looks for `fabric.config` in the application directory. A `customType` entry names `System.Resources.ResXResourceSet` and supplies `Resources.resx` as its constructor argument, reaching a resource parser without shipping an attacker-built manager DLL. This requires the AppFabric-related signed assembly and the named framework classes to resolve on the target; it is not a universal property of any managed EXE.<sup>[[36]](#references)</sup>
+In that chain, the configuration selects `Microsoft.ApplicationServer.Caching.DataCacheFactoryConfiguration` from `Microsoft.HostIntegration.Connectors`. Its initialization looks for `fabric.config` in the application directory. A `customType` entry names `System.Resources.ResXResourceSet` and supplies `Resources.resx` as its constructor argument, reaching a resource parser without shipping an attacker-built manager DLL. This requires the AppFabric-related signed assembly and the named framework classes to resolve on the target; it is not a universal property of any managed EXE.<sup>[[35]](#references)</sup> A configured AppDomainManager also requires a full-trust application; otherwise the CLR throws `TypeLoadException`.<sup>[[16]](#references)[[17]](#references)</sup>
 
 ```xml
 <!-- in <host>.exe.config -->
@@ -97,7 +97,7 @@ In that chain, the configuration selects `Microsoft.ApplicationServer.Caching.Da
 </section>
 ```
 
-The `Resources.resx` content is the deserialization sink, not merely a data file; see [RESX to BinaryFormatter and XAML](../../../pentesting-web/deserialization/basic-.net-deserialization-objectdataprovider-gadgets-expandedwrapper-and-json.net.md#resx-resource-parsing-to-binaryformatter-and-xaml). In the reported stage, the XAML loader also derived its AES key from the SHA-256 hash of the **lowercased full host command line** and used the first 16 bytes of the decoded blob as its IV. Replaying the files with a different command line therefore fails decryption before the next XAML is loaded.<sup>[[36]](#references)</sup>
+The `Resources.resx` content is the deserialization sink, not merely a data file; see [RESX to BinaryFormatter and XAML](../../../pentesting-web/deserialization/basic-.net-deserialization-objectdataprovider-gadgets-expandedwrapper-and-json.net.md#resx-resource-parsing-to-binaryformatter-and-xaml). In the reported stage, the XAML loader also derived its AES key from the SHA-256 hash of the **lowercased full host command line** and used the first 16 bytes of the decoded blob as its IV. Replaying the files with a different command line therefore fails decryption before the next XAML is loaded.<sup>[[35]](#references)</sup>
 
 ### AppDomainManager as a downloader + scheduled-task bootstrap
 
@@ -890,6 +890,6 @@ Defensive pivots
 - [32] [FortiGuard Labs – Uncovering a SectopRAT Variant Embedded in Legitimate Software](https://www.fortinet.com/blog/threat-research/uncovering-a-sectoprat-variant-embedded-in-legitimate-software)
 - [33] [Mandiant – Stealing the LIGHTSHOW (Part One)](https://cloud.google.com/blog/topics/threat-intelligence/lightshow-north-korea-unc2970/)
 - [34] [Kaspersky Securelist – Operation FlashHole](https://securelist.com/lazarus-operation-flashhole/121541/)
-- [35] [3gstudent – Use AppDomainManager to maintain persistence](https://3gstudent.github.io/Use-AppDomainManager-to-maintain-persistence)
-- [36] [Kaspersky Securelist – NetamLoader XAML-based .NET loading framework](https://securelist.com/netamloader/121676)
+- [35] [Kaspersky Securelist – NetamLoader XAML-based .NET loading framework](https://securelist.com/netamloader/121676)
+
 {{#include ../../../banners/hacktricks-training.md}}
