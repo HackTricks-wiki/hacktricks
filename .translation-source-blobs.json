@@ -579,7 +579,7 @@
     "src/mobile-pentesting/android-app-pentesting/manual-deobfuscation.md": "d7ec81fc20dab53ec8d69261c9df45a2e7c8bbc8",
     "src/mobile-pentesting/android-app-pentesting/play-integrity-attestation-bypass.md": "b3bc7ea6ecd4452d74931f9a99a64bee692dcae3",
     "src/mobile-pentesting/android-app-pentesting/react-native-application.md": "cf0be275554faa3ff3fdd4f77a9f9c8a4b8180c6",
-    "src/mobile-pentesting/android-app-pentesting/reversing-native-libraries.md": "8b8366fc295f65af164979dc02e5bb30fb1f3f51",
+    "src/mobile-pentesting/android-app-pentesting/reversing-native-libraries.md": "6e3e0f48b78fd0b91a82eece68f2742b5b5c26f4",
     "src/mobile-pentesting/android-app-pentesting/shizuku-privileged-api.md": "6a2b108864eeb526bcf71a6f337c074d305aad6e",
     "src/mobile-pentesting/android-app-pentesting/smali-changes.md": "f212730fefb5cbf328e9ff9d72d90f420bf61598",
     "src/mobile-pentesting/android-app-pentesting/spoofing-your-location-in-play-store.md": "5d65f50d070a2b78105a70878dd461e024b31b57",
