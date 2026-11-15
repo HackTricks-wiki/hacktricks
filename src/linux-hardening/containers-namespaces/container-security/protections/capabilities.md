@@ -390,6 +390,12 @@ tcpdump -ni any -c 20 'host 169.254.169.254'
 
 If the matching prerequisites exist, **exploit** the environment-specific chain as documented in [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html): capture the request and sequence state, inject the forged metadata response containing an SSH key, then validate host access. The chain required root, host networking, `CAP_NET_ADMIN`, `CAP_NET_RAW`, plaintext GCE metadata traffic, and a raceable guest-agent request; modern transport or agent behavior can break it.
 
+### Local-origin restrictions and interface addresses
+
+A listener may reject connections whose source is `127.0.0.1` but overlook another address assigned to the same network namespace. Where the listener is reachable from that interface, compare a loopback connection with one bound to an existing non-loopback local address. `CAP_NET_ADMIN` can permit interface configuration in the current namespace, but it is not needed if an appropriate address is already assigned. `CAP_NET_RAW` is not a prerequisite for an ordinary TCP connection. This is a source-address classification failure, not a container escape or proof that the application will authorize a privileged request.<sup>[[1]](#references)[[7]](#references)</sup>
+
+For a WebSocket listener, a valid HTTP `101 Switching Protocols` response establishes that the opening handshake completed; a subsequent application-level error can show the connection reached the handler. Neither response proves that authentication or the requested operation succeeded.<sup>[[8]](#references)</sup>
+
 ## Checks
 
 The goal of the capability checks is not only to dump raw values but to understand whether the process has enough privilege to make its current namespace and mount situation dangerous.
@@ -418,6 +424,8 @@ After collecting the raw capability information, the next step is interpretation
 
 For Kubernetes, the important point is that the API does not define one universal default capability set. If the Pod does not add or drop capabilities, the workload inherits the runtime default for that node.
 
+{{#include ../../../../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [capabilities(7) - Linux manual page](https://man7.org/linux/man-pages/man7/capabilities.7.html)
@@ -426,5 +434,5 @@ For Kubernetes, the important point is that the API does not define one universa
 - [4] [Kubernetes Documentation - Set capabilities for a container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)
 - [5] [Podman documentation - `--cap-add` and `--cap-drop`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-add-capability)
 - [6] [Incus documentation - Security](https://linuxcontainers.org/incus/docs/main/explanation/security/)
-
-{{#include ../../../../banners/hacktricks-training.md}}
+- [7] [ip(7) - Linux IPv4 protocol implementation](https://man7.org/linux/man-pages/man7/ip.7.html)
+- [8] [RFC 6455 - The WebSocket Protocol](https://www.rfc-editor.org/rfc/rfc6455.html)
