@@ -44,6 +44,7 @@
 - MIFARE Classic balance tampering → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; Proxmark remains tool reference.
 - PostgreSQL `lo_import`/`dblink_connect` exfiltration → `src/pentesting-web/sql-injection/postgresql-injection/README.md`; other dblink tasks remain separate.
 - Legacy PHP `safe_mode` Windows command-path, `fopen`, Linux `proc_open` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/legacy-php-safe-mode-bypasses.md`; Perl extension stays separate.
+- PHP `pcntl_exec` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md#pcntl_exec-command-execution-with-disabled-functions`; Apache `mod_cgi` stays separate.
 
 - Recursive CSS `@import` exfiltration PoC → `src/pentesting-web/xs-search/css-injection/README.md#recursive-import-css-exfiltration-poc`; keep selector mechanism and server/victim code together. LESS compilation has separate server-side prerequisite.
 - Format-string arbitrary-write `FmtStr` template → `src/binary-exploitation/format-strings/README.md#pwntools-template`; arbitrary-read examples stay separate. Old URL redirects.
