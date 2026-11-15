@@ -30,9 +30,9 @@ Moreover, there some python pickle based models like the ones used by [PyTorch](
 
 ### Evading static checks on pickle-based checkpoints
 
-A model-loading path that calls unrestricted `pickle.load()`, `joblib.load()`, or `torch.load(..., weights_only=False)` is an execution sink, not merely a parser. In PyTorch 2.6, `torch.load()` defaults to `weights_only=True` when no custom pickle module is supplied; the examples below require an unrestricted loader or an application that disables this protection to load an unsupported object. A clean static-scan result does not change that boundary.<sup>[[22]](#references)</sup>
+A model-loading path that calls unrestricted `pickle.load()`, `joblib.load()`, or `torch.load(..., weights_only=False)` is an execution sink, not merely a parser.<sup>[[22]](#references)</sup> In PyTorch 2.6, `torch.load()` defaults to `weights_only=True` when no custom pickle module is supplied; the examples below require an unrestricted loader or an application that disables this protection to load an unsupported object.<sup>[[4]](#references)</sup> A clean static-scan result does not change that boundary.<sup>[[21]](#references)</sup>
 
-See [Python pickle deserialization](../pentesting-web/deserialization/README.md#pickle) for the basic `__reduce__` primitive and [Fickling's ML import allowlist](../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md#ml-pickle-import-allowlisting-for-aiml-models-fickling) for runtime import checks.
+See [Python pickle deserialization](../pentesting-web/deserialization/#pickle) for the basic `__reduce__` primitive and [Fickling's ML import allowlist](../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md#ml-pickle-import-allowlisting-for-aiml-models-fickling) for runtime import checks.
 
 #### Register a callable, then resolve it with `EXT2`
 
@@ -446,5 +446,3 @@ For a focused guide on .keras internals, Lambda-layer RCE, the arbitrary import 
 - [23] [PyTorch storage `_load_from_bytes` implementation](https://raw.githubusercontent.com/pytorch/pytorch/main/torch/storage.py)
 - [24] [CPython pickle `find_class` compatibility mapping](https://raw.githubusercontent.com/python/cpython/main/Lib/pickle.py)
 - [25] [CPython `_compat_pickle` import mapping](https://raw.githubusercontent.com/python/cpython/main/Lib/_compat_pickle.py)
-
-{{#include ../banners/hacktricks-training.md}}
