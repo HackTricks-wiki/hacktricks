@@ -28,6 +28,58 @@ The following table lists representative vulnerabilities in this category:
 
 Moreover, there some python pickle based models like the ones used by [PyTorch](https://github.com/pytorch/pytorch/security) that can be used to execute arbitrary code on the system if they are not loaded with `weights_only=True`. So, any pickle based model might be specially susceptible to this type of attacks, even if they are not listed in the table above.
 
+### Evading static checks on pickle-based checkpoints
+
+A model-loading path that calls unrestricted `pickle.load()`, `joblib.load()`, or `torch.load(..., weights_only=False)` is an execution sink, not merely a parser. In PyTorch 2.6, `torch.load()` defaults to `weights_only=True` when no custom pickle module is supplied; the examples below require an unrestricted loader or an application that disables this protection to load an unsupported object. A clean static-scan result does not change that boundary.<sup>[[22]](#references)</sup>
+
+See [Python pickle deserialization](../pentesting-web/deserialization/README.md#pickle) for the basic `__reduce__` primitive and [Fickling's ML import allowlist](../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md#ml-pickle-import-allowlisting-for-aiml-models-fickling) for runtime import checks.
+
+#### Register a callable, then resolve it with `EXT2`
+
+A pickle can invoke `copyreg.add_extension` through `REDUCE`, registering a module/name pair under an attacker-chosen numeric extension code. A later `EXT2` resolves that code to the callable, which another `REDUCE` can invoke. The critical callable is therefore not the operand of a `GLOBAL` or `STACK_GLOBAL` opcode. Binarly demonstrated this with `multiprocessing.util.spawnv_passfds`; four of five evaluated scanners missed it, while SaferPickle detected it. The registry mutation and `EXT2` resolution happen inside the same unpickling operation.<sup>[[21]](#references)[[22]](#references)</sup>
+
+```text
+GLOBAL       'copyreg add_extension'
+BINUNICODE   'multiprocessing.util'
+BINUNICODE   'spawnv_passfds'
+BININT2      31337
+TUPLE3
+REDUCE       # register the extension
+POP
+EXT2         31337  # resolve the callable
+# Push its arguments, then REDUCE to call it
+```
+
+This is an opcode sketch, not a complete checkpoint: the outer loader must accept the surrounding pickle stream. A scanner that only searches `GLOBAL` operands for dangerous callables misses the later lookup; a scanner without `EXT2` support may fail before producing a verdict. A strict allowlist could still reject `copyreg.add_extension` itself.<sup>[[21]](#references)</sup>
+
+#### Hide constructed code-object types behind ordinary functions
+
+Another pickle chain can obtain `FunctionType` from `type(copy.copy)` and `CodeType` from `type(copy.copy.__code__)`, then construct a code object from supplied bytecode, wrap it as a function, and call it. The published variant obtains `__code__` through `operator.methodcaller('__getattribute__', '__code__')`, so the pickle need not import either constructor by name. Its `CodeType(...)` field layout and bytecode are CPython-version-specific; a payload built for a different interpreter can fail before execution. SaferPickle still flagged the demonstrated sample, but downgraded it to `suspicious`; the other four evaluated scanners missed it.<sup>[[21]](#references)[[22]](#references)</sup>
+
+```python
+from copy import copy
+from operator import methodcaller
+function_type = type(copy)
+code_type = type(methodcaller('__getattribute__', '__code__')(copy))
+# REDUCE can construct code_type(...) and function_type(code, {})
+```
+
+#### Trigger a second model load from a pickle argument
+
+An outer pickle can call `torch.storage._load_from_bytes` with an attacker-supplied serialized model as its argument. That function calls `torch.load(io.BytesIO(b), weights_only=False)`, so the nested model is deserialized without the weights-only restriction even though it appears to a top-level opcode scanner as bytes passed to one callable. The outer load must still permit that callable; `weights_only=True` does not automatically make the outer pickle accept it. Scanners that do not recurse into the nested bytes can miss the inner `GLOBAL`/`REDUCE` chain.<sup>[[21]](#references)[[23]](#references)</sup>
+
+#### Resolve a legacy pickle module name at load time
+
+For pickle protocols below 3, Python's default `fix_imports=True` maps a `GLOBAL` reference to `commands.run` onto `subprocess.run` through `_compat_pickle.IMPORT_MAPPING`. A scanner comparing the literal module string against a `subprocess` denylist can therefore miss the runtime callable. This requires a loader that preserves the compatibility mapping and accepts the resulting call arguments.<sup>[[21]](#references)[[24]](#references)[[25]](#references)</sup>
+
+#### Route a non-ZIP checkpoint past a ZIP-only scanner
+
+Format selection can fail independently of opcode inspection: Binarly found that ModelScan 0.8.8 routed `.bin`, `.pt`, `.pth`, and `.ckpt` files to a ZIP-specific PyTorch scanner and skipped a non-ZIP pickle stream rather than falling back to its plain-pickle scanner. It also documented a legacy TAR model layout that `torch.load()` accepts but that ModelScan and JFrog did not inspect. These are scanner-version-specific gaps, not properties of every model scanner.<sup>[[21]](#references)</sup>
+
+#### Execute before a static parser reaches a malformed tail
+
+A scanner that fully walks a pickle with `pickletools.genops()` can raise on a truncated opcode after a valid `REDUCE`. The unrestricted unpickler has already invoked the callable before it encounters that tail, even if the overall load later raises an exception. The reported sample placed a truncated `BINUNICODE` immediately after the executing `REDUCE`, causing `pickletools.genops()` to fail while the earlier file-write side effect had occurred. This bypasses a scanner only if it treats the parse error as clean or skips the file. It is useful only when the side effect matters without a successfully returned model; a target that requires a completed load may reject the artifact.<sup>[[21]](#references)</sup>
+
 ### Hydra metadata → RCE (works even with safetensors)
 
 `hydra.utils.instantiate()` imports and calls any dotted `_target_` in a configuration/metadata object. When libraries such as Hugging Face Transformers feed **untrusted model metadata** into `instantiate()`, an attacker can supply a callable and arguments that run immediately during model load (no pickle required).<sup>[[11]](#references)</sup><sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
@@ -389,5 +441,10 @@ For a focused guide on .keras internals, Lambda-layer RCE, the arbitrary import 
 - [18] [MLflow source – PyFunc `model.py`](https://github.com/mlflow/mlflow/blob/master/mlflow/pyfunc/model.py)
 - [19] [MLflow REST API – artifact download and upload endpoints](https://mlflow.org/docs/latest/api_reference/rest-api.html)
 - [20] [0xdf – HTB: SmartHire](https://0xdf.gitlab.io/2026/09/26/htb-smarthire.html)
+- [21] [Binarly MLTracer static-scanner evasion taxonomy](https://raw.githubusercontent.com/binarly-io/ai-supply-chain-attacks-research/master/MLTracer/evasion.md)
+- [22] [Binarly – Malicious Model Detection with MLTracer](https://binarly.io/blog/malicious-model-detection-mltracer)
+- [23] [PyTorch storage `_load_from_bytes` implementation](https://raw.githubusercontent.com/pytorch/pytorch/main/torch/storage.py)
+- [24] [CPython pickle `find_class` compatibility mapping](https://raw.githubusercontent.com/python/cpython/main/Lib/pickle.py)
+- [25] [CPython `_compat_pickle` import mapping](https://raw.githubusercontent.com/python/cpython/main/Lib/_compat_pickle.py)
 
 {{#include ../banners/hacktricks-training.md}}
