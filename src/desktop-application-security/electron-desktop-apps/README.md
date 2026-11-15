@@ -356,6 +356,8 @@ If the function's URL allowlist regex can be bypassed—for example, because dot
 
 As mentioned in [the Electron security guide](https://www.electronjs.org/docs/latest/tutorial/security#18-avoid-usage-of-the-file-protocol-and-prefer-usage-of-custom-protocols), pages running on **`file://`** receive broad file access. Consequently, **XSS may be usable to load arbitrary files** from the user's machine. A correctly designed **custom protocol** can restrict access to a specific set of files.<sup>[[21]](#references)</sup>
 
+For a distinct worker-context file-scope bypass in desktop assistant previews, see [AI assistant embedded browser trust boundaries](../../AI/AI-Embedded-Browser-Trust-Boundaries.md#worker-context-bypass-of-a-local-previews-file-scope).
+
 ## Remote module
 
 The Electron Remote module allows **renderer processes to access main process APIs**, facilitating communication within an Electron application. However, enabling this module introduces significant security risks. It expands the application's attack surface, making it more susceptible to vulnerabilities such as cross-site scripting (XSS) attacks.

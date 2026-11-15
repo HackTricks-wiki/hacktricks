@@ -13,6 +13,8 @@ Key properties exploited:
 - Policy-compliant phish: the agent never types the password, but still ushers the user to do it.
 - Hosted egress and a stable browser fingerprint (often Cloudflare or vendor ASN; example UA observed: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36).<sup>[[2]](#references)</sup>
 
+For the separate local desktop-preview attack surface, see [AI assistant embedded browser trust boundaries](../../AI/AI-Embedded-Browser-Trust-Boundaries.md).
+
 ## Attack Flow (AI‑in‑the‑Middle via Shared Prompt)
 
 1) Delivery: Victim opens a shared prompt in agent mode (e.g., ChatGPT/other agentic assistant).

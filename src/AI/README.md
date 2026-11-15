@@ -74,6 +74,10 @@ AI-Risk-Frameworks.md
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
+### Embedded browser trust boundaries
+
+For desktop-assistant browser bridges, tab-address spoofing, and worker-context local-file reads, see [AI assistant embedded browser trust boundaries](AI-Embedded-Browser-Trust-Boundaries.md).
+
 ### AI Prompts Security
 
 LLMs have made the use of AI explode in the last years, but they are not perfect and can be tricked by adversarial prompts. This is a very important topic to understand how to use AI safely and how to attack it:
