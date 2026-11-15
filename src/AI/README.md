@@ -4,7 +4,7 @@
 
 ## 主要机器学习算法
 
-学习 AI 的最佳起点是了解主要机器学习算法的工作原理。这有助于你理解 AI 的工作方式、如何使用它以及如何攻击它：
+了解 AI 的最佳起点是掌握主要机器学习算法的工作原理。这有助于你了解 AI 如何工作、如何使用它以及如何攻击它：
 
 
 {{#ref}}
@@ -32,7 +32,7 @@
 
 ### LLM 架构
 
-以下页面介绍了使用 transformers 构建基础 LLM 所需的各组件基础知识：
+在以下页面中，你将了解使用 transformers 构建基础 LLM 时各个组件的基础知识：
 
 
 {{#ref}}
@@ -41,7 +41,7 @@ AI-llm-architecture/README.md
 
 ## 模型工具与平台
 
-如需运行、微调、部署或试用模型，请参阅 [AI 模型工具与平台指南](AI-Model-Tools-and-Platforms.md)。
+如需运行、微调、部署或试用模型，请使用 [AI 模型工具与平台指南](AI-Model-Tools-and-Platforms.md)。
 
 ## AI 安全
 
@@ -61,22 +61,26 @@ AI-Agent-Security-Methodology.md
 
 ### AI 风险框架
 
-评估 AI 系统风险时，两个实用的入门框架是 OWASP Machine Learning Security Top 10 和 Google 的 Secure AI Framework (SAIF)。二者互为补充，但并未涵盖所有 AI 风险框架。<sup>[[1]](#references)[[2]](#references)</sup>
+评估 AI 系统风险时，有两个实用的入门框架：OWASP Machine Learning Security Top 10 和 Google 的 Secure AI Framework (SAIF)。它们相辅相成，但并非 AI 风险框架的完整清单。<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### 机械可解释性指导的对抗攻击
+### 由 Mechanistic Interpretability 指导的对抗性攻击
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
+### 嵌入式浏览器信任边界
+
+有关桌面助手的浏览器桥接、标签页地址欺骗以及 worker 上下文中的本地文件读取，请参阅 [AI 助手嵌入式浏览器信任边界](AI-Embedded-Browser-Trust-Boundaries.md)。
+
 ### AI Prompt 安全
 
-近年来，LLM 的出现使 AI 的应用迅速普及，但它们并不完美，可能会被对抗性 prompt 欺骗。了解如何安全地使用和攻击 AI 是一个非常重要的主题：
+近年来，LLM 推动 AI 的应用迅速普及，但它们并不完美，可能会被对抗性 prompt 欺骗。了解这一主题对于安全地使用和攻击 AI 非常重要：
 
 
 {{#ref}}
@@ -85,16 +89,16 @@ AI-Prompts.md
 
 ### AI 模型 RCE
 
-开发者和公司从互联网上下载模型并运行的情况非常常见，但仅仅加载模型就可能足以在系统上执行任意代码。了解如何安全地使用和攻击 AI 是一个非常重要的主题：
+开发者和公司从 Internet 下载模型并运行的情况很常见，但仅加载模型就可能足以在系统上执行任意代码。了解这一主题对于安全地使用和攻击 AI 非常重要：
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### 借助 AI 绕过 KYC
+### AI 辅助 KYC 绕过
 
-生成式视频可以与虚拟摄像头注入和摄像头 API 操纵结合起来，绕过安全性较弱的 KYC、年龄验证和生物特征活体检测流程：
+生成式视频可以结合虚拟摄像头注入和摄像头 API 操纵，绕过安全性较弱的 KYC、年龄验证和生物特征活体检测流程：
 
 
 {{#ref}}
@@ -112,7 +116,7 @@ AI-MCP-Servers.md
 
 ### AI Agent-to-Agent (A2A) 协议
 
-A2A 允许 Agent 通过 agent card 发现彼此，并通过 HTTP 相互发送任务。测试 agent card、任务授权、推送通知 webhook 和扩展卡片：
+A2A 允许 agent 通过 agent card 发现彼此，并通过 HTTP 相互发送任务。测试 agent card、任务授权、推送通知 webhook 和扩展卡片：
 
 {{#ref}}
 AI-A2A-Protocol.md
@@ -120,7 +124,7 @@ AI-A2A-Protocol.md
 
 ### 暴露的自托管 AI 服务
 
-对无需身份验证运行的模型运行器、Agent 构建器、ML 演示 UI、计算集群和向量数据库进行指纹识别和测试：
+对未启用身份验证的暴露模型运行器、agent 构建器、ML 演示 UI、计算集群和向量数据库进行指纹识别与测试：
 
 {{#ref}}
 AI-Exposed-Self-Hosted-AI-Services.md
@@ -143,11 +147,11 @@ AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 
 ### AI 辅助逆向工程
 
-[部分提升、invariant MBA 检测、环境绑定解码以及自动提取器验证](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[部分提升、invariant MBA 检测、环境绑定解码和自动化提取器验证](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
 ### Web 黑盒 AI Pentester Bot
 
-在具备可观测性、编排、已认证会话处理和对抗性验证的支持下，由 LLM 驱动的 Agent 可以自动执行长时间运行的黑盒 Web pentesting 工作流：
+在可观测性、编排、已认证会话处理和对抗性验证的支持下，由 LLM 驱动的 agent 可以自动执行长时间运行的黑盒 Web pentesting 工作流：
 
 
 {{#ref}}
