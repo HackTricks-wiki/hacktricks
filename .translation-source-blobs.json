@@ -781,7 +781,7 @@
     "src/network-services-pentesting/pentesting-web/php-tricks-esp/README.md": "278f226acd07902e887c30fa4723014d2dac598f",
     "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-rce-abusing-object-creation-new-usd_get-a-usd_get-b.md": "8398618a497c3b4ddfd6d05bbe5dfaef6ff1a5c5",
     "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-ssrf.md": "26f7f6fbdbba9e303f97a97cd02cb59f9e27c19c",
-    "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md": "d2b1b2095386b349ea52a1c76c91d0d30f857c48",
+    "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md": "8ddff3b51cb92a12dbccbf4b3c428573ca92d75c",
     "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-dl-function.md": "f83e3c81ed9b8280e87a466133531508ca5525c2",
     "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-imagick-less-than-3.3.0-php-greater-than-5.4-exploit.md": "0b6110604ec521bfac99edb8681d696a1c4b6800",
     "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-mod_cgi.md": "efbfa382ef94dfb3fec8f671b3c99bc7df9f98eb",
