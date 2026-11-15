@@ -628,7 +628,6 @@
       - [disable_functions bypass - PHP 5.2.3 - Win32std ext Protections Bypass](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-5.2.3-win32std-ext-protections-bypass.md)
       - [disable_functions bypass - via mem](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-via-mem.md)
       - [disable_functions bypass - mod_cgi](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-mod_cgi.md)
-      - [disable_functions bypass - PHP 4 >= 4.2.0, PHP 5 pcntl_exec](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-4-greater-than-4.2.0-php-5-pcntl_exec.md)
     - [Php Rce Abusing Object Creation New Usd Get A Usd Get B](network-services-pentesting/pentesting-web/php-tricks-esp/php-rce-abusing-object-creation-new-usd_get-a-usd_get-b.md)
     - [PHP SSRF](network-services-pentesting/pentesting-web/php-tricks-esp/php-ssrf.md)
   - [Perl Tricks](network-services-pentesting/pentesting-web/perl-tricks.md)
