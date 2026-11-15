@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Wichtigste Machine-Learning-Algorithmen
+## Zentrale Machine-Learning-Algorithmen
 
-Der beste Einstieg in AI ist, zu verstehen, wie die wichtigsten Machine-Learning-Algorithmen funktionieren. So lernst du, wie AI funktioniert, wie du sie einsetzt und wie du sie angreifst:
+Am besten lernst du AI kennen, indem du verstehst, wie die wichtigsten Machine-Learning-Algorithmen funktionieren. So kannst du nachvollziehen, wie AI funktioniert, wie du sie einsetzt und wie du sie angreifst:
 
 
 {{#ref}}
@@ -26,28 +26,28 @@ Der beste Einstieg in AI ist, zu verstehen, wie die wichtigsten Machine-Learning
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Aufbereitung und Auswertung von Modelldaten
+### Vorbereitung und Auswertung von Modelldaten
 
-Informationen zu Dataset-Splits, klassischen Metriken und Answer-Side-Angriffen auf LLM-basiertes Grading findest du unter [Aufbereitung und Auswertung von Modelldaten](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
+Informationen zu Dataset-Splits, klassischen Metriken und Answer-Side-Angriffen auf LLM-basiertes Grading findest du unter [Vorbereitung und Auswertung von Modelldaten](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
 
 ### LLM-Architektur
 
-Auf der folgenden Seite findest du die Grundlagen zu jeder Komponente, die du zum Aufbau eines einfachen LLM mit Transformers benötigst:
+Auf der folgenden Seite findest du die Grundlagen zu den einzelnen Komponenten, mit denen sich mithilfe von Transformers ein einfaches LLM erstellen lässt:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Model-Tools und Plattformen
+## Modelltools und Plattformen
 
-Zum Ausführen, Fine-Tuning, Bereitstellen oder Ausprobieren von Modellen kannst du den [Leitfaden zu AI-Model-Tools und -Plattformen](AI-Model-Tools-and-Platforms.md) verwenden.
+Zum Ausführen, Fine-Tuning, Bereitstellen oder Ausprobieren von Modellen findest du hier den [Leitfaden zu AI-Modelltools und Plattformen](AI-Model-Tools-and-Platforms.md).
 
 ## AI-Sicherheit
 
 ### Vertrauensgrenzen von LLM-Gateways
 
-Informationen zur Sicherheit von Gateways findest du unter:
+Informationen zur Gateway-Sicherheit findest du hier:
 
 {{#ref}}
 AI-LLM-Gateway-Security.md
@@ -61,7 +61,7 @@ AI-Agent-Security-Methodology.md
 
 ### AI-Risikoframeworks
 
-Zwei nützliche Frameworks für den Einstieg in die Bewertung von Risiken bei AI-Systemen sind die OWASP Machine Learning Security Top 10 und Googles Secure AI Framework (SAIF). Sie ergänzen sich, stellen aber keine vollständige Liste der AI-Risikoframeworks dar.<sup>[[1]](#references)[[2]](#references)</sup>
+Zwei nützliche Frameworks für den Einstieg in die Bewertung von Risiken bei AI-Systemen sind die OWASP Machine Learning Security Top 10 und Googles Secure AI Framework (SAIF). Sie ergänzen sich, bilden aber keine vollständige Liste aller AI-Risikoframeworks.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -74,9 +74,13 @@ AI-Risk-Frameworks.md
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
+### Vertrauensgrenzen eingebetteter Browser
+
+Informationen zu Browser-Bridges von Desktop-Assistenten, Spoofing von Tab-Adressen und dem Auslesen lokaler Dateien aus Worker-Kontexten findest du unter [Vertrauensgrenzen eingebetteter Browser von AI-Assistenten](AI-Embedded-Browser-Trust-Boundaries.md).
+
 ### Sicherheit von AI-Prompts
 
-LLMs haben in den letzten Jahren zu einer explosionsartigen Zunahme der AI-Nutzung geführt. Sie sind jedoch nicht perfekt und lassen sich durch adversariale Prompts austricksen. Dieses Thema ist wichtig, um zu verstehen, wie du AI sicher einsetzt und wie du sie angreifst:
+LLMs haben in den letzten Jahren zu einer explosionsartigen Zunahme des AI-Einsatzes geführt. Sie sind jedoch nicht perfekt und lassen sich durch adversariale Prompts täuschen. Dieses Thema ist sehr wichtig, um zu verstehen, wie du AI sicher einsetzen und angreifen kannst:
 
 
 {{#ref}}
@@ -85,16 +89,16 @@ AI-Prompts.md
 
 ### RCE in AI-Modellen
 
-Entwickler und Unternehmen führen häufig Modelle aus, die sie aus dem Internet heruntergeladen haben. Doch bereits das Laden eines Modells kann ausreichen, um beliebigen Code auf dem System auszuführen. Dieses Thema ist wichtig, um zu verstehen, wie du AI sicher einsetzt und wie du sie angreifst:
+Entwickler und Unternehmen führen sehr häufig Modelle aus, die sie aus dem Internet heruntergeladen haben. Doch bereits das Laden eines Modells kann ausreichen, um beliebigen Code auf dem System auszuführen. Dieses Thema ist sehr wichtig, um zu verstehen, wie du AI sicher einsetzen und angreifen kannst:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Umgehung von KYC mit AI-Unterstützung
+### Umgehung von KYC mithilfe von AI
 
-Generative Videos lassen sich mit Virtual-Camera-Injection und der Manipulation von Kamera-APIs kombinieren, um schwache KYC-, Altersverifizierungs- und biometrische Liveness-Verfahren zu umgehen:
+Generative Videos lassen sich mit Virtual-Camera-Injection und der Manipulation von Camera-APIs kombinieren, um schwache KYC-, Altersverifikations- und biometrische Liveness-Prüfungen zu umgehen:
 
 
 {{#ref}}
@@ -103,16 +107,16 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) ist ein offenes Protokoll, über das AI-Anwendungen mit Tools und Datenquellen verbunden werden. Da MCP-Server Daten und Aktionen zugänglich machen können, müssen Assessments Autorisierung, Einwilligung, Validierung von Tool-Eingaben und die Überprüfung von Vertrauensgrenzen umfassen.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) ist ein offenes Protokoll, über das sich AI-Anwendungen mit Tools und Datenquellen verbinden lassen. Da MCP-Server Daten und Aktionen zugänglich machen können, müssen Prüfungen Autorisierung, Einwilligung, Validierung von Tool-Eingaben und die Überprüfung von Vertrauensgrenzen umfassen.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-Agent-to-Agent-Protokoll (A2A)
+### AI Agent-to-Agent (A2A) Protocol
 
-Mit A2A können Agenten einander über eine Agent Card finden und Aufgaben über HTTP senden. Teste Agent Cards, die Autorisierung von Aufgaben, Webhooks für Push-Benachrichtigungen und erweiterte Cards:
+A2A ermöglicht es Agenten, sich über eine Agent Card gegenseitig zu entdecken und über HTTP Aufgaben zu senden. Prüfe Agent Cards, die Autorisierung von Aufgaben, Webhooks für Push-Benachrichtigungen und erweiterte Cards:
 
 {{#ref}}
 AI-A2A-Protocol.md
@@ -120,32 +124,32 @@ AI-A2A-Protocol.md
 
 ### Offen zugängliche, selbst gehostete AI-Dienste
 
-Fingerprinting und Tests von offen zugänglichen Model Runnern, Agent-Buildern, ML-Demo-UIs, Compute-Clustern und Vektordatenbanken ohne Authentifizierung:
+Fingerprinting und Tests exponierter Model-Runner, Agent-Builder, ML-Demo-UIs, Compute-Cluster und Vektordatenbanken, die ohne Authentifizierung betrieben werden:
 
 {{#ref}}
 AI-Exposed-Self-Hosted-AI-Services.md
 {{#endref}}
 
-### Fuzzing und automatisierte Schwachstellensuche mit AI-Unterstützung
+### AI-gestütztes Fuzzing und automatisierte Schwachstellenerkennung
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Quellcodeanalyse und Schwachstellenvalidierung mit AI-Unterstützung
+### AI-gestützte Codeanalyse und Validierung von Schwachstellen
 
-Informationen zur Analyse von Quellen und Senken, Taskflows für mobile Einstiegspunkte, Audits von Kernel-Mustern und evidenzbasierte Validierung findest du unter:
+Informationen zur Prüfung von Quellen und Senken, Taskflows für mobile Einstiegspunkte, Audits von Kernel-Mustern und evidenzbasierter Validierung findest du hier:
 
 {{#ref}}
 AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 {{#endref}}
 
-### Reverse Engineering mit AI-Unterstützung
+### AI-gestütztes Reverse Engineering
 
-[Partielles Lifting, Erkennung invarianten MBAs, umgebungsgebundene Dekodierung und Validierung automatisierter Extractoren](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Partielles Lifting, Erkennung invarianten MBA-Codes, umgebungsgebundene Dekodierung und Validierung automatisierter Extraktoren](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Black-Box-Web-Pentester-Bots mit AI
+### Web Black-Box AI Pentester Bots
 
 LLM-gestützte Agenten können lang laufende Black-Box-Web-Pentesting-Workflows automatisieren, wenn sie durch Observability, Orchestrierung, die Verwaltung authentifizierter Sitzungen und adversariale Validierung unterstützt werden:
 
@@ -158,7 +162,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Top 10 zur Sicherheit von Machine Learning](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [1] [OWASP Machine-Learning-Security-Top-10](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google — Sicheres AI-Framework (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Einführung](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
