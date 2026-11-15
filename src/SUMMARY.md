@@ -1161,6 +1161,7 @@
   - [Exposed Self-Hosted AI Services](AI/AI-Exposed-Self-Hosted-AI-Services.md)
   - [AI Models RCE](AI/AI-Models-RCE.md)
   - [KYC Bypass Using AI](AI/KYC-Bypass-Using-AI.md)
+  - [AI Assistant Embedded Browser Trust Boundaries](AI/AI-Embedded-Browser-Trust-Boundaries.md)
   - [AI Prompts](AI/AI-Prompts.md)
   - [AI Risk Frameworks](AI/AI-Risk-Frameworks.md)
   - [AI Supervised Learning Algorithms](AI/AI-Supervised-Learning-Algorithms.md)
