@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Algorithms Kuu za Machine Learning
+## Algoriti Kuu za Machine Learning
 
-Njia bora ya kuanza kujifunza kuhusu AI ni kuelewa jinsi algorithms kuu za machine learning zinavyofanya kazi. Hii itakusaidia kuelewa jinsi AI inavyofanya kazi, jinsi ya kuitumia na jinsi ya kuishambulia:
+Njia bora ya kuanza kujifunza kuhusu AI ni kuelewa jinsi algoriti kuu za machine learning zinavyofanya kazi. Hii itakusaidia kuelewa jinsi AI inavyofanya kazi, jinsi ya kuitumia na jinsi ya kuishambulia:
 
 
 {{#ref}}
@@ -26,22 +26,22 @@ Njia bora ya kuanza kujifunza kuhusu AI ni kuelewa jinsi algorithms kuu za machi
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Maandalizi na tathmini ya data ya model
+### Maandalizi na tathmini ya data ya modeli
 
-Kwa mgawanyo wa dataset, vipimo vya kawaida na mashambulizi yanayolenga majibu dhidi ya uwekaji alama unaotegemea LLM, angalia [maandalizi na tathmini ya data ya model](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
+Kwa mgawanyo wa dataset, vipimo vya kawaida, na mashambulizi ya upande wa majibu dhidi ya upangaji alama unaotegemea LLM, angalia [maandalizi na tathmini ya data ya modeli](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
 
-### Muundo wa LLM
+### Usanifu wa LLMs
 
-Katika ukurasa ufuatao utapata misingi ya kila kipengele kinachohitajika kujenga LLM ya msingi kwa kutumia transformers:
+Katika ukurasa unaofuata utapata misingi ya kila kipengele kinachohitajika kujenga LLM ya msingi kwa kutumia transformers:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Zana na majukwaa ya model
+## Zana na mifumo ya modeli za AI
 
-Kwa kuendesha, kufanya fine-tuning, kutoa huduma au kujaribu models, tumia [mwongozo wa zana na majukwaa ya AI model](AI-Model-Tools-and-Platforms.md).
+Kwa kuendesha, kufanya fine-tuning, kuhudumia, au kujaribu modeli, tumia [mwongozo wa zana na mifumo ya modeli za AI](AI-Model-Tools-and-Platforms.md).
 
 ## Usalama wa AI
 
@@ -53,39 +53,43 @@ Kwa usalama wa gateway, angalia:
 AI-LLM-Gateway-Security.md
 {{#endref}}
 
-### Mbinu za Usalama wa AI Agent
+### Mbinu ya Usalama wa AI Agent
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### Mifumo ya Hatari za AI
+### Miundo ya Hatari za AI
 
-Mifumo miwili mizuri ya kuanzia katika kutathmini hatari za mifumo ya AI ni OWASP Machine Learning Security Top 10 na Secure AI Framework (SAIF) ya Google. Inakamilishana, badala ya kuwa orodha kamili ya mifumo ya hatari za AI.<sup>[[1]](#references)[[2]](#references)</sup>
+Miundo miwili mizuri ya kuanzia kwa kutathmini hatari za mifumo ya AI ni OWASP Machine Learning Security Top 10 na Google's Secure AI Framework (SAIF). Inakamilishana badala ya kuwa orodha kamili ya miundo ya hatari za AI.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Mashambulizi ya Adversarial Yanayoongozwa na Mechanistic Interpretability
+### Mashambulizi ya Adversarial Yanayoongozwa na Ufafanuzi wa Kimekanika
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
-### Usalama wa Prompts za AI
+### Mipaka ya uaminifu ya browser iliyopachikwa
 
-Matumizi ya AI yameongezeka sana katika miaka ya hivi karibuni kutokana na LLMs, lakini si kamilifu na yanaweza kudanganywa kwa prompts za adversarial. Hii ni mada muhimu sana ya kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
+Kwa madaraja ya browser ya desktop-assistant, udanganyifu wa anwani ya tab, na usomaji wa faili za ndani katika muktadha wa worker, angalia [mipaka ya uaminifu ya browser iliyopachikwa katika AI assistant](AI-Embedded-Browser-Trust-Boundaries.md).
+
+### Usalama wa AI Prompts
+
+Matumizi ya AI yameongezeka sana katika miaka ya hivi karibuni kutokana na LLMs, lakini si kamilifu na zinaweza kudanganywa kwa prompts za adversarial. Hili ni suala muhimu sana ili kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE ya AI Models
+### RCE kupitia Modeli za AI
 
-Ni jambo la kawaida kwa developers na makampuni kuendesha models zilizopakuliwa kutoka kwenye Internet; hata hivyo, kupakia model pekee kunaweza kutosha kutekeleza code yoyote kwenye mfumo. Hii ni mada muhimu sana ya kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
+Ni jambo la kawaida kwa watengenezaji na makampuni kuendesha modeli zilizopakuliwa kutoka Internet; hata hivyo, kupakia modeli pekee kunaweza kutosha kutekeleza msimbo wowote kwenye mfumo. Hili ni suala muhimu sana ili kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
 
 
 {{#ref}}
@@ -94,7 +98,7 @@ AI-Models-RCE.md
 
 ### KYC Bypass Inayosaidiwa na AI
 
-Video generative inaweza kuunganishwa na uingizaji wa virtual camera na udanganyifu wa camera API ili kupita taratibu dhaifu za KYC, uthibitishaji wa umri na uthibitishaji wa uhai wa biometriki:
+Video generative inaweza kuunganishwa na uingizaji wa virtual-camera na udanganyifu wa camera API ili kupita mifumo dhaifu ya KYC, uthibitishaji wa umri na uthibitishaji wa uhai wa biometriki:
 
 
 {{#ref}}
@@ -103,39 +107,39 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) ni protocol iliyo wazi ya kuunganisha programu za AI na zana pamoja na vyanzo vya data. Kwa kuwa seva za MCP zinaweza kufichua data na vitendo, tathmini lazima zijumuishe authorization, consent, uthibitishaji wa tool-input na ukaguzi wa mipaka ya uaminifu.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) ni protocol iliyo wazi ya kuunganisha programu za AI na zana na vyanzo vya data. Kwa kuwa seva za MCP zinaweza kufichua data na vitendo, tathmini lazima zijumuishe uidhinishaji, ridhaa, uthibitishaji wa ingizo la zana, na mapitio ya mipaka ya uaminifu.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Protocol ya AI Agent-to-Agent (A2A)
+### AI Agent-to-Agent (A2A) Protocol
 
-A2A huwawezesha agents kugundua kila mmoja kupitia agent card na kutumiana tasks kupitia HTTP. Jaribu agent cards, authorization ya tasks, webhooks za push-notification na cards zilizopanuliwa:
+A2A huruhusu agents kugundua kila mmoja kupitia agent card na kutumiana kazi kupitia HTTP. Jaribu agent cards, uidhinishaji wa kazi, webhook za push-notification na cards zilizopanuliwa:
 
 {{#ref}}
 AI-A2A-Protocol.md
 {{#endref}}
 
-### Huduma za AI Zinazoendeshwa Mwenyewe Zilizo Wazi kwa Umma
+### Huduma za AI Zinazojiendesha Zilizowekwa Hadharani
 
-Kutambua aina na kujaribu model runners, agent builders, ML demo UIs, compute clusters na vector databases zilizo wazi bila authentication:
+Kutambua na kujaribu model runners, agent builders, ML demo UIs, compute clusters na vector databases zilizowekwa hadharani zinazoendeshwa bila uthibitishaji:
 
 {{#ref}}
 AI-Exposed-Self-Hosted-AI-Services.md
 {{#endref}}
 
-### Fuzzing Inayosaidiwa na AI na Ugunduzi wa Kiotomatiki wa Vulnerability
+### Fuzzing Inayosaidiwa na AI na Ugunduzi Otomatiki wa Vulnerability
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Ukaguzi wa Source Unaosaidiwa na AI na Uthibitishaji wa Vulnerability
+### Mapitio ya Source na Uthibitishaji wa Vulnerability Unaosaidiwa na AI
 
-Kwa ukaguzi wa source/sink, taskflows za mobile entry-point, ukaguzi wa mifumo ya kernel na uthibitishaji unaohitaji ushahidi:
+Kwa mapitio ya source/sink, taskflows za sehemu za kuingilia za simu, ukaguzi wa mifumo ya kernel, na uthibitishaji unaohitaji ushahidi:
 
 {{#ref}}
 AI-Assisted-Source-Review-and-Vulnerability-Validation.md
@@ -143,11 +147,11 @@ AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 
 ### Reverse Engineering Inayosaidiwa na AI
 
-[Kuinua sehemu ya code, kugundua invariant MBA, decoding inayofungamana na mazingira na uthibitishaji wa automated-extractor](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Partial lifting, ugunduzi wa invariant MBA, decoding inayotegemea mazingira, na uthibitishaji wa automated-extractor](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Bots za AI za Pentesting ya Web Black-Box
+### Web Black-Box AI Pentester Bots
 
-Agents zinazoendeshwa na LLM zinaweza kuendesha kiotomatiki workflows za muda mrefu za web pentesting ya black-box zinapoungwa mkono na observability, orchestration, ushughulikiaji wa authenticated session na uthibitishaji wa adversarial:
+Agents zinazoendeshwa na LLM zinaweza kuendesha workflows za muda mrefu za black-box web pentesting kiotomatiki zinapoungwa mkono na observability, orchestration, ushughulikiaji wa authenticated session, na uthibitishaji wa adversarial:
 
 
 {{#ref}}
@@ -158,7 +162,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Usalama wa Machine Learning 10 Bora](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [1] [OWASP Machine Learning Security 10 Bora](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google — Mfumo Salama wa AI (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Utangulizi](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
