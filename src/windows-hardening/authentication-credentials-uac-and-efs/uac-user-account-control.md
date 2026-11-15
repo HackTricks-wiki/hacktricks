@@ -410,6 +410,14 @@ logman stop AdminProtectionTrace -ets
 
 
 
+### Secure-desktop input forwarded through a writable shared-memory ring
+
+A secure-desktop helper can undermine the UAC prompt if a medium-integrity user can write to its input IPC. In the reported Steam design, `IClientSecureDesktop::BStartStreaming` starts `secure_desktop_capture.exe` as SYSTEM on `winsta0\winlogon`. It exposes `Global\SecureDesktopInput_mem-IPCWrapper` with user `GENERIC_ALL` access; the helper consumes ring entries and calls `SendInput` on the secure desktop. This is distinct from UIAccess or changing `PromptOnSecureDesktop`: input is forwarded by a process already running there. See the [service IPC bootstrap](../windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md#shared-memory-bootstrap-into-privileged-service-ipc) for how the client reaches this handler. <sup>[[15]](#references)[[16]](#references)</sup>
+
+The ring has 128 slots of 173 bytes. Its write and read counters are at `0x414` and `0x418`, with slot `N` at `0x41c + 173*N`. Set the slot's first byte to `0` for plaintext, copy a 40-byte Windows `INPUT` immediately after it, then advance the write counter. For a medium-integrity administrator facing a consent prompt, a keyboard `Y` key-down/key-up can activate the affirmative UAC control after launching an executable that requests elevation; it cannot answer a standard-user credential prompt. The **consent gate still matters**: the helper forwards input only after the user has approved its `InputEnabled` prompt for the current 90-day authorization period. A readable/writable mapping alone is not proof that input reaches the prompt; compare the read counter before and after a controlled test. <sup>[[15]](#references)[[16]](#references)</sup>
+
+
+
 ## References
 
 - [1] [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
@@ -426,4 +434,6 @@ logman stop AdminProtectionTrace -ets
 - [12] [Kaspersky Securelist – HoneyMyte Enhances CoolClient with a Signed Windows Kernel Rootkit](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
 - [13] [Group-IB – KGB RAT: A Fully Undetectable Windows Trojan Built to Spy, Steal, and Terrorize](https://www.group-ib.com/blog/kgb-rat-windows-fud-trojan/)
 - [14] [LOLBAS – ComputerDefaults.exe](https://lolbas-project.github.io/lolbas/Binaries/ComputerDefaults/)
+- [15] [Atredis – Turning the Valve](https://atredis.com/blog/2026/10/28/turning-the-valve)
+- [16] [Atredis – Turning the Valve PoCs](https://github.com/atredispartners/proof-of-concept/tree/main/turning-the-valve/code)
 {{#include ../../banners/hacktricks-training.md}}
