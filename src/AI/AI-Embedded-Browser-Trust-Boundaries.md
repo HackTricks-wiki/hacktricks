@@ -20,7 +20,7 @@ window.cursorBrowser.send("element-selected", {
 });
 ```
 
-The split fields made the model assemble a command rather than reject one obvious command attribute. In the demonstrated workflow, the command appeared as a run card, one Enter approved it, and the agent retried outside its command sandbox after an initial block. That last step was the agent's own behavior, not an instruction in the page, and success varied by model. The execution path was the package's install hook with the desktop user's privileges; it was **not** a Chromium memory-corruption escape. See [indirect prompt injection](AI-Prompts.md#third-party-or-indirect-prompt-injection) for the general instruction-trust boundary.<sup>[[1]](#references)[[2]](#references)</sup>
+The split fields made the model assemble a command rather than reject one obvious command attribute. In the demonstrated workflow, the command appeared as a run card, one Enter approved it, and the agent retried outside its command sandbox after an initial block. That last step was the agent's own behavior, not an instruction in the page, and success varied by model. The execution path was the package's install hook with the desktop user's privileges; it was **not** a Chromium memory-corruption escape. Cursor patched the reported bridge behavior on October 1, 2026, so this is a historical example rather than a claim about current versions. See [indirect prompt injection](AI-Prompts.md#third-party-or-indirect-prompt-injection) for the general instruction-trust boundary.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Page-supplied address bar and agent-context spoofing
 
@@ -33,7 +33,7 @@ window.__TAURI_INTERNALS__.invoke(
 );
 ```
 
-The forged address can lend credibility to a login form on the attacker page and can contaminate agent decisions that rely on tab metadata. Unlike [hosted agent-browser phishing](../generic-methodologies-and-resources/phishing-methodology/ai-agent-mode-phishing-abusing-hosted-agent-browsers.md), this is an **address provenance** failure inside a desktop preview, not an assistant asking the user to take over a cloud session. The reported Copilot behavior was fixed after the researcher's test, so validate the bridge and version before testing this historical path.<sup>[[1]](#references)[[2]](#references)</sup>
+The forged address can lend credibility to a login form on the attacker page and can contaminate agent decisions that rely on tab metadata. Unlike [hosted agent-browser phishing](../generic-methodologies-and-resources/phishing-methodology/ai-agent-mode-phishing-abusing-hosted-agent-browsers.md), this is an **address provenance** failure inside a desktop preview, not an assistant asking the user to take over a cloud session. The behavior was confirmed in Copilot 1.1.27 and fixed in 1.1.29, so validate the bridge and version before testing this historical path.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Worker-context bypass of a local preview's file scope
 
@@ -52,9 +52,9 @@ new Worker(URL.createObjectURL(blob));
 
 Run the same `fetch("file:///etc/hosts")` in the top document and in the worker to isolate this check gap: a top-level rejection with a worker success identifies the worker-scoping failure. In the reported Codex preview, the top document itself had no corresponding file-read fence, so no worker was needed. The page's JavaScript could then send readable file contents to an external endpoint. On macOS, readable `.DS_Store` files from folders previously opened in Finder can reveal sibling names and turn known-path reads into recursive discovery; their presence is not guaranteed in every directory. See [Electron `file://` risks](../desktop-application-security/electron-desktop-apps/#file-protocol) for the broader local-renderer exposure, but do not assume these assistants all use the same browser implementation.<sup>[[1]](#references)</sup>
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [EMBRACE: Technical Overview of Embedded Browsers in Desktop AI Assistants](https://forever.security/blog/embrace-hacking-5-ai-assistants-embedded-browsers-technical)
 - [2] [EMBRACE: Hacking Five AI Assistants with Embedded Browsers](https://forever.security/blog/embrace-hacking-5-ai-assistants-embedded-browsers)
-
-{{#include ../banners/hacktricks-training.md}}
