@@ -357,6 +357,12 @@ This technique was initially discovered by [@RastaMouse](https://twitter.com/_Ra
 
 There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
 
+### AMSI COM scan-pointer redirection instead of `AmsiScanBuffer` patching
+
+Another process-local bypass leaves the `AmsiScanBuffer` entry point untouched. In the reported 64-bit .NET loader, an AMSI COM object is created from CLSID `fdb00e52-a214-4aa1-8fba-4357bb0072ec`; `Marshal.GetIUnknownForObject()` yields the interface pointer, and its vtable slot at offset `0x18` is used as the scan-call target. The loader patches a native pointer for `Console.Clear()` with a small x64 stub, changes that vtable entry to the stub under `VirtualProtect()`, then restores the original page protection. Both the 64-bit pointer width and the expected COM layout are prerequisites; this is not a generic offset for arbitrary AMSI interfaces or builds. The earlier observed stages are [signed AppDomainManager sidecar loading](windows-local-privilege-escalation/dll-hijacking/#signed-appdomainmanager-type-as-a-configuration-file-gadget) and [RESX deserialization](../pentesting-web/deserialization/basic-.net-deserialization-objectdataprovider-gadgets-expandedwrapper-and-json.net.md#resx-resource-parsing-to-binaryformatter-and-xaml).<sup>[[51]](#references)</sup>
+
+The observed stub bytes are `41 C7 00 01 00 00 00 33 C0 C3`: they write **1** to the result pointer in `r8` and return **0** in `eax`. Thus the reported claim that the scan result is `AMSI_RESULT_CLEAN` (0) conflates the `S_OK` return value with the output enum. In the documented `AMSI_RESULT` order, result **1** is `AMSI_RESULT_NOT_DETECTED`; it is still below the detection threshold.<sup>[[51]](#references)[[52]](#references)[[53]](#references)</sup>
+
 ### Blocking AMSI by preventing amsi.dll load (LdrLoadDll hook)
 
 AMSI is initialised only after `amsi.dll` is loaded into the current process. A robust, language‑agnostic bypass is to place a user‑mode hook on `ntdll!LdrLoadDll` that returns an error when the requested module is `amsi.dll`. As a result, AMSI never loads and no scans occur for that process.<sup>[[23]](#references)</sup>
@@ -1595,5 +1601,8 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [48] [EMBER2024 benchmark dataset and thrember tooling](https://github.com/FutureComputing4AI/EMBER2024)
 - [49] [Using EMBER2024 to evaluate red team implants](https://mez0.cc/posts/evaluating-implants-with-ember/)
 - [50] [MSec Operations – Evading Machine Learning Based Detections](https://msecops.de/blog/posts/ml-evasion/)
+- [51] [Kaspersky Securelist – NetamLoader XAML-based .NET loading framework](https://securelist.com/netamloader/121676)
+- [52] [Microsoft Learn – AMSI_RESULT enumeration](https://learn.microsoft.com/en-us/windows/win32/api/amsi/ne-amsi-amsi_result)
+- [53] [Microsoft Learn – IAntimalware::Scan method](https://learn.microsoft.com/en-us/windows/win32/api/amsi/nf-amsi-iantimalware-scan)
 
 {{#include ../banners/hacktricks-training.md}}
