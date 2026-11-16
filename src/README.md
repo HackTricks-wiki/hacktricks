@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logos et motion design de_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Logos HackTricks et motion design par_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Exécuter HackTricks localement
 
@@ -34,15 +34,15 @@ export HT_LANG="master" # Leave master for English
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 
-Votre copie locale de HackTricks sera **disponible à [http://localhost:3337](http://localhost:3337)** dans < 5 minutes (la compilation du livre prend un peu de temps, veuillez patienter).
+Votre copie locale de HackTricks sera **disponible à [http://localhost:3337](http://localhost:3337)** dans <5 minutes (la compilation du livre est nécessaire, soyez patient).
 
-Sinon, si vous disposez de Docker Compose, vous pouvez simplement exécuter la commande suivante depuis la racine du dépôt :
+Sinon, si vous avez Docker Compose, vous pouvez simplement exécuter la commande suivante depuis la racine du dépôt :
 
 ```bash
 docker compose up
 ```
 
-Ce service utilise le fichier `docker-compose.yml` fourni pour servir la branche actuellement extraite sur l’hôte à l’adresse [http://localhost:3337](http://localhost:3337), avec rechargement à chaud. Pour changer de langue avec Compose, extrayez la branche de la langue souhaitée avant de démarrer le service.
+Cela utilise le fichier `docker-compose.yml` fourni pour servir la branche actuellement extraite sur l’hôte à l’adresse [http://localhost:3337](http://localhost:3337), avec rechargement à chaud. Pour changer de langue avec Compose, extrayez la branche de la langue souhaitée avant de démarrer le service.
 
 ## Partenaires HackTricks
 
@@ -54,7 +54,7 @@ Ce service utilise le fichier `docker-compose.yml` fourni pour servir la branche
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-STM Cyber fournit des services de tests d’intrusion, d’audits de sécurité, d’exploits et de recherche, des outils ainsi que des services de sensibilisation à la sécurité. Son site présente une équipe de testeurs d’intrusion, de programmeurs et de chercheurs en sécurité qui cumule plus de dix ans d’expérience.<sup>[[1]](#references)</sup>
+STM Cyber propose des services de pentest, d’audits de sécurité, d’exploitation et de recherche, ainsi que des outils et des services de sensibilisation à la sécurité. Son site présente une équipe de pentesters, de programmeurs et de chercheurs en sécurité cumulant plus de dix ans d’expérience.<sup>[[1]](#references)</sup>
 
 Vous pouvez consulter leur **blog** à l’adresse [**https://blog.stmcyber.com**](https://blog.stmcyber.com).
 
@@ -66,7 +66,7 @@ Vous pouvez consulter leur **blog** à l’adresse [**https://blog.stmcyber.com*
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-Intigriti est un fournisseur de sécurité participative qui propose des services de bug bounty et de tests d’intrusion grâce à une communauté mondiale de chercheurs. Sa plateforme associe une couverture continue de bug bounty à des services PTaaS à la demande et à des programmes gérés de divulgation des vulnérabilités.<sup>[[2]](#references)</sup>
+Intigriti est un fournisseur de sécurité participative qui propose des services de bug bounty et de pentest grâce à une communauté mondiale de chercheurs. Sa plateforme associe une couverture continue de bug bounty à des services PTaaS à la demande et à des programmes gérés de divulgation de vulnérabilités.<sup>[[2]](#references)</sup>
 
 **Conseil bug bounty** : Rejoignez Intigriti via [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) et découvrez ses programmes de bug bounty.
 
@@ -76,7 +76,7 @@ Intigriti est un fournisseur de sécurité participative qui propose des service
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security propose des formations pratiques en sécurité de l’IA, à suivre à votre rythme, destinées aux ingénieurs en sécurité, aux professionnels AppSec et aux développeurs. Sa certification en sécurité de l’IA couvre les fondamentaux des LLM et des agents, le RAG et les bases de données vectorielles, la modélisation des menaces, les attaques par prompt injection et MCP, ainsi que l’architecture défensive.<sup>[[3]](#references)</sup>
+Modern Security propose des formations pratiques en sécurité de l’IA, à suivre à son rythme, destinées aux ingénieurs en sécurité, aux professionnels AppSec et aux développeurs. Sa certification en sécurité de l’IA couvre les fondamentaux des LLM et des agents, le RAG et les bases de données vectorielles, la modélisation des menaces, les attaques par prompt injection et MCP, ainsi que l’architecture défensive.<sup>[[3]](#references)</sup>
 
 👉 Plus d’informations sur la formation en sécurité de l’IA :  
 https://www.modernsecurity.io/courses/ai-security-certification
@@ -87,9 +87,9 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** fournit des API pour Google et d’autres moteurs de recherche, qui renvoient des données SERP structurées avec des fonctionnalités telles que les résultats géolocalisés, Maps, Shopping et le Knowledge Graph.<sup>[[4]](#references)</sup>
+**SerpApi** fournit des API pour Google et d’autres moteurs de recherche, renvoyant des données SERP structurées avec des fonctionnalités telles que les résultats géolocalisés, Maps, Shopping et Knowledge Graph.<sup>[[4]](#references)</sup>
 
-Pour en savoir plus, consultez leur [**blog**](https://serpapi.com/blog/), essayez un exemple dans leur [**environnement de test**](https://serpapi.com/playground) ou [**créez un compte gratuit**](https://serpapi.com/users/sign_up).
+Pour en savoir plus, consultez leur [**blog**](https://serpapi.com/blog/), essayez un exemple dans leur [**playground**](https://serpapi.com/playground) ou [**créez un compte gratuit**](https://serpapi.com/users/sign_up).
 
 ---
 
@@ -97,19 +97,19 @@ Pour en savoir plus, consultez leur [**blog**](https://serpapi.com/blog/), essay
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** propose des formations en sécurité mobile et IA, à suivre à votre rythme. Son catalogue couvre l’audit et le reverse engineering d’applications mobiles avec des outils comme Ghidra, Frida et LLDB, ainsi que des laboratoires d’attaque et de défense de l’IA et des LLM.<sup>[[5]](#references)[[6]](#references)</sup>
+**8kSec Academy** propose des formations en sécurité mobile et IA, à suivre à son rythme. Son catalogue couvre l’audit et la rétro-ingénierie d’applications mobiles avec des outils comme Ghidra, Frida et LLDB, ainsi que des laboratoires sur les attaques et la défense de l’IA et des LLM.<sup>[[5]](#references)[[6]](#references)</sup>
 
-Consultez le [catalogue des formations de 8kSec Academy](https://academy.8ksec.io/).
+Consultez le [catalogue de formations de 8kSec Academy](https://academy.8ksec.io/).
 
 ---
 
-### [NaxusAI – Scanner de sécurité propulsé par l’IA](https://www.naxusai.com/)
+### [NaxusAI – Sécurité offensive autonome](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
 
-**Naxus** présente une plateforme d’IA offensive qui cartographie le code et l’infrastructure, puis utilise des agents statiques et dynamiques pour trouver et valider des faiblesses exploitables, avec des preuves de concept et des conseils de remédiation.<sup>[[7]](#references)</sup>
+**Naxus** est une plateforme de sécurité offensive propulsée par l’IA, destinée à l’analyse complète de la surface d’attaque externe, à l’audit d’applications mobiles, aux tests web en boîte noire et à l’analyse de code source. Ses agents valident les vulnérabilités exploitables et fournissent des preuves traçables, des exploits de preuve de concept et des mesures correctives concrètes.<sup>[[7]](#references)</sup>
 
-**Conseil en sécurité du code** : Découvrez Naxus pour rechercher des vulnérabilités dans le code et l’infrastructure.
+**Conseil d’audit de sécurité** : Utilisez Naxus pour réaliser des audits autonomes de bout en bout couvrant les actifs externes, les applications mobiles et web, ainsi que le code source.
 
 ---
 
@@ -117,7 +117,7 @@ Consultez le [catalogue des formations de 8kSec Academy](https://academy.8ksec.i
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-WebSec fournit des services de tests d’intrusion, des abonnements de sécurité, des services de recrutement et des évaluations de vulnérabilités. Son site indique que l’entreprise exerce ses activités à l’international et couvre la sécurité offensive, la sécurité défensive ainsi que la gouvernance, la gestion des risques et la conformité.<sup>[[8]](#references)</sup>
+WebSec propose des services de pentest, des abonnements de sécurité, du placement de personnel et des évaluations de vulnérabilités. Son site indique que l’entreprise opère à l’international et couvre la sécurité offensive, la sécurité défensive ainsi que la gouvernance, la gestion des risques et la conformité.<sup>[[8]](#references)</sup>
 
 Pour en savoir plus, consultez leur [**site web**](https://websec.net/en/) ou leur [**blog**](https://websec.net/blog/).
 
@@ -130,13 +130,13 @@ En plus de ce qui précède, WebSec est également un **soutien engagé de HackT
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**Conçues pour le terrain. Conçues pour vous.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) propose des formations en cybersécurité animées par des experts, avec des contenus et des laboratoires conçus sur mesure et fondés sur des infrastructures réelles. Ses programmes sont adaptés aux besoins des organisations et couvrent toutes les étapes, de l’évaluation à la mise en œuvre.<sup>[[9]](#references)</sup> Pour toute demande de formation personnalisée, contactez-les [**ici**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+**Conçue pour le terrain. Conçue autour de vous.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) propose des formations en cybersécurité dirigées par des experts, avec du contenu et des laboratoires personnalisés, basés sur des infrastructures réelles. Ses programmes sont adaptés aux besoins des organisations et couvrent toutes les étapes, de l’évaluation à la mise en œuvre.<sup>[[9]](#references)</sup> Pour toute demande de formation personnalisée, contactez-les [**ici**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Les atouts de leurs formations :**
-* Contenus et laboratoires conçus sur mesure
-* S’appuient sur des outils et plateformes de premier ordre
-* Conçues et enseignées par des praticiens
+**Ce qui distingue leurs formations :**
+* Contenu et laboratoires personnalisés
+* Appuyés par des outils et des plateformes de premier plan
+* Conçus et enseignés par des professionnels du secteur
 
 ---
 
@@ -144,7 +144,7 @@ En plus de ce qui précède, WebSec est également un **soutien engagé de HackT
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions se spécialise dans le conseil en cybersécurité pour les secteurs de l’**éducation** et de la **FinTech**, notamment les évaluations cloud, les tests d’intrusion internes et externes, les évaluations de vulnérabilités et l’accompagnement en matière de conformité.<sup>[[10]](#references)</sup>
+Last Tower Solutions se concentre sur le conseil en cybersécurité dans les secteurs de l’**éducation** et de la **FinTech**, notamment les évaluations cloud, les pentests internes et externes, les évaluations de vulnérabilités et l’accompagnement en matière de conformité.<sup>[[10]](#references)</sup>
 
 Restez informé des dernières actualités en cybersécurité en consultant notre [**blog**](https://www.lasttowersolutions.com/blog).
 
@@ -154,17 +154,17 @@ Restez informé des dernières actualités en cybersécurité en consultant notr
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio est un IDE Kubernetes pour ordinateur de bureau offrant la visualisation CloudMaps, la navigation multi-cluster, RBAC, Helm, ainsi que des vues pour les journaux, YAML et le terminal. Le fournisseur indique que l’outil se connecte via kubeconfig sans installer d’agents et prend en charge macOS, Windows, Linux et les clusters isolés d’Internet.<sup>[[11]](#references)</sup>
+K8Studio est un IDE Kubernetes de bureau proposant la visualisation CloudMaps, la navigation multi-cluster, RBAC, Helm, les journaux, YAML et des vues de terminal. L’éditeur indique que l’outil se connecte via kubeconfig sans installer d’agents et prend en charge macOS, Windows, Linux et les clusters isolés du réseau.<sup>[[11]](#references)</sup>
 
 ---
 
-## Licence et avertissement
+## Licence et clause de non-responsabilité
 
 Consultez l’entrée HackTricks Values & FAQ dans les références ci-dessous.
 
-## Statistiques GitHub
+## Statistiques Github
 
-![Statistiques GitHub de HackTricks](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
@@ -181,7 +181,7 @@ Consultez l’entrée HackTricks Values & FAQ dans les références ci-dessous.
 - [11] [K8Studio](https://k8studio.io/)
 - [12] [Parrainage HackTricks Intigriti](https://go.intigriti.com/hacktricks)
 - [13] [Modern Security](https://modernsecurity.io/)
-- [14] [Vidéo de parrainage WebSec](https://www.youtube.com/watch?v=Zq2JycGDCPM)
+- [14] [Vidéo de sponsoring WebSec](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Formations Cyber Helmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 - [16] [Valeurs et FAQ de HackTricks](welcome/hacktricks-values-and-faq.md)
 {{#include banners/hacktricks-training.md}}
