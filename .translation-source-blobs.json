@@ -50,7 +50,7 @@
     "src/binary-exploitation/basic-stack-binary-exploitation-methodology/tools/README.md": "24bab0827cea5fa5a51659c4b1aced047a5f3ba8",
     "src/binary-exploitation/basic-stack-binary-exploitation-methodology/tools/pwntools.md": "bb57eea4ce2fade6d9299dd2e6859952cc03a2d1",
     "src/binary-exploitation/brotli-block-switch-decoder-state-corruption.md": "70a8f77e1a0b94883c94d86df3b7d13bfd125076",
-    "src/binary-exploitation/chrome-exploiting.md": "0acccc53820092c2fb670352c0454701d3a98a38",
+    "src/binary-exploitation/chrome-exploiting.md": "e3ac149f525ebb9aba22bbfb7e4f4bc311d0238d",
     "src/binary-exploitation/common-binary-protections-and-bypasses/README.md": "092d74cea4b5c60def237448ff327889fb09e0ec",
     "src/binary-exploitation/common-binary-protections-and-bypasses/aslr/README.md": "491b012f23f58f530e42df5046a80becd8a3364f",
     "src/binary-exploitation/common-binary-protections-and-bypasses/aslr/ret2plt.md": "6de183c6662de775935fa81016b256e1a5bd120f",
