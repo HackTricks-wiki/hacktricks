@@ -223,6 +223,22 @@ chmod +x /tmp/test.pl
 
 The example is only a candidate where the interpreter's file capability can become effective and the script's actual exec attachment permits the operation. Check the loaded policy and process label, the capability bounding set, `no_new_privs`, and the mount's `nosuid` state; a profile file name or `cap_setuid+ep` listing alone does not prove a usable transition. Interpreter chains and alternate execution paths deserve separate review.
 
+## Policy-control files as a privileged write primitive
+
+On affected AppArmor kernels, an unprivileged user can open the securityfs `.load`, `.replace`, or `.remove` file for writing, but a direct `write()` fails because policy-admin permission is checked at write time. If a setuid helper inherits that descriptor as stdout or stderr and writes attacker-controlled bytes, the kernel sees the helper's credentials. This makes the helper a *privileged writer* of policy data, not a general grant of root to the caller. Qualys demonstrated that `su -P` can relay bytes from a command run as the same user through its privileged PTY path; that route requires a password set for the user's account. Check the installed kernel and `su` fixes rather than treating a world-writable file mode as proof of exposure.<sup>[[3]](#references)[[4]](#references)</sup>
+
+In a disposable lab with an affected kernel and helper, this creates and then removes a test profile. The shell opens each control file before `su` writes to it; `stty raw` keeps the PTY relay from changing the compiled profile bytes. Do not run the test against a production profile.<sup>[[3]](#references)</sup>
+
+```bash
+printf '/usr/bin/true {\n}\n' > /tmp/ht-aa-probe
+apparmor_parser -K -o /tmp/ht-aa-probe.pf /tmp/ht-aa-probe
+su -P -c 'stty raw && cat /tmp/ht-aa-probe.pf' "$USER" > /sys/kernel/security/apparmor/.load
+grep '/usr/bin/true ' /sys/kernel/security/apparmor/profiles
+su -P -c 'stty raw && printf %s /usr/bin/true' "$USER" > /sys/kernel/security/apparmor/.remove
+```
+
+The same primitive can replace an existing profile. For example, a profile that permits `userns` for a launcher may remove an AppArmor user-namespace restriction, but it does not grant host-root capabilities; the actual namespace sysctls and other controls still matter. It can also remove confinement from a target process. Review the [kernel exposure checks](../../../main-system-information/kernel-vulnerability-assessment.md) and the [Linux Hardening overview](../../../) for the wider privilege-escalation workflow.<sup>[[3]](#references)[[4]](#references)</sup>
+
 ## Checks
 
 The goal of these checks is to answer three questions quickly: is AppArmor enabled on the host, is the current process confined, and did the runtime actually apply a profile to this container?
@@ -257,9 +273,12 @@ If a container already has elevated privileges for operational reasons, leaving 
 
 For AppArmor, the most important variable is often the **host**, not only the runtime. A profile setting in a manifest does not create confinement on a node where AppArmor is not enabled.
 
+
+
 ## References
 
 - [1] [Kubernetes security context: AppArmor profile fields and node-support behavior](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 - [2] [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, and profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
-
+- [3] [Qualys CrackArmor technical advisory](https://cdn2.qualys.com/advisory/2026/03/10/crack-armor.txt)
+- [4] [Ubuntu CrackArmor vulnerability knowledge base](https://ubuntu.com/security/vulnerabilities/crackarmor)
 {{#include ../../../../banners/hacktricks-training.md}}
