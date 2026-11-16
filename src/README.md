@@ -150,11 +150,13 @@ Stay informed and up to date with the latest in cybersecurity by visiting our [*
 
 ---
 
-### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
+### [Beaki — Food that fits you](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
 
-K8Studio is a desktop Kubernetes IDE with CloudMaps visualization, multi-cluster navigation, RBAC, Helm, logs, YAML, and terminal views. The vendor says it connects through kubeconfig without installing agents and supports macOS, Windows, Linux, and air-gapped clusters.<sup>[[11]](#references)</sup>
+**Beaki** is a personalized food scanner, calorie counter and nutrition tracker. Scan barcodes and supermarket shelves, photograph or describe meals and restaurant menus, and get explainable scores shaped by your goals, diet, allergies and health profile. Beaki also tracks calories and macros and creates personalized meal plans with shopping lists.<sup>[[11]](#references)</sup>
+
+[**Download Beaki free**](https://www.beaki.app/?utm_source=hacktricks&utm_medium=partner&utm_campaign=hacktricks) on Android or iPhone.
 
 ---
 
@@ -178,7 +180,7 @@ See the HackTricks Values & FAQ entry in References below.
 - [8] [WebSec](https://websec.net/)
 - [9] [Cyber Helmets](https://cyberhelmets.com/)
 - [10] [Last Tower Solutions](https://www.lasttowersolutions.com/)
-- [11] [K8Studio](https://k8studio.io/)
+- [11] [Beaki](https://www.beaki.app/)
 - [12] [Intigriti HackTricks referral](https://go.intigriti.com/hacktricks)
 - [13] [Modern Security](https://modernsecurity.io/)
 - [14] [WebSec sponsorship video](https://www.youtube.com/watch?v=Zq2JycGDCPM)
