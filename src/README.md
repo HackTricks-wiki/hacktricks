@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks के लोगो और मोशन डिज़ाइन_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_ द्वारा।_
+_Hacktricks के लोगो और मोशन डिज़ाइन_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/) _द्वारा।_
 
 ### HackTricks को स्थानीय रूप से चलाएँ
 
@@ -34,9 +34,9 @@ export HT_LANG="master" # Leave master for English
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 
-HackTricks की आपकी local copy 5 मिनट से कम समय में **[http://localhost:3337](http://localhost:3337)** पर उपलब्ध होगी (इसे book build करने में समय लगता है, कृपया धैर्य रखें)।
+आपकी HackTricks की स्थानीय कॉपी <5 मिनट में **[http://localhost:3337](http://localhost:3337)** पर **उपलब्ध** होगी (इसे book build करनी होगी, इसलिए धैर्य रखें)।
 
-वैकल्पिक रूप से, अगर आपके पास Docker Compose है, तो आप repo root से बस यह चला सकते हैं:
+वैकल्पिक रूप से, अगर आपके पास Docker Compose है, तो repo root से बस यह चलाएँ:
 
 ```bash
 docker compose up
@@ -44,7 +44,7 @@ docker compose up
 
 यह bundled `docker-compose.yml` का उपयोग करके host पर वर्तमान में checkout की गई branch को [http://localhost:3337](http://localhost:3337) पर live reload के साथ serve करता है। Compose का उपयोग करते समय languages बदलने के लिए, service शुरू करने से पहले इच्छित language branch checkout करें।
 
-## HackTricks पार्टनर्स
+## HackTricks साझेदार
 
 ---
 
@@ -54,11 +54,11 @@ docker compose up
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-STM Cyber penetration testing, security audits, exploit और research work, tools, तथा security-awareness services प्रदान करता है। इसकी साइट के अनुसार, इसकी टीम में एक दशक से अधिक अनुभव वाले penetration testers, programmers और security researchers शामिल हैं।<sup>[[1]](#references)</sup>
+STM Cyber penetration testing, security audits, exploit और research work, tools, तथा security-awareness services प्रदान करता है। इसकी site के अनुसार, इसकी team में एक दशक से अधिक अनुभव वाले penetration testers, programmers और security researchers शामिल हैं।<sup>[[1]](#references)</sup>
 
 आप उनका **blog** [**https://blog.stmcyber.com**](https://blog.stmcyber.com) पर देख सकते हैं।
 
-**STM Cyber** HackTricks जैसे cybersecurity open source projects का भी समर्थन करता है :)
+**STM Cyber**, HackTricks जैसे cybersecurity open source projects को भी support करता है :)
 
 ---
 
@@ -66,17 +66,17 @@ STM Cyber penetration testing, security audits, exploit और research work, to
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-Intigriti एक crowdsourced security provider है, जो वैश्विक researcher community के ज़रिए bug bounty और penetration-testing services प्रदान करता है। इसका platform continuous bug bounty coverage को on-demand PTaaS और managed vulnerability disclosure programs के साथ जोड़ता है।<sup>[[2]](#references)</sup>
+Intigriti एक crowdsourced security provider है, जो वैश्विक researcher community के माध्यम से bug bounty और penetration-testing services प्रदान करता है। इसका platform continuous bug bounty coverage को on-demand PTaaS और managed vulnerability disclosure programs के साथ जोड़ता है।<sup>[[2]](#references)</sup>
 
 **Bug bounty tip**: [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) के ज़रिए Intigriti से जुड़ें और इसके bug bounty programs देखें।
 
 ---
 
-### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
+### [Modern Security – AI और Application Security Training Platform](https://modernsecurity.io/)
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security security engineers, AppSec professionals और developers के लिए self-paced, hands-on AI security training प्रदान करता है। इसका AI Security Certification LLM और agent fundamentals, RAG और vector databases, threat modeling, prompt-injection और MCP attacks, तथा defensive architecture को कवर करता है।<sup>[[3]](#references)</sup>
+Modern Security, security engineers, AppSec professionals और developers के लिए self-paced, hands-on AI security training प्रदान करता है। इसका AI Security Certification, LLM और agent fundamentals, RAG और vector databases, threat modeling, prompt-injection और MCP attacks, तथा defensive architecture को कवर करता है।<sup>[[3]](#references)</sup>
 
 👉 AI Security course की अधिक जानकारी:  
 https://www.modernsecurity.io/courses/ai-security-certification
@@ -93,23 +93,23 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ---
 
-### [8kSec Academy – In-Depth Mobile & AI Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – गहन Mobile और AI Security Courses](https://academy.8ksec.io/)
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** self-paced mobile और AI-security courses प्रदान करता है। इसका catalog Ghidra, Frida और LLDB जैसे tools से mobile application auditing और reversing के साथ-साथ AI/LLM attack और defense labs को कवर करता है।<sup>[[5]](#references)[[6]](#references)</sup>
+**8kSec Academy** self-paced mobile और AI-security courses प्रदान करता है। इसके catalog में Ghidra, Frida और LLDB जैसे tools के साथ mobile application auditing और reversing, तथा AI/LLM attack और defense labs शामिल हैं।<sup>[[5]](#references)[[6]](#references)</sup>
 
-[8kSec Academy course catalog](https://academy.8ksec.io/) देखें।
+[8kSec Academy का course catalog](https://academy.8ksec.io/) देखें।
 
 ---
 
-### [NaxusAI – AI Powered Security Scanner](https://www.naxusai.com/)
+### [NaxusAI – Autonomous Offensive Security](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
 
-**Naxus** एक offensive-AI platform प्रस्तुत करता है, जो code और infrastructure को map करता है, फिर static और dynamic agents के ज़रिए exploitable कमजोरियों को ढूँढ़ता और validate करता है, साथ में proof-of-concept evidence और remediation guidance भी देता है।<sup>[[7]](#references)</sup>
+**Naxus**, full external attack-surface scans, mobile app audits, web black-box testing और source-code reviews के लिए AI-powered offensive-security platform है। इसके agents exploitable findings को validate करते हैं और traceable evidence, proof-of-concept exploits तथा उपयोगी remediation प्रदान करते हैं।<sup>[[7]](#references)</sup>
 
-**Code security tip**: code और infrastructure पर केंद्रित vulnerability discovery के लिए Naxus देखें।
+**Security audit tip**: external assets, mobile apps, web apps और source code के end-to-end autonomous audits के लिए Naxus का उपयोग करें।
 
 ---
 
@@ -117,11 +117,11 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-WebSec penetration testing, security subscriptions, staffing और vulnerability-assessment services प्रदान करता है। इसकी साइट के अनुसार, यह अंतरराष्ट्रीय स्तर पर काम करता है और offensive security, defensive security, तथा governance, risk और compliance से जुड़े काम करता है।<sup>[[8]](#references)</sup>
+WebSec penetration testing, security subscriptions, staffing और vulnerability-assessment services प्रदान करता है। इसकी site के अनुसार, यह अंतरराष्ट्रीय स्तर पर काम करता है और offensive security, defensive security, तथा governance, risk और compliance से जुड़ा काम करता है।<sup>[[8]](#references)</sup>
 
-अधिक जानकारी के लिए उनकी [**website**](https://websec.net/en/) या [**blog**](https://websec.net/blog/) पर जाएँ।
+अधिक जानकारी के लिए उनकी [**website**](https://websec.net/en/) या [**blog**](https://websec.net/blog/) देखें।
 
-उपरोक्त के अलावा, WebSec HackTricks का **समर्पित समर्थक** भी है।
+उपरोक्त के अलावा, WebSec **HackTricks का प्रतिबद्ध समर्थक** भी है।
 
 ---
 
@@ -130,13 +130,13 @@ WebSec penetration testing, security subscriptions, staffing और vulnerabilit
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**वास्तविक परिस्थितियों के लिए बना। आपकी ज़रूरतों के अनुसार बना।**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) वास्तविक infrastructures पर आधारित, custom-built content और labs के साथ expert-led cybersecurity training प्रदान करता है। इसके programs संगठन की ज़रूरतों के अनुसार तैयार किए जाते हैं और assessment से लेकर implementation तक शामिल होते हैं।<sup>[[9]](#references)</sup> Custom training के बारे में पूछताछ के लिए [**यहाँ**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) संपर्क करें।
+**Field के लिए बना। आपके अनुरूप बनाया गया।**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) वास्तविक infrastructures पर आधारित custom-built content और labs के साथ expert-led cybersecurity training प्रदान करता है। इसके programs संगठन की ज़रूरतों के अनुसार तैयार किए जाते हैं और assessment से लेकर implementation तक के विषयों को कवर करते हैं।<sup>[[9]](#references)</sup> Custom training के बारे में पूछताछ के लिए [**यहाँ**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) संपर्क करें।
 
-**इसकी training की खासियतें:**
+**उनकी training को अलग बनाने वाली बातें:**
 * Custom-built content और labs
-* शीर्ष स्तर के tools और platforms का समर्थन
-* Practitioners द्वारा तैयार और पढ़ाई जाती है
+* शीर्ष-स्तरीय tools और platforms का समर्थन
+* Practitioners द्वारा तैयार और सिखाई गई
 
 ---
 
@@ -144,13 +144,13 @@ WebSec penetration testing, security subscriptions, staffing और vulnerabilit
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions **Education** और **FinTech** के लिए cybersecurity consulting पर केंद्रित है। इसकी सेवाओं में cloud assessments, internal और external penetration tests, vulnerability assessments, तथा compliance support शामिल हैं।<sup>[[10]](#references)</sup>
+Last Tower Solutions, **Education** और **FinTech** के लिए cybersecurity consulting पर ध्यान केंद्रित करता है। इसकी सेवाओं में cloud assessments, internal और external penetration tests, vulnerability assessments, तथा compliance support शामिल हैं।<sup>[[10]](#references)</sup>
 
-हमारे [**blog**](https://www.lasttowersolutions.com/blog) पर जाकर cybersecurity की नवीनतम जानकारी से अपडेट रहें।
+हमारे [**blog**](https://www.lasttowersolutions.com/blog) पर जाकर cybersecurity की नवीनतम जानकारी से अवगत रहें।
 
 ---
 
-### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
+### [K8Studio - Kubernetes प्रबंधन के लिए अधिक स्मार्ट GUI.](https://k8studio.io/)
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
@@ -158,9 +158,9 @@ K8Studio एक desktop Kubernetes IDE है, जिसमें CloudMaps visu
 
 ---
 
-## License & Disclaimer
+## License और Disclaimer
 
-नीचे References में HackTricks Values & FAQ प्रविष्टि देखें।
+नीचे References में HackTricks Values & FAQ entry देखें।
 
 ## Github Stats
 
