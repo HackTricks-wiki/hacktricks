@@ -195,7 +195,7 @@ it's possible to see all these interesting values debugging before getting into 
 
 ## dyld_all_image_infos
 
-This is a structure exported by dyld with information about the dyld state which can be found in the [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) with information like the version, pointer to dyld_image_info array, to dyld_image_notifier, if proc is detached from shared cache, if libSystem initializer was called, pointer to dyls's own Mach header, pointer to dyld version string...<sup>[[4]](#references)</sup>
+This is a structure exported by dyld with information about the dyld state which can be found in the [**source code**](https://github.com/apple-oss-distributions/dyld/blob/dyld-852.2/include/mach-o/dyld_images.h) with information like the version, pointer to dyld_image_info array, to dyld_image_notifier, if proc is detached from shared cache, if libSystem initializer was called, pointer to dyls's own Mach header, pointer to dyld version string...<sup>[[4]](#references)</sup>
 
 ## dyld env variables
 
@@ -333,7 +333,7 @@ find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 - [1] [dyld — `dyld/dyldMain.cpp` (process startup path)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
 - [2] [dyld — `dyld/DyldProcessConfig.cpp` (process/security configuration)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
 - [3] [XNU — `bsd/kern/kern_exec.c` (kernel side of `execve`, loading dyld)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
-- [4] [dyld — `include/mach-o/dyld_images.h` (`dyld_all_image_infos` structure)](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)
+- [4] [dyld — `include/mach-o/dyld_images.h` (`dyld_all_image_infos` structure)](https://github.com/apple-oss-distributions/dyld/blob/dyld-852.2/include/mach-o/dyld_images.h)
 - [5] [fishhook — lazy and non-lazy symbol pointer binding](https://github.com/meta/fishhook)
 - [6] [dyld(1) — dynamic-linker diagnostics](https://github.com/apple-oss-distributions/dyld/blob/main/doc/man/man1/dyld.1)
 - [7] [dyld — runtime library-path search](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/Loader.cpp)
