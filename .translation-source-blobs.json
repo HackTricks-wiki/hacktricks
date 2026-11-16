@@ -982,7 +982,7 @@
     "src/pentesting-web/webhook-security.md": "4ca952f006223186ab8b19f05fa5ef36d7a7a6ca",
     "src/pentesting-web/websocket-attacks.md": "ab2a5eceb7f9a478a87c57c0a9d709cfb2a16ca2",
     "src/pentesting-web/xml-injection.md": "dd82f116d00dc97037287a24ad977b357a488567",
-    "src/pentesting-web/xpath-injection.md": "dc1d8895aa31fe6496294d36b1e8c3c0f9c4c257",
+    "src/pentesting-web/xpath-injection.md": "6f5b091476f1e50c02246cef8fc098c6e605b4ee",
     "src/pentesting-web/xs-search/README.md": "2b9f4ea3db519bed0b52ca5f1b58ec42ed61692d",
     "src/pentesting-web/xs-search/connection-pool-by-destination-example.md": "a0b578fe3d2a1a5aef1cdd061da07028fff54414",
     "src/pentesting-web/xs-search/connection-pool-example.md": "ec5e1a3dfef2b866f0f528356fdf04d3a9ea376d",
