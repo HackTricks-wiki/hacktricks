@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logotypy i motion design HackTricks autorstwa_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_.
+_Logotypy Hacktricks i projekt motion autorstwa_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Uruchom HackTricks lokalnie
 
@@ -42,7 +42,7 @@ Jeśli masz Docker Compose, możesz też po prostu uruchomić poniższe poleceni
 docker compose up
 ```
 
-Ta konfiguracja używa dołączonego pliku `docker-compose.yml`, aby udostępniać aktualnie wybraną na hoście gałąź pod adresem [http://localhost:3337](http://localhost:3337) z automatycznym odświeżaniem. Aby zmienić język podczas korzystania z Compose, przed uruchomieniem usługi przełącz się na odpowiednią gałąź językową.
+Ten plik używa dołączonego `docker-compose.yml`, aby udostępnić gałąź aktualnie pobraną na hoście pod adresem [http://localhost:3337](http://localhost:3337), z funkcją live reload. Aby zmienić język podczas korzystania z Compose, pobierz odpowiednią gałąź przed uruchomieniem usługi.
 
 ## Partnerzy HackTricks
 
@@ -54,11 +54,11 @@ Ta konfiguracja używa dołączonego pliku `docker-compose.yml`, aby udostępnia
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-STM Cyber świadczy usługi pentestów, audytów bezpieczeństwa, tworzenia exploitów i prowadzenia badań, dostarcza narzędzia oraz prowadzi działania zwiększające świadomość bezpieczeństwa. Na stronie opisuje zespół pentesterów, programistów i badaczy bezpieczeństwa z ponad dziesięcioletnim doświadczeniem.<sup>[[1]](#references)</sup>
+STM Cyber oferuje testy penetracyjne, audyty bezpieczeństwa, prace nad exploitami i badania, narzędzia oraz usługi zwiększające świadomość bezpieczeństwa. Na stronie opisuje swój zespół testerów penetracyjnych, programistów i badaczy bezpieczeństwa z ponad dziesięcioletnim doświadczeniem.<sup>[[1]](#references)</sup>
 
-Odwiedź ich **blog**: [**https://blog.stmcyber.com**](https://blog.stmcyber.com).
+Zajrzyj na ich **blog**: [**https://blog.stmcyber.com**](https://blog.stmcyber.com).
 
-**STM Cyber** wspiera również projekty open source z zakresu cyberbezpieczeństwa, takie jak HackTricks :)
+**STM Cyber** wspiera również projekty open source związane z cyberbezpieczeństwem, takie jak HackTricks :)
 
 ---
 
@@ -66,17 +66,17 @@ Odwiedź ich **blog**: [**https://blog.stmcyber.com**](https://blog.stmcyber.com
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-Intigriti to dostawca usług crowdsourcingowych z zakresu bezpieczeństwa, oferujący bug bounty i pentesty za pośrednictwem globalnej społeczności badaczy. Platforma łączy stały zakres programów bug bounty z usługą PTaaS na żądanie oraz zarządzanymi programami ujawniania podatności.<sup>[[2]](#references)</sup>
+Intigriti to dostawca usług bezpieczeństwa crowdsourcingowego, który oferuje programy bug bounty i testy penetracyjne prowadzone przez globalną społeczność badaczy. Platforma łączy ciągłe programy bug bounty z usługami PTaaS na żądanie oraz zarządzanymi programami zgłaszania podatności.<sup>[[2]](#references)</sup>
 
 **Wskazówka dotycząca bug bounty**: Dołącz do Intigriti przez [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) i poznaj ich programy bug bounty.
 
 ---
 
-### [Modern Security – platforma szkoleń z bezpieczeństwa AI i aplikacji](https://modernsecurity.io/)
+### [Modern Security – platforma szkoleń z AI i bezpieczeństwa aplikacji](https://modernsecurity.io/)
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security oferuje szkolenia z bezpieczeństwa AI, które można realizować we własnym tempie i które obejmują praktyczne ćwiczenia. Są przeznaczone dla inżynierów bezpieczeństwa, specjalistów AppSec i programistów. Certyfikacja AI Security obejmuje podstawy LLM i agentów, RAG i wektorowe bazy danych, modelowanie zagrożeń, ataki prompt injection i MCP oraz architekturę obronną.<sup>[[3]](#references)</sup>
+Modern Security oferuje samodzielne, praktyczne szkolenia z bezpieczeństwa AI dla inżynierów bezpieczeństwa, specjalistów AppSec i programistów. Certyfikacja AI Security obejmuje podstawy LLM i agentów, RAG i wektorowe bazy danych, modelowanie zagrożeń, ataki prompt injection i MCP oraz architekturę obronną.<sup>[[3]](#references)</sup>
 
 👉 Więcej informacji o kursie AI Security:  
 https://www.modernsecurity.io/courses/ai-security-certification
@@ -87,29 +87,29 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** udostępnia API dla Google i innych wyszukiwarek, zwracające uporządkowane dane SERP z funkcjami takimi jak wyniki zależne od lokalizacji, Maps, Shopping i Knowledge Graph.<sup>[[4]](#references)</sup>
+**SerpApi** udostępnia API do Google i innych wyszukiwarek, zwracające uporządkowane dane SERP z takimi funkcjami jak wyniki zależne od lokalizacji, Maps, Shopping i Knowledge Graph.<sup>[[4]](#references)</sup>
 
-Więcej informacji znajdziesz na ich [**blogu**](https://serpapi.com/blog/), wypróbuj przykład w ich [**środowisku testowym**](https://serpapi.com/playground) lub [**utwórz bezpłatne konto**](https://serpapi.com/users/sign_up).
+Więcej informacji znajdziesz na ich [**blogu**](https://serpapi.com/blog/), wypróbuj przykład w ich [**playgroundzie**](https://serpapi.com/playground) lub [**utwórz bezpłatne konto**](https://serpapi.com/users/sign_up).
 
 ---
 
-### [8kSec Academy – zaawansowane kursy z bezpieczeństwa urządzeń mobilnych i AI](https://academy.8ksec.io/)
+### [8kSec Academy – szczegółowe kursy z bezpieczeństwa urządzeń mobilnych i AI](https://academy.8ksec.io/)
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** oferuje kursy z bezpieczeństwa urządzeń mobilnych i AI, które można realizować we własnym tempie. Program obejmuje audyt i analizę wsteczną aplikacji mobilnych przy użyciu narzędzi takich jak Ghidra, Frida i LLDB, a także laboratoria poświęcone atakom i obronie w obszarze AI/LLM.<sup>[[5]](#references)[[6]](#references)</sup>
+**8kSec Academy** oferuje samodzielne kursy dotyczące bezpieczeństwa urządzeń mobilnych i AI. Jej oferta obejmuje audyt i reverse engineering aplikacji mobilnych przy użyciu narzędzi takich jak Ghidra, Frida i LLDB, a także laboratoria poświęcone atakom i obronie w obszarze AI/LLM.<sup>[[5]](#references)[[6]](#references)</sup>
 
 Zapoznaj się z [katalogiem kursów 8kSec Academy](https://academy.8ksec.io/).
 
 ---
 
-### [NaxusAI – autonomiczne ofensywne bezpieczeństwo](https://www.naxusai.com/)
+### [NaxusAI – autonomiczne bezpieczeństwo ofensywne](https://www.naxusai.com/)
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
 
-**Naxus** to platforma ofensywnego bezpieczeństwa oparta na AI, służąca do kompleksowego skanowania zewnętrznej powierzchni ataku, audytów aplikacji mobilnych, testów black-box aplikacji webowych i przeglądów kodu źródłowego. Jej agenci weryfikują możliwe do wykorzystania podatności i przedstawiają możliwe do prześledzenia dowody, exploity proof of concept oraz konkretne zalecenia naprawcze.<sup>[[7]](#references)</sup>
+**Naxus** to oparta na AI platforma bezpieczeństwa ofensywnego, służąca do kompleksowego skanowania zewnętrznej powierzchni ataku, audytów aplikacji mobilnych, testów webowych black-box i przeglądów kodu źródłowego. Jej agenci weryfikują możliwe do wykorzystania podatności i przedstawiają możliwe do prześledzenia dowody, exploity proof-of-concept oraz konkretne zalecenia naprawcze.<sup>[[7]](#references)</sup>
 
-**Wskazówka dotycząca audytu bezpieczeństwa**: Użyj Naxus do kompleksowych, autonomicznych audytów zasobów zewnętrznych, aplikacji mobilnych i webowych oraz kodu źródłowego.
+**Wskazówka dotycząca audytów bezpieczeństwa**: Użyj Naxus do kompleksowych, autonomicznych audytów zewnętrznych zasobów, aplikacji mobilnych i webowych oraz kodu źródłowego.
 
 ---
 
@@ -117,7 +117,7 @@ Zapoznaj się z [katalogiem kursów 8kSec Academy](https://academy.8ksec.io/).
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-WebSec oferuje pentesty, subskrypcje usług bezpieczeństwa, usługi kadrowe i oceny podatności. Na stronie podaje, że działa na całym świecie i zajmuje się bezpieczeństwem ofensywnym i defensywnym oraz zarządzaniem, ryzykiem i zgodnością.<sup>[[8]](#references)</sup>
+WebSec oferuje testy penetracyjne, abonamentowe usługi bezpieczeństwa, rekrutację specjalistów i ocenę podatności. Na stronie informuje o działalności międzynarodowej i usługach z zakresu bezpieczeństwa ofensywnego, bezpieczeństwa defensywnego oraz zarządzania, ryzyka i zgodności.<sup>[[8]](#references)</sup>
 
 Więcej informacji znajdziesz na ich [**stronie internetowej**](https://websec.net/en/) lub [**blogu**](https://websec.net/blog/).
 
@@ -130,13 +130,13 @@ Oprócz powyższych działań WebSec jest również **zaangażowanym sponsorem H
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**Stworzone do pracy w terenie. Stworzone z myślą o Tobie.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) oferuje szkolenia z cyberbezpieczeństwa prowadzone przez ekspertów, z autorskimi materiałami i laboratoriami opartymi na rzeczywistej infrastrukturze. Programy są dostosowywane do potrzeb organizacji i obejmują zagadnienia od oceny po wdrożenie.<sup>[[9]](#references)</sup> W sprawie szkoleń dostosowanych do potrzeb skontaktuj się z nimi [**tutaj**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+**Stworzone z myślą o pracy w terenie. Stworzone dla Ciebie.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) oferuje szkolenia z cyberbezpieczeństwa prowadzone przez ekspertów. Obejmują one tworzone na zamówienie materiały i laboratoria oparte na rzeczywistych infrastrukturach. Programy są dostosowane do potrzeb organizacji i obejmują działania od oceny po wdrożenie.<sup>[[9]](#references)</sup> W sprawie szkoleń na zamówienie skontaktuj się [**tutaj**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
 **Co wyróżnia ich szkolenia:**
-* Autorskie materiały i laboratoria
+* Tworzone na zamówienie materiały i laboratoria
 * Wsparcie najlepszych narzędzi i platform
-* Programy opracowane i prowadzone przez praktyków
+* Projektowane i prowadzone przez praktyków
 
 ---
 
@@ -144,23 +144,25 @@ Oprócz powyższych działań WebSec jest również **zaangażowanym sponsorem H
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions koncentruje się na konsultingu z zakresu cyberbezpieczeństwa dla **edukacji** i **FinTech**, oferując m.in. ocenę bezpieczeństwa chmury, wewnętrzne i zewnętrzne pentesty, oceny podatności oraz wsparcie w zakresie zgodności.<sup>[[10]](#references)</sup>
+Last Tower Solutions koncentruje się na doradztwie w zakresie cyberbezpieczeństwa dla **edukacji** i **FinTech**, obejmującym ocenę bezpieczeństwa chmury, wewnętrzne i zewnętrzne testy penetracyjne, ocenę podatności oraz wsparcie w zakresie zgodności.<sup>[[10]](#references)</sup>
 
-Odwiedź nasz [**blog**](https://www.lasttowersolutions.com/blog), aby być na bieżąco z najnowszymi informacjami z zakresu cyberbezpieczeństwa.
-
----
-
-### [K8Studio - inteligentniejszy GUI do zarządzania Kubernetes.](https://k8studio.io/)
-
-<figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
-
-K8Studio to desktopowe IDE dla Kubernetes z wizualizacją CloudMaps, nawigacją po wielu klastrach, RBAC, Helm, logami, YAML i widokami terminala. Według producenta łączy się za pomocą kubeconfig bez instalowania agentów i obsługuje macOS, Windows, Linux oraz klastry odizolowane od sieci.<sup>[[11]](#references)</sup>
+Bądź na bieżąco z najnowszymi informacjami o cyberbezpieczeństwie, odwiedzając nasz [**blog**](https://www.lasttowersolutions.com/blog).
 
 ---
 
-## Licencja i zastrzeżenia
+### [Beaki — jedzenie dopasowane do Ciebie](https://www.beaki.app/)
 
-Zobacz wpis HackTricks Values & FAQ w poniższych odnośnikach.
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+
+**Beaki** to spersonalizowany skaner żywności, licznik kalorii i narzędzie do śledzenia wartości odżywczych. Skanuj kody kreskowe i półki w supermarketach, fotografuj lub opisuj posiłki i menu restauracyjne, a następnie otrzymuj zrozumiałe oceny dostosowane do Twoich celów, diety, alergii i profilu zdrowotnego. Beaki śledzi również kalorie i makroskładniki oraz tworzy spersonalizowane plany posiłków z listami zakupów.<sup>[[11]](#references)</sup>
+
+[**Pobierz Beaki bezpłatnie**](https://www.beaki.app/?utm_source=hacktricks&utm_medium=partner&utm_campaign=hacktricks) na Androida lub iPhone'a.
+
+---
+
+## Licencja i zastrzeżenie
+
+Zobacz wpis HackTricks Values & FAQ w sekcji References poniżej.
 
 ## Statystyki GitHub
 
@@ -178,10 +180,10 @@ Zobacz wpis HackTricks Values & FAQ w poniższych odnośnikach.
 - [8] [WebSec](https://websec.net/)
 - [9] [Cyber Helmets](https://cyberhelmets.com/)
 - [10] [Last Tower Solutions](https://www.lasttowersolutions.com/)
-- [11] [K8Studio](https://k8studio.io/)
-- [12] [Polecenie Intigriti HackTricks](https://go.intigriti.com/hacktricks)
+- [11] [Beaki](https://www.beaki.app/)
+- [12] [Polecenie HackTricks w Intigriti](https://go.intigriti.com/hacktricks)
 - [13] [Modern Security](https://modernsecurity.io/)
 - [14] [Film o sponsorowaniu WebSec](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Kursy Cyber Helmets](https://cyberhelmets.com/courses/?ref=hacktricks)
-- [16] [Wartości HackTricks i FAQ](welcome/hacktricks-values-and-faq.md)
+- [16] [Wartości i FAQ HackTricks](welcome/hacktricks-values-and-faq.md)
 {{#include banners/hacktricks-training.md}}
