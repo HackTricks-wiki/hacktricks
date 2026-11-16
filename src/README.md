@@ -103,13 +103,13 @@ Browse the [8kSec Academy course catalog](https://academy.8ksec.io/).
 
 ---
 
-### [NaxusAI – AI Powered Security Scanner](https://www.naxusai.com/)
+### [NaxusAI – Autonomous Offensive Security](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
 
-**Naxus** markets an offensive-AI platform that maps code and infrastructure, then uses static and dynamic agents to find and validate exploitable weaknesses with proof-of-concept evidence and remediation guidance.<sup>[[7]](#references)</sup>
+**Naxus** is an AI-powered offensive-security platform for full external attack-surface scans, mobile app audits, web black-box testing, and source-code reviews. Its agents validate exploitable findings and return traceable evidence, proof-of-concept exploits, and actionable remediation.<sup>[[7]](#references)</sup>
 
-**Code security tip**: Explore Naxus for code- and infrastructure-focused vulnerability discovery.
+**Security audit tip**: Use Naxus for end-to-end autonomous audits across external assets, mobile apps, web apps, and source code.
 
 ---
 
