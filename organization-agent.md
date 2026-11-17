@@ -26,6 +26,7 @@
 - Electron renderer/IPC → `src/desktop-application-security/electron-desktop-apps/README.md` and context-isolation siblings; updater → sibling `electron-auto-update-trust-boundaries.md`; local ASAR/snapshot → sibling `electron-local-code-injection-and-snapshot-tampering.md`. Linux/macOS retain OS-local injection; 80/443 is a client pivot.
 - VM guest surfaces → `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md`, linking QEMU/KVM, VirtualBox and VMware chapters. Slirp allocator stays in `libc-heap/` but appears with guest-to-host cases in SUMMARY.
 - SOAP/REST API methodology → `src/pentesting-web/web-api-pentesting.md`; GraphQL endpoint/security testing → `src/pentesting-web/graphql.md` beneath it in SUMMARY. 80/443 links to both; Cloud keeps provider APIs.
+- Firebase Realtime Database rules/REST queries → `src/pentesting-web/firebase-realtime-database.md` beneath Web APIs, linked from Android/iOS; do not group it with object-storage buckets. Bucket enumeration stays in Cloud via public URL from web/recon/upload entry points; old bucket hub and Firebase URLs redirect.
 - Go `net/http` `ServeMux` `CONNECT` path canonicalization → `src/pentesting-web/403-and-401-bypasses.md#go-nethttp-servemux-connect-path-canonicalization`; 80/443 and TiDB link there. This is a method/path authorization mismatch, not a Go product guide.
 - RDPexec → `src/network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session`; Windows Lateral Movement links directly there, avoiding a procedure-free stub.
 - Python `venv` and wheel builds → `src/generic-methodologies-and-resources/python/basic-python.md#virtual-environments-and-wheel-builds-venv`; the Python hub links to this heading, not a thin setup page.
@@ -46,23 +47,23 @@
 - Legacy PHP `safe_mode` Windows command-path, `fopen`, Linux `proc_open` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/legacy-php-safe-mode-bypasses.md`; Perl extension stays separate.
 - PHP `pcntl_exec` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md#pcntl_exec-command-execution-with-disabled-functions`; Apache `mod_cgi` stays separate.
 
-- Recursive CSS `@import` exfiltration PoC → `src/pentesting-web/xs-search/css-injection/README.md#recursive-import-css-exfiltration-poc`; keep selector mechanism and server/victim code together. LESS compilation has separate server-side prerequisite.
+- Recursive CSS `@import` PoC stays with CSS injection selector mechanism; LESS compilation is distinct.
 - Format-string arbitrary-write `FmtStr` template → `src/binary-exploitation/format-strings/README.md#pwntools-template`; arbitrary-read examples stay separate. Old URL redirects.
 
 - Adobe Reader PDF-upload XXE/SOP → `src/pentesting-web/file-upload/README.md#pdf-upload-adobe-reader-xxe-and-same-origin-policy-bypass`; Web XXE links there.
 - FTP bounce scan → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-attack.md`; protocol relay/retrieval → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-protocol-relay.md`. Distinct tasks; overview links to both.
 
-- Cookie-bomb DoS → `src/pentesting-web/hacking-with-cookies/cookie-bomb.md`; state-dependent header-limit `onerror` oracle → `src/pentesting-web/xs-search/cookie-bomb-+-onerror-xs-leak.md`. Distinct outcomes; direct links from both entry points.
+- Cookie-bomb DoS stays in Cookies; `onerror` header-limit oracle in XS-Leaks.
 
 ## Researcher entry points
 
 - Board debug/serial/glitching → Hardware; RFID/NFC → Radio. OT safety → ICS; OT protocols → Network Services. Android images → Forensics; app/eSIM → Mobile; guest surfaces → VM Escape.
-- SOAP/REST → Web APIs; GraphQL schema/resolver/federation/batching → Web > Web APIs > GraphQL; 401/403 → Web authorization; LFI upload race → Web File Inclusion.
+- 401/403 → Web authorization; LFI upload race → Web File Inclusion.
 - Browser `nosniff`, UTF-16 script, ICO width → XS-Leaks; executable cross-origin script inclusion → XSSI; in-origin script injection → XSS.
 - `R_PROFILE`, `RUBYOPT`, `ERL_AFLAGS` → macOS interpreter startup chapter.
 - Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; unlike cross-origin XS-Leaks, injection and the probed page share an origin. Former standalone page redirects.
 
 ## Deferred
 
-- Audit remaining mixed `network-services-pentesting/pentesting-web/` before moving; GraphQL is an API task, not a product/port guide.
+- Audit remaining mixed `network-services-pentesting/pentesting-web/` before moving; move only cases with a clear mechanism or API-task home.
 - Blockchain and Privacy cryptocurrency need a union audit.
