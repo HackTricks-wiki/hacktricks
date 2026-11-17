@@ -14,6 +14,10 @@ Software:
 windbg-automation.md
 {{#endref}}
 
+## Office document macro analysis
+
+For suspicious Office documents, inspect [VBA macro junk code and hidden UserForm controls](../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md#vba-macro-analysis-junk-code-and-userforms).
+
 ## Windows exception-driven control flow
 
 {{#ref}}

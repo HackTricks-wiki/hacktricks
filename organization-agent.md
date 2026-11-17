@@ -2,11 +2,11 @@
 
 ## Principles
 
-- One home per mechanism; entry points link there and retain distinct prerequisites.
+- One home per mechanism; entry points link and retain prerequisites.
 - Use headings for one task/mechanism; split by task or prerequisites, not size.
 - Main: general techniques; Cloud: provider/IAM pivots. Use public URLs.
-- Removed chapters need whole-page `book.toml` redirects; preserve content/current links.
-- Keep PoCs with their mechanism; code size alone does not justify a page.
+- Removed chapters need whole-page redirects; preserve content/current links.
+- Keep PoCs with mechanisms; code size does not justify splitting.
 
 ## Canonical locations and boundaries
 
@@ -39,31 +39,29 @@
 - Python expression-evaluation confirmation (`"+str(True)+"`) → `src/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md#python-expression-evaluation-probe`; HTTP/web entry links directly there, not to a generic Python web-tech stub.
 - Remote MCP testing → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Distinct prerequisites.
 - eSIM/eUICC, Java Card and OTA/APDU → `src/mobile-pentesting/esim-javacard-exploitation.md`; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
-
 - Cross-platform collection tools → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters.
 - macOS interpreter startup (PHP, Lua, Julia, Octave, R, Ruby, Erlang/Elixir) → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`; runtime prerequisites stay under headings, distinct from shell/Python/PowerShell.
 - MIFARE Classic balance tampering → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; Proxmark remains tool reference.
 - PostgreSQL `lo_import`/`dblink_connect` exfiltration → `src/pentesting-web/sql-injection/postgresql-injection/README.md`; other dblink tasks remain separate.
 - Legacy PHP `safe_mode` Windows command-path, `fopen`, Linux `proc_open` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/legacy-php-safe-mode-bypasses.md`; Perl extension stays separate.
 - PHP `pcntl_exec` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md#pcntl_exec-command-execution-with-disabled-functions`; Apache `mod_cgi` stays separate.
-
-- Recursive CSS `@import` PoC stays with CSS injection selector mechanism; LESS compilation is distinct.
+- Recursive CSS `@import` stays with CSS injection; LESS compilation is distinct.
 - Format-string arbitrary-write `FmtStr` template → `src/binary-exploitation/format-strings/README.md#pwntools-template`; arbitrary-read examples stay separate. Old URL redirects.
-
 - Adobe Reader PDF-upload XXE/SOP → `src/pentesting-web/file-upload/README.md#pdf-upload-adobe-reader-xxe-and-same-origin-policy-bypass`; Web XXE links there.
-- FTP bounce scan → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-attack.md`; protocol relay/retrieval → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-protocol-relay.md`. Distinct tasks; overview links to both.
+- FTP bounce scan → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-attack.md`; relay/retrieval → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-protocol-relay.md`. Distinct tasks.
+- Cookie-bomb DoS → Cookies; `onerror` header oracle → XS-Leaks.
 
-- Cookie-bomb DoS stays in Cookies; `onerror` header-limit oracle in XS-Leaks.
+- Office VBA junk/UserForms → `src/generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md#vba-macro-analysis-junk-code-and-userforms`; Revit RFA OLE/ECC exploit → `src/binary-exploitation/revit-rfa-ole-compound-file-exploitation.md` (separate parser task).
 
 ## Researcher entry points
 
-- Board debug/serial/glitching → Hardware; RFID/NFC → Radio. OT safety → ICS; OT protocols → Network Services. Android images → Forensics; app/eSIM → Mobile; guest surfaces → VM Escape.
+- Board debug/glitching → Hardware; RFID/NFC → Radio. OT safety → ICS; protocols → Network. Android images → Forensics; app/eSIM → Mobile; guests → VM Escape.
 - 401/403 → Web authorization; LFI upload race → Web File Inclusion.
-- Browser `nosniff`, UTF-16 script, ICO width → XS-Leaks; executable cross-origin script inclusion → XSSI; in-origin script injection → XSS.
+- `nosniff`, UTF-16 script, ICO width → XS-Leaks; cross-origin script inclusion → XSSI; in-origin script injection → XSS.
 - `R_PROFILE`, `RUBYOPT`, `ERL_AFLAGS` → macOS interpreter startup chapter.
-- Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; unlike cross-origin XS-Leaks, injection and the probed page share an origin. Former standalone page redirects.
+- Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; injection and probe share an origin, unlike XS-Leaks. Old page redirects.
 
 ## Deferred
 
-- Audit remaining mixed `network-services-pentesting/pentesting-web/` before moving; move only cases with a clear mechanism or API-task home.
+- Audit mixed `network-services-pentesting/pentesting-web/`; move only with a clear mechanism or API-task home.
 - Blockchain and Privacy cryptocurrency need a union audit.
