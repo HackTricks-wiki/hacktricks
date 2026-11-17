@@ -25,6 +25,8 @@ _**Categories**: Links and References, **Filed names**: includePicture, and **Fi
 
 ![Office Documents - External Image Load: Go to: Insert -- Quick Parts -- Field](<../../images/image (155).png>)
 
+For analyzing a received document rather than constructing one, see [VBA macro analysis: junk code and UserForms](../basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md#vba-macro-analysis-junk-code-and-userforms).
+
 ### Macros Backdoor
 
 It's possible to use macros to run arbitrary code from the document.
