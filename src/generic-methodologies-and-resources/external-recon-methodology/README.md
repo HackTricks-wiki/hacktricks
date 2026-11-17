@@ -574,8 +574,8 @@ ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http:
 
 ### **Buckets Brute Force**
 
-While looking for **subdomains** keep an eye to see if it is **pointing** to any type of **bucket**, and in that case [**check the permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html)**.**\
-Also, as at this point you will know all the domains inside the scope, try to [**brute force possible bucket names and check the permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html).
+While looking for **subdomains** keep an eye to see if it is **pointing** to any type of **bucket**, and in that case [**check the permissions**](https://cloud.hacktricks.wiki/en/pentesting-cloud/aws-security/aws-unauthenticated-enum-access/aws-s3-unauthenticated-enum.html#aws---s3-unauthenticated-enum)**.**\
+Also, as at this point you will know all the domains inside the scope, try to [**brute force possible bucket names and check the permissions**](https://cloud.hacktricks.wiki/en/pentesting-cloud/aws-security/aws-unauthenticated-enum-access/aws-s3-unauthenticated-enum.html#aws---s3-unauthenticated-enum).
 
 ### **Monitorization**
 
@@ -584,7 +584,7 @@ You can **monitor** if **new subdomains** of a domain are created by monitoring 
 ### **Looking for vulnerabilities**
 
 Check for possible [**subdomain takeovers**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover).\
-If the **subdomain** is pointing to some **S3 bucket**, [**check the permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html).
+If the **subdomain** is pointing to some **S3 bucket**, [**check the permissions**](https://cloud.hacktricks.wiki/en/pentesting-cloud/aws-security/aws-unauthenticated-enum-access/aws-s3-unauthenticated-enum.html#aws---s3-unauthenticated-enum).
 
 If you find any **subdomain with an IP different** from the ones you already found in the assets discovery, you should perform a **basic vulnerability scan** (using Nessus or OpenVAS) and some [**port scan**](../pentesting-network/index.html#discovering-hosts-from-the-outside) with **nmap/masscan/shodan**. Depending on which services are running you can find in **this book some tricks to "attack" them**.\
 _Note that sometimes the subdomain is hosted inside an IP that is not controlled by the client, so it's not in the scope, be careful._
