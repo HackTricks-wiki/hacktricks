@@ -915,7 +915,7 @@
     "src/pentesting-web/json-xml-yaml-hacking.md": "aa0d22e2f88a034df363aa2683230d37d6a82605",
     "src/pentesting-web/ldap-injection.md": "1328ac599a59ec66fd70153091e2ba9e9ddc245e",
     "src/pentesting-web/login-bypass/README.md": "3b7dd4c49eeb9b18cd492d0839dc8be3d440b35b",
-    "src/pentesting-web/login-bypass/sql-login-bypass.md": "a671000dce43464347e742a88c3dff8b16df1db4",
+    "src/pentesting-web/login-bypass/sql-login-bypass.md": "a879fa17e592d0b601b760e37ab026c4b82cbab3",
     "src/pentesting-web/mass-assignment-cwe-915.md": "ce3862befdb240a8ace28a20292cb15ea45a8783",
     "src/pentesting-web/nosql-injection.md": "266b1cc94b673ec3fab32a7b40d729bff617a483",
     "src/pentesting-web/oauth-to-account-takeover.md": "7d404be3a370b2bc9e3bf06399637e383cbc57c3",
