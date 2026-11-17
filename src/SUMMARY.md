@@ -1096,6 +1096,7 @@
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
   - [WWW2Exec - \_\_printf_arginfo_table](binary-exploitation/arbitrary-write-2-exec/aw2exec-__printf_arginfo_table.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
+- [Revit RFA OLE Compound File Exploitation](binary-exploitation/revit-rfa-ole-compound-file-exploitation.md)
 - [Brotli Block-Switch Decoder State Corruption](binary-exploitation/brotli-block-switch-decoder-state-corruption.md)
   - [FreeBSD Kernel Exploitation and VNET Jail Escape](binary-exploitation/freebsd-kernel-exploitation-vnet-jail-escape.md)
 - [VM Escape and Hypervisor Exploitation](binary-exploitation/vm-escape-and-hypervisor-exploitation.md)
@@ -1190,7 +1191,6 @@
   - [Windows Kernel Debugging with KernelFlirt](reversing/reversing-tools-basic-methods/windows-kernel-debugging-kernelflirt.md)
 - [Windows Exception-Driven Control Flow and Anti-Debugging](reversing/windows-exception-driven-control-flow.md)
 - [Common API used in Malware](reversing/common-api-used-in-malware.md)
-- [Word Macros](reversing/word-macros.md)
 
 # 🕵️ Crypto
 
