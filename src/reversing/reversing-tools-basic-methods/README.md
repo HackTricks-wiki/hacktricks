@@ -2,82 +2,86 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ImGui ベースのリバースエンジニアリングツール
+## ImGuiベースのリバースエンジニアリングツール
 
 ソフトウェア:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## WinDbg のユーザーモード自動化
+## WinDbgのユーザーモード自動化
 
 {{#ref}}
 windbg-automation.md
 {{#endref}}
 
-## Windows の例外駆動型制御フロー
+## Officeドキュメントのマクロ解析
+
+不審なOfficeドキュメントについては、[VBAマクロのジャンクコードと非表示のUserFormコントロール](../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md#vba-macro-analysis-junk-code-and-userforms)を調査してください。
+
+## Windowsの例外駆動型制御フロー
 
 {{#ref}}
 ../windows-exception-driven-control-flow.md
 {{#endref}}
 
-## Windows カーネルデバッグ
+## Windowsカーネルデバッグ
 
 {{#ref}}
 windows-kernel-debugging-kernelflirt.md
 {{#endref}}
 
-## Wasm デコンパイラ / Wat コンパイラ
+## Wasm decompiler / Wat compiler
 
 オンライン:
 
-- [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) を使うと、wasm（バイナリ）から wat（プレーンテキスト）に**デコンパイル**できます
-- [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) を使うと、wat から wasm に**コンパイル**できます
-- デコンパイルには [web-wasmdec](https://wwwg.github.io/web-wasmdec/) も試せます。
+- wasm（バイナリ）をwat（プレーンテキスト）に**逆コンパイル**するには、[https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html)を使用します
+- watをwasmに**コンパイル**するには、[https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/)を使用します
+- 逆コンパイルには[web-wasmdec](https://wwwg.github.io/web-wasmdec/)も試せます。
 
 ソフトウェア:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## Node.js / V8 のキャッシュされたバイトコード
+## Node.js / V8のキャッシュ済みバイトコード
 
 {{#ref}}
 nodejs-v8-cached-bytecode.md
 {{#endref}}
 
-## 仮想化されたペイロードとカスタム VM
+## 仮想化されたペイロードとカスタムVM
 
 {{#ref}}
 ../../windows-hardening/virtualized-payload-execution.md
 {{#endref}}
 
-## .NET デコンパイラ
+## .NET decompiler
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek は、ライブラリ（.dll）、**Windows metadata file**（.winmd）、実行ファイル（.exe）など、複数の形式を**デコンパイルして調査**できるデコンパイラです。デコンパイル後、アセンブリを Visual Studio プロジェクト（.csproj）として保存できます。
+dotPeekは、ライブラリ（.dll）、Windowsメタデータファイル（.winmd）、実行ファイル（.exe）など、**複数の形式を逆コンパイルして調査する**decompilerです。逆コンパイルしたアセンブリは、Visual Studioプロジェクト（.csproj）として保存できます。
 
-失われたソースコードをレガシーアセンブリから復元する必要がある場合、この機能を使えば時間を節約できます。また、dotPeek はデコンパイル済みコード内を便利に移動できるため、**Xamarin のアルゴリズム解析**に最適なツールの一つです。
+レガシーアセンブリから失われたソースコードを復元する必要がある場合、この機能によって時間を節約できます。さらに、dotPeekは逆コンパイルされたコード内を簡単に移動できるため、**Xamarinのアルゴリズム解析に最適なツールの1つ**です。
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-包括的なアドインモデルと、ニーズに合わせてツールを拡張できる API を備えた .NET Reflector は、時間を節約し、開発を簡素化します。このツールが提供する豊富なリバースエンジニアリング機能を見てみましょう。
+包括的なアドインモデルと、ニーズに合わせてツールを拡張できるAPIを備えた.NET Reflectorは、時間を節約し、開発を簡素化します。このツールが提供する豊富なリバースエンジニアリング機能を見てみましょう。
 
-- ライブラリやコンポーネント内のデータフローを把握できます
-- .NET の言語やフレームワークの実装と使用方法を把握できます
-- ドキュメント化されていない機能や公開されていない機能を見つけ、使用中の API やテクノロジーをさらに活用できます
-- 依存関係や各種アセンブリを見つけられます
-- コード、サードパーティ製コンポーネント、ライブラリ内のエラーの正確な位置を特定できます
-- 使用するすべての .NET コードのソースをデバッグできます
+- ライブラリやコンポーネント内でデータがどのように流れるかを把握できます
+- .NET言語やフレームワークの実装と使用方法を把握できます
+- ドキュメント化されていない、または公開されていない機能を見つけ、使用中のAPIやテクノロジーをさらに活用できます
+- 依存関係やさまざまなアセンブリを見つけられます
+- コード、サードパーティ製コンポーネント、ライブラリ内のエラーの正確な場所を特定できます
+- 使用しているすべての.NETコードのソースをデバッグできます
 
-### [ILSpy](https://github.com/icsharpcode/ILSpy) と [dnSpy](https://github.com/dnSpy/dnSpy/releases)
+### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Visual Studio Code 用 ILSpy プラグイン](https://github.com/icsharpcode/ilspy-vscode): どの OS でも利用できます（VSCode から直接インストールできるため、git をダウンロードする必要はありません。**Extensions** をクリックして **ILSpy** を検索してください）。\
-**デコンパイル**、**変更**、再度**コンパイル**する必要がある場合は、[**dnSpy**](https://github.com/dnSpy/dnSpy/releases) または活発にメンテナンスされているフォークの [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) を使用できます。（関数内を変更するには **Right Click -> Modify Method** を選択します）。
+[Visual Studio Code用ILSpyプラグイン](https://github.com/icsharpcode/ilspy-vscode): どのOSでも利用できます（VSCodeから直接インストールできるため、gitをダウンロードする必要はありません。**Extensions**をクリックして、**ILSpy**を検索してください）。\
+**逆コンパイル**し、**変更**してから再び**再コンパイル**する必要がある場合は、[**dnSpy**](https://github.com/dnSpy/dnSpy/releases)または現在もメンテナンスされているフォークの[**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases)を使用できます。（関数内の内容を変更するには、**右クリック -> Modify Method**を選択します）。
 
-### REA による実行不要のマネージドコード検査
+### REAによる実行不要のマネージドコード検査
 
-**REA** はアセンブリを読み込まずに PE/CLI メタデータと CIL を検査できます。まずアーティファクトの識別情報を確認し、次にメンバーと宣言されたネイティブ境界を調べます。デコンパイラを使用したりプログラムを実行したりする前に、疑わしい呼び出しを確認する際に役立ちます。<sup>[[16]](#references)[[17]](#references)</sup>
+**REA**はアセンブリをロードせずに、PE/CLIメタデータとCILを検査できます。まずアーティファクトの識別情報を確認し、次にメンバーと宣言されたネイティブ境界を調べます。decompilerを使ったりプログラムを実行したりする前に、不審な呼び出しを確認する際に役立ちます。<sup>[[16]](#references)[[17]](#references)</sup>
 
 ```bash
 rea inspect-managed-artifact /absolute/path/Assembly.dll --json
@@ -85,11 +89,11 @@ rea inspect-managed-members /absolute/path/Assembly.dll --json
 rea inspect-managed-native-boundaries /absolute/path/Assembly.dll --json
 ```
 
-バージョン差分の比較では、`compare_managed_members` はメタデータトークンがビルド間で安定しているものとして扱わず、生の CIL／シグネチャの同一性と、デコード済み命令のフィンガープリントを使用します。P/Invoke 宣言はネイティブコードが実行された証拠にはなりません。境界を確認するには、`verify_managed_native_boundaries` に照合できるネイティブエクスポートまたは関数の証拠が必要です。成果物のダイジェスト、MVID、未解決のマッピングを結果とともに保持してください。<sup>[[17]](#references)</sup>
+バージョン間の差分を比較する際、`compare_managed_members` は、metadata token がビルド間で安定しているものとして扱わず、生の CIL／シグネチャの同一性と、デコードされた命令のフィンガープリントを使用します。P/Invoke 宣言だけではネイティブコードが実行された証拠にはなりません。この境界を確認するには、`verify_managed_native_boundaries` で対応するネイティブエクスポートまたは関数の証拠が必要です。アーティファクトのダイジェスト、MVID、未解決のマッピングは結果とともに保持してください。<sup>[[17]](#references)</sup>
 
-### DNSpy のログ出力
+### DNSpyのログ出力
 
-**DNSpy に情報をファイルへ記録させる**には、次のスニペットを使用できます。
+**DNSpyに情報をファイルへログ出力させる**には、次のスニペットを使用できます。
 
 ```cs
 using System.IO;
@@ -97,13 +101,13 @@ path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
 
-### DNSpy のデバッグ
+### DNSpyでのデバッグ
 
-DNSpy を使ってコードをデバッグするには、次の手順が必要です。
+DNSpyを使ってコードをデバッグするには、次の操作が必要です。
 
-まず、**デバッグ**に関連する **Assembly attributes** を変更します。
+まず、**デバッグ**に関連する**アセンブリ属性**を変更します。
 
-![DNSpy Logging - DNSpy Debugging: First, change the Assembly attributes related to debugging](<../../images/image (973).png>)
+![DNSpy Logging - DNSpyでのデバッグ: まず、デバッグに関連するアセンブリ属性を変更します](<../../images/image (973).png>)
 
 変更前：
 
@@ -128,95 +132,95 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 
 ![DNSpy Logging - DNSpy Debugging: Then save the new file via File Save module](<../../images/image (602).png>)
 
-これが必要なのは、これを行わないと、**runtime** にコードにいくつかの**最適化**が適用され、デバッグ中に**ブレークポイントに到達しない**場合や、**変数が存在しない**場合があるためです。
+これを行う必要があるのは、行わないと **runtime** にコードへ複数の **optimisations** が適用され、デバッグ中に **break-point に到達しない**、または一部の **variables が存在しない**可能性があるためです。
 
-.NET アプリケーションが **IIS** によって**実行**されている場合は、次のコマンドで**再起動**できます：
+.NET アプリケーションが **IIS** によって **実行**されている場合は、次のコマンドで **再起動**できます：
 
 ```
 iisreset /noforce
 ```
 
-次に、デバッグを開始するには、開いているファイルをすべて閉じ、**Debug Tab** で **Attach to Process...** を選択します。
+次に、debuggingを開始するには、開いているファイルをすべて閉じ、**Debug Tab** から **Attach to Process...** を選択します。
 
-![DNSpy Logging - DNSpy Debugging: デバッグを開始するには、開いているファイルをすべて閉じ、Debug Tab で Attach to Process を選択します](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: 次に、debuggingを開始するには、開いているファイルをすべて閉じ、Debug Tab から Attach to Process を選択します](<../../images/image (318).png>)
 
-次に、**IIS server** にアタッチするため **w3wp.exe** を選択し、**attach** をクリックします。
+次に **w3wp.exe** を選択して **IIS server** にattachし、**attach** をクリックします。
 
-![DNSpy Logging - DNSpy Debugging: IIS server にアタッチするため w3wp.exe を選択し、attach をクリックします](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging: 次に、w3wp.exe を選択して IIS server にattachし、attach をクリックします](<../../images/image (113).png>)
 
-プロセスをデバッグしている状態になったので、処理を一時停止して、すべてのモジュールを読み込みます。まず _Debug >> Break All_ をクリックし、次に _**Debug >> Windows >> Modules**_ をクリックします。
+processをdebuggingしているので、次は停止してすべてのmoduleを読み込みます。まず _Debug >> Break All_ をクリックし、次に _**Debug >> Windows >> Modules**_ をクリックします。
 
-![DNSpy Logging - DNSpy Debugging: プロセスをデバッグしている状態になったので、処理を一時停止して、すべてのモジュールを読み込みます。まず Debug Break All をクリックし、次に Debug Windows Modules をクリックします](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: processをdebuggingしているので、次は停止してすべてのmoduleを読み込みます。まず Debug Break All をクリックし、次に Debug Windows Modules をクリックします](<../../images/image (132).png>)
 
-![DNSpy Logging - DNSpy Debugging: プロセスをデバッグしている状態になったので、処理を一時停止して、すべてのモジュールを読み込みます。まず Debug Break All をクリックし、次に Debug Windows Modules をクリックします](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: processをdebuggingしているので、次は停止してすべてのmoduleを読み込みます。まず Debug Break All をクリックし、次に Debug Windows Modules をクリックします](<../../images/image (834).png>)
 
-**Modules** 内の任意のモジュールをクリックし、**Open All Modules** を選択します。
+**Modules** 内の任意のmoduleをクリックし、**Open All Modules** を選択します。
 
-![DNSpy Logging - DNSpy Debugging: Modules 内の任意のモジュールをクリックし、Open All Modules を選択します](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging: Modules 内の任意のmoduleをクリックし、Open All Modules を選択します](<../../images/image (922).png>)
 
-**Assembly Explorer** 内の任意のモジュールを右クリックし、**Sort Assemblies** をクリックします。
+**Assembly Explorer** 内の任意のmoduleを右クリックし、**Sort Assemblies** をクリックします。
 
-![DNSpy Logging - DNSpy Debugging: Assembly Explorer 内の任意のモジュールを右クリックし、Sort Assemblies をクリックします](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Assembly Explorer 内の任意のmoduleを右クリックし、Sort Assemblies をクリックします](<../../images/image (339).png>)
 
-## Java デコンパイラ
+## Java decompiler
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## DLL のデバッグ
+## DLLのdebugging
 
-### IDA を使用する
+### IDAを使用する
 
-- **rundll32 を読み込む**（64bits は C:\Windows\System32\rundll32.exe、32 bits は C:\Windows\SysWOW64\rundll32.exe）
-- **Windbg** debugger を選択する
-- "**Suspend on library load/unload**" を選択する
+- **rundll32を読み込む**（64bits版はC:\Windows\System32\rundll32.exe、32 bits版はC:\Windows\SysWOW64\rundll32.exe）
+- **Windbg** debuggerを選択します
+- "**Suspend on library load/unload**" を選択します
 
-![Debugging DLLs - Using IDA: " Suspend on library load/unload " を選択します](<../../images/image (868).png>)
+![Debugging DLLs - IDAを使用する: "Suspend on library load/unload" を選択します](<../../images/image (868).png>)
 
-- 実行の **parameters** を設定し、**DLL のパス** と呼び出す関数を指定します。
+- **parameters** に **DLLのパス** と呼び出したいfunctionを設定します。
 
-![Debugging DLLs - Using IDA: 実行の parameters を設定し、DLL のパスと呼び出す関数を指定します](<../../images/image (704).png>)
+![Debugging DLLs - IDAを使用する: parameters にDLLのパスと呼び出したいfunctionを設定します](<../../images/image (704).png>)
 
-デバッグを開始すると、**各 DLL が読み込まれるたびに実行が停止します**。そのため、rundll32 が DLL を読み込むと、実行が停止します。
+debuggingを開始すると、**DLLが読み込まれるたびに実行が停止します**。そのため、rundll32がDLLを読み込むと、実行が停止します。
 
-この方法ではモジュールの読み込みイベントで停止しますが、読み込まれた DLL のエントリポイントに到達する手順は、以下の x64dbg の方法よりも直接的ではありません。
+この方法ではmoduleの読み込みイベントで停止しますが、読み込んだDLLのentry pointに到達する操作は、以下のx64dbgの手順より直接的ではありません。
 
-### x64dbg/x32dbg を使用する
+### x64dbg/x32dbgを使用する
 
-- **rundll32 を読み込む**（64bits は C:\Windows\System32\rundll32.exe、32 bits は C:\Windows\SysWOW64\rundll32.exe）
-- **Command Line を変更**（_File --> Change Command Line_）し、DLL のパスと呼び出す関数を指定します。例: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **rundll32を読み込む**（64bits版はC:\Windows\System32\rundll32.exe、32 bits版はC:\Windows\SysWOW64\rundll32.exe）
+- **Command Lineを変更**（_File --> Change Command Line_）し、dllのパスと呼び出したいfunctionを設定します。例: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - _Options --> Settings_ を変更し、"**DLL Entry**" を選択します。
-- **実行を開始**すると、デバッガは各 DLL の main で停止します。いずれかの時点で、**自分の DLL の Entry で停止します**。そこから、ブレークポイントを設定したい箇所を探します。
+- **実行を開始**すると、debuggerは各dll mainで停止します。そのうち、**自分のdllのEntryで停止します**。そこから、breakpointを設定したい箇所を探してください。
 
-win64dbg では、何らかの理由で実行が停止した際、**win64dbg ウィンドウの上部**を見ると、**どのコード内にいるか**を確認できます。
+win64dbgで何らかの理由により実行が停止したときは、**win64dbgウィンドウの上部**を見ると、**どのcodeにいるか**を確認できます。
 
-![Using IDA - Using x64dbg/x32dbg: 何らかの理由で実行が停止した際、win64dbg ウィンドウの上部を見ると、どのコード内にいるかを確認できます](<../../images/image (842).png>)
+![Using IDA - x64dbg/x32dbgを使用する: 実行が何らかの理由で停止したときは、win64dbgウィンドウの上部を見ると、どのcodeにいるかを確認できます](<../../images/image (842).png>)
 
-このインジケーターで、デバッグ対象の DLL 内で実行が停止したことを確認できます。
+このindicatorにより、debugしたいDLL内で実行が停止したことを確認できます。
 
-## GUI アプリ / ビデオゲーム
+## GUIアプリ / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) は、実行中のゲームのメモリ内で重要な値が保存されている場所を見つけ、変更するのに便利なプログラムです。詳しくは以下を参照してください。
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) は、実行中のgameのmemory内で重要な値が保存されている場所を見つけ、値を変更するのに便利なprogramです。詳細は以下を参照してください。
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) は、ゲームに特化した GNU Project Debugger (GDB) 用のフロントエンド／reverse engineering ツールです。ただし、reverse engineering 関連のさまざまな用途に使用できます。
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) は、gameに重点を置いたGNU Project Debugger (GDB)向けのfront-end/reverse engineering toolです。ただし、reverse engineeringに関連する用途であれば何にでも使用できます。
 
-[**Decompiler Explorer**](https://dogbolt.org/) は、複数のデコンパイラを利用できる Web フロントエンドです。この Web サービスでは、小さな実行ファイルに対する各デコンパイラの出力を比較できます。
+[**Decompiler Explorer**](https://dogbolt.org/) は、複数のdecompilerを利用できるweb front-endです。このweb serviceでは、小さなexecutableに対する各decompilerの出力を比較できます。
 
-### Godot PCK の復号とプロジェクトの復元
+### Godot PCKの復号とprojectの復元
 
-配布された Godot ゲームの場合、PCK の場所は、単体の `.pck`、実行ファイルに追加または埋め込まれたパック、あるいは APK の `assets` ディレクトリです。[gore](https://github.com/figurophobia/gore) でパックを検査・展開できます。一方、スクリプトとリソースを完全に再構築するには GDRE Tools が必要です（`gore setup` でインストールするか、`--gdre` を使用します）。このワークフローでは Godot 4.x の PCK 形式 v2～v4 をサポートしています。v1 ヘッダーは検出できますが、v1 ではキーの指定が必要です。<sup>[[25]](#references)</sup>
+配布されたGodot gameでは、単独の`.pck`、実行ファイルに追加または埋め込まれたpack、あるいはAPKの`assets`ディレクトリからPCKを見つけます。[gore](https://github.com/figurophobia/gore)でpackを検査・展開できます。scriptとresourceを完全に再構築するにはGDRE Toolsが必要です（`gore setup`でインストールするか、`--gdre`を使用します）。このworkflowではGodot 4.xのPCK形式v2～v4に対応しています。v1のheaderは検出できますが、v1にはkeyの指定が必要です。<sup>[[25]](#references)</sup>
 
-自動キー復元には暗号化されたファイルテーブルが必要です。ファイルの内容のみが暗号化されている場合は、既知のキーを指定してください。復元に失敗したからといって、パックが暗号化されていないとは限りません。<sup>[[28]](#references)</sup>
+自動key復元には暗号化されたfile tableが必要です。fileの内容だけが暗号化されている場合は、既知のkeyを指定してください。復元に失敗しても、packが暗号化されていないとは限りません。<sup>[[28]](#references)</sup>
 
-キー検索は **AES-256 の鍵空間を総当たりする攻撃ではありません**。暗号化されたファイルテーブルには、平文の MD5、平文の長さ、IV、AES-256-CFB の ciphertext が含まれています。<sup>[[27]](#references)</sup> `gore` はゲームの実行ファイルまたは近隣のファイルから 32 バイトのウィンドウを取り出し、候補キーとして検証します。復号したパスの長さとプレフィックスが妥当かどうかで候補を絞り込み、バイナリスキャンで見つかった候補は、テーブル全体を復号して MD5 を照合します。<sup>[[26]](#references)[[28]](#references)</sup> まず初期化済みの PE/ELF データセクションを検索し、その後、ファイル全体をスキャンします。`--scan` を指定すると、ほかの候補ファイルも追加されます。<sup>[[28]](#references)</sup>
+keyの検索は、**AES-256のkeyspaceに対する攻撃ではありません**。暗号化されたfile tableには、平文のMD5、平文の長さ、IV、AES-256-CFBのciphertextが含まれます。<sup>[[27]](#references)</sup> `gore`は、gameの実行ファイルや隣接するfileから32-byteの範囲を切り出し、candidate keyとして試します。復号したpathの長さとprefixが妥当かどうかでcandidateを絞り込み、binary scanで見つかった候補については、table全体を復号してMD5を確認します。<sup>[[26]](#references)[[28]](#references)</sup> まず初期化済みのPE/ELF data sectionを検索し、その後、file全体をscanします。`--scan`を指定すると、ほかのcandidate fileも検索対象に加わります。<sup>[[28]](#references)</sup>
 
-埋め込みキーが見つからない場合は、組み込みの短い password リストを試します。ほかの候補を指定するには `--wordlist` を使います。各 password は、エンジンが password から導出するキー表現、ゼロでパディングしたリテラル、または 64 文字の 16 進数キーとして検証されます。バイナリスキャンで見つかった候補とは異なり、この実装で wordlist から見つかった候補は、パス構造のフィルターを通過するだけです。パックを開き、展開したアセットを検証して確認してください。<sup>[[26]](#references)[[28]](#references)</sup>
+埋め込みkeyが見つからない場合は、組み込みの小さなpassword listが試されます。ほかの候補を指定するには`--wordlist`を使用します。各passwordは、engineのpassword由来のkey表現、ゼロpaddingした文字列、または64文字のhex keyとして試されます。binary scanで見つかった候補とは異なり、この実装ではwordlistで見つかった候補はpath構造のfilterを通過するだけです。packを開いて、展開されたassetを検証してください。<sup>[[26]](#references)[[28]](#references)</sup>
 
-ゲームのファイルをローカルで利用できる場合は、分析に必要な段階を選択します。`recover` は GDRE を呼び出して、開けるプロジェクトを再構築します。一方、`extract` は生ファイルを展開するだけです。`key` は、別のツールで使用する候補キーを出力します。<sup>[[25]](#references)[[28]](#references)</sup>
+gameのartifactをローカルで利用できる場合は、分析に必要な段階を選択します。`recover`はGDREを呼び出して、開けるprojectを再構築します。一方、`extract`はraw fileを展開するだけです。`key`は、別のtoolで使用するcandidate keyを出力します。<sup>[[25]](#references)[[28]](#references)</sup>
 
 ```bash
 gore info game.exe
@@ -226,9 +230,9 @@ gore setup
 gore recover game.exe -o ./game_project
 ```
 
-## REAを使った、根拠に基づくネイティブ調査
+## REAによるエビデンスに基づくネイティブ調査
 
-**REA**は、CLIとMCPを通じてHopper、Ghidra、IDAによる解析を提供します。Node.js 22.x（22.19以上）、24.x（24.11以上）、または26以上とnpmが必要です。まず既存のネイティブプロバイダーを設定してください。`rea providers --json`を確認し、複数のプロバイダーが対象をサポートしている場合は、プロバイダーを明示的に選択してください。以下では、インベントリにある実際に確認された関数名またはアドレスを`0x1000`の代わりに使用してください。<sup>[[16]](#references)[[18]](#references)</sup>
+**REA**は、Hopper、Ghidra、IDAの解析機能をCLIおよびMCP経由で利用できます。Node.js 22.x（22.19以上）、24.x（24.11以上）、または26以上とnpmが必要です。まず既存のネイティブプロバイダーを設定してください。`rea providers --json`で確認し、対象をサポートするプロバイダーが複数ある場合は、プロバイダーを明示的に選択します。以下の`0x1000`は、インベントリにある実際に確認済みの関数名またはアドレスに置き換えてください。<sup>[[16]](#references)[[18]](#references)</sup>
 
 ```bash
 npm install --global rea-agents
@@ -240,15 +244,15 @@ rea xrefs /absolute/path/to/program 0x1000 --provider ghidra --json
 rea function /absolute/path/to/program 0x1000 --provider ghidra --json
 ```
 
-機能文字列またはシンボルから始め、参照先や呼び出し元をたどり、選択した関数の dossier と疑似コードを `rea decompile` で確認します。REA は選択した provider にセッションを紐付け、失敗後に黙って別の provider に切り替えることはありません。クエリを再現可能にするには、`--snapshot PATH` を指定します。このオプションは、artifact のバイト列、provider、設定、操作、パラメーターが一致する場合に限り再利用します。snapshot はローカルキャッシュであり、provider のデータベースを保存したものではありません。返された Evidence と明示された不明点を保持し、推定されたパスや decompiler のテキストを元のソースとして扱わないでください。<sup>[[16]](#references)[[18]](#references)</sup>
+機能文字列またはシンボルから始め、参照先や呼び出し元をたどり、選択した関数の dossier と擬似コードを `rea decompile` で調べます。REA は失敗後に黙って別の provider に切り替えるのではなく、選択した provider にセッションを固定します。クエリを再現可能にするには、`--snapshot PATH` を指定すると、一致する artifact のバイト列、provider、設定、操作、パラメーターに限って再利用します。snapshot はローカルキャッシュであり、provider のデータベースを保存したものではありません。返された Evidence と明示された未知事項を保持し、推定されたパスや decompiler の出力を元のソースとして扱わないでください。<sup>[[16]](#references)[[18]](#references)</sup>
 
-ネイティブ add-on につながる JavaScript/Electron のエントリーポイントについては、[Electron Desktop Apps](../../desktop-application-security/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea) を参照してください。
+JavaScript/Electron のエントリーポイントから native add-on へ至る場合は、[Electron Desktop Apps](../../desktop-application-security/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea) を参照してください。
 
-## ローカル TCP ブリッジを使った IDA と Ghidra のスクリプト分析
+## ローカルTCPブリッジを使ったIDAとGhidraのスクリプト分析
 
-[IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge) は、**すでに開いている** IDA database または Ghidra CodeBrowser program 内で動作し、別のスクリプトからその分析データベースをクエリおよび変更できるようにします。IDA の Python CLI から `ID_Server.py` を実行（`import ID_Server`）するか、Ghidra の Script Manager から `Ghidra_Server.py` を実行します。IDA は `127.0.0.1` のポート `5073` からバインドを開始し、より大きいポート番号を順に確認します。現在の Ghidra スクリプトはポート `5093` から開始し、`5102` までの 10 個のポートを試します。Java socket は loopback だけでなく、ワイルドカードアドレスにバインドします。接続する前に、インスタンスが表示したポートを確認してください。headless analyzer とは異なり、このブリッジは GUI インスタンスで現在開いている program を対象に動作します。<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+[IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge) は、**すでに開いている** IDA データベースまたは Ghidra CodeBrowser プログラム内で実行され、別のスクリプトから分析データベースを照会・変更できるようにします。IDA の Python CLI から `ID_Server.py`（`import ID_Server`）を実行するか、Ghidra の Script Manager から `Ghidra_Server.py` を実行します。IDA は `127.0.0.1` のポート `5073` からバインドを開始し、より大きいポートを順にスキャンします。現在の Ghidra スクリプトはポート `5093` から開始し、`5102` までの10個のポートを試します。Java socket は loopback のみに限定せず、ワイルドカードアドレスにバインドします。接続する前に、インスタンスが出力したポートを確認してください。headless analyzer とは異なり、このブリッジはその GUI インスタンスで現在開いているプログラムを操作します。<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
-**接続ごとに、改行で終わるコマンドを1つ送信し、改行で終わる応答を読み取ります。** 通常、結果は JSON です。たとえば、入力パスに関係する imported API を見つけた後、`IMPORTXREF` でその呼び出し箇所を検索し、`DECOMP_XREF` で選択したアドレスの呼び出し元をまとめて逆コンパイルできます。`FUNC` は関数を調べ、`PCODE` は decompiler の中間表現を返します。異なる rebase 済みバイナリからコピーしたアドレスではなく、アクティブな database のアドレスを使用してください。以下の例では IDA のデフォルトポートを使用しています。Ghidra の場合は、そのスクリプトが表示したポートを使用してください。<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
+接続ごとに、改行で終わるコマンドを**1つ**送信し、改行で終わる応答を読み取ります。結果は通常 JSON です。たとえば、入力パスに関係する imported API を見つけた後、`IMPORTXREF` でその呼び出し箇所を検索し、続いて `DECOMP_XREF` で選択したアドレスの呼び出し元をまとめて逆コンパイルできます。`FUNC` は関数を調べ、`PCODE` は decompiler の中間表現を返します。別の rebase 済みバイナリからコピーしたアドレスではなく、アクティブなデータベースのアドレスを使ってください。以下の例は IDA のデフォルトポートを使用しています。Ghidra の場合は、そのスクリプトが出力したポートを使ってください。<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
 
 ```python
 import socket
@@ -258,7 +262,7 @@ with socket.create_connection(("127.0.0.1", 5073)) as sock:
     print(sock.makefile("r", encoding="utf-8").readline())
 ```
 
-同じチャネルから**解析データベースを変更**することもできます。`RENAME_FUNC`、`RETYPE`、`SETCONV`、`DEFSTRUCT`/`SETFIELD`、`MAKEFUNC`、`PATCH`は、名前、型、構造体の定義、関数の境界、または保存されたバイト列を変更します。`PATCH`はデータベースの編集であり、実行中プロセスへのパッチを示すものではありません。どちらのリスナーも認証については記載していません。IDAはloopback限定ですが、Ghidraはネットワークインターフェース経由でアクセスできる場合があります。Ghidraのリスナーを使用する際は、アクセスを制限してください。`QUIT`はどちらのリスナーも停止し、IDAでは`ida_bridge_stop()`も利用できます。<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+同じチャネルから**analysis databaseを変更する**こともできます。`RENAME_FUNC`、`RETYPE`、`SETCONV`、`DEFSTRUCT`/`SETFIELD`、`MAKEFUNC`、`PATCH`は、名前、型、構造体定義、関数境界、または保存されたバイト列を変更します。`PATCH`はdatabaseの編集であり、実行中プロセスへのpatchを示すものではありません。どちらのlistenerも認証について記載していません。IDAはloopback限定ですが、Ghidraはネットワークインターフェース経由でアクセス可能な場合があります。Ghidraのlistenerを使う場合は、アクセスを制限してください。`QUIT`はどちらのlistenerも停止し、IDAでは`ida_bridge_stop()`も利用できます。<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
 ## ARM & MIPS
 
@@ -269,13 +273,13 @@ https://github.com/nongiach/arm_now
 
 ## Shellcodes
 
-### BlobRunnerを使ったshellcodeのデバッグ
+### blobrunnerを使ったshellcodeのデバッグ
 
 [**BlobRunner**](https://github.com/OALabs/BlobRunner)は**shellcode**を割り当て、その**メモリアドレス**を表示してから、実行を一時停止します。\
-IDAやx64dbgなどのデバッガをアタッチし、表示されたアドレスにブレークポイントを設定して実行を再開すると、shellcodeをデバッグできます。
+IDAやx64dbgなどのdebuggerをアタッチし、表示されたアドレスにbreakpointを設定して実行を再開すると、shellcodeをデバッグできます。
 
-GitHubのリリースページには、コンパイル済みリリースを含むzipファイルがあります: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-以下のリンクから、わずかに変更されたバージョンのBlobRunnerを入手できます。コンパイルするには、**Visual Studio CodeでC/C++プロジェクトを作成し、コードをコピーして貼り付け、ビルドするだけです**。
+GitHubのreleasesページには、コンパイル済みリリースを含むzipファイルがあります: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+以下のリンクから、少し変更されたBlobrunnerのバージョンを入手できます。コンパイルするには、**Visual Studio CodeでC/C++プロジェクトを作成し、コードをコピーして貼り付け、ビルドするだけ**です。
 
 
 {{#ref}}
@@ -284,34 +288,34 @@ blobrunner.md
 
 ### jmp2itを使ったshellcodeのデバッグ
 
-[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)はBlobRunnerと似ています。shellcodeを割り当てて無限ループに入ります。デバッガをアタッチし、**2～5秒間**実行を再開した後、そのループ内で一時停止し、割り当てられたshellcodeに実行を移す次のcallまでステップ実行します。
+[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)はBlobRunnerと似ています。shellcodeを割り当てて、無限ループに入ります。debuggerをアタッチし、**2～5秒**間実行を再開してから、そのループ内で一時停止し、割り当てられたshellcodeに実行を移す次のcallまでステップ実行します。
 
-![jmp2itの無限ループ内で、割り当てられたshellcodeを呼び出す直前にデバッガが一時停止している画面](<../../images/image (509).png>)
+![jmp2itの無限ループ内で、割り当てられたshellcodeへのcall直前にdebuggerが一時停止している状態](<../../images/image (509).png>)
 
-コンパイル済みの[jmp2itはリリースページからダウンロードできます](https://github.com/adamkramer/jmp2it/releases/)。
+コンパイル済みの[jmp2itはreleasesページからダウンロードできます](https://github.com/adamkramer/jmp2it/releases/)。
 
 ### Cutterを使ったshellcodeのデバッグ
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0)はradareのGUIです。Cutterを使うと、shellcodeをエミュレートして動的に調査できます。
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0)はradareのGUIです。Cutterを使うと、shellcodeをエミュレートして動的に調べることができます。
 
-Cutterでは「Open File」と「Open Shellcode」を選択できます。同じshellcodeを試したところ、ファイルとして開くと正しく逆コンパイルされましたが、shellcodeとして開くと正しく処理されませんでした。
+Cutterでは「Open File」と「Open Shellcode」を選択できます。同じshellcodeをファイルとして開いた場合は正しく逆コンパイルされましたが、shellcodeとして開いた場合は正しく処理されませんでした。
 
-![同じバイト列をファイルとして開いた場合とshellcodeとして開いた場合の異なる解析結果を表示するCutter](<../../images/image (562).png>)
+![同じバイト列をファイルとshellcodeとして開いたときの異なる解析結果を表示するCutter](<../../images/image (562).png>)
 
-指定した場所からエミュレーションを開始するには、そこにbpを設定します。どうやらCutterはその場所から自動的にエミュレーションを開始します。
+指定した場所からエミュレーションを開始するには、その場所にbpを設定します。すると、Cutterはそこから自動的にエミュレーションを開始するようです。
 
-![Cutterのエミュレーション開始前に、shellcodeの目的のエントリポイントにブレークポイントを設定した画面](<../../images/image (589).png>)
+![Cutterでエミュレーションを開始する前に、目的のshellcodeエントリにbreakpointを設定](<../../images/image (589).png>)
 
-![選択したshellcodeのブレークポイントで一時停止したCutterエミュレーター](<../../images/image (387).png>)
+![選択したshellcodeのbreakpointで一時停止しているCutterのemulator](<../../images/image (387).png>)
 
-たとえば、hex dumpでスタックを確認できます。
+たとえば、hex dumpでstackを確認できます。
 
-![Cutterのhex dumpでエミュレートされたshellcodeのスタックを表示した画面](<../../images/image (186).png>)
+![Cutterのhex dumpでエミュレートされたshellcodeのstackを表示](<../../images/image (186).png>)
 
-### shellcodeの難読化解除と実行された関数の特定
+### shellcodeをdeobfuscateして実行された関数を特定する
 
-[**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152)を試してください。\
-shellcodeが使用している**関数**や、メモリ内で自身を**デコード**しているかどうかなどを確認できます。
+[**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152)を試してみてください。\
+shellcodeが使用している**関数**や、メモリ内で自身を**decode**しているかどうかなどを確認できます。
 
 ```bash
 scdbg.exe -f shellcode # Get info
@@ -322,48 +326,48 @@ scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
 
-scDbgには、必要なオプションを選択してshellcodeを実行できるグラフィカルランチャーも付属しています。
+scDbgには、必要なオプションを選択してshellcodeを実行できるグラフィカルランチャーもあります
 
-![shellcodeのエミュレーションとトレースのオプションを選択するscDbgのグラフィカルランチャー](<../../images/image (258).png>)
+![shellcodeのエミュレーションとトレースのオプションを選択するscDbgグラフィカルランチャー](<../../images/image (258).png>)
 
-**Create Dump** オプションを使うと、メモリ上でshellcodeが動的に変更された場合に、変更後のshellcodeをダンプできます（デコード済みのshellcodeを取得するのに便利です）。**start offset** は、指定したオフセットからshellcodeを開始する場合に便利です。**Debug Shell** オプションを使うと、scDbgのターミナルでshellcodeをデバッグできます（ただし、この用途には前述のオプションのほうが適していると思います。IDAやx64dbgを使えるためです）。
+**Create Dump**オプションを使うと、メモリ上でshellcodeが動的に変更された場合に、最終的なshellcodeをダンプできます（デコードされたshellcodeのダウンロードに便利です）。**start offset**は、特定のオフセットからshellcodeを開始する場合に便利です。**Debug Shell**オプションを使うと、scDbgのターミナルでshellcodeをデバッグできます（ただし、この用途では、前述したいずれかのオプションのほうが優れていると思います。Idaやx64dbgを使用できるためです）。
 
-### CyberChefを使ったDisassembling
+### CyberChefを使用した逆アセンブル
 
 shellcodeファイルを入力としてアップロードし、次のレシピを使って逆アセンブルします: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
-## MBA obfuscationのdeobfuscation
+## MBA obfuscationの難読化解除
 
-**Mixed Boolean-Arithmetic (MBA)** obfuscationは、算術演算子（`+`、`-`、`*`）とビット演算子（`&`、`|`、`^`、`~`、シフト）を組み合わせた式で、`x + y`のような単純な式を隠します。重要なのは、こうした恒等式が通常、**固定幅の剰余演算**でのみ成立する点です。そのため、キャリーとオーバーフローが重要になります:
+**Mixed Boolean-Arithmetic (MBA)** obfuscationは、`x + y`のような単純な式を、算術演算（`+`、`-`、`*`）とビット演算子（`&`、`|`、`^`、`~`、シフト）を組み合わせた数式で隠します。重要なのは、こうした恒等式が通常、**固定幅の剰余演算**でのみ成立することです。そのため、キャリーとオーバーフローが重要になります:
 
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
 
-この種の式を汎用的な代数ツールで簡略化すると、ビット幅のセマンティクスが無視されているため、誤った結果になりやすいです。<sup>[[1]](#references)</sup>
+この種の式を汎用代数ツールで簡略化すると、bit-width のセマンティクスが無視されているため、誤った結果になりやすいです。<sup>[[1]](#references)</sup>
 
 ### 実践的なワークフロー
 
-1. リフトしたコード/IR/decompilerの出力にある**元のビット幅**（`8/16/32/64` bits）を維持する。
-2. 簡略化を試みる前に、式を**分類**する:
-   - **Linear**: ビット演算の要素の加重和
-   - **Semilinear**: `x & 0xFF` のような定数マスクを含む線形式
-   - **Polynomial**: 積を含む式
-   - **Mixed**: 積とビット演算ロジックが混在し、部分式が繰り返されることも多い
-3. 候補となる書き換えはすべて、ランダムテストまたはSMT証明で検証する。同値性を証明できない場合は、推測で書き換えず、元の式を維持する。
+1. lifted code/IR/decompiler output の**元の bit-width**（`8/16/32/64` bits）を維持する。
+2. 簡略化を試す前に、式を**分類する**:
+   - **線形**: bitwise atom の加重和
+   - **半線形**: `x & 0xFF` のような定数マスクを含む線形式
+   - **多項式**: 積を含む
+   - **混合**: 積と bitwise logic が入り交じり、同じ部分式が繰り返し現れることが多い
+3. ランダムテストまたは SMT proof で、書き換え候補をすべて**検証する**。同値性を証明できない場合は、推測で書き換えず、元の式を維持する。
 
-### 狭い実行スライスで平坦化された制御フローを回避する
+### 狭い実行スライスでflattened control flowを回避する
 
-制御フローグラフ全体を復元する必要がない場合もよくあります。control-flow flattening、opaque predicates、大規模なdispatcher、またはMBAを多用したコードでは、暗号化されたblobや出力バッファから参照をたどり、それらを変換する最小のルーチンを特定します。その後、そのデータフロースライスだけを再現するか、単独で実行します。関連するstateを直接初期化できるなら、dispatcherは必要な解決策に含まれません。<sup>[[7]](#references)</sup>
+完全な control-flow graph を復元する必要はないことがよくあります。control-flow flattening、opaque predicates、大規模な dispatcher、または MBA-heavy なコードでは、暗号化された blob や出力バッファから参照をたどり、それらを変換する最小のルーチンを特定します。その後、その data-flow slice だけを再現するか、単独で実行します。関連する状態を直接初期化できるなら、dispatcher は必要な解法に含まれません。<sup>[[7]](#references)</sup>
 
-実践的なワークフローは次のとおりです。<sup>[[7]](#references)</sup>
+実践的なワークフローは次のとおりです:<sup>[[7]](#references)</sup>
 
-1. 実行可能セクションとデータセクション、relocations、cross-referencesを一覧化する。`.rodata`から候補となるテーブルをダンプし、バイト順と要素幅を維持する。
-2. plaintextまたは出力バッファに最後に書き込むルーチンを特定する。その入力、参照するテーブル、importされた呼び出し、必要なglobal stateを記録する。
-3. それらの操作だけを固定幅のPythonモデルにリフトする。スライスが依然として多くのstateに依存する場合は、プログラム全体をエミュレートする代わりに、Unicorn、QEMU、またはdebugger上でルーチンを呼び出し、無関係なimportsをhookする。
-4. extractorが与えられたbinaryから実際に出力を導出していることを検証する。暗黙のfallbackをなくし、埋め込まれた回答を検索し、文字列、鍵、識別子、layout、obfuscation seedを変更した未知のbuildで実行する。
+1. 実行可能セクションとデータセクション、relocation、cross-reference を一覧化する。`.rodata` から候補となるテーブルをdumpし、バイト順と要素幅を維持する。
+2. plaintext または出力バッファに最後に書き込むルーチンを特定する。その入力、参照されるテーブル、importされた呼び出し、および必要なグローバル状態を記録する。
+3. それらの処理だけを固定幅の Python model に移す。slice が依然として過剰な状態に依存する場合は、プログラム全体をemulateする代わりに、Unicorn、QEMU、またはdebuggerでルーチンを呼び出し、無関係なimportをhookする。
+4. extractorが与えられたbinaryから実際に出力を導出していることを検証する。無言のfallbackを削除し、埋め込み済みの答えがないか検索し、文字列、鍵、識別子、レイアウト、難読化seedを変更した未知のbuildでも実行する。
 
-最初に試すとよいコマンドは次のとおりです。<sup>[[7]](#references)</sup>
+最初に試すとよいコマンドは次のとおりです:<sup>[[7]](#references)</sup>
 
 ```bash
 readelf -SW target
@@ -371,9 +375,9 @@ objdump -s -j .rodata target > rodata.txt
 objdump -d target | rg 'adrp|add|ldr|str'
 ```
 
-#### 定数に見せかけたMBA式を検出する
+#### 定数を偽装した MBA 式を検出する
 
-一見すると入力に依存しているように見えるバイト式でも、入力が完全に相殺されることがあります。テーブルを抽出した後、8ビットの全領域で式を評価します。出力集合が単一の値なら、周囲のステートマシンを復元しなくても、そのバイトが定数だと証明できます。<sup>[[7]](#references)</sup>
+一見すると入力に依存しているように見えるバイト式でも、入力が完全に相殺されることがあります。テーブルを抽出した後、8 ビットの全領域にわたって式を評価します。出力集合が単一の値なら、周囲の状態機械を復元しなくても、そのバイトが定数であると証明できます。<sup>[[7]](#references)</sup>
 
 ```python
 def mba(a, b, c, d, e, x):
@@ -389,17 +393,17 @@ for row in zip(A, B, C, D, E):
 print(decoded)
 ```
 
-元の加算にはbyte幅のwraparoundがあるため、最後のmaskは残してください。より広い領域では、同じ幅の2つのシンボリック入力について、SMT solverで `f(x1) != f(x2)` が充足可能かどうかを調べます。`unsat` なら不変性が証明され、`sat` なら反例が得られるため、その入力を除去できないことを意味します。<sup>[[7]](#references)</sup>
+元の加算はバイト幅でラップアラウンドするため、最後のマスクは残してください。より広いドメインでは、同じ幅の記号入力 `x1` と `x2` に対して `f(x1) != f(x2)` が充足可能か SMT solver に問い合わせます。`unsat` は不変性を証明し、`sat` は反例を示すため、その入力を破棄できないことを意味します。<sup>[[7]](#references)</sup>
 
-#### 環境に依存するデコードを見分ける
+#### 環境依存のデコードを見分ける
 
-Anti-analysisチェックは、分岐やクラッシュを引き起こすとは限りません。decoderはセンサーの結果をキーのビット、不透明述語の定数、またはflattened dispatcherの状態に混ぜ、正常に処理を続けながら、emulator上で妥当に見えるものの誤った平文を生成することがあります。そのため、目に見える失敗分岐だけをpatchしても不十分です。環境プローブからdecoderの状態へのデータ依存関係を追跡し、実機とemulatorで同じスライスを比較し、各センサーの結果を強制的に変更したときに最終バッファがどう変わるかをテストしてください。<sup>[[7]](#references)</sup>
+Anti-analysis チェックは、分岐やクラッシュを伴うとは限りません。decoder はセンサーの結果を鍵ビット、不透明述語の定数、または平坦化された dispatcher の状態に混ぜ、正常に処理を続けながら、emulator 上で一見もっともらしい偽の平文を生成することがあります。そのため、目に見える失敗分岐だけをパッチするのでは不十分です。環境プローブから decoder の状態へのデータ依存関係を追跡し、実機と emulator で同じ処理スライスを比較し、各センサー結果を強制的に変更したときに最終バッファがどう変化するかをテストしてください。<sup>[[7]](#references)</sup>
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) は、malware解析や保護されたbinaryのreversingに使える実用的なMBA simplifierです。式を分類し、すべてに汎用のrewrite passを適用するのではなく、専用のpipelineに振り分けます。<sup>[[2]](#references)</sup>
+[**CoBRA**](https://github.com/trailofbits/CoBRA) は、malware analysis と保護された binary の reversing に実用的な MBA simplifier です。すべてに汎用の rewrite pass を適用するのではなく、式を分類し、専用の pipeline に振り分けます。<sup>[[2]](#references)</sup>
 
-簡単な使い方：
+簡単な使い方:
 
 ```bash
 # Recover arithmetic from a logic-heavy MBA
@@ -416,80 +420,80 @@ cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 
 有用なケース:
 
-- **Linear MBA**: CoBRAはBoolean入力で式を評価し、signatureを導出して、pattern matching、ANF変換、係数補間など複数の復元手法を並行して実行します。
-- **Semilinear MBA**: constant-masked atomはbit-partitioned reconstructionで再構築され、マスクされた領域の正確さが保たれます。
-- **Polynomial/Mixed MBA**: 積はcoreに分解され、外側の関係を簡略化する前に、繰り返し現れる部分式をtemporaryに持ち上げられます。
+- **Linear MBA**: CoBRA は Boolean 入力で式を評価して signature を導出し、pattern matching、ANF conversion、coefficient interpolation など複数の復元手法を並行して実行します。
+- **Semilinear MBA**: constant-masked atom は bit-partitioned reconstruction で再構築され、マスクされた領域が正しく保たれます。
+- **Polynomial/Mixed MBA**: 積は cores に分解され、繰り返し現れる部分式は一時変数に持ち上げてから、外側の関係式を簡略化できます。
 
-復元を試す価値がある、よくあるmixed identityの例:
+復元を試す価値がある、一般的な mixed identity の例:
 
 ```c
 (x & y) * (x | y) + (x & ~y) * (~x & y)
 ```
 
-これは次のようにまとめられます:
+これは次の形にまとめられます:
 
 ```c
 x * y
 ```
 
-### Reversing のメモ
+### リバースに関するメモ
 
-- CoBRA は、正確な計算処理を特定した後の **lifted IR expressions** または decompiler の出力に対して実行するのがおすすめです。
-- 式がマスク演算や狭いレジスタに由来する場合は、`--bitwidth` を明示的に指定してください。
-- より強力な証明手順が必要な場合は、こちらの Z3 のメモを確認してください。
+- 正確な計算を特定した後、**lifted IR expressions**またはデコンパイラの出力に対してCoBRAを実行するのが望ましいです。
+- 式がマスク演算や狭いレジスタに由来する場合は、`--bitwidth`を明示的に指定してください。
+- より強力な証明ステップが必要な場合は、こちらのZ3に関するローカルメモを確認してください。
 
 
 {{#ref}}
 satisfiability-modulo-theories-smt-z3.md
 {{#endref}}
 
-- CoBRA には **LLVM pass plugin** (`libCobraPass.so`) も含まれており、後続の解析 pass の前に MBA が多用された LLVM IR を正規化する場合に便利です。
-- carry に依存する、サポート対象外の混合ドメインの残余式がある場合は、元の式を維持して carry の経路を手動で解析する目印としてください。
+- CoBRAは**LLVM pass plugin**（`libCobraPass.so`）としても提供されており、後続の解析passの前に、MBAを多用するLLVM IRを正規化したい場合に便利です。
+- carryに依存する未対応の混合ドメイン残差がある場合は、元の式を維持し、carryの経路を手作業で推論する必要があるという兆候として扱ってください。
 
-## XOR-state による制御フロー平坦化の復元
+## XOR-stateによるcontrol-flow flatteningの復元
 
-OLLVM 形式の flattener は、現在の basic block の state を2つの64ビットレジスタに保持し、dispatcher で XOR を使って再構成する場合があります。元の各 block は、次の state に対応するペアを書き込み、dispatcher に戻ります。条件付き block は `CMOVcc` を使って CPU flags に応じてペアの一方を書き換えることがあるため、目に見える branch 命令だけを追うと、2つの後続 block を見落とします。間接ジャンプを使う dispatcher とは異なり、この形式では全体を通して直接の後方分岐を使うことがあります。<sup>[[19]](#references)[[20]](#references)</sup>
+OLLVM形式のflatteningでは、2つの64-bitレジスタに現在のbasic blockのstateを保持し、dispatcherでXORを使って復元することがあります。元の各blockは、次のstateに対応するレジスタペアを書き込み、dispatcherに戻ります。条件付きblockでは、CPU flagsに応じてペアの片方を置き換えるために`CMOVcc`を使うことがあり、目に見える分岐命令だけを追っていると、2つの後続先を見落とします。間接ジャンプを使うdispatcherとは異なり、この形式では全体を通じて直接のback-edgeを使えます。<sup>[[19]](#references)[[20]](#references)</sup>
 
-グラフを復元するには、dispatcher の比較ツリーと2つの state レジスタを特定し、比較された各 XOR state を対象 block に対応付けたうえで、元の各 block でレジスタペアに書き込む到達可能な命令を追跡します。条件付き書き込みでは、flags を設定する命令と `CMOVcc` の両方の結果を考慮します。各 block の dispatcher への exit を、解決した直接の後続 block または条件分岐に書き換えます。すると、binary にパッチを当てなくても dispatcher は到達不能になります。これは CFG 全体を扱う方法です。対象の decoder が1つだけなら、上記の[狭い実行スライスのワークフロー](#bypass-flattened-control-flow-with-a-narrow-execution-slice)のほうが速い場合があります。<sup>[[19]](#references)[[20]](#references)</sup>
+グラフを復元するには、dispatcherの比較木と2つのstateレジスタを特定し、比較された各XOR stateを対象blockに対応付けてから、元の各blockでレジスタペアに到達する書き込みを追跡します。条件付きの書き込みでは、flagsを設定する命令と、両方の`CMOVcc`の結果を考慮します。各blockのdispatcherへの出口を、解決した直接の後続先または条件分岐に書き換えます。これにより、バイナリをpatchせずにdispatcherを到達不能にできます。これはCFG全体を対象にする方法です。対象となるdecoderが1つだけなら、上記の[narrow execution-slice workflow](#bypass-flattened-control-flow-with-a-narrow-execution-slice)のほうが速い場合があります。<sup>[[19]](#references)[[20]](#references)</sup>
 
-[DispatchThis](https://github.com/YungBinary/DispatchThis) は、Binary Ninja でこの形式を自動処理します。`plugins/DispatchThis` を Binary Ninja のユーザープラグインディレクトリにコピーして再起動してください。対象の関数で **Function Settings** を開き、`OLLVM_XOR_64` を選択します。解析が開始されない場合は、**Analysis → Reanalyze All Functions** を実行してください。このモードは MLIL の制御フローエッジを書き換えるもので、ファイルのバイト列は変更せず、Z3 や indirect-jump resolver も必要ありません。Binary Ninja 5.3.9757+ で動作確認されています。block ごとに残る不要な state 書き込みは削除されないため、それらを有効な遷移と誤認しないでください。<sup>[[19]](#references)</sup>
+[DispatchThis](https://github.com/YungBinary/DispatchThis)は、Binary Ninjaでこの形式を自動化します。`plugins/DispatchThis`をBinary Ninjaのユーザープラグインディレクトリにコピーして、再起動してください。対象の関数で**Function Settings**を開き、`OLLVM_XOR_64`を選択します。解析が始まらない場合は、**Analysis → Reanalyze All Functions**を実行してください。このモードはファイルのバイト列ではなくMLILのcontrol-flow edgeを書き換え、Z3や間接ジャンプresolverを必要としません。Binary Ninja 5.3.9757以降で動作確認されています。blockごとの不要なstate書き込みは削除されないため、それらをまだ有効な遷移と誤認しないでください。<sup>[[19]](#references)</sup>
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-この obfuscator は、プログラムの操作を `mov` ベースの命令シーケンスに置き換え、signal/exception handling を使って制御フローを変更します。詳細はこちら:
+このobfuscatorは、プログラムの操作を`mov`ベースの命令列に置き換え、signal/exception handlingを使ってcontrol flowを変更します。詳細はこちらを参照してください。
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-対応する binary であれば、[demovfuscator](https://github.com/kirschju/demovfuscator) で結果を deobfuscate できます。いくつかの依存関係があります。
+対応するバイナリであれば、[demovfuscator](https://github.com/kirschju/demovfuscator)で結果をdeobfuscateできます。いくつかの依存関係があります。
 
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
 
-And [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
+そして[keystoneをインストール](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md)します（`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`）。
 
-**CTFをプレイしている場合、この回避策を使ってflagを見つけられるかもしれません**: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+**CTFをプレイしている場合、この回避策はflagを見つけるのに非常に役立つ可能性があります**：[https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-**エントリポイント**を見つけるには、次のように関数名を `::main` で検索します。
+**エントリポイント**を見つけるには、次のように関数名に含まれる`::main`を検索します。
 
-![関数名をダブルコロン付きのmainで検索して、GhidraでRustのエントリポイントを見つける](<../../images/image (1080).png>)
+![Ghidraで関数名のdouble-colon mainを検索してRustのエントリポイントを見つける](<../../images/image (1080).png>)
 
-このケースでは、バイナリの名前はauthenticatorだったため、これが注目すべきmain関数であることは明らかです。\
-呼び出されている**関数**の**名前**がわかったら、**Internet**で検索して、それらの**入力**と**出力**を調べましょう。
+このケースでは、バイナリ名がauthenticatorだったため、どれが興味深いmain関数なのかは明らかです。\
+呼び出されている**関数**の**名前**がわかったら、**入力**と**出力**を調べるために**インターネット**で検索します。
 
 ### ELFファームウェアからRust文字列を復元する
 
-**Rust ELF**バイナリでは、多くの静的文字列は、CスタイルのNUL終端ポインタとして参照されていません。一般的な `rustc` のレイアウトでは、**`.data.rel.ro`** 内の**ポインタ/長さのタプル**が、**`.rodata`** に格納された実際の文字列データを指しています。
+**Rust ELF**バイナリでは、多くの静的文字列がCスタイルのNUL終端ポインターとして参照されていません。一般的な`rustc`のレイアウトでは、**`.data.rel.ro`**内の**ポインターと長さのタプル**が、**`.rodata`**に格納された実際の文字列データを指しています：
 
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
 
-これは、`strings` や Ghidra のデフォルト解析では、隣接する文字列が結合されたり、クロスリファレンスが完全に見落とされたりする可能性があることを意味します。<sup>[[3]](#references)</sup>
+これは、`strings` や Ghidra のデフォルトの解析では、隣接する文字列が結合されたり、クロスリファレンスが完全に見落とされたりする可能性があるということです。<sup>[[3]](#references)</sup>
 
 簡単なワークフロー:
 
@@ -500,9 +504,9 @@ objdump -h <bin>
 
 1. **`.rodata`** の仮想アドレスとサイズを取得します。
 2. **`.data.rel.ro`** を1ワードずつ列挙します。
-3. `.rodata` のアドレス範囲内にある値を、文字列ポインター候補として扱います。
-4. 次のワードを長さ候補として扱います。
-5. 妥当性フィルターを適用します（例: **4**〜**100** バイトの長さに限定）。
+3. `.rodata` のアドレス範囲内にある値を、文字列ポインターの候補として扱います。
+4. 次のワードを候補の長さとして扱います。
+5. 妥当性フィルターを適用します（たとえば、長さが **4**〜**100** バイトのものを残します）。
 6. `0x00` までスキャンするのではなく、`.rodata` から `length` バイトを正確に読み取ります。
 
 最小限の抽出ロジック:
@@ -516,52 +520,52 @@ for off in range(0, len(data_rel_ro), 8):
         print(rodata[start:start+length])
 ```
 
-これはファームウェアのリバースエンジニアリングで特に役立ちます。復元された Rust の文字列から、**HTTP routes、RPC names、log messages、assertions、filenames、config keys、command handlers、認証関連のロジック**が明らかになることがよくあります。
+これは、復元された Rust の文字列から **HTTP routes、RPC names、log messages、assertions、filenames、config keys、command handlers、auth関連のロジック** が見つかることが多いため、firmwareのreversingで特に役立ちます。
 
-Ghidra がこれらの文字列を見つけられない場合は、同じヒューリスティックを適用し、参照先の `.rodata` オフセットに文字列データを作成するカスタムスクリプトやプラグインを実行してください。Pen Test Partners が公開している `rust-strings` と `RustStrings.py` は、このアイデアを他の**ワードサイズ、エンディアン、セクションレイアウト**に応用する際の参考になります。<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
+Ghidraがこれらの文字列を検出できない場合は、同じヒューリスティックを適用し、参照先の `.rodata` offsets にstring dataを作成するカスタムscript/pluginを実行してください。Pen Test Partnersが公開している `rust-strings` と `RustStrings.py` は、このアイデアを他の **word sizes、endianness、section layouts** に適用する際の参考になります。<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
 
 ## **Delphi**
 
-Delphi コンパイル済みバイナリには、[https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)を使用できます。
+Delphiでコンパイルされたバイナリには、[https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR) を使用できます。
 
-Delphi バイナリをリバースする必要がある場合は、IDA plugin の[https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)の使用をおすすめします。
+Delphiバイナリをreversingする場合は、IDA pluginの [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi) の使用をおすすめします。
 
-IDA で**Alt+F7**を押して Python plugin を読み込み、plugin ファイルを選択します。
+IDAで **Alt+F7** を押してPython pluginを読み込み、pluginファイルを選択します。
 
-この plugin はバイナリを実行し、デバッグ開始時に関数名を動的に解決します。デバッグを開始したら、もう一度 Start ボタン（緑色のボタン、または f9）を押すと、実際のコードの先頭でブレークポイントに到達します。
+このpluginはバイナリを実行し、debuggingの開始時にfunction namesを動的に解決します。debuggingを開始した後、もう一度Start button（緑色のボタンまたはf9）を押すと、実際のcodeの先頭でbreakpointがヒットします。
 
-グラフィカルアプリケーションのボタンを押すと、デバッガーはそのボタンから呼び出された関数で停止することがあります。
+graphical applicationでボタンを押すと、debuggerはそのボタンから呼び出されたfunctionで停止できます。
 
 ## Golang
 
-一般的な Go バイナリでは、[IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)を使ってランタイム構造を復元し、IDA の関数名を改善できます。**Alt+F7**で Python plugin を読み込みます。
+一般的なGoバイナリでは、[IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) を使うと、runtime structuresを復元し、IDA上のfunction namesを改善できます。**Alt+F7** でPython pluginを読み込みます。
 
-Golang バイナリをリバースする必要がある場合は、IDA plugin の[https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)の使用をおすすめします。
+Golangバイナリをreversingする場合は、IDA pluginの [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) の使用をおすすめします。
 
-IDA で**Alt+F7**を押して Python plugin を読み込み、plugin ファイルを選択します。
+IDAで **Alt+F7** を押してPython pluginを読み込み、pluginファイルを選択します。
 
-これにより、関数名が解決されます。
+これによりfunction namesが解決されます。
 
-### シンボルテーブルなしでメタデータを復元する
+### シンボルテーブルなしでmetadataを復元する
 
-strip された Go 実行ファイルでも、プログラムカウンターを関数に対応付けるためにランタイムメタデータが必要です。[GoReSym](https://github.com/mandiant/GoReSym)は、Go runtime 由来のコードを使って、`pclntab`や`moduledata`などの構造を特定して解析します。これにより、従来のシンボルテーブルに頼らずに、関数の境界、名前、ソースパス、型、ビルド情報を復元できます。<sup>[[9]](#references)[[13]](#references)</sup>
+stripされたGo executableでも、program countersをfunctionsに対応付けるためにruntime metadataが必要です。[GoReSym](https://github.com/mandiant/GoReSym) は、Go runtime由来のcodeを使用して `pclntab` や `moduledata` などのstructuresを特定し、解析します。従来のシンボルテーブルに依存せずに、function boundaries、names、source paths、types、build detailsを復元できます。<sup>[[9]](#references)[[13]](#references)</sup>
 
 ```bash
 GoReSym.exe -t -d -p /path/to/sample.exe > goresym.json
 ```
 
-obfuscatorは、復元された名前を置き換えながら、これらの構造を利用可能な状態に保つことがあります。たとえばGarbleは、識別子とpackage pathをハッシュ化し、build、module、debug情報を削除します。<sup>[[12]](#references)</sup> obfuscated package tokenは、そのpackageの関数間で一貫している必要があります。繰り返し現れるtokenで関数をグループ化し、callee、文字列、APIから1つのpackageを推定して、そのpackageラベルをグループ全体に適用します。<sup>[[13]](#references)</sup>
+難読化ツールは、復元された名前を置き換えながら、それらの構造を使用可能な状態に保つことがあります。たとえば Garble は、識別子と package path をハッシュ化し、build、module、debug 情報を削除します。<sup>[[12]](#references)</sup> 難読化された package token は、その package 内の関数間で一貫している必要があります。繰り返し現れる token で関数をグループ化し、callee、文字列、API から package を1つ推定して、その package ラベルをグループ全体に適用します。<sup>[[13]](#references)</sup>
 
-### GoResolverでGarbleの名前を復元する
+### GoResolver で Garble の名前を復元する
 
-[GoResolver](https://github.com/volexity/GoResolver)は、runtime symbolの抽出、クリーンな参照バイナリの生成、control-flow graph（CFG）のマッチングを組み合わせます。次の手順で進めます。<sup>[[10]](#references)[[13]](#references)</sup>
+[GoResolver](https://github.com/volexity/GoResolver) は、runtime symbol の抽出と、クリーンな参照バイナリの生成、control-flow graph（CFG）のマッチングを組み合わせます。次の手順を使用します。<sup>[[10]](#references)[[13]](#references)</sup>
 
-1. **compilerのversionを特定する。** まず`BuildInfo`と埋め込みversion文字列を確認します。obfuscatorがそれらを削除している場合は、バンドルされたGo runtimeの一部を、version別の参照runtimeと比較します。Volexityのテストでは、runtimeの約`2%`でGoのメジャーversionを識別できました。これは経験的な最適化であり、普遍的な閾値ではないことに注意してください。<sup>[[13]](#references)</sup>
-2. **マッチング用の参照バイナリを作成する。** 特定したGo version、target architecture、使用が見込まれるlibrary向けに、クリーンなバイナリを生成します。toolchainを一致させることで、compilerが生成するCFGの差異を減らせます。<sup>[[10]](#references)[[13]](#references)</sup>
-3. **関数を比較する。** GoGrapherは関数のCFGをマッチングし、`0.0`から`1.0`までの正規化されたスコアを出力します。basic blockのマッチングは、類似した命令を重み付けして比較します。信頼度の高いマッチは、ランダム化された関数をクリーンな実装に対応付けます。信頼度の低いマッチでも、packageやmoduleを特定できる場合があります。<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
-4. **検証してインポートする。** call関係、定数、文字列、副作用を使って候補名を確認し、GoResolver pluginを使ってJSONレポートをIDAまたはGhidraにインポートします。<sup>[[10]](#references)[[13]](#references)</sup>
+1. **コンパイラのバージョンを特定する。** まず `BuildInfo` と埋め込みバージョン文字列を確認します。obfuscator に削除されている場合は、同梱された Go runtime の一部を、バージョン別の参照 runtime と比較します。Volexity のテストでは、runtime の約 `2%` で Go のメジャーバージョンを識別できました。これは実験に基づく最適化であり、普遍的なしきい値ではありません。<sup>[[13]](#references)</sup>
+2. **マッチング用の参照バイナリを作成する。** 特定した Go バージョン、ターゲットアーキテクチャ、使用されている可能性の高いライブラリに合わせて、クリーンなバイナリを生成します。toolchain を一致させることで、コンパイラが生成する CFG の差異を減らせます。<sup>[[10]](#references)[[13]](#references)</sup>
+3. **関数を比較する。** GoGrapher は関数の CFG をマッチングし、`0.0` から `1.0` までの正規化スコアを出力します。basic block のマッチングは、類似する命令の重み付け比較に基づいています。信頼度の高いマッチは、ランダム化された関数をクリーンな実装に対応付けます。信頼度が低めのマッチでも、package や module の特定に役立ちます。<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
+4. **検証してインポートする。** call relationship、定数、文字列、side effect を使って候補の名前を確認し、GoResolver の IDA または Ghidra 用 plugin で JSON レポートをインポートします。<sup>[[10]](#references)[[13]](#references)</sup>
 
-toolchainをインストールし、extractorとgraph matcherを組み合わせて実行します。<sup>[[10]](#references)</sup>
+toolchain をインストールし、抽出ツールと graph matcher を組み合わせて実行します。<sup>[[10]](#references)</sup>
 
 ```bash
 python3 -m venv goresolver-env
@@ -576,34 +580,34 @@ goresolver resolve -v go1.23.4 -l os/exec net/http \
   -t 0.9 -o report.json /path/to/sample.exe
 ```
 
-デフォルトの有意な一致のしきい値は `0.9` です。`--extract` と `--graph` のスイッチを使うと、どちらか一方の段階だけを実行できます。デフォルトでは、復元された runtime metadata と CFG の証拠が互いを補完するため、両方が実行されます。<sup>[[10]](#references)</sup> CFG のスコアはヒューリスティックです。インライン化、ビルドフラグ、アーキテクチャ、ライブラリのバージョンの違いによってグラフの形状が変わる可能性があるため、信頼度の低い名前を無理に割り当てず、未解決の関数はそのまま残してください。<sup>[[13]](#references)</sup>
+デフォルトの significant-match threshold は `0.9` です。`--extract` と `--graph` のスイッチを使うと各ステージを個別に実行できます。デフォルトでは、復元された runtime metadata と CFG の証拠が互いを補完するため、両方を実行します。<sup>[[10]](#references)</sup> CFG のスコアはヒューリスティックです。インライン化、ビルドフラグ、アーキテクチャ、ライブラリのバージョンの違いによってグラフの形状が変わることがあるため、確信度の低い名前を無理に割り当てず、解決できなかった関数はそのままにしてください。<sup>[[13]](#references)</sup>
 
-### Go string table の復元
+### Go の string table の復元
 
-Go バイナリでは、リンクされたすべてのパッケージの文字列データが、1つの連続したテーブルに配置されます。エントリは NUL 終端ではなく、runtime 構造体からテーブルのベースアドレスやサイズを取得することもできません。しかし、コンパイラは OS やアーキテクチャにかかわらず、エントリをまず長さ順、次にアルファベット順に並べます。そのため、1つのエントリを見つければ、隣接するエントリをたどり、データのクロスリファレンスを使って文字列とコードを関連付けられます。<sup>[[15]](#references)</sup>
+Go バイナリでは、リンクされたすべてのパッケージの文字列バイト列が、連続したテーブルに格納されます。エントリは NUL 終端されておらず、runtime の構造体からテーブルのベースアドレスやサイズを取得することもできません。しかし、コンパイラは OS やアーキテクチャにかかわらず、エントリをまず長さ順、次にアルファベット順に並べます。そのため、1つのエントリを見つければ、隣接するエントリをたどり、データのクロスリファレンスを使って文字列をコードに関連付けられます。<sup>[[15]](#references)</sup>
 
-[GoStringExtractor](https://github.com/volexity/GoStringExtractor) は、IDA Pro と Ghidra でこの作業を自動化します。プラグインはデータセグメントのクロスリファレンスに依存するため、先に自動解析を完了させてください。デフォルトのアンカーは runtime の文字列 `entersyscall` です。この文字列を基準にどちらの方向にもスキャンでき、復元した文字列をデータベースに定義し、文字列とそれを参照する関数の対応を JSON 形式でエクスポートできます。<sup>[[14]](#references)</sup>
+[GoStringExtractor](https://github.com/volexity/GoStringExtractor) は、この手順を IDA Pro と Ghidra で自動化します。プラグインはデータセグメントのクロスリファレンスに依存するため、まず自動解析を完了させてください。デフォルトのアンカーは runtime 文字列 `entersyscall` です。その後、どちらの方向にもスキャンし、復元した文字列をデータベース内に定義して、文字列と参照元の関数を対応付けた JSON をエクスポートできます。<sup>[[14]](#references)</sup>
 
-参照元の関数のパッケージでレポートを絞り込むと、アプリケーションやマルウェアのコードを、リンクされたライブラリ由来のノイズから分けられます。この手法では、Garble の `-literals` 変換のような難読化によって破壊されたリテラルは復元できません。それでも、難読化されずに残っている runtime 文字列を整理することはできます。<sup>[[14]](#references)[[15]](#references)</sup>
+参照元の関数が属するパッケージでレポートをフィルタリングすると、アプリケーションやマルウェアのコードを、リンクされたライブラリ由来のノイズから分離できます。この手法では、Garble の `-literals` 変換のような難読化によって破壊されたリテラルは復元できません。ただし、難読化されていない runtime 文字列の整理には引き続き利用できます。<sup>[[14]](#references)[[15]](#references)</sup>
 
 ### Go runtime の型情報の復元
 
-Go には、ガベージコレクションなどの機能で使われる runtime の型情報が埋め込まれています。ビルド情報が削除されている場合や、逆アセンブラがこのメタデータを解析できない場合、命令が任意のデータアドレスを読み込んでいるように見え、対象の領域は型情報のないままになります。このメタデータを復元すると、それらのアドレスを読みやすい型参照に変換でき、パッケージが持つ機能を把握しやすくなります。<sup>[[15]](#references)</sup>
+Go は、ガベージコレクションなどの機能で使用される runtime の型情報を埋め込みます。ビルド情報が削除されていたり、逆アセンブラがこのメタデータを解析できなかったりすると、命令が任意のデータアドレスを読み込んでいるように見え、対象領域に型情報が付与されません。メタデータを復元すると、それらのアドレスが読みやすい型参照に変わり、パッケージの機能を把握しやすくなります。<sup>[[15]](#references)</sup>
 
-[GoResolver](https://github.com/volexity/GoResolver) は、シンボルを抽出し、runtime の型情報を解析して JSON レポートに出力できます。現在の CLI では `resolve` サブコマンドを使います。<sup>[[10]](#references)</sup>
+[GoResolver](https://github.com/volexity/GoResolver) は、シンボルを抽出し、runtime の型情報を解析して JSON レポートに出力できます。現在の CLI では `resolve` サブコマンドを使用します。<sup>[[10]](#references)</sup>
 
 ```bash
 pip install goresolver
 goresolver resolve -x -y -o report.json sample_bin.exe
 ```
 
-`-y`/`--types` オプションを有効にすると、型の解析が行われます。GoResolver の IDA Pro または Ghidra plugin でレポートをインポートし、復元された型を定義して、その参照を解析データベースに適用します。この機能で導入されたレポート形式では、`-y` を省略すると、RTTI アドレスと復元された型のメンバーは null になります。<sup>[[10]](#references)[[15]](#references)</sup>
+`-y`/`--types` オプションを有効にすると、type parsing が行われます。GoResolver の IDA Pro または Ghidra plugin でレポートをインポートし、復元された型を定義して、分析データベース内でその参照を適用します。この機能で導入されたレポート形式では、`-y` を省略すると、RTTI address と recovered-types members は null のままです。<sup>[[10]](#references)[[15]](#references)</sup>
 
-GoResolver は x86、AMD64、ARM、ARM64 の PE、ELF、Mach-O サンプルに対応しているため、同じ手順を Windows、Linux、macOS の Go バイナリに適用できます。<sup>[[10]](#references)</sup>
+GoResolver は x86、AMD64、ARM、ARM64 の PE、ELF、Mach-O サンプルに対応しているため、同じワークフローを Windows、Linux、macOS の Go バイナリに適用できます。<sup>[[10]](#references)</sup>
 
-## コンパイル済み Python
+## Compiled Python
 
-このページでは、ELF/EXE の Python コンパイル済みバイナリから Python コードを取得する方法を紹介します。
+このページでは、ELF/EXE の Python コンパイル済みバイナリから Python コードを取得する方法を説明します。
 
 
 {{#ref}}
@@ -612,18 +616,18 @@ GoResolver は x86、AMD64、ARM、ARM64 の PE、ELF、Mach-O サンプルに�
 
 ## GBA - Game Boy Advance
 
-GBA ゲームの**バイナリ**を入手した場合は、さまざまなツールを使って**エミュレート**および**デバッグ**できます。
+GBA ゲームの**バイナリ**を入手した場合、さまざまなツールを使って**エミュレート**および**デバッグ**できます。
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_デバッグ版をダウンロード_) - インターフェース付きの debugger を搭載
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_デバッグバージョンをダウンロード_) - インターフェース付きの debugger を搭載
 - [**mgba** ](https://mgba.io)- CLI debugger を搭載
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
 
-[**no$gba**](https://problemkaputt.de/gba.htm) の _**Options --> Emulation Setup --> Controls**_** ** で、Game Boy Advance の**ボタン**の押し方を確認できます。
+[**no$gba**](https://problemkaputt.de/gba.htm) の _**Options --> Emulation Setup --> Controls**_** ** では、Game Boy Advance の**ボタン**の押し方を確認できます。
 
-![Game Boy Advance のボタン割り当てを表示する no$gba のコントロール設定](<../../images/image (581).png>)
+![Game Boy Advance のボタン割り当てを示す no$gba のコントロール設定](<../../images/image (581).png>)
 
-押すと、各**キーには値**が割り当てられ、識別に使われます。
+押すと、各**キーには識別用の値**が割り当てられます。
 
 ```
 A = 1
@@ -638,13 +642,13 @@ R = 256
 L = 256
 ```
 
-この種のプログラムでは、注目すべき点は**プログラムがユーザー入力をどのように処理するか**です。アドレス **0x4000130** には、よく見られる関数 **KEYINPUT** があります。
+この種のプログラムでは、興味深いのは**プログラムがユーザー入力をどのように処理するか**です。アドレス **0x4000130** には、よく見られる関数 **KEYINPUT** があります。
 
 ![アドレス 0x4000130 で KEYINPUT を参照している GBA バイナリの Ghidra ビュー](<../../images/image (447).png>)
 
-前の画像では、この関数が **FUN_080015a8**（アドレス: _0x080015fa_ および _0x080017ac_）から呼び出されていることが確認できます。
+前の画像では、この関数が **FUN_080015a8**（アドレス: _0x080015fa_ と _0x080017ac_）から呼び出されていることがわかります。
 
-この関数では、いくつかの初期化処理（重要ではありません）の後に、次の処理が行われます。
+この関数では、いくつかの初期化処理（重要ではありません）の後に:
 
 ```c
 void FUN_080015a8(void)
@@ -667,7 +671,7 @@ void FUN_080015a8(void)
   uVar4 = DAT_030004d8;
 ```
 
-このコードが見つかりました：
+次のコードが見つかります：
 
 ```c
   do {
@@ -681,7 +685,7 @@ void FUN_080015a8(void)
       if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
 
-最後のifは、**uVar4**が**最後のKeys**に含まれていて、現在のキーではないことを確認しています。これはボタンを離すことを意味します（現在のキーは**uVar1**に格納されています）。
+最後の if は、**`uVar4`** が前回の Keys に含まれており、現在のキーではないことを確認しています。つまり、ボタンを離した状態です（現在のキーは **`uVar1`** に格納されています）。
 
 ```c
         if (uVar1 == 4) {
@@ -711,17 +715,17 @@ void FUN_080015a8(void)
                 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 
-前述のコードでは、**uVar1**（**押されたボタンの値**が格納されている場所）をいくつかの値と比較していることがわかります。
+前のコードでは、**uVar1**（**押されたボタンの値**が格納されている場所）が、いくつかの値と比較されていることがわかります。
 
-- まず、**値 4**（**SELECT**ボタン）と比較します。このチャレンジでは、このボタンを押すと画面が消去されます。
-- 次に、値を **8**（**START**ボタン）と比較します。このチャレンジでは、この処理経路で入力されたコードが有効かどうかを確認します。
+- まず、**値 4**（**SELECT**ボタン）と比較されます。このチャレンジでは、このボタンを押すと画面がクリアされます。
+- 次に、値が **8**（**START**ボタン）と比較されます。このチャレンジでは、この経路で入力されたコードが有効かどうかを確認します。
   - この場合、変数 **`DAT_030000d8`** が 0xf3 と比較され、値が一致するとコードが実行されます。
 - それ以外の場合は、カウンター（`DAT_030000d4`）が確認され、インクリメントされます。\
-  カウンターが 8 未満の場合、押されたキーの値が `DAT_030000d8` に累積されます。
+  カウンターが 8 未満の間、押されたキーの値が `DAT_030000d8` に加算されます。
 
 つまり、このチャレンジでは、ボタンの値を把握したうえで、合計が 0xf3 になる、長さが 8 未満の組み合わせを**押す必要がありました**。
 
-**このチュートリアルの参考資料:** [アーカイブされた Nostalgia challenge の writeup](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)。<sup>[[6]](#references)</sup>
+**このチュートリアルの参考資料:** [archived Nostalgia challenge writeup](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)。<sup>[[6]](#references)</sup>
 
 ## Game Boy
 
@@ -733,36 +737,36 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 ## Courses
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary の難読化解除)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
 
 ## References
 
-- [1] [CoBRAによるMBA難読化の簡素化](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [1] [MBA obfuscation を CoBRA で簡略化する](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
 - [2] [Trail of Bits CoBRA リポジトリ](https://github.com/trailofbits/CoBRA)
-- [3] [Rust の文字列をデコードする - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [3] [Rust 文字列のデコード - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
 - [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
-- [6] [Nostalgia - GBA reversing チュートリアル（アーカイブ版）](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
-- [7] [AI支援による Reverse Engineering を阻止する、あるいは少なくとも試みる](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
-- [8] [Basic Block Matching に基づく Control Flow Graph 比較手法](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
+- [6] [Nostalgia - GBA reverse engineering チュートリアル（アーカイブ）](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
+- [7] [AI 支援による reverse engineering を阻止する、あるいは少なくとも試みる](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
+- [8] [基本ブロックマッチングに基づく制御フローグラフ比較のアプローチ](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
 - [9] [Mandiant GoReSym](https://github.com/mandiant/GoReSym)
 - [10] [Volexity GoResolver リポジトリ](https://github.com/volexity/GoResolver)
 - [11] [Volexity GoGrapher](https://github.com/volexity/GoGrapher)
-- [12] [Garble の難読化メカニズム](https://github.com/burrowers/garble#mechanism)
-- [13] [GoResolver: Control-Flow Graph の類似性を利用して Golang バイナリを自動的に難読化解除する](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
+- [12] [Garble の obfuscation メカニズム](https://github.com/burrowers/garble#mechanism)
+- [13] [GoResolver: 制御フローグラフの類似性を用いて Golang バイナリを自動的に deobfuscate する](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
 - [14] [Volexity GoStringExtractor リポジトリ](https://github.com/volexity/GoStringExtractor)
 - [15] [Go Get 'Em: Volexity Golang ツールのアップデート](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
-- [16] [REA: あらゆるものを Reverse Engineer する](https://github.com/morluto/rea)
-- [17] [REA による managed-code の解析](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
+- [16] [REA: あらゆるものを reverse engineer する](https://github.com/morluto/rea)
+- [17] [REA の managed-code 分析](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
 - [18] [REA CLI と Evidence ガイド](https://github.com/morluto/rea/blob/main/docs/cli.md)
 - [19] [DispatchThis: Binary Ninja の control-flow unflattening ワークフロー](https://github.com/YungBinary/DispatchThis)
-- [20] [eSentire: PaperCut MF の Zero-Day Intrusion、Java Loader、Web Shell、AdaptixC2](https://esentire.com/blog/papercut-mf-zero-day-intrusion-java-loader-web-shell-and-adaptixc2-via-cve-2026-82078-and-cve-2026-81578)
+- [20] [eSentire: PaperCut MF のゼロデイ侵入、Java Loader、Web Shell、AdaptixC2](https://esentire.com/blog/papercut-mf-zero-day-intrusion-java-loader-web-shell-and-adaptixc2-via-cve-2026-82078-and-cve-2026-81578)
 - [21] [IDA-Ghidra-bridge README](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge)
 - [22] [IDA bridge サーバーの実装](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
 - [23] [Ghidra bridge サーバーの実装](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
-- [24] [Oracle - InetSocketAddress(int) はワイルドカードアドレスに bind する](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
-- [25] [gore: Godot Reverse Engineering ツールキット](https://github.com/figurophobia/gore)
+- [24] [Oracle - InetSocketAddress(int) はワイルドカードアドレスにバインドする](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
+- [25] [gore: Godot reverse engineering toolkit](https://github.com/figurophobia/gore)
 - [26] [gore の key-recovery 実装](https://github.com/figurophobia/gore/blob/master/src/keyfind.rs)
 - [27] [gore の encrypted-blob 形式](https://github.com/figurophobia/gore/blob/master/src/crypto.rs)
-- [28] [gore のコマンドおよびリカバリ実装](https://github.com/figurophobia/gore/blob/master/src/main.rs)
+- [28] [gore のコマンドおよびリカバリー実装](https://github.com/figurophobia/gore/blob/master/src/main.rs)
 {{#include ../../banners/hacktricks-training.md}}
