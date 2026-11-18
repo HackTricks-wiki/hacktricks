@@ -1,4 +1,4 @@
-# More tools
+# Third-Party Tools and Resources
 
 {{#include ../banners/hacktricks-training.md}}
 

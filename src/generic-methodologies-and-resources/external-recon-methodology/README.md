@@ -4,6 +4,8 @@
 
 ## Assets discoveries
 
+For a categorized list of additional OSINT and web-discovery projects, see [Third-Party Tools and Resources](../third-party-tools-and-resources.md#osint).
+
 > So you were said that everything belonging to some company is inside the scope, and you want to figure out what this company actually owns.
 
 The goal of this phase is to obtain all the **companies owned by the main company** and then all the **assets** of these companies. To do so, we are going to:<sup>[[1]](#references)</sup>
