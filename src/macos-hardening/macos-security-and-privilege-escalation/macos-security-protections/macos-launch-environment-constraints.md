@@ -168,6 +168,8 @@ While implementing constraints on the XPC service might be beneficial by **narro
 
 Even if it's required that the application has to be **opened by LaunchService** (in the parents constraints). This can be achieved using **`open`** (which can set env variables) or using the **Launch Services API** (where env variables can be indicated).<sup>[[3]](#references)</sup>
 
+For the general MACF mechanism behind policy-specific spawn attributes, see [MACF policy-specific spawn attributes](macos-macf-mandatory-access-control-framework.md#policy-specific-spawn-attributes-as-a-macf-input).
+
 ### CVE-2025-43253 - Overriding the built-in constraints at spawn time
 
 Launch constraints (officially **lightweight code requirements**, *LWCR*) are enforced by the **AMFI MAC policy**. `posix_spawn` lets a caller hand an arbitrary blob to a MAC policy through **`posix_spawnattr_setmacpolicyinfo_np()`**, and AMFI accepted a caller-supplied LWCR dictionary through that path. The bug was that the **attacker-supplied constraints replaced the binary's built-in ones** instead of being checked in addition to them:
@@ -181,6 +183,8 @@ After the fix, **both** the built-in and the supplied constraints are validated,
 > [!TIP]
 > This is the general shape to look for when auditing constraint enforcement: an API that lets untrusted input *supply* a policy tends to be interesting whenever the policy engine treats the supplied value as a replacement rather than an additional requirement.
 
+
+
 ## References
 
 - [1] [Objective by the Sea #OBTS v6.0 Day 2 (Live-Stream)](https://youtu.be/f1HA5QhLQ7Y?t=24146)
@@ -191,5 +195,4 @@ After the fix, **both** the built-in and the supplied constraints are validated,
 - [6] [Description of the Launch Constraints introduced in iOS 16 (LinusHenze gist)](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)
 - [7] [macOS Sonoma (14) Launch Constraints (theevilbit gist)](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)
 - [8] [Beyond the good ol` LaunchAgents - about it in here](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints)
-
 {{#include ../../../banners/hacktricks-training.md}}

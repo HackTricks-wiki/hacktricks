@@ -377,7 +377,7 @@ Which is calling the `MAC_CHECK` macro, whose code can be found in [https://gith
 } while (0)
 ```
 
-Which will go over all the registered mac policies calling their functions and storing the output inside the error variable, which will only be overridable by `mac_error_select` by success codes so if any check fails the complete check will fail and the action won't be allowed.
+This walks the registered policies and combines their results with `mac_error_select()`. A zero return from a later check cannot override an earlier denial; if several policies deny, the function chooses the error by precedence (for example, `EACCES` before `EPERM`).<sup>[[2]](#references)</sup>
 
 > [!TIP]
 > However, remember that not all MACF callouts are used only to deny actions. For example, `mac_priv_grant` calls the macro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), which will grant the requested privilege if any policy answers with a 0:
@@ -464,6 +464,16 @@ For offensive reversing, **`__mac_syscall`** is still one of the best userland c
 
 Recent macOS bugs rarely "break MACF" directly. Instead, they usually abuse a **desynchronisation between a MACF / Sandbox / TCC decision and the privileged action that happens later**.
 
+### Policy-specific spawn attributes as a MACF input
+
+`posix_spawnattr_setmacpolicyinfo_np()` attaches a policy name and opaque bytes to a `posix_spawn()` request. XNU looks up those bytes by each registered policy's `mpc_name` and passes them to that policy's exec-label hook; the launch-constraints hook also reads the matching bytes. This is a separate, attacker-controlled MACF input path from `__mac_syscall`. Audit whether the policy treats those bytes as an *additional restriction* or lets them replace the parent's or executable's existing policy.<sup>[[9]](#references)[[10]](#references)[[11]](#references)</sup>
+
+For a controlled test, start with a restricted parent and spawn the same child **without** and **with** a policy-specific attribute. Compare the child's effective access to a resource the parent cannot use; a successful spawn alone does not prove a boundary was crossed.<sup>[[12]](#references)[[13]](#references)</sup>
+
+When reversing the policy, trace `mpo_cred_label_update_execve` and `mpo_proc_check_launch_constraints`, then check whether the caller may supply the attribute.<sup>[[10]](#references)[[11]](#references)</sup> AMFI historically accepted supplied launch constraints instead of built-in ones; Sandbox could apply a named built-in profile to a child instead of preserving the parent's restrictions.<sup>[[13]](#references)[[12]](#references)</sup> Both behaviors were patched, so do not assume either on current systems.<sup>[[13]](#references)[[12]](#references)</sup>
+
+See the [launch-constraints analysis](macos-launch-environment-constraints.md) for the AMFI case and [Sandbox debugging](macos-sandbox/macos-sandbox-debug-and-bypass/) for testing the child's effective policy.
+
 ### Broker path checks vs real privileged action
 
 A recurring pattern is a privileged daemon performing a **userland pre-check** (for example `sandbox_check_by_audit_token()`) on one version of a path, and later executing the real privileged sink with a **different or non-canonical attacker-controlled path**. Recent `diskarbitrationd` / `storagekitd` research is a good example: **directory traversal** plus **symlink swaps** let the attacker pass the daemon's sandbox validation and then mount over sensitive locations such as `~/Library/Application Support/com.apple.TCC`, turning the bug into a **sandbox escape**, **local privilege escalation** or **TCC bypass** depending on the chosen mount point.<sup>[[6]](#references)</sup>
@@ -484,6 +494,8 @@ Another practical pattern is to avoid attacking MACF hooks directly and instead 
 
 For deeper product-specific reversing, check the dedicated pages on [macOS Sandbox](macos-sandbox/README.md) and [macOS TCC](macos-tcc/README.md).
 
+
+
 ## References
 
 - [1] [XNU — `security/mac_policy.h` (the full MACF policy operations vector)](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_policy.h)
@@ -494,5 +506,9 @@ For deeper product-specific reversing, check the dedicated pages on [macOS Sandb
 - [6] [Uncovering Apple Vulnerabilities: diskarbitrationd and storagekitd Audit Part 2](https://blog.kandji.io/macos-audit-story-part2)
 - [7] [XXR — XNU Cross Reference tool](https://newosxbook.com/xxr/index.php)
 - [8] [New macOS vulnerability, "HM Surf", could lead to unauthorized data access (Microsoft Security Blog)](https://www.microsoft.com/en-us/security/blog/2024/10/17/new-macos-vulnerability-hm-surf-could-lead-to-unauthorized-data-access/)
-
+- [9] [XNU — posix_spawn policy attribute setter](https://github.com/apple-oss-distributions/xnu/blob/main/libsyscall/wrappers/spawn/posix_spawn.c)
+- [10] [XNU — policy-specific exec-label attribute dispatch](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_vfs.c)
+- [11] [XNU — launch-constraints policy dispatch](https://github.com/apple-oss-distributions/xnu/blob/main/security/mac_process.c)
+- [12] [Escaping the Apple Sandbox by Spawning an Executable](https://wts.dev/posts/sandbox-spawnattrs-escape/)
+- [13] [Bypassing Launch Constraints on macOS](https://wts.dev/posts/bypassing-launch-constraints/)
 {{#include ../../../banners/hacktricks-training.md}}
