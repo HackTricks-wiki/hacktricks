@@ -443,7 +443,7 @@
     "src/linux-hardening/software-information/splunk-lpe-and-persistence.md": "a9d766456d653bed3935d53032271f1901ed8fb4",
     "src/linux-hardening/user-information/README.md": "19d45b33148b94470f87b9e6361e6ef9105efe77",
     "src/linux-hardening/user-information/euid-ruid-suid.md": "4059b485cdaab4dbaaa287df8bef23783b6df800",
-    "src/linux-hardening/user-information/interesting-groups-linux-pe/README.md": "e794c1a3b31beab3d66a9c350a10cc331262d61d",
+    "src/linux-hardening/user-information/interesting-groups-linux-pe/README.md": "3a445b0685bba5a45c1e60eaeea92e988ee327fa",
     "src/linux-hardening/user-information/interesting-groups-linux-pe/lxd-privilege-escalation.md": "fcd3c3d5482920a38d0cff01492f8bcfa5a7e45b",
     "src/linux-hardening/user-information/linux-active-directory.md": "b0a680e1e2d121b640578d5151bb8ce3eed3872e",
     "src/linux-hardening/user-information/ssh-forward-agent-exploitation.md": "402b4acd4a180b670144a567f6b82ef334538408",
