@@ -1,87 +1,92 @@
-# macOS Launch/Environment Constraints & Trust Cache
+# macOS ograničenja pokretanja/okruženja i Trust Cache
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Osnovne informacije
 
-Launch constraints u macOS-u uvedeni su radi poboljšanja bezbednosti tako što **regulišu kako, ko i odakle može da pokrene proces**. Uvedeni u macOS Ventura, pružaju okvir koji kategorizuje **svaki sistemski binary u zasebne kategorije constraints**, definisane unutar **trust cache-a**, liste koja sadrži sistemske binary-je i njihove odgovarajuće hash vrednosti. Ovi constraints se primenjuju na svaki izvršni binary u sistemu i obuhvataju skup **pravila** koja određuju zahteve za **pokretanje određenog binary-ja**. Pravila obuhvataju self constraints, koje binary mora da ispuni, parent constraints, koje mora da ispuni njegov parent process, i responsible constraints, kojih se moraju pridržavati drugi relevantni entiteti.<sup>[[1]](#references)[[4]](#references)</sup>
+Ograničenja pokretanja u macOS-u uvedena su radi unapređenja bezbednosti tako što **uređuju kako, ko i odakle može da pokrene proces**. Uvedena u macOS Ventura, pružaju okvir koji **svaki sistemski binarni fajl svrstava u posebne kategorije ograničenja**, definisane unutar **trust cache-a** — liste sistemskih binarnih fajlova i njihovih hash vrednosti. Ova ograničenja važe za svaki izvršni binarni fajl u sistemu i obuhvataju skup **pravila** koja definišu uslove za **pokretanje određenog binarnog fajla**. Pravila obuhvataju ograničenja samog binarnog fajla koja on mora da ispuni, ograničenja roditeljskog procesa koja njegov roditeljski proces mora da ispuni i ograničenja odgovornog procesa kojih se moraju pridržavati drugi relevantni entiteti.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Mehanizam se proširuje i na third-party aplikacije kroz **Environment Constraints**, počevši od macOS Sonoma, što developer-ima omogućava da zaštite svoje aplikacije navođenjem **skupa ključeva i vrednosti za environment constraints.**<sup>[[5]](#references)</sup>
+Od macOS Sonoma mehanizam obuhvata i aplikacije trećih strana kroz **Environment Constraints**, što programerima omogućava da zaštite svoje aplikacije navođenjem **skupa ključeva i vrednosti za ograničenja okruženja.**<sup>[[5]](#references)</sup>
 
-**Launch environment i library constraints** definišete u constraint dictionary-jima koje ili čuvate u **`launchd` property list fajlovima**, ili u **zasebnim property list** fajlovima koje koristite prilikom code signing-a.<sup>[[5]](#references)</sup>
+**Ograničenja okruženja pri pokretanju i ograničenja biblioteka** definišu se u rečnicima ograničenja, koje možete sačuvati u **`launchd` datotekama property lista** ili u **zasebnim datotekama property lista** koje koristite pri potpisivanju koda.<sup>[[5]](#references)</sup>
 
-Postoje 4 tipa constraints:
+Postoje 4 vrste ograničenja:
 
-- **Self Constraints**: Constraints koji se primenjuju na **pokrenuti** binary.
-- **Parent Process**: Constraints koji se primenjuju na **parent process** procesa (na primer **`launchd`** koji pokreće XP service)
-- **Responsible Constraints**: Constraints koji se primenjuju na **process koji poziva service** u XPC komunikaciji
-- **Library load constraints**: Library load constraints koristite za selektivno opisivanje koda koji može biti učitan
+- **Self Constraints**: Ograničenja koja se primenjuju na **pokrenuti** binarni fajl.
+- **Parent Process**: Ograničenja koja se primenjuju na **roditeljski proces** (na primer, **`launchd`** koji pokreće XPC servis)
+- **Responsible Constraints**: Ograničenja koja se primenjuju na **proces koji poziva servis** u XPC komunikaciji
+- **Library load constraints**: Ograničenja učitavanja biblioteka koriste se za selektivno opisivanje koda koji može da se učita
 
-Kada proces pokuša da pokrene drugi proces — pozivanjem `execve(_:_:_:)` ili `posix_spawn(_:_:_:_:_:_:)` — operativni sistem proverava da **izvršni** fajl **ispunjava sopstveni self constraint**. Takođe proverava da izvršni fajl **parent process-a** **ispunjava parent constraint** izvršnog fajla i da izvršni fajl **responsible process-a** **ispunjava responsible process constraint** izvršnog fajla. Ako bilo koji od ovih launch constraints nije ispunjen, operativni sistem ne pokreće program.
+Kada proces pokuša da pokrene drugi proces — pozivom `execve(_:_:_:)` ili `posix_spawn(_:_:_:_:_:_:)` — operativni sistem proverava da li **izvršna** datoteka **ispunjava** svoje **sopstveno Self Constraint ograničenje**. Takođe proverava da li izvršna datoteka **roditeljskog procesa** **ispunjava** **Parent Constraint ograničenje** izvršne datoteke i da li izvršna datoteka **odgovornog procesa** **ispunjava Responsible Process Constraint ograničenje izvršne datoteke**. Ako bilo koje od ovih ograničenja pokretanja nije ispunjeno, operativni sistem ne pokreće program.
 
-Ako prilikom učitavanja library-ja bilo koji deo **library constraint-a nije tačan**, vaš proces **ne učitava** library.
+Ako pri učitavanju biblioteke bilo koji deo **ograničenja biblioteke nije ispunjen**, vaš proces **ne učitava** biblioteku.
 
 ## LC kategorije
 
 LC se sastoji od **činjenica** i **logičkih operacija** (and, or..) koje kombinuju činjenice.
 
-[**Činjenice koje LC može da koristi su dokumentovane**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Na primer:
+[**Dokumentovane su činjenice koje LC može da koristi**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Na primer:
 
-- is-init-proc: Boolean vrednost koja pokazuje da li executable mora biti initialization process operativnog sistema (`launchd`).
-- is-sip-protected: Boolean vrednost koja pokazuje da li executable mora biti fajl zaštićen funkcijom System Integrity Protection (SIP).
-- `on-authorized-authapfs-volume:` Boolean vrednost koja pokazuje da li je operativni sistem učitao executable sa autorizovanog, autentifikovanog APFS volume-a.
-- `on-authorized-authapfs-volume`: Boolean vrednost koja pokazuje da li je operativni sistem učitao executable sa autorizovanog, autentifikovanog APFS volume-a.
-- Cryptexes volume
-- `on-system-volume:` Boolean vrednost koja pokazuje da li je operativni sistem učitao executable sa trenutno pokrenutog system volume-a.
-- Unutar /System...
+- is-init-proc: Bulova vrednost koja označava da li izvršni fajl mora biti proces za inicijalizaciju operativnog sistema (`launchd`).
+- is-sip-protected: Bulova vrednost koja označava da li izvršni fajl mora biti datoteka zaštićena funkcijom System Integrity Protection (SIP).
+- `on-authorized-authapfs-volume:` Bulova vrednost koja označava da li je operativni sistem učitao izvršni fajl sa autorizovanog, autentifikovanog APFS volumena.
+- `on-authorized-authapfs-volume`: Bulova vrednost koja označava da li je operativni sistem učitao izvršni fajl sa autorizovanog, autentifikovanog APFS volumena.
+  - Cryptexes volume
+- `on-system-volume:`Bulova vrednost koja označava da li je operativni sistem učitao izvršni fajl sa trenutno pokrenutog sistemskog volumena.
+  - Unutar /System...
 - ...
 
-Kada se Apple binary potpiše, **dodeljuje mu LC kategoriju** unutar **trust cache-a**.
+Kada se Apple binarni fajl potpiše, **dodeljuje mu LC kategoriju** unutar **trust cache-a**.
 
-- **iOS 16 LC kategorije** su [**reversed i dokumentovane ovde**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).<sup>[[6]](#references)</sup>
-- Aktuelne **LC kategorije (macOS 14** - Somona) su reversed, a njihovi [**opisi se mogu pronaći ovde**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).<sup>[[7]](#references)</sup>
+- **LC kategorije za iOS 16** su [**obrnuto analizirane i dokumentovane ovde**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).<sup>[[6]](#references)</sup>
+- Aktuelne **LC kategorije (macOS 14** - Somona) su obrnuto analizirane, a njihove [**opise možete pronaći ovde**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).<sup>[[7]](#references)</sup>
 
 Na primer, kategorija 1 je:<sup>[[7]](#references)</sup>
+
 ```
 Category 1:
-Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
-Parent Constraint: is-init-proc
+        Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
+        Parent Constraint: is-init-proc
 ```
-- `(on-authorized-authapfs-volume || on-system-volume)`: Mora biti na System ili Cryptexes volume.
-- `launch-type == 1`: Mora biti system service (plist u LaunchDaemons).
+
+- `(on-authorized-authapfs-volume || on-system-volume)`: Mora da bude na System ili Cryptexes volume-u.
+- `launch-type == 1`: Mora da bude sistemska usluga (plist u LaunchDaemons).
 - `validation-category == 1`: Izvršna datoteka operativnog sistema.
 - `is-init-proc`: Launchd
 
-### Reversing LC Categories
+### Reverzni inženjering LC kategorija
 
-Više informacija o tome možete pronaći [**ovde**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), ali suštinski, one su definisane u **AMFI (AppleMobileFileIntegrity)**, tako da je potrebno preuzeti Kernel Development Kit da biste dobili **KEXT**. Simboli koji počinju sa **`kConstraintCategory`** su **interesantni**. Njihovim izdvajanjem dobićete DER (ASN.1) kodirani tok koji ćete morati da dekodirate pomoću [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) ili python-asn1 biblioteke i njene `dump.py` skripte, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master), što će vam dati razumljiviji string.<sup>[[3]](#references)[[8]](#references)</sup>
+Više informacija možete pronaći [**ovde**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), ali ukratko, one su definisane u **AMFI (AppleMobileFileIntegrity)**, pa morate da preuzmete Kernel Development Kit da biste dobili **KEXT**. Simboli koji počinju sa **`kConstraintCategory`** su **zanimljivi**. Kada ih izdvojite, dobićete DER (ASN.1) kodiran tok koji ćete morati da dekodirate pomoću [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) ili python-asn1 biblioteke i njene skripte `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master), koja će vam dati razumljiviji string.<sup>[[3]](#references)[[8]](#references)</sup>
 
-## Environment Constraints
+## Ograničenja okruženja
 
-Ovo su Launch Constraints postavljeni i konfigurisani u **third party applications**. Developer može da izabere **facts** i **logical operands** koje će koristiti u svojoj aplikaciji kako bi ograničio pristup samoj aplikaciji.
+Ovo su Launch Constraints podešena u **aplikacijama trećih strana**. Programer može da izabere **činjenice** i **logičke operande koje će koristiti** u svojoj aplikaciji da bi ograničio pristup njoj.
 
-Moguće je izlistati Environment Constraints aplikacije pomoću:
+Moguće je izlistati Environment Constraints neke aplikacije pomoću:
+
 ```bash
 codesign -d -vvvv app.app
 ```
-## Trust Caches
 
-U **macOS-u** postoji nekoliko trust cache-ova:
+## Keševi poverenja
+
+U **macOS** postoji nekoliko keševa poverenja:
 
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/BaseSystemTrustCache.img4`**
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**
 - **`/System/Library/Security/OSLaunchPolicyData`**
 
-A u iOS-u se, po svemu sudeći, nalazi na lokaciji **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
+A u iOS-u se čini da se nalazi u **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
 
 > [!WARNING]
-> Na macOS-u koji radi na Apple Silicon uređajima, ako se Apple signed binary ne nalazi u trust cache-u, AMFI će odbiti da ga učita.
+> Na macOS-u koji radi na uređajima sa Apple Silicon čipovima, ako se binarna datoteka koju je potpisao Apple ne nalazi u kešu poverenja, AMFI će odbiti da je učita.
 
-### Enumerisanje Trust Caches
+### Enumerisanje keševa poverenja
 
-Prethodno navedene trust cache datoteke su u formatu **IMG4** i **IM4P**, pri čemu je IM4P payload sekcija IMG4 formata.
+Prethodne datoteke keša poverenja su u formatu **IMG4** i **IM4P**, pri čemu je IM4P odeljak sa sadržajem formata IMG4.
 
-Možete koristiti [**pyimg4**](https://github.com/m1stadev/PyIMG4) za ekstrakciju payloada iz baza:
+Možete da koristite [**pyimg4**](https://github.com/m1stadev/PyIMG4) da biste izdvojili sadržaj baza podataka:
+
 ```bash
 # Installation
 python3 -m pip install pyimg4
@@ -97,9 +102,11 @@ pyimg4 im4p extract -i /tmp/StaticTrustCache.im4p -o /tmp/StaticTrustCache.data
 
 pyimg4 im4p extract -i /System/Library/Security/OSLaunchPolicyData -o /tmp/OSLaunchPolicyData.data
 ```
-(Druga opcija je korišćenje alata [**img4tool**](https://github.com/tihmstar/img4tool), koji će raditi čak i na M1 uređajima iako je izdanje staro, kao i na x86_64 ako ga instalirate na odgovarajuće lokacije).
 
-Sada možete koristiti alat [**trustcache**](https://github.com/CRKatri/trustcache) da dobijete informacije u čitljivom formatu:
+(Druga opcija može biti korišćenje alata [**img4tool**](https://github.com/tihmstar/img4tool), koji će raditi čak i na M1, iako je izdanje staro i namenjeno za x86_64, ako ga instalirate na odgovarajuće lokacije).
+
+Sada možete da koristite alat [**trustcache**](https://github.com/CRKatri/trustcache) da biste dobili informacije u čitljivom formatu:
+
 ```bash
 # Install
 wget https://github.com/CRKatri/trustcache/releases/download/v2.0/trustcache_macos_arm64
@@ -123,63 +130,69 @@ entry count = 969
 01e6934cb8833314ea29640c3f633d740fc187f2 [none] [2] [2]
 020bf8c388deaef2740d98223f3d2238b08bab56 [none] [2] [3]
 ```
-Trust cache prati sledeću strukturu, tako da je **LC category 4. kolona**
+
+Trust cache prati sledeću strukturu, tako da je **LC kategorija 4. kolona**
+
 ```c
 struct trust_cache_entry2 {
-uint8_t cdhash[CS_CDHASH_LEN];
-uint8_t hash_type;
-uint8_t flags;
-uint8_t constraintCategory;
-uint8_t reserved0;
+	uint8_t cdhash[CS_CDHASH_LEN];
+	uint8_t hash_type;
+	uint8_t flags;
+	uint8_t constraintCategory;
+	uint8_t reserved0;
 } __attribute__((__packed__));
 ```
-Zatim biste mogli da koristite skriptu kao što je [**ova**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) za izdvajanje podataka.
 
-Iz tih podataka možete proveriti aplikacije sa **vrednošću launch constraints od `0`**, odnosno one koje nisu ograničene (pogledajte [**ovde**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) šta svaka vrednost predstavlja).<sup>[[6]](#references)</sup>
+Zatim biste mogli da upotrebite skriptu kao što je [**ova**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) da izdvojite podatke.
 
-## Mitigacije napada
+Na osnovu tih podataka možete da proverite aplikacije koje imaju **vrednost launch constraints `0`** — one nisu ograničene ([**ovde**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) možete proveriti značenje svake vrednosti).<sup>[[6]](#references)</sup>
 
-Launch Constraints bi ublažio nekoliko starih napada tako što bi **obezbedio da proces ne bude izvršen u neočekivanim uslovima:** na primer, sa neočekivanih lokacija ili pozivanjem od strane neočekivanog nadređenog procesa (ako bi samo launchd trebalo da ga pokreće).
+## Ublažavanje napada
 
-Pored toga, Launch Constraints takođe **ublažava downgrade napade.**
+Launch Constraints bi ublažio nekoliko starih napada tako što bi **osigurao da se proces ne izvršava u neočekivanim uslovima**: na primer, sa neočekivanih lokacija ili kada ga pokrene neočekivani nadređeni proces (ako bi trebalo da ga pokreće samo launchd).
 
-Međutim, oni **ne ublažavaju uobičajene XPC** zloupotrebe, **Electron** code injections ili **dylib injections** bez library validation-a (osim ako su poznati team IDs koji mogu da učitavaju biblioteke).<sup>[[3]](#references)</sup>
+Pored toga, Launch Constraints **ublažava i downgrade napade**.
 
-### XPC Daemon Protection
+Međutim, **ne ublažava uobičajene zloupotrebe XPC-a**, ubacivanje koda u **Electron** niti **dylib injections** bez library validation (osim ako nisu poznati team ID-jevi kojima je dozvoljeno učitavanje biblioteka).<sup>[[3]](#references)</sup>
 
-U izdanju Sonoma, značajna stavka je **konfiguracija odgovornosti** XPC servisa daemon-a. XPC servis je odgovoran za sebe, za razliku od povezivanja klijenta koji je odgovoran. Ovo je dokumentovano u feedback izveštaju FB13206884. Ovakva postavka može delovati neispravno, jer omogućava određene interakcije sa XPC servisom:
+### Zaštita XPC demona
 
-- **Pokretanje XPC servisa**: Ako se pretpostavi da je ovo bug, ova postavka ne dozvoljava pokretanje XPC servisa putem attacker koda.
-- **Povezivanje sa aktivnim servisom**: Ako XPC servis već radi (moguće je da ga je aktivirala njegova originalna aplikacija), ne postoje prepreke za povezivanje sa njim.
+U izdanju Sonoma, značajna stavka je **konfiguracija odgovornosti** XPC servisa demona. Za XPC servis odgovoran je sam servis, a ne klijent koji se povezuje. Ovo je dokumentovano u izveštaju o povratnim informacijama FB13206884. Ovo podešavanje može delovati manjkavo jer omogućava određene interakcije sa XPC servisom:
 
-Iako bi implementiranje ograničenja na XPC servisu moglo biti korisno tako što bi **sužavalo vremenski prozor za potencijalne napade**, ono ne rešava primarni problem. Bezbednost XPC servisa u osnovi zahteva **efikasnu validaciju klijenta koji se povezuje**. To ostaje jedini način za jačanje bezbednosti servisa. Takođe, vredi napomenuti da je pomenuta konfiguracija odgovornosti trenutno operativna, što možda nije u skladu sa predviđenim dizajnom.<sup>[[3]](#references)</sup>
+- **Pokretanje XPC servisa**: Ako se ovo smatra greškom, podešavanje ne dozvoljava pokretanje XPC servisa pomoću koda napadača.
+- **Povezivanje sa aktivnim servisom**: Ako je XPC servis već pokrenut (možda ga je aktivirala njegova originalna aplikacija), nema prepreka za povezivanje sa njim.
 
-### Electron Protection
+Uvođenje ograničenja za XPC servis moglo bi biti korisno jer bi **sužilo vremenski prozor za potencijalne napade**, ali ne rešava osnovni problem. Da bi XPC servis bio bezbedan, neophodno je **efikasno proveravati klijenta koji se povezuje**. To je jedini način da se ojača bezbednost servisa. Takođe, vredi napomenuti da je pomenuta konfiguracija odgovornosti trenutno aktivna, što možda nije u skladu sa predviđenim dizajnom.<sup>[[3]](#references)</sup>
 
-Čak i ako je zahtevano da aplikaciju mora da **otvori LaunchService** (u parents constraints). To se može postići korišćenjem **`open`** (koji može da postavi env promenljive) ili korišćenjem **Launch Services API-ja** (gde se env promenljive mogu navesti).<sup>[[3]](#references)</sup>
+### Zaštita Electron-a
 
-### CVE-2025-43253 - Overriding the built-in constraints at spawn time
+Čak i ako je neophodno da aplikaciju **otvori LaunchService** (u ograničenjima nadređenog procesa), to se može postići pomoću **`open`** (koji može da postavi env varijable) ili pomoću **Launch Services API-ja** (u kom se mogu navesti env varijable).<sup>[[3]](#references)</sup>
 
-Launch constraints (zvanično **lightweight code requirements**, *LWCR*) primenjuje **AMFI MAC policy**. `posix_spawn` omogućava pozivaocu da prosledi proizvoljan blob MAC policy-ju putem **`posix_spawnattr_setmacpolicyinfo_np()`**, a AMFI je tim putem prihvatao LWCR dictionary koji je dostavio pozivalac. Greška je bila u tome što su **constraints koje je dostavio attacker zamenjivale ugrađene constraints binarnog fajla**, umesto da se proveravaju zajedno sa njima:
+Opšti opis mehanizma MACF koji stoji iza atributa pokretanja specifičnih za pravila potražite u odeljku [Atributi pokretanja specifični za pravila u MACF-u](macos-macf-mandatory-access-control-framework.md#policy-specific-spawn-attributes-as-a-macf-input).
 
-- Napraviti minimalni (čak i prazan) launch-constraints dictionary.
-- Postaviti **constraint category na `127`**, vrednost koju AMFI dozvoljava u spawn attributes, ali je **ne primenjuje** — umesto blokiranja izvršavanja, samo beleži `Launch Constraint Violation (not enforcing)`.
-- Proslediti ga putem spawn attributes; proces se zatim pokreće u kontekstu koji bi njegove stvarne self/parent constraints zabranile.
+### CVE-2025-43253 - Zaobilaženje ugrađenih ograničenja tokom pokretanja procesa
 
-Nakon ispravke, proveravaju se **i** ugrađene **i** prosleđene constraints, tako da prosleđeni dictionary više ne može da oslabi ugrađene constraints.<sup>[[2]](#references)</sup>
+Launch constraints (zvanično **lightweight code requirements**, *LWCR*) sprovodi **AMFI MAC policy**. `posix_spawn` omogućava pozivaocu da prosledi proizvoljan blob MAC policy-ju pomoću **`posix_spawnattr_setmacpolicyinfo_np()`**, a AMFI je preko tog mehanizma prihvatao LWCR dictionary koji je dostavio pozivalac. Greška je bila u tome što su **ograničenja koja je dostavio napadač zamenjivala ugrađena ograničenja binarne datoteke**, umesto da se proveravaju uz njih:
+
+- Napravite minimalan (čak i prazan) launch-constraints dictionary.
+- Postavite **kategoriju ograničenja na `127`**, vrednost koju AMFI dozvoljava u spawn atributima, ali je **ne sprovodi** — umesto da blokira izvršavanje, samo beleži `Launch Constraint Violation (not enforcing)`.
+- Prosledite je putem spawn atributa; proces će se pokrenuti u kontekstu koji bi njegova stvarna ograničenja za sebe/nadređeni proces zabranila.
+
+Nakon ispravke, proveravaju se **i ugrađena i dostavljena ograničenja**, pa dostavljeni dictionary više ne može da oslabi ugrađena ograničenja.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Ovo je opšti obrazac koji treba tražiti prilikom auditovanja primene constraints: API koji omogućava da nepouzdan unos *dostavi* policy obično je zanimljiv kada policy engine tretira dostavljenu vrednost kao zamenu, a ne kao dodatni zahtev.
+> Ovo je opšti obrazac na koji treba obratiti pažnju pri proveri sprovođenja ograničenja: API koji omogućava da nepouzdan ulaz *dostavi* pravilo često je zanimljiv kada mehanizam za sprovođenje pravila tretira dostavljenu vrednost kao zamenu, a ne kao dodatni uslov.
 
-## Reference
 
-- [1] [Objective by the Sea #OBTS v6.0 Day 2 (Live-Stream)](https://youtu.be/f1HA5QhLQ7Y?t=24146)
-- [2] [CVE-2025-43253: Bypassing Launch Constraints on macOS (wts.dev)](https://wts.dev/posts/bypassing-launch-constraints/)
-- [3] [Dubinska analiza Launch and Environment Constraints - theevilbit](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
-- [4] [Zašto se system app ili command tool ne pokreće? Launch constraints i trust caches - The Eclectic Light Company](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
-- [5] [Zaštitite Mac aplikaciju pomoću environment constraints - WWDC23](https://developer.apple.com/videos/play/wwdc2023/10266/)
+
+## References
+
+- [1] [Objective by the Sea #OBTS v6.0, 2. dan (prenos uživo)](https://youtu.be/f1HA5QhLQ7Y?t=24146)
+- [2] [CVE-2025-43253: Zaobilaženje Launch Constraints na macOS-u (wts.dev)](https://wts.dev/posts/bypassing-launch-constraints/)
+- [3] [Detaljan pregled Launch and Environment Constraints - theevilbit](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
+- [4] [Zašto se sistemska aplikacija ili komandni alat ne pokreće? Launch constraints i trust caches - The Eclectic Light Company](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
+- [5] [Zaštitite svoju Mac aplikaciju pomoću environment constraints - WWDC23](https://developer.apple.com/videos/play/wwdc2023/10266/)
 - [6] [Opis Launch Constraints uvedenih u iOS 16 (LinusHenze gist)](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)
-- [7] [macOS Sonoma (14) Launch Constraints (theevilbit gist)](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)
-- [8] [Beyond the good ol` LaunchAgents - about it in here](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints)
-
+- [7] [Launch Constraints u macOS Sonoma (14) (theevilbit gist)](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)
+- [8] [Više od dobrih starih LaunchAgents - više o tome ovde](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints)
 {{#include ../../../banners/hacktricks-training.md}}
