@@ -579,6 +579,7 @@
   - [Apache Tapestry](network-services-pentesting/pentesting-web/apache-tapestry.md)
   - [Apache](network-services-pentesting/pentesting-web/apache.md)
   - [Artifactory Hacking guide](network-services-pentesting/pentesting-web/artifactory-hacking-guide.md)
+  - [BeyondTrust Remote Support MRS Origin Spoofing](network-services-pentesting/pentesting-web/beyondtrust-remote-support-mrs-origin-spoofing.md)
   - [Bolt CMS](network-services-pentesting/pentesting-web/bolt-cms.md)
   - [CGI](network-services-pentesting/pentesting-web/cgi.md)
   - [Citrix NetScaler ADC and Gateway](network-services-pentesting/pentesting-web/citrix-netscaler.md)
