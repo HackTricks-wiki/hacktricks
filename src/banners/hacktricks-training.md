@@ -1,16 +1,15 @@
 > [!TIP]
-> Učite i vežbajte AWS Hacking:<img src="../../../../../images/arte-badge-v1.webp" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://hacktricks-training.com/courses/arte)<img src="../../../../../images/arte-badge-v1.webp" alt="" style="width:auto;height:24px;vertical-align:middle;">\
-> Učite i vežbajte GCP Hacking: <img src="../../../../../images/grte-badge-v1.webp" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training GCP Red Team Expert (GRTE)**](https://hacktricks-training.com/courses/grte)<img src="../../../../../images/grte-badge-v1.webp" alt="" style="width:auto;height:24px;vertical-align:middle;">\
-> Učite i vežbajte Az Hacking: <img src="../../../../../images/azrte-badge-v1.webp" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training Azure Red Team Expert (AzRTE)**](https://hacktricks-training.com/courses/azrte)<img src="../../../../../images/azrte-badge-v1.webp" alt="" style="width:auto;height:24px;vertical-align:middle;">\
-> Pregledajte [**celokupan katalog HackTricks Training kurseva**](https://hacktricks-training.com/courses/).
+> **Učite i vežbajte hacking uz HackTricks Training**\
+> <span style="white-space:nowrap">[<img src="../../../../../images/arte-badge-v1.webp" alt="" width="16" height="24" style="width:16px;height:24px;vertical-align:middle;"> **AWS**](https://hacktricks-training.com/courses/arte "AWS Red Team Expert (ARTE)")</span> · <span style="white-space:nowrap">[<img src="../../../../../images/grte-badge-v1.webp" alt="" width="16" height="24" style="width:16px;height:24px;vertical-align:middle;"> **GCP**](https://hacktricks-training.com/courses/grte "GCP Red Team Expert (GRTE)")</span> · <span style="white-space:nowrap">[<img src="../../../../../images/azrte-badge-v1.webp" alt="" width="16" height="24" style="width:16px;height:24px;vertical-align:middle;"> **Azure**](https://hacktricks-training.com/courses/azrte "Azure Red Team Expert (AzRTE)")</span> · <span style="white-space:nowrap">[<img src="../../../../../images/krte-badge-v1.webp" alt="" width="16" height="24" style="width:16px;height:24px;vertical-align:middle;"> **Kubernetes**](https://hacktricks-training.com/courses/krte "Kubernetes Red Team Expert (KRTE)")</span> · <span style="white-space:nowrap">[<img src="../../../../../images/lhe-badge-v1.webp" alt="" width="16" height="24" style="width:16px;height:24px;vertical-align:middle;"> **Linux privesc**](https://hacktricks-training.com/courses/lhe "Linux Hardening Expert (LHE) — eskalacija privilegija na Linuxu")</span> · <span style="white-space:nowrap">[<img src="../../../../../images/lee-badge-v1.webp" alt="" width="16" height="24" style="width:16px;height:24px;vertical-align:middle;"> **Linux eksploatacija**](https://hacktricks-training.com/courses/lee "Linux Exploitation Expert (LEE)")</span>\
+> [**Istražite sve kurseve →**](https://hacktricks-training.com/courses/).
 >
 > <details>
 >
 > <summary>Podržite HackTricks</summary>
 >
 > - Pogledajte [**planove pretplate**](https://github.com/sponsors/carlospolop)!
-> - **Pridružite se** 💬 [**Discord grupi**](https://discord.gg/hRep4RUj7f), [**Telegram grupi**](https://t.me/peass), **zapratite** [**@hacktricks_live**](https://twitter.com/hacktricks_live) na **X/Twitteru** ili pogledajte [**LinkedIn stranicu**](https://www.linkedin.com/company/hacktricks/) i [**YouTube kanal**](https://www.youtube.com/@hacktricks_LIVE).
-> - **Podelite hacking trikove slanjem PR-ova u** [**GitHub repozitorijume HackTricks**](https://github.com/carlospolop/hacktricks) i [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+> - **Pridružite se** 💬 [**Discord grupi**](https://discord.gg/hRep4RUj7f), [**Telegram grupi**](https://t.me/peass), **zapratite** [**@hacktricks_live**](https://twitter.com/hacktricks_live) na **X/Twitter-u** ili pogledajte [**LinkedIn stranicu**](https://www.linkedin.com/company/hacktricks/) i [**YouTube kanal**](https://www.youtube.com/@hacktricks_LIVE).
+> - **Podelite hacking trikove slanjem PR-ova u GitHub repozitorijume** [**HackTricks**](https://github.com/carlospolop/hacktricks) i [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 >
 > </details>
 
