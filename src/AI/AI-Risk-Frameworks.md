@@ -86,9 +86,7 @@ TTPs:
 - Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
 - Abuse direct base-model endpoints to bypass enterprise guardrails and rate limits.<sup>[[4]](#references)</sup>
 
-**In-host API-key reuse:** An implant with code execution can invoke a paid model API from the compromised host without exporting the key to an external proxy or relying on a local AI CLI. In the observed `ai_generate` handler, a C2 task supplies `prompt`, optional `api_key`, and optional `model`. An empty prompt aborts before any HTTP request; an omitted key is read from the implant process's `OPENAI_API_KEY` environment variable, so this path requires a valid key visible to that process. The observed default model was `gpt-4`, but the operator could override it.<sup>[[14]](#references)</sup>
-
-The handler sends a `POST` to `/v1/chat/completions` from the victim host with a system message followed by the operator's user prompt, plus `model`, `temperature`, and `max_tokens`. It extracts `choices[0].message.content` and `usage` from a successful response, then returns them over its C2 channel. When the environment-key fallback succeeds, the operator can analyze collected data during the same session using the victim's credential and network egress. This is distinct from [poisoning a local AI CLI or MCP configuration](../generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md), which needs the developer tool to run.<sup>[[14]](#references)</sup>
+**In-host API-key reuse:** After host compromise, an implant can send model API requests directly from the victim host and relay the replies over C2, without exporting a cloud API key or launching a local AI CLI. In the observed handler, a C2-supplied key takes precedence; only when it is absent does the implant read `OPENAI_API_KEY` from its own process environment. Using the victim's account therefore requires a valid key visible to that process and access to the model API. The operator's prompt goes to the Chat Completions API, while the model output and token usage return over C2. This can consume the victim's paid model access without running the developer's AI tools, unlike [local AI CLI or MCP configuration abuse](../generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md).<sup>[[14]](#references)</sup>
 
 Mitigations:
 - Bind tokens to device fingerprint, IP ranges, and client attestation; enforce short expirations and refresh with MFA.
@@ -247,6 +245,8 @@ Treat this as a proactive domain-monitoring problem, not just a prompt-injection
 
 This fits several AI risk buckets at once: **AI supply-chain attack**, **insecure model output**, and **rogue actions** when agents autonomously consume the hallucinated URL.
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/)
@@ -263,5 +263,3 @@ This fits several AI risk buckets at once: **AI supply-chain attack**, **insecur
 - [12] [Unit 42 – Phantom Squatting: AI-Hallucinated Domains as a Software Supply Chain Vector](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
 - [13] [Socket – Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 - [14] [Cisco Talos – NIK C2: The new AI-enabled command-and-control framework](https://blog.talosintelligence.com/nik-c2-new-ai-enabled-framework/)
-
-{{#include ../banners/hacktricks-training.md}}
