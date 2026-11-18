@@ -17,6 +17,9 @@ for image in \
   arte-badge-v1.webp \
   grte-badge-v1.webp \
   azrte-badge-v1.webp \
+  krte-badge-v1.webp \
+  lhe-badge-v1.webp \
+  lee-badge-v1.webp \
   lee-sponsor-v1.webp \
   azrte-sponsor-v1.webp \
   grte-sponsor-v1.webp \

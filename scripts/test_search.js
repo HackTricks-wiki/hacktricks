@@ -214,18 +214,22 @@ test('typos in full names also find acronym-only headings', () => {
 });
 
 test('introductory previews use real content on the same page when the root is only a banner', () => {
-  const banner = 'Tip Learn & practice AWS Hacking: HackTricks Training AWS Red Team Expert. Share hacking tricks by submitting PRs to the HackTricks and HackTricks Cloud github repos.';
-  const search = install(worker(), [legacy([
-    {title:'SQL Injection', breadcrumbs:'SQL Injection » SQL Injection', body:banner, url:'sql.html#intro'},
-    {title:'References', body:'References '.repeat(10), url:'sql.html#refs'},
-    {title:'Basic Information', body:banner + ' SQL injection changes a database query when data is treated as SQL syntax.', url:'sql.html#basic'},
-    {title:'Unrelated', body:'Another page must never supply the preview.', url:'other.html#intro'}
-  ])]);
-  const result = search('sql injection')[0];
-  assert.equal(result.title, 'SQL Injection');
-  assert(result.url.endsWith('sql.html#intro'));
-  assert(result.body.startsWith('SQL injection changes'));
-  assert(!result.body.includes('Training'));
+  for(const banner of [
+    'Tip Learn & practice AWS Hacking: HackTricks Training AWS Red Team Expert. Share hacking tricks by submitting PRs to the HackTricks and HackTricks Cloud github repos.',
+    'Tip Learn & practice hacking with HackTricks Training AWS (ARTE) GCP (GRTE) Azure (AzRTE) Kubernetes (KRTE) Linux privesc (LHE) Linux exploitation (LEE) Explore all courses. Support HackTricks Share hacking tricks by submitting PRs to the HackTricks and HackTricks Cloud github repos.'
+  ]){
+    const search = install(worker(), [legacy([
+      {title:'SQL Injection', breadcrumbs:'SQL Injection » SQL Injection', body:banner, url:'sql.html#intro'},
+      {title:'References', body:'References '.repeat(10), url:'sql.html#refs'},
+      {title:'Basic Information', body:banner + ' SQL injection changes a database query when data is treated as SQL syntax.', url:'sql.html#basic'},
+      {title:'Unrelated', body:'Another page must never supply the preview.', url:'other.html#intro'}
+    ])]);
+    const result = search('sql injection')[0];
+    assert.equal(result.title, 'SQL Injection');
+    assert(result.url.endsWith('sql.html#intro'));
+    assert(result.body.startsWith('SQL injection changes'));
+    assert(!result.body.includes('Training'));
+  }
 });
 
 test('exact titles beat fuzzy and prefix titles across books', () => {
