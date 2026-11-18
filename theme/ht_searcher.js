@@ -543,7 +543,7 @@
     }
 
     function cleanBody(body){
-      return String(body || '').replace(/(?:Tip )?Learn & practice AWS Hacking: HackTricks Training[\s\S]*?Share hacking tricks by submitting PRs to the HackTricks and HackTricks Cloud github repos\.\s*/g, '').trim();
+      return String(body || '').replace(/(?:Tip )?Learn & practice (?:AWS Hacking: HackTricks Training|hacking with HackTricks Training)[\s\S]*?Share hacking tricks by submitting PRs to the HackTricks and HackTricks Cloud github repos\.\s*/g, '').trim();
     }
 
     function previewBody(source, ref){
