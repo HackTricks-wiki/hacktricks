@@ -1002,7 +1002,7 @@
     "src/pentesting-web/xss-cross-site-scripting/README.md": "e6538b645434353f1237d78c98dfdfed8b70cdd7",
     "src/pentesting-web/xss-cross-site-scripting/abusing-service-workers.md": "43ac1216d8b69fab16c47a7c9044f484e793a10a",
     "src/pentesting-web/xss-cross-site-scripting/chrome-cache-to-xss.md": "98fc7cfc3813c39ee37e2f5f9c0b6626a92a7f82",
-    "src/pentesting-web/xss-cross-site-scripting/debugging-client-side-js.md": "3d932c662ceb6b5c629dd8430ab5b856ee7e5d93",
+    "src/pentesting-web/xss-cross-site-scripting/debugging-client-side-js.md": "8d1ee7d051c43817f18da6a37e5d6b942702b8d2",
     "src/pentesting-web/xss-cross-site-scripting/dom-clobbering.md": "4669b26533ead121d3d823f83d01b2e31f05bcab",
     "src/pentesting-web/xss-cross-site-scripting/dom-invader.md": "9d24ceab4442d380787ce8763023a3b0b1a0145f",
     "src/pentesting-web/xss-cross-site-scripting/dom-xss.md": "d71bd6407132a077ea863730b33167ca96a4f6d4",
