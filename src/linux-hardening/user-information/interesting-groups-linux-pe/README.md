@@ -227,6 +227,24 @@ Set the image Width and Height to match the framebuffer geometry; try the availa
 
 ![Disk Group - Video Group: Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen)](<../../../images/image (317).png>)
 
+## Input Group
+
+On systems that grant the `input` group read access to keyboard event devices, a member can observe raw keystrokes from that device. Check the actual mode and ACL first: an active local seat may receive access through a `uaccess` ACL instead, and the group name alone does not guarantee access.<sup>[[23]](#references)[[24]](#references)</sup>
+
+Find the keyboard's `eventX` handler, confirm that the current account can read its node, then monitor a short authorized test with `evtest`. Do **not** use `--grab`: it takes exclusive access and can stop other applications receiving input.<sup>[[25]](#references)[[26]](#references)</sup>
+
+```bash
+id -nG
+cat /proc/bus/input/devices            # Match the keyboard name with its eventX handler
+ls -l /dev/input/by-id/*event-kbd      # If persistent keyboard links exist
+getfacl /dev/input/eventX             # Check effective group/seat ACL access
+evtest /dev/input/eventX              # Stop with Ctrl-C after the test
+```
+
+`EV_KEY` reports key codes rather than finished text: value `1` is press, `0` is release, and `2` is repeat. This can disclose keys typed at another session using that physical keyboard, including credentials, but is not itself root access. A desktop compositor does not undo access to the raw device node.<sup>[[25]](#references)</sup>
+
+For the broader identity and session checks, see [users and sessions](../user-and-session-triage.md).
+
 ## Root Group
 
 Membership in the **root** group does not provide root's UID, but group-writable files owned by `root` can still be interesting when privileged services or libraries consume them. Verify the file's actual permissions and how it is used before treating it as a privilege-escalation path.
@@ -298,6 +316,8 @@ Treat membership here as a high-value data exposure finding and pivot through pa
 
 On OpenBSD, when S/Key is configured, `/etc/skey` is owned by `root:auth` and access to its records requires group `auth`; YubiKey records are stored in `/var/db/yubikey`.<sup>[[16]](#references)[[17]](#references)</sup> A vulnerable OpenBSD 6.6 configuration with S/Key or YubiKey enabled allowed local users with `auth` privileges to become root; Qualys documents the prerequisite and exploit chain, and the linked PoC implements it.<sup>[[18]](#references)[[19]](#references)</sup>
 
+
+
 ## References
 
 - [1] [pkexec/pkttyagent authentication without a GUI session (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
@@ -322,5 +342,8 @@ On OpenBSD, when S/Key is configured, `/etc/skey` is owned by `root:auth` and ac
 - [20] [w(1) — Linux manual page](https://man7.org/linux/man-pages/man1/w.1.html)
 - [21] [Linux allocated devices (4.x+ version)](https://docs.kernel.org/6.16/admin-guide/devices.html)
 - [22] [Image Import and Export — GIMP Documentation](https://docs.gimp.org/3.0/en/gimp-prefs-import-export.html)
-
+- [23] [beep device permissions guidance — Debian Sources](https://sources.debian.org/src/beep/1.4.9-1/PERMISSIONS.md)
+- [24] [sd-login — systemd manual](https://freedesktop.org/software/systemd/man/latest/sd-login.html)
+- [25] [Input event codes — Linux kernel documentation](https://docs.kernel.org/5.18/input/event-codes.html)
+- [26] [evtest(1) — Debian Manpages](https://manpages.debian.org/bookworm/evtest/evtest.1.en.html)
 {{#include ../../../banners/hacktricks-training.md}}
