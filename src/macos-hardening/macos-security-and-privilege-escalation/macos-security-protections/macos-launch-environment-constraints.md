@@ -1,87 +1,92 @@
-# macOS Launch/Environment Kısıtlamaları ve Trust Cache
+# macOS Başlatma/Ortam Kısıtlamaları ve Trust Cache
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Temel Bilgiler
 
-macOS'teki launch kısıtlamaları, **bir sürecin nasıl, kim tarafından ve nereden başlatılabileceğini düzenleyerek** güvenliği artırmak amacıyla kullanıma sunulmuştur. macOS Ventura ile başlatılan bu özellik, **her sistem binary'sini farklı kısıtlama kategorilerine** ayıran bir framework sağlar. Bu kategoriler, sistem binary'lerini ve bunlara karşılık gelen hash'leri içeren bir liste olan **trust cache** içinde tanımlanır. Bu kısıtlamalar sistemdeki her executable binary için geçerlidir ve **belirli bir binary'yi başlatmak** için karşılanması gereken **kurallar** kümesini içerir. Kurallar, bir binary'nin karşılaması gereken self constraints, parent process tarafından karşılanması gereken parent constraints ve diğer ilgili varlıkların uyması gereken responsible constraints kurallarını kapsar.<sup>[[1]](#references)[[4]](#references)</sup>
+macOS'taki başlatma kısıtlamaları, **bir sürecin nasıl, kim tarafından ve nereden başlatılabileceğini düzenleyerek** güvenliği artırmak amacıyla kullanıma sunuldu. macOS Ventura ile başlayan bu kısıtlamalar, **her sistem ikilisini ayrı kısıtlama kategorilerine** ayıran bir çerçeve sağlar. Bu kategoriler, sistem ikililerini ve bunların karşılık gelen hash'lerini içeren bir liste olan **trust cache** içinde tanımlanır. Bu kısıtlamalar sistemdeki her çalıştırılabilir ikiliyi kapsar ve **belirli bir ikilinin başlatılması** için gereken koşulları tanımlayan bir dizi **kural** içerir. Kurallar, ikilinin karşılaması gereken kendi kısıtlamalarını, üst sürecinin karşılaması gereken üst süreç kısıtlamalarını ve ilgili diğer varlıkların uyması gereken sorumlu süreç kısıtlamalarını kapsar.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Bu mekanizma, macOS Sonoma'dan itibaren **Environment Constraints** aracılığıyla third-party uygulamalara da genişletilmiştir ve geliştiricilerin **environment constraints için bir anahtar ve değer kümesi belirleyerek** uygulamalarını korumalarına olanak tanır.<sup>[[5]](#references)</sup>
+macOS Sonoma'dan itibaren bu mekanizma, geliştiricilerin **ortam kısıtlamaları için bir anahtar ve değer kümesi** belirleyerek uygulamalarını korumasına olanak tanır ve üçüncü taraf uygulamaları da kapsar.<sup>[[5]](#references)</sup>
 
-**Launch environment ve library constraints** tanımlarını, **`launchd` property list dosyalarında** veya code signing sırasında kullandığınız **ayrı property list** dosyalarında kaydettiğiniz constraint dictionary'lerinde yaparsınız.<sup>[[5]](#references)</sup>
+**Başlatma ortamı ve kütüphane kısıtlamalarını**, kısıtlama sözlüklerinde tanımlarsınız. Bu sözlükleri **`launchd` property list dosyalarına** ya da code signing'de kullandığınız **ayrı property list** dosyalarına kaydedebilirsiniz.<sup>[[5]](#references)</sup>
 
-4 tür constraint vardır:
+4 tür kısıtlama vardır:
 
-- **Self Constraints**: **Çalışan** binary'ye uygulanan constraint'ler.
-- **Parent Process**: Sürecin **parent'ına** uygulanan constraint'ler (örneğin **`launchd`** tarafından çalıştırılan bir XPC service)
-- **Responsible Constraints**: Bir XPC iletişiminde **service'i çağıran sürece** uygulanan constraint'ler
-- **Library load constraints**: Yüklenebilecek code'u seçici şekilde tanımlamak için library load constraints kullanılır
+- **Kendi Kısıtlamaları**: **Çalışan** ikiliye uygulanan kısıtlamalar.
+- **Üst Süreç**: Sürecin **üst sürecine** uygulanan kısıtlamalar (örneğin, bir XP hizmetini çalıştıran **`launchd`**)
+- **Sorumlu Süreç Kısıtlamaları**: XPC iletişiminde hizmeti **çağıran sürece** uygulanan kısıtlamalar
+- **Kütüphane yükleme kısıtlamaları**: Yüklenebilecek kodu seçici olarak tanımlamak için kütüphane yükleme kısıtlamalarını kullanın
 
-Bir süreç başka bir süreci başlatmaya çalıştığında — `execve(_:_:_:)` veya `posix_spawn(_:_:_:_:_:_:)` çağrısı yaparak — işletim sistemi, **executable** dosyanın kendi **self constraint**'ini karşılayıp karşılamadığını kontrol eder. Ayrıca **parent** **process**'in executable'ının, executable'ın **parent constraint**'ini ve **responsible** **process**'in executable'ının executable'ın responsible process **constraint**'ini karşılayıp karşılamadığını da kontrol eder. Bu launch constraint'lerinden herhangi biri karşılanmazsa işletim sistemi programı çalıştırmaz.
+Bir süreç, `execve(_:_:_:)` veya `posix_spawn(_:_:_:_:_:_:)` çağrısı yaparak başka bir süreci başlatmaya çalıştığında işletim sistemi, **çalıştırılabilir** dosyanın **kendi kısıtlamasını karşıladığını** denetler. Ayrıca **üst** **sürecin** çalıştırılabilir dosyasının, çalıştırılabilir dosyanın **üst süreç kısıtlamasını** karşıladığını ve **sorumlu** **sürecin** çalıştırılabilir dosyasının, çalıştırılabilir dosyanın **sorumlu süreç kısıtlamasını** karşıladığını denetler. Bu başlatma kısıtlamalarından herhangi biri karşılanmazsa işletim sistemi programı çalıştırmaz.
 
-Bir library yüklenirken **library constraint**'in herhangi bir kısmı **doğru değilse**, process'iniz library'yi **yüklemez**.
+Bir kütüphane yüklenirken **kütüphane kısıtlamasının herhangi bir bölümü karşılanmıyorsa** süreciniz kütüphaneyi **yüklemez**.
 
 ## LC Kategorileri
 
-Bir LC, fact'lerden ve bu fact'leri birleştiren **mantıksal işlemlerden** (and, or..) oluşur.
+Bir LC, olguların ve bu olguları birleştiren mantıksal işlemlerin (and, or vb.) oluşturduğu bir yapıdır.
 
-Bir LC'nin kullanabileceği [**fact'ler belgelenmiştir**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Örneğin:
+Bir LC'nin kullanabileceği [**olgular belgelenmiştir**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Örneğin:
 
-- is-init-proc: Executable'ın işletim sisteminin initialization process'i (`launchd`) olması gerekip gerekmediğini belirten Boolean değer.
-- is-sip-protected: Executable'ın System Integrity Protection (SIP) tarafından korunan bir dosya olması gerekip gerekmediğini belirten Boolean değer.
-- `on-authorized-authapfs-volume:` İşletim sisteminin executable'ı yetkili ve authenticated bir APFS volume'undan yükleyip yüklemediğini belirten Boolean değer.
-- `on-authorized-authapfs-volume`: İşletim sisteminin executable'ı yetkili ve authenticated bir APFS volume'undan yükleyip yüklemediğini belirten Boolean değer.
-- Cryptexes volume
-- `on-system-volume:` İşletim sisteminin executable'ı o anda boot edilmiş system volume'undan yükleyip yüklemediğini belirten Boolean değer.
-- /System içinde...
+- is-init-proc: Çalıştırılabilir dosyanın işletim sisteminin başlatma süreci (`launchd`) olması gerekip gerekmediğini belirten bir Boolean değer.
+- is-sip-protected: Çalıştırılabilir dosyanın System Integrity Protection (SIP) tarafından korunan bir dosya olması gerekip gerekmediğini belirten bir Boolean değer.
+- `on-authorized-authapfs-volume:` İşletim sisteminin çalıştırılabilir dosyayı yetkilendirilmiş, kimliği doğrulanmış bir APFS biriminden yükleyip yüklemediğini belirten bir Boolean değer.
+- `on-authorized-authapfs-volume`: İşletim sisteminin çalıştırılabilir dosyayı yetkilendirilmiş, kimliği doğrulanmış bir APFS biriminden yükleyip yüklemediğini belirten bir Boolean değer.
+  - Cryptexes birimi
+- `on-system-volume:`İşletim sisteminin çalıştırılabilir dosyayı şu anda önyüklenmiş sistem biriminden yükleyip yüklemediğini belirten bir Boolean değer.
+  - /System içinde...
 - ...
 
-Bir Apple binary'si imzalandığında, **trust cache** içinde onu bir LC kategorisine **atar**.
+Bir Apple ikilisi imzalandığında, **trust cache** içinde onu bir **LC kategorisine** atar.
 
-- **iOS 16 LC kategorileri** [**burada reverse edilerek belgelenmiştir**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).<sup>[[6]](#references)</sup>
-- Güncel **LC kategorileri (macOS 14** - Sonoma) reverse edilmiştir ve bunların [**açıklamalarına buradan ulaşılabilir**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).<sup>[[7]](#references)</sup>
+- **iOS 16 LC kategorileri** [**burada tersine mühendislikle çözümlenip belgelenmiştir**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).<sup>[[6]](#references)</sup>
+- Mevcut **LC kategorileri (macOS 14 - Somona)** tersine mühendislikle çözümlenmiştir ve [**açıklamalarına buradan ulaşılabilir**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).<sup>[[7]](#references)</sup>
 
-Örneğin Category 1 şu şekildedir:<sup>[[7]](#references)</sup>
+Örneğin, Kategori 1 şöyledir:<sup>[[7]](#references)</sup>
+
 ```
 Category 1:
-Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
-Parent Constraint: is-init-proc
+        Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
+        Parent Constraint: is-init-proc
 ```
+
 - `(on-authorized-authapfs-volume || on-system-volume)`: System veya Cryptexes volume içinde olmalıdır.
 - `launch-type == 1`: Bir system service olmalıdır (LaunchDaemons içindeki plist).
-- `validation-category == 1`: Bir işletim sistemi executable'ı.
+- `validation-category == 1`: Bir operating system executable olmalıdır.
 - `is-init-proc`: Launchd
 
-### LC Categories'lerini Reversing
+### LC Kategorilerinin Tersine Mühendislikle İncelenmesi
 
-Bu konu hakkında [**burada daha fazla bilgi**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints) bulabilirsiniz; ancak temel olarak bunlar **AMFI (AppleMobileFileIntegrity)** içinde tanımlıdır, bu nedenle **KEXT**'i edinmek için Kernel Development Kit'i indirmeniz gerekir. **`kConstraintCategory`** ile başlayan semboller **ilgi çekici** olanlardır. Bunları extract ettiğinizde, [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) veya python-asn1 kütüphanesi ve `dump.py` script'i ile decode etmeniz gereken DER (ASN.1) encoded bir stream elde edersiniz. [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) bu stream'i daha anlaşılır bir string'e dönüştürür.<sup>[[3]](#references)[[8]](#references)</sup>
+Daha fazla bilgiye [**buradan ulaşabilirsiniz**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), ancak temel olarak bunlar **AMFI (AppleMobileFileIntegrity)** içinde tanımlanmıştır; bu nedenle **KEXT** dosyasını edinmek için Kernel Development Kit'i indirmeniz gerekir. **`kConstraintCategory`** ile başlayan semboller **ilgi çekici** olanlardır. Bunları çıkardığınızda, [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) veya python-asn1 kütüphanesindeki `dump.py` betiğiyle çözmeniz gereken DER (ASN.1) kodlu bir akış elde edersiniz. [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) bu akışı daha anlaşılır bir metne dönüştürür.<sup>[[3]](#references)[[8]](#references)</sup>
 
-## Environment Constraints
+## Ortam Kısıtlamaları
 
-Bunlar **third party applications** içinde yapılandırılmış Launch Constraints'tır. Developer, uygulamanın kendisine erişimi kısıtlamak için uygulamasında kullanılacak **facts** ve **logical operands**'ı seçebilir.
+Bunlar, **üçüncü taraf uygulamalarda** yapılandırılan Launch Constraints'tir. Geliştirici, uygulamanın kendisine erişimi kısıtlamak için uygulamasında kullanılacak **olguları** ve **mantıksal işleçleri** seçebilir.
 
-Bir uygulamanın Environment Constraints'larını şu şekilde enumerate etmek mümkündür:
+Bir uygulamanın Environment Constraints'lerini şu şekilde sıralamak mümkündür:
+
 ```bash
 codesign -d -vvvv app.app
 ```
-## Trust Cache'leri
 
-**macOS** içinde birkaç trust cache bulunur:
+## Trust Caches
+
+**macOS**’te birkaç trust cache bulunur:
 
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/BaseSystemTrustCache.img4`**
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**
 - **`/System/Library/Security/OSLaunchPolicyData`**
 
-iOS'ta ise bunun **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`** içinde olduğu görülüyor.
+iOS’ta ise **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`** konumunda olduğu anlaşılıyor.
 
 > [!WARNING]
-> Apple Silicon cihazlarda çalışan macOS'ta, Apple tarafından imzalanmış bir binary trust cache içinde değilse AMFI onu yüklemeyi reddeder.
+> Apple Silicon cihazlarda çalışan macOS’te, Apple tarafından imzalanmış bir binary trust cache’te yer almıyorsa AMFI yüklenmesini reddeder.
 
-### Trust Cache'leri Listeleme
+### Trust Caches’i Listeleme
 
-Önceki trust cache dosyaları **IMG4** ve **IM4P** formatındadır; IM4P, IMG4 formatının payload bölümüdür.
+Önceki trust cache dosyaları **IMG4** biçimindedir. **IM4P**, IMG4 biçiminin payload bölümüdür.
 
-Veritabanlarının payload'unu çıkarmak için [**pyimg4**](https://github.com/m1stadev/PyIMG4) kullanabilirsiniz:
+Veritabanlarının payload’ını çıkarmak için [**pyimg4**](https://github.com/m1stadev/PyIMG4) kullanabilirsiniz:
+
 ```bash
 # Installation
 python3 -m pip install pyimg4
@@ -97,9 +102,11 @@ pyimg4 im4p extract -i /tmp/StaticTrustCache.im4p -o /tmp/StaticTrustCache.data
 
 pyimg4 im4p extract -i /System/Library/Security/OSLaunchPolicyData -o /tmp/OSLaunchPolicyData.data
 ```
-(Başka bir seçenek de, sürüm eski olsa bile M1 üzerinde ve x86_64 için uygun konumlara kurduğunuzda çalışacak olan [**img4tool**](https://github.com/tihmstar/img4tool) aracını kullanmaktır).
 
-Şimdi bilgileri okunabilir bir formatta almak için [**trustcache**](https://github.com/CRKatri/trustcache) aracını kullanabilirsiniz:
+(Başka bir seçenek de [**img4tool**](https://github.com/tihmstar/img4tool) aracını kullanmak olabilir. Sürüm eski olsa bile M1'de çalışır; x86_64'te ise doğru konumlara yüklerseniz çalışır.)
+
+Artık bilgileri okunabilir bir biçimde almak için [**trustcache**](https://github.com/CRKatri/trustcache) aracını kullanabilirsiniz:
+
 ```bash
 # Install
 wget https://github.com/CRKatri/trustcache/releases/download/v2.0/trustcache_macos_arm64
@@ -123,63 +130,69 @@ entry count = 969
 01e6934cb8833314ea29640c3f633d740fc187f2 [none] [2] [2]
 020bf8c388deaef2740d98223f3d2238b08bab56 [none] [2] [3]
 ```
-Trust cache aşağıdaki yapıyı izler; bu nedenle **LC kategorisi 4. sütundur**
+
+Güven önbelleği aşağıdaki yapıyı izler; bu nedenle **LC kategorisi 4. sütundur**
+
 ```c
 struct trust_cache_entry2 {
-uint8_t cdhash[CS_CDHASH_LEN];
-uint8_t hash_type;
-uint8_t flags;
-uint8_t constraintCategory;
-uint8_t reserved0;
+	uint8_t cdhash[CS_CDHASH_LEN];
+	uint8_t hash_type;
+	uint8_t flags;
+	uint8_t constraintCategory;
+	uint8_t reserved0;
 } __attribute__((__packed__));
 ```
-Ardından, veri çıkarmak için [**bu script**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) gibi bir script kullanabilirsiniz.
 
-Bu verilerden **`0` launch constraints değerine sahip** Apps'leri kontrol edebilirsiniz; bunlar kısıtlanmamış olanlardır (her değerin ne anlama geldiğini görmek için [**buraya bakın**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)).<sup>[[6]](#references)</sup>
+Then verileri çıkarmak için [**bu**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) gibi bir script kullanabilirsiniz.
 
-## Saldırıların Önlenmesi
+Bu verilerden **launch constraints değeri `0` olan** Apps'leri kontrol edebilirsiniz; bunlar kısıtlanmamış olanlardır (her değerin ne anlama geldiğini öğrenmek için [**buraya bakın**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)).<sup>[[6]](#references)</sup>
 
-Launch Constraints, eski saldırıların birkaçını **process'in beklenmeyen koşullarda çalıştırılmayacağından emin olarak** önleyebilirdi: Örneğin beklenmeyen konumlardan veya beklenmeyen bir parent process tarafından çağrıldığında (onu yalnızca launchd başlatabiliyorsa).
+## Saldırı Azaltımları
+
+Launch Constraints, **process'in beklenmedik koşullarda yürütülmesini önleyerek** eski saldırıların birçoğunu engelleyebilirdi: Örneğin beklenmedik konumlardan veya beklenmedik bir parent process tarafından başlatılması (onu yalnızca launchd başlatmalıysa).
 
 Ayrıca Launch Constraints, **downgrade saldırılarını da azaltır.**
 
-Ancak, library validation olmadan gerçekleştirilen yaygın **XPC** abuse'larını, **Electron** code injection'larını veya **dylib injection**'larını azaltmazlar (library'leri yükleyebilecek team ID'leri bilinmiyorsa).<sup>[[3]](#references)</sup>
+Ancak, **yaygın XPC** kötüye kullanımlarını, **Electron** kod enjeksiyonlarını veya library validation olmadan **dylib enjeksiyonlarını** engellemezler (library yükleyebilecek team ID'leri biliniyorsa bu durum hariç).<sup>[[3]](#references)</sup>
 
 ### XPC Daemon Koruması
 
-Sonoma sürümünde dikkat çeken bir nokta, daemon XPC service'in **sorumluluk yapılandırmasıdır**. XPC service, bağlantı kuran client'ın sorumlu olmasının aksine kendisinden sorumludur. Bu durum, feedback report FB13206884'te belgelenmiştir. Bu kurulum kusurlu görünebilir, çünkü XPC service ile belirli etkileşimlere izin verir:
+Sonoma sürümündeki dikkat çekici bir nokta, daemon XPC service'in **sorumluluk yapılandırmasıdır**. Bağlanan client yerine XPC service'in kendisi sorumludur. Bu, FB13206884 feedback raporunda belgelenmiştir. Bu yapı kusurlu görünebilir; çünkü XPC service ile belirli etkileşimlere izin verir:
 
-- **XPC Service'i Başlatma**: Bunun bir bug olduğu varsayılsa bile bu kurulum, attacker code aracılığıyla XPC service'in başlatılmasına izin vermez.
-- **Aktif bir Service'e Bağlanma**: XPC service zaten çalışıyorsa (muhtemelen kendi uygulaması tarafından etkinleştirilmiştir), ona bağlanmanın önünde herhangi bir engel yoktur.
+- **XPC Service'i Başlatma**: Bunun bir bug olduğu varsayılsa bile, bu yapı attacker kodunun XPC service'i başlatmasına izin vermez.
+- **Çalışır Durumdaki Bir Service'e Bağlanma**: XPC service zaten çalışıyorsa (muhtemelen özgün uygulaması tarafından etkinleştirilmiştir), ona bağlanmanın önünde hiçbir engel yoktur.
 
-XPC service üzerinde constraints uygulamak **potansiyel saldırılar için mevcut zaman aralığını daraltarak** faydalı olsa da temel sorunu çözmez. XPC service'in güvenliğini sağlamak, temelde **bağlantı kuran client'ı etkili bir şekilde validate etmeyi** gerektirir. Service'in güvenliğini güçlendirmenin tek yöntemi budur. Ayrıca, belirtilen sorumluluk yapılandırmasının şu anda çalışır durumda olduğunu ve bunun amaçlanan tasarımla örtüşmeyebileceğini belirtmek gerekir.<sup>[[3]](#references)</sup>
+XPC service'e constraints uygulamak, **potansiyel saldırılar için fırsat aralığını daraltarak** fayda sağlayabilir; ancak temel sorunu çözmez. XPC service'in güvenliğini sağlamak için **bağlanan client'ı etkili biçimde doğrulamak** gerekir. Service'in güvenliğini güçlendirmenin tek yolu budur. Ayrıca, söz konusu sorumluluk yapılandırmasının şu anda çalışır durumda olduğunu ve bunun amaçlanan tasarımla örtüşmeyebileceğini belirtmek gerekir.<sup>[[3]](#references)</sup>
 
 ### Electron Koruması
 
-Uygulamanın **LaunchService tarafından açılması** zorunlu tutulsa bile (parents constraints içinde), bu işlem **`open`** (env variable'lar ayarlanabilir) veya **Launch Services API** (env variable'ların belirtilebildiği) kullanılarak gerçekleştirilebilir.<sup>[[3]](#references)</sup>
+Uygulamanın **LaunchService tarafından açılması** zorunlu olsa bile (parents constraints içinde), bu işlem **`open`** (env variables ayarlayabilir) veya **Launch Services API** (env variables belirtilebilir) kullanılarak gerçekleştirilebilir.<sup>[[3]](#references)</sup>
 
-### CVE-2025-43253 - Spawn sırasında yerleşik constraint'leri override etme
+Policy'ye özgü spawn attributes'ın arkasındaki genel MACF mekanizması için bkz. [MACF policy-specific spawn attributes](macos-macf-mandatory-access-control-framework.md#policy-specific-spawn-attributes-as-a-macf-input).
 
-Launch constraints (resmî olarak **lightweight code requirements**, *LWCR*), **AMFI MAC policy** tarafından uygulanır. `posix_spawn`, bir caller'ın **`posix_spawnattr_setmacpolicyinfo_np()`** aracılığıyla bir MAC policy'ye rastgele bir blob iletmesine izin verir ve AMFI, bu yol üzerinden caller tarafından sağlanan bir LWCR dictionary'sini kabul ediyordu. Bug, **attacker tarafından sağlanan constraints'in binary'nin yerleşik constraints'lerine ek olarak kontrol edilmek yerine bunların yerini almasıydı**:
+### CVE-2025-43253 - Yerleşik constraints'leri spawn anında geçersiz kılma
 
-- Minimal (hatta boş) bir launch-constraints dictionary'si oluşturun.
-- **Constraint category'yi `127`** olarak ayarlayın; bu değer AMFI'nin spawn attributes içinde izin verdiği, ancak **uygulamadığı** bir değerdir — execution'ı engellemek yerine yalnızca `Launch Constraint Violation (not enforcing)` log'unu yazar.
-- Bunu spawn attributes aracılığıyla iletin; böylece process, gerçek self/parent constraints'lerinin normalde yasaklayacağı bir context içinde başlar.
+Launch constraints (resmî adıyla **lightweight code requirements**, *LWCR*), **AMFI MAC policy** tarafından uygulanır. `posix_spawn`, çağıranın **`posix_spawnattr_setmacpolicyinfo_np()`** aracılığıyla bir MAC policy'ye keyfi bir blob iletmesine izin verir ve AMFI bu yol üzerinden çağıranın sağladığı bir LWCR sözlüğünü kabul ediyordu. Bug, **attacker tarafından sağlanan constraints'lerin binary'nin yerleşik constraints'lerinin yerine geçmesi**, bunlara ek olarak denetlenmemesiydi:
 
-Fix sonrasında **hem** yerleşik hem de sağlanan constraints validate edilir; dolayısıyla sağlanan dictionary artık yerleşik constraint'i zayıflatamaz.<sup>[[2]](#references)</sup>
+- Minimal (hatta boş) bir launch-constraints sözlüğü oluşturun.
+- **Constraint kategorisini `127`** olarak ayarlayın. Bu değere AMFI spawn attributes içinde izin verir ancak **uygulamaz**; yürütmeyi engellemek yerine yalnızca `Launch Constraint Violation (not enforcing)` kaydı tutar.
+- Bunu spawn attributes üzerinden iletin; process, gerçek self/parent constraints'lerinin yasaklayacağı bir bağlamda başlatılır.
+
+Düzeltmeden sonra hem yerleşik hem de sağlanan constraints doğrulanır; dolayısıyla sağlanan sözlük artık yerleşik constraints'leri zayıflatamaz.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Constraint enforcement'ı audit ederken aranacak genel yapı şöyledir: Untrusted input'un bir policy *sağlamasına* izin veren bir API, policy engine sağlanan değeri ek bir gereklilik yerine replacement olarak ele aldığında genellikle ilgi çekicidir.
+> Constraint uygulamasını denetlerken aranması gereken genel kalıp şudur: Güvenilmeyen girdilerin bir policy *sağlamasına* izin veren bir API, policy engine bu sağlanan değeri ek bir gereklilik yerine ikame olarak ele alıyorsa ilgi çekicidir.
 
-## Referanslar
 
-- [1] [Objective by the Sea #OBTS v6.0 Day 2 (Canlı Yayın)](https://youtu.be/f1HA5QhLQ7Y?t=24146)
-- [2] [CVE-2025-43253: macOS'ta Launch Constraints'i Bypass Etme (wts.dev)](https://wts.dev/posts/bypassing-launch-constraints/)
-- [3] [Launch ve Environment Constraints Deep Dive - theevilbit](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
-- [4] [Bir system app veya command tool neden çalışmaz? Launch constraints ve trust caches - The Eclectic Light Company](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
-- [5] [Environment constraints ile Mac app'inizi koruyun - WWDC23](https://developer.apple.com/videos/play/wwdc2023/10266/)
-- [6] [iOS 16'da tanıtılan Launch Constraints'in açıklaması (LinusHenze gist)](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)
+
+## References
+
+- [1] [Objective by the Sea #OBTS v6.0 2. Gün (Canlı Yayın)](https://youtu.be/f1HA5QhLQ7Y?t=24146)
+- [2] [CVE-2025-43253: macOS'ta Launch Constraints'i Atlatma (wts.dev)](https://wts.dev/posts/bypassing-launch-constraints/)
+- [3] [Launch ve Environment Constraints Derinlemesine İnceleme - theevilbit](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
+- [4] [Bir sistem uygulaması veya komut aracı neden çalışmaz? Launch constraints ve trust caches - The Eclectic Light Company](https://eclecticlight.co/2023/06/13/why-wont-a-system-app-or-command-tool-run-launch-constraints-and-trust-caches/)
+- [5] [Environment constraints ile Mac uygulamanızı koruyun - WWDC23](https://developer.apple.com/videos/play/wwdc2023/10266/)
+- [6] [iOS 16'da kullanıma sunulan Launch Constraints'in açıklaması (LinusHenze gist)](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)
 - [7] [macOS Sonoma (14) Launch Constraints (theevilbit gist)](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)
-- [8] [İyi eski LaunchAgents'ın ötesi - burada bunun hakkında](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints)
-
+- [8] [Eski güzel LaunchAgents'ın ötesi - konuyla ilgili yazı](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints)
 {{#include ../../../banners/hacktricks-training.md}}
