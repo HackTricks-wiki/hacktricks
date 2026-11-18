@@ -11,6 +11,7 @@
 
 - [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
 - [Post-Exploitation Collection Tools](generic-methodologies-and-resources/post-exploitation-collection-tools.md)
+- [Third-Party Tools and Resources](generic-methodologies-and-resources/third-party-tools-and-resources.md)
 - [Fuzzing Methodology](generic-methodologies-and-resources/fuzzing.md)
 - [Proof Assistant and Formal Verification Security](generic-methodologies-and-resources/proof-assistant-formal-verification-security.md)
 - [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
@@ -1214,7 +1215,3 @@
 - [Text Stego](stego/text/README.md)
 - [Documents](stego/documents/README.md)
 - [Malware & Network Stego](stego/malware-and-network/README.md)
-
-# ✍️ TODO
-
-- [More Tools](todo/more-tools.md)
