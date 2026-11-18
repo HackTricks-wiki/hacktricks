@@ -285,6 +285,8 @@ Once the firmware is obtained, it's essential to dissect it for understanding it
 
 ### Initial Analysis Tools
 
+For additional firmware-analysis tools and reading, see the [firmware section of Third-Party Tools and Resources](../../generic-methodologies-and-resources/third-party-tools-and-resources.md#firmware).
+
 A set of commands is provided for initial inspection of the binary file (referred to as `<bin>`). These commands help in identifying file types, extracting strings, analyzing binary data, and understanding the partition and filesystem details:
 
 ```bash
