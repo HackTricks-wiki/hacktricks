@@ -10,7 +10,7 @@
 
 ### Rasilimali zinazohusiana
 
-Kwa kupata firmware kupitia interfaces za hardware zilizo wazi, angalia [UART console-assisted firmware dumping](../hardware-hacking/uart.md#dumping-firmware-with-uart-console) na [SPI flash dumping](../hardware-hacking/spi.md#dumping-firmware-from-eeproms). Kwa kunasa UART wakati wa kuwasha kifaa kwa njia inayoweza kurudiwa kabla ya kupata console, angalia [SCPI-controlled power and oscilloscope acquisition](../hardware-hacking/uart.md#automating-boot-time-uart-capture-with-scpi).
+Kwa kupata firmware kupitia miingiliano ya maunzi iliyo wazi, angalia [kutupa firmware kwa kutumia koni ya UART](../hardware-hacking/uart.md#dumping-firmware-with-uart-console) na [kutupa flash ya SPI](../hardware-hacking/spi.md#dumping-firmware-from-eeproms). Ili kunasa UART wakati wa kuwasha kifaa kwa njia inayoweza kurudiwa kabla ya kupata ufikiaji wa koni, angalia [upataji wa data kwa kutumia umeme unaodhibitiwa na SCPI na oscilloscope](../hardware-hacking/uart.md#automating-boot-time-uart-capture-with-scpi).
 
 {{#ref}}
 uefi-ifr-nvram-security-setting-patching.md
@@ -32,63 +32,63 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmware ni programu muhimu inayowezesha vifaa kufanya kazi ipasavyo kwa kudhibiti na kuwezesha mawasiliano kati ya vipengele vya hardware na programu ambazo watumiaji hutumia. Huhifadhiwa kwenye kumbukumbu isiyofutika, na hivyo kuhakikisha kuwa kifaa kinaweza kupata maelekezo muhimu mara tu kinapowashwa, jambo linalosababisha mfumo wa uendeshaji kuanza. Kuchunguza na, ikiwezekana, kurekebisha firmware ni hatua muhimu katika kutambua udhaifu wa kiusalama.<sup>[[2]](#references)[[3]](#references)</sup>
+Firmware ni programu muhimu inayowezesha vifaa kufanya kazi ipasavyo kwa kusimamia na kurahisisha mawasiliano kati ya vipengele vya maunzi na programu ambazo watumiaji hutumia. Huhifadhiwa kwenye kumbukumbu ya kudumu, na hivyo kuhakikisha kifaa kinaweza kufikia maagizo muhimu mara tu kinapowashwa, kisha mfumo wa uendeshaji huanza. Kuchunguza na ikiwezekana kurekebisha firmware ni hatua muhimu ya kutambua udhaifu wa usalama.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## **Kukusanya Taarifa**
 
-**Kukusanya taarifa** ni hatua muhimu ya awali katika kuelewa muundo wa kifaa na teknolojia zinazotumika ndani yake. Mchakato huu unahusisha kukusanya data kuhusu:
+**Kukusanya taarifa** ni hatua muhimu ya awali ya kuelewa muundo wa kifaa na teknolojia kinazotumia. Mchakato huu unahusisha kukusanya data kuhusu:
 
 - Usanifu wa CPU na mfumo wa uendeshaji unaotumia
 - Maelezo mahususi ya bootloader
-- Muundo wa hardware na datasheet
-- Vipimo vya codebase na maeneo ya chanzo
+- Mpangilio wa maunzi na datasheet
+- Vipimo vya codebase na maeneo ya source
 - Maktaba za nje na aina za leseni
 - Historia ya masasisho na vyeti vya udhibiti
 - Michoro ya usanifu na mtiririko
 - Tathmini za usalama na udhaifu uliotambuliwa
 
-Kwa madhumuni haya, zana za **open-source intelligence (OSINT)** ni muhimu sana, kama ilivyo uchanganuzi wa vipengele vyovyote vya open-source software vinavyopatikana kupitia michakato ya ukaguzi wa mikono na kiotomatiki. Zana kama [Coverity Scan](https://scan.coverity.com) na [Semmle’s LGTM](https://lgtm.com/#explore) hutoa uchanganuzi tuli bila malipo unaoweza kutumiwa kutafuta matatizo yanayoweza kuwepo.
+Kwa madhumuni haya, zana za **open-source intelligence (OSINT)** ni muhimu sana, sawa na uchanganuzi wa vipengele vyovyote vya programu huria vinavyopatikana, kwa kutumia michakato ya ukaguzi wa mikono na kiotomatiki. Zana kama [Coverity Scan](https://scan.coverity.com) na [LGTM ya Semmle](https://lgtm.com/#explore) hutoa uchanganuzi tuli bila malipo ambao unaweza kutumiwa kutafuta matatizo yanayoweza kuwepo.
 
 ## **Kupata Firmware**
 
 Firmware inaweza kupatikana kwa njia mbalimbali, kila moja ikiwa na kiwango chake cha ugumu:
 
-- Kuipata **moja kwa moja** kutoka kwa chanzo (watengenezaji programu, wazalishaji)
-- **Kuijenga** kwa kufuata maelekezo yaliyotolewa
+- **Moja kwa moja** kutoka kwa chanzo (watengenezaji, wazalishaji)
+- **Kuitengeneza** kwa kufuata maelekezo yaliyotolewa
 - **Kuipakua** kutoka tovuti rasmi za usaidizi
-- Kutumia hoja za **Google dork** kutafuta faili za firmware zilizowekwa mtandaoni
+- Kutumia utafutaji wa **Google dork** kupata faili za firmware zilizowekwa mtandaoni
 - Kufikia **cloud storage** moja kwa moja, kwa kutumia zana kama [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Kunasa **masasisho** kwa kutumia mbinu za man-in-the-middle
-- **Kuichota** kutoka kwenye kifaa kupitia miunganisho kama **UART**, [**JTAG**](../hardware-hacking/jtag.md#halting-the-cpu-and-dumping-memoryflash), au **PICit**
-- **Kunasa** maombi ya masasisho ndani ya mawasiliano ya kifaa
-- Kutambua na kutumia **endpoint za masasisho zilizowekwa kwenye code**
-- **Kuidump** kutoka kwenye bootloader au mtandao
-- **Kuondoa na kusoma** chipu ya hifadhi, ikiwa njia nyingine zote hazijafaulu, kwa kutumia zana zinazofaa za hardware
+- Kuzuia **masasisho** kwa kutumia mbinu za man-in-the-middle
+- **Kuitoa** kwenye kifaa kupitia miunganisho kama **UART**, [**JTAG**](../hardware-hacking/jtag.md#halting-the-cpu-and-dumping-memoryflash), au **PICit**
+- **Kunusa** maombi ya masasisho kwenye mawasiliano ya kifaa
+- Kutambua na kutumia **miisho ya masasisho iliyowekwa moja kwa moja kwenye msimbo**
+- **Kuitupa** kutoka kwa bootloader au mtandao
+- **Kuondoa na kusoma** chipu ya hifadhi, ikiwa njia nyingine zote zimeshindwa, kwa kutumia zana zinazofaa za maunzi
 
 ### Logi za UART pekee: lazimisha root shell kupitia mazingira ya U-Boot kwenye flash
 
-Ikiwa UART RX inapuuzwa (logi pekee ndizo zinazopatikana), bado unaweza kulazimisha init shell kwa **kuhariri blob ya mazingira ya U-Boot ukiwa nje ya kifaa**:<sup>[[6]](#references)</sup>
+Ikiwa UART RX itapuuzwa (logi pekee), bado unaweza kulazimisha init shell kwa **kuhariri blob ya mazingira ya U-Boot** nje ya mtandao:<sup>[[6]](#references)</sup>
 
-1. Dump SPI flash kwa kutumia klipu ya SOIC-8 na programmer (3.3V):
+1. Tupa SPI flash kwa kutumia klipu ya SOIC-8 na programu ya kuandika (3.3V):
    ```bash
    flashrom -p ch341a_spi -r flash.bin
    ```
-2. Tafuta partition ya U-Boot env, hariri `bootargs` ili ijumuishe `init=/bin/sh`, na **kokotoa upya U-Boot env CRC32** ya blob.
-3. Flash upya partition ya env pekee na uwashe upya; shell inapaswa kuonekana kupitia UART.
+2. Tafuta partition ya U-Boot env, hariri `bootargs` ili ijumuishwe `init=/bin/sh`, na **ukokotoe upya U-Boot env CRC32** ya blob.
+3. Andika upya partition ya env pekee kisha uwashe upya; shell inapaswa kuonekana kwenye UART.
 
-Hii ni muhimu kwenye vifaa vilivyopachikwa ambapo shell ya bootloader imezimwa lakini partition ya env inaweza kuandikiwa kupitia ufikiaji wa nje wa flash.
+Hii inafaa kwa vifaa vilivyopachikwa ambapo shell ya bootloader imezimwa lakini partition ya env inaweza kuandikwa kupitia ufikiaji wa flash wa nje.
 
-### Kufichua code iliyolindwa kupitia kazi ya kunakili ya Firewall
+### Kufichua msimbo uliolindwa kupitia task ya kunakili ya Firewall
 
-Baadhi ya MCU huruhusu code ya programu isiyolindwa kuita gateway ya eneo lililolindwa badala ya kusoma Flash iliyolindwa moja kwa moja. Baada ya kupata uwezo wa kutekeleza code ya programu, kagua kila gateway task kama primitive tofauti ya kuhamisha kumbukumbu. Katika kisa cha Cypherock X1, STM32L4 Firewall call gate ilikubali task, pointer ya nje ya `data`, urefu, na `address` iliyolindwa. Task ya kuandika ilishindwa kukataa pointer ya chanzo cha `data` iliyoelekeza kwenye Firewall Code. Mpigaji hakuweza kusoma code hiyo moja kwa moja, lakini gateway yenyewe ingeweza kuinakili kwenye hifadhi isiyobadilika iliyolindwa ambayo task ya kusoma iliyoruhusiwa ingeweza kufichua.<sup>[[15]](#references)</sup>
+Baadhi ya MCU huruhusu msimbo wa programu usiolindwa kuita gateway ya eneo lililolindwa badala ya kusoma Flash iliyolindwa moja kwa moja. Baada ya kupata uwezo wa kutekeleza msimbo wa programu, kagua kila gateway task kama primitive tofauti ya kuhamisha kumbukumbu. Katika hali ya Cypherock X1, lango la STM32L4 Firewall lilikubali task, pointer ya nje ya `data`, urefu, na `address` iliyolindwa. Task ya kuandika haikukataa pointer ya chanzo ya `data` inayoelekeza ndani ya Firewall Code. Mwitaji hakuweza kusoma msimbo huo moja kwa moja, lakini gateway yenyewe ingeweza kuunakili kwenye hifadhi isiyofutika iliyolindwa, kisha task ya kusoma iliyoruhusiwa kuufichua.<sup>[[15]](#references)</sup>
 
-Ili kurudia aina hii ya ufichuaji, tambua ukurasa wa hifadhi unaoweza kuandikiwa katika eneo lililolindwa, wenye task ya kusoma inayolingana; weka chanzo cha kuandika kwenye anwani zinazofuatana za code iliyolindwa, kisha soma tena baiti zilizohifadhiwa kwa muda. Kagua hifadhi kabla ya kurudia uandishi: katika kisa hiki ilikuwa Flash, kwa hiyo ukurasa ulihitaji kufutwa kabla ya kutumiwa tena. Watafiti walitumia utaratibu uliofuta na kurejesha maudhui halali ya Secure Data Storage, kisha wakaweka code kwenye nafasi iliyobaki wazi badala ya kufuta data ya wallet. Hili linahitaji uwezo wa kutekeleza code kwenye MCU na call gate inayoweza kufikiwa; si njia ya moja kwa moja ya kukwepa usomaji kutoka kwa host isiyo na uthibitishaji.<sup>[[15]](#references)</sup>
+Ili kurudia aina hii ya ufichuzi, tambua ukurasa wa hifadhi iliyolindwa unaoweza kuandikwa na ulio na task inayolingana ya kusoma, weka chanzo cha kuandika kwenye anwani zinazofuatana za msimbo uliolindwa, kisha usome tena baiti zilizohifadhiwa kwa muda. Kagua hifadhi kabla ya kurudia uandishi: katika hali hii ilikuwa Flash, kwa hiyo ukurasa ulihitaji kufutwa kabla ya kutumiwa tena. Watafiti walitumia utaratibu uliofuta na kurejesha maudhui halali ya Secure Data Storage, kisha kuhifadhi msimbo katika nafasi iliyobaki badala ya kufuta data ya wallet. Hili linahitaji uwezo wa kutekeleza msimbo kwenye MCU na lango la kuita linalofikika; si njia ya moja kwa moja ya kukwepa vizuizi vya usomaji kutoka kwa host isiyo na uthibitishaji.<sup>[[15]](#references)</sup>
 
-Code iliyorejeshwa inaweza kufichua [mapengo ya uaminifu katika masasisho ya firmware na uadilifu wa boot](firmware-integrity.md#fragmented-update-state-and-writable-integrity-metadata).<sup>[[15]](#references)</sup>
+Msimbo uliorejeshwa unaweza kufichua [mapengo ya uaminifu katika sasisho za firmware na uadilifu wa boot](firmware-integrity.md#fragmented-update-state-and-writable-integrity-metadata).<sup>[[15]](#references)</sup>
 
-## Kuchanganua firmware
+## Kuchambua firmware
 
-Sasa kwa kuwa **una firmware**, unahitaji kutoa taarifa kuihusu ili ujue jinsi ya kuichunguza. Hizi ni baadhi ya zana unazoweza kutumia:
+Sasa kwa kuwa **una firmware**, unahitaji kutoa taarifa kuihusu ili kujua jinsi ya kuichunguza. Zana mbalimbali unazoweza kutumia kwa hilo:
 
 ```bash
 file <bin>
@@ -99,9 +99,10 @@ hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
 
-Ikiwa hutapata mengi kwa kutumia zana hizo, kagua **entropy** ya image kwa `binwalk -E <bin>`. Ikiwa entropy ni ndogo, basi huenda haijasimbwa kwa njia fiche. Ikiwa entropy ni kubwa, huenda imesimbwa kwa njia fiche (au imebanwa kwa namna fulani).
+Ikiwa hupati mengi kwa kutumia zana hizo, angalia **entropy** ya picha kwa `binwalk -E <bin>`. Ikiwa entropy ni ndogo, huenda haijasimbwa kwa njia fiche. Ikiwa entropy ni kubwa, huenda imesimbwa kwa njia fiche (au imebanwa kwa namna fulani).
 
 Zaidi ya hayo, unaweza kutumia zana hizi kutoa **files zilizopachikwa ndani ya firmware**:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
@@ -109,46 +110,46 @@ Zaidi ya hayo, unaweza kutumia zana hizi kutoa **files zilizopachikwa ndani ya f
 
 Au tumia [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) kukagua file.
 
-### Vipengee ghafi vya kuonyesha vilivyo kwenye flash ya nje
+### Vipengee ghafi vya onyesho kwenye flash ya nje
 
-Dump ya SPI ya nje si lazima iwe firmware inayotekelezwa na MCU. Kwa kifaa lengwa cha Cortex-M, linganisha mwanzo wa kila eneo linaloweza kuwa na code na memory map ya kifaa: vector table ya kawaida huanza na anwani inayowezekana ya SRAM stack pointer na anwani ya reset handler iliyo kwenye memory inayotekelezeka. Kukosekana kwa vector table kwenye offset sifuri pekee hakuthibitishi kuwa chip nzima haina code; kagua offset nyingine na mpangilio wa boot. Ikiwa `binwalk` haitapata container, kagua bytes ghafi na ulinganishe anwani za usomaji wa flash na vitendo vinavyopakia skrini mpya, ukitumia [decoded SPI capture](../hardware-hacking/spi.md#reconstructing-spi-flash-reads-with-a-logic-analyzer).<sup>[[14]](#references)</sup>
+SPI dump ya nje si lazima iwe firmware inayotekelezeka ya MCU. Kwa kifaa lengwa cha Cortex-M, linganisha mwanzo wa kila eneo linaloweza kuwa code na ramani ya kumbukumbu ya kifaa: vector table ya kawaida huanza na anwani inayowezekana ya SRAM stack pointer na anwani ya reset handler iliyo kwenye kumbukumbu inayotekelezeka. Kukosekana kwa vector table kwenye offset sifuri pekee hakuthibitishi kuwa chipu nzima haina code; kagua offset nyingine na mpangilio wa boot. Ikiwa `binwalk` haitambui container, kagua byte ghafi na ulinganishe anwani za usomaji wa flash na vitendo vinavyopakia skrini mpya, ukitumia [decoded SPI capture](../hardware-hacking/spi.md#reconstructing-spi-flash-reads-with-a-logic-analyzer).<sup>[[14]](#references)</sup>
 
-Kwa eneo la display-asset, jaribu pixel formats na dimensions zinazowezekana badala ya kudhani ni PNG/JPEG. Kifaa kilichotajwa kilitumia fremu za **80×160 RGB565 little-endian**: kwa bytes mbili kwa pixel, fremu moja ina **25,600 bytes** (25 KiB), si kilobits 24. Anwani ya usomaji wa flash iliyodekodishwa ilibainisha offset ya screen asset; mtafiti alibadilisha image iliyotayarishwa kwa `ffmpeg -i bubo.jpg -pix_fmt rgb565le test.rgb`, akaweka asset yenye ukubwa sawa badala ya ile ya awali kwenye dump, akaiandika kwa `flashrom -p linux_spi:dev=/dev/spidev0.0 -w flashme.bin`, kisha akathibitisha kuwa image mpya ilionekana kwenye display. Hili linaonyesha kuwa *external display assets* zinaweza kuandikwa, si kwamba firmware ya ndani ya MCU inaweza kutolewa au kuandikwa upya. Hifadhi dump ya awali na uthibitishe dimensions, byte order, offset, na urefu wa data itakayobadilishwa kabla ya kuandika.<sup>[[14]](#references)</sup>
+Kwa eneo la vipengee vya onyesho, jaribu miundo na vipimo tofauti vya pixel badala ya kudhani ni PNG/JPEG. Kifaa kilichorejelewa kilitumia fremu za **80×160 RGB565 little-endian**: kwa byte mbili kwa pixel, fremu moja ni **25,600 bytes** (25 KiB), si kilobiti 24. Anwani ya usomaji wa flash iliyosimbuliwa ilitambua offset ya kipengee cha skrini; mtafiti alibadilisha picha iliyotayarishwa kwa `ffmpeg -i bubo.jpg -pix_fmt rgb565le test.rgb`, akaweka kipengee chenye ukubwa sawa kwenye dump asili, akaiandika kwa `flashrom -p linux_spi:dev=/dev/spidev0.0 -w flashme.bin`, na kuthibitisha picha mpya kwenye onyesho. Hii inaonyesha kuwa *vipengee vya onyesho vya nje* vinaweza kuandikwa, si kwamba firmware ya ndani ya MCU imetolewa au kuandikwa upya. Hifadhi dump asili na uthibitishe vipimo, mpangilio wa byte, offset na urefu wa kipengee mbadala kabla ya kuandika chochote.<sup>[[14]](#references)</sup>
 
-### Uchambuzi wa tofauti za flash na hifadhi za siri za XOR zinazoweza kurejeshwa
+### Uchanganuzi tofauti wa flash na hifadhi za siri za XOR zinazoweza kurejeshwa
 
-Ikiwa setting ya firmware haina muundo wa hifadhi ulioandikwa kwenye nyaraka, kwanza soma flash mara kadhaa kwa hali zinazolingana, badilisha **setting moja tu**, kisha dump chip nzima tena na ulinganishe offset. Kurudia jaribio kwa thamani zinazodhibitiwa husaidia kutofautisha setting hiyo na counters pamoja na metadata ya uandishi; mabadiliko kwenye offset mpya badala ya eneo lilelile yanaashiria hifadhi ya append-only au log-structured. Hifadhi entries zilizofutwa au zilizowekewa tombstone kwa sababu bytes za payload zake zinaweza bado kurejeshwa.<sup>[[12]](#references)[[13]](#references)</sup>
+Wakati mpangilio wa firmware hauna muundo wa hifadhi ulioandikwa, kwanza fanya usomaji kadhaa unaolingana wa flash, badilisha **mpangilio mmoja tu**, kisha dump chipu nzima tena na ulinganishe offset. Kurudia jaribio kwa thamani zinazodhibitiwa hutofautisha mpangilio huo na kaunta pamoja na metadata ya uandishi; mabadiliko kwenye offset mpya badala ya sehemu ileile huashiria hifadhi ya append-only au iliyopangwa kama log. Hifadhi maingizo yaliyofutwa/yaliyowekwa alama ya kufutwa, kwa kuwa byte za data zake huenda bado zikaweza kurejeshwa.<sup>[[12]](#references)[[13]](#references)</sup>
 
 ```bash
 sha256sum baseline-1.bin baseline-2.bin baseline-3.bin
 cmp -l baseline-1.bin changed.bin
 ```
 
-Baada ya kupata eneo hilo, toa moduli za firmware kwa kutumia zana kama `binwalk`, kisha fanya reverse engineering ya writer/validator katika Ghidra. Thibitisha mipaka ya field, padding, key indexing na key derivation kwenye code badala ya kukisia scheme kutokana na mifumo ya ciphertext pekee.<sup>[[12]](#references)</sup>
+Baada ya kupata eneo hilo, toa moduli za firmware kwa kutumia zana kama `binwalk`, kisha fanya reverse engineering ya writer/validator katika Ghidra. Thibitisha mipaka ya field, padding, indexing ya key na derivation ya key kwenye code badala ya kukisia scheme kutokana na mifumo ya ciphertext pekee.<sup>[[12]](#references)</sup>
 
-#### Rejesha funguo kutoka kwenye padding ya sifuri iliyosimbwa
+#### Rejesha keys kutoka kwenye zero padding iliyosimbwa
 
-Kama ilivyoelezwa katika [XOR-based encryption](../../crypto/symmetric/#xor-based-encryption), known plaintext hufichua baiti za keystream zilizo kwenye offsets zilezile. Field yenye ukubwa usiobadilika huwa hatarini hasa padding yake ya sifuri inapofunika kila index ya XOR key inayojirudia: padding iliyosimbwa hufichua baiti hizo za key moja kwa moja, kwa kuwa `0x00 XOR key_byte = key_byte`. Ikiwa kila index ya key imefunikwa, jenga upya key kutoka mwisho wa ciphertext na usimbue data iliyojazwa.<sup>[[12]](#references)</sup>
+Kama ilivyoelezwa kwenye [XOR-based encryption](../../crypto/symmetric/#xor-based-encryption), plaintext inayojulikana hufichua bytes za keystream katika offsets zilezile. Field yenye ukubwa usiobadilika huwa katika hatari zaidi hasa padding yake ya sifuri inapojumuisha kila index ya key ya XOR inayojirudia: padding iliyosimbwa hufichua bytes hizo za key moja kwa moja kwa sababu `0x00 XOR key_byte = key_byte`. Ikiwa kila index ya key imefunikwa, jenga upya key kutokana na mwisho wa ciphertext na usimbue bytes zenye data.<sup>[[12]](#references)</sup>
 
-Muundo wa DVAR BIOS-password wa Dell ulio hatarini ni mfano halisi: baiti ya `0` katika field yenye baiti 32 iko wazi, huku baiti `1..31` zikitumia key inayojirudia yenye baiti 20.<sup>[[12]](#references)</sup>
+Muundo wa DVAR wa nenosiri la BIOS ulio katika mazingira hatarishi wa Dell ni mfano halisi: byte `0` ya field ya 32-byte iko kwenye plaintext, ilhali bytes `1..31` hutumia key inayojirudia ya 20-byte.<sup>[[12]](#references)</sup>
 
 ```text
 stored[0] = password[0]
 stored[i] = password[i] XOR key[(i - 1) mod 20]  # i = 1..31
 ```
 
-Kwa urefu wa nenosiri `L`, nafasi za `L..31` zilikuwa sifuri kabla ya XOR. Wakati `L <= 12`, nafasi hizo zinajumuisha kila faharasa ya ufunguo, kwa hivyo ufunguo na nenosiri kamili hupatikana bila brute force:<sup>[[12]](#references)</sup>
+Kwa urefu wa nenosiri `L`, nafasi `L..31` zilikuwa sifuri kabla ya XOR. Wakati `L <= 12`, nafasi hizo zinajumuisha kila faharasa ya key, hivyo key na nenosiri kamili hupatikana bila brute force:<sup>[[12]](#references)</sup>
 
 ```text
 key[(i - 1) mod 20] = stored[i]                  # padding positions
 password[i] = stored[i] XOR key[(i - 1) mod 20] # populated positions
 ```
 
-#### Inua funguo kutoka rekodi za kihistoria
+#### Pata funguo kutoka kwenye rekodi za kihistoria
 
-Usichanganue kila rekodi kivyake. Ufunguo wa DVAR hukokotolewa takribani kama `modified_md5(device_seed || variable_GUID || password[0])`: device seed na GUID hazibadiliki, na ingizo pekee linalotegemea password ni baiti ya kwanza iliyo wazi. Hii hutoa hadi funguo 256 kwa kila kifaa na kusababisha rekodi zinazoanza kwa baiti ileile kushiriki ufunguo mmoja. Panga rekodi zinazotumika na zilizofutwa kulingana na baiti hiyo; rekodi fupi ya zamani inaweza ku-leak ufunguo mzima kupitia padding na kusimbua rekodi mpya ndefu zaidi ambayo padding yake yenyewe haitoshi. Kwa hiyo, kubadilisha password kunaweza kuongeza hatari ikiwa ciphertext za zamani zinawekewa alama ya kufutwa badala ya kufutwa kabisa.<sup>[[12]](#references)</sup>
+Usichanganue kila rekodi kivyake. Ufunguo wa DVAR hukokotolewa takribani kama `modified_md5(device_seed || variable_GUID || password[0])`: device seed na GUID hazibadiliki, na ingizo pekee linalotegemea nenosiri ni byte ya kwanza iliyo wazi. Hii hutoa hadi funguo 256 kwa kila kifaa na husababisha rekodi zinazoanza na byte ileile kushiriki ufunguo. Panga rekodi zilizo hai na zilizofutwa kulingana na byte hiyo; rekodi fupi ya kihistoria inaweza kufichua ufunguo mzima kupitia padding na kusimbua rekodi ndefu ya sasa ambayo padding yake haitoshi. Kwa hiyo, kubadilisha nenosiri kunaweza kuongeza hatari ya kufichuliwa pale ciphertext ya zamani inapowekwa alama ya kufutwa badala ya kufutwa kabisa.<sup>[[12]](#references)</sup>
 
-Zana ya [`dellpwn`](https://github.com/R3n5k1/dellpwn) hutafuta DVAR, huthibitisha rekodi zinazowezekana, hurejesha password, na inaweza kuonyesha baiti ghafi zilizohifadhiwa/za ufunguo. Iunde kutoka kwenye checkout na uchanganue picha ya flash iliyothibitishwa kama ifuatavyo:<sup>[[13]](#references)</sup>
+Zana ya [`dellpwn`](https://github.com/R3n5k1/dellpwn) hutafuta DVAR, huthibitisha rekodi zinazoweza kutumika, hurejesha manenosiri, na inaweza kuonyesha byte ghafi zilizohifadhiwa/za ufunguo. Iunde kutoka kwenye checkout na uchanganue picha ya flash iliyothibitishwa kama ifuatavyo:<sup>[[13]](#references)</sup>
 
 ```bash
 cargo install --path .
@@ -156,18 +157,18 @@ dellpwn scan dump.bin --raw
 dellpwn scan dump.bin --partial  # include uncertain recoveries
 ```
 
-Kwa custom parsers, kataa matokeo chanya ya uongo kwa kutumia muundo wa rekodi, masharti ya herufi zinazochapishika, ukaguzi wa padding ya sufuri, entropy ya ufunguo, na uthabiti pale ufunguo unapozunguka. Ikiwa dumps zinazorudiwa zinaonyesha mabadiliko machache ya biti kwa kila write, orodhesha masks zilizobainika na upange marekebisho kwa kutumia masharti haya, lakini ripoti herufi zisizo na uhakika badala ya kuwasilisha matokeo ya heuristic kana kwamba ni urejeshaji kamili.<sup>[[12]](#references)</sup>
+Kwa custom parsers, kataa matokeo chanya ya uongo kwa kutumia muundo wa rekodi, masharti ya herufi zinazoweza kuchapishwa, ukaguzi wa zero-padding, entropy ya key, na uthabiti pale key inapozunguka. Ikiwa dumps zinazorudiwa zinaonyesha mabadiliko machache ya bit kwa kila write, orodhesha masks zilizobainika na upange marekebisho kwa kutumia masharti haya, lakini ripoti herufi zisizo na uhakika badala ya kuwasilisha matokeo ya heuristic kana kwamba ni recovery sahihi kabisa.<sup>[[12]](#references)</sup>
 
-Password verifiers zinapaswa kuhifadhi salted, iterated one-way hash badala ya ciphertext inayoweza kurejeshwa, na log-structured stores zinapaswa kuondoa kwa usalama nyenzo za siri zilizopitwa na wakati.<sup>[[12]](#references)</sup>
+Password verifiers zinapaswa kuhifadhi hash ya one-way yenye salt na inayorudiwa mara nyingi badala ya ciphertext inayoweza kurejeshwa, na hifadhi za log-structured zinapaswa kuondoa kwa usalama nyenzo za siri zilizopitwa na wakati.<sup>[[12]](#references)</sup>
 
 ### Kupata Filesystem
 
-Kwa kutumia tools zilizotajwa awali zenye maoni, kama `binwalk -ev <bin>`, unapaswa kuwa umeweza **kutoa filesystem**.\
-Binwalk kwa kawaida huiondoa ndani ya **folda yenye jina la aina ya filesystem**, ambayo kwa kawaida huwa mojawapo ya hizi: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Ukiwa na tools zilizotajwa awali, kama `binwalk -ev <bin>`, unapaswa kuwa umeweza **kutoa filesystem**.\
+Kwa kawaida, Binwalk huitoa ndani ya **folder yenye jina la aina ya filesystem**, ambazo kwa kawaida ni mojawapo ya hizi: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Kutoa Filesystem kwa Mkono
+#### Utoaji wa Filesystem kwa Mkono
 
-Wakati mwingine, binwalk **haitakuwa na magic byte ya filesystem kwenye signatures zake**. Katika hali hizi, tumia binwalk **kutafuta offset ya filesystem na kukata filesystem iliyobanwa** kutoka kwenye binary, kisha **utoe filesystem kwa mkono** kulingana na aina yake kwa kutumia hatua zilizo hapa chini.
+Wakati mwingine, binwalk **haitakuwa na magic byte ya filesystem kwenye signatures zake**. Katika hali hizi, tumia binwalk **kutafuta offset ya filesystem na kuchonga filesystem iliyobanwa** kutoka kwenye binary, kisha **utoe filesystem kwa mkono** kulingana na aina yake ukitumia hatua zilizo hapa chini.
 
 ```
 $ binwalk DIR850L_REVB.bin
@@ -181,7 +182,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
 
-Tekeleza amri ifuatayo ya **dd** ili kufanya carving ya mfumo wa faili wa Squashfs.
+Endesha **dd command** ifuatayo ili kutoa mfumo wa faili wa Squashfs.
 
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
@@ -201,29 +202,29 @@ Vinginevyo, amri ifuatayo pia inaweza kutekelezwa.
 
 `$ unsquashfs dir.squashfs`
 
-Baadaye, faili zitakuwa kwenye saraka ya "`squashfs-root`".
+Faili zitakuwa kwenye saraka ya "`squashfs-root`" baadaye.
 
 - Faili za kumbukumbu za CPIO
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- Kwa filesystem za jffs2
+- Kwa mifumo ya faili ya jffs2
 
 `$ jefferson rootfsfile.jffs2`
 
-- Kwa filesystem za ubifs zinazotumia NAND flash
+- Kwa mifumo ya faili ya ubifs yenye NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-### Kuunda upya root filesystem zilizogawanywa za embedded
+### Kuunda upya mifumo ya faili ya root iliyogawanywa kwenye vifaa vilivyopachikwa
 
-Ikiwa raw eMMC/SSD dump ina header halali ya filesystem lakini offsets za metadata zake zinafika nje ya mipaka ya partition inayotarajiwa, usiihukumu mara moja kuwa imeharibika. Boot code ya embedded inaweza kuunganisha kifaa halisi cha root kutoka kwenye safu nyingi za kimwili kwa kutumia Device Mapper, kwa hiyo kutoa data kutoka kwenye partition moja ya GPT hutoa sehemu ya kwanza pekee.<sup>[[9]](#references)</sup>
+Ikiwa dump ghafi ya eMMC/SSD ina kichwa halali cha mfumo wa faili lakini offsets za metadata zake zinaishia nje ya ukubwa wa kawaida wa partition, usiihitimishe mara moja kuwa imeharibika. Msimbo wa boot wa vifaa vilivyopachikwa unaweza kuunda kifaa halisi cha root kutoka kwenye safu nyingi za kimwili kwa kutumia Device Mapper, kwa hiyo kutoa data kutoka kwenye partition moja ya GPT hutoa sehemu ya kwanza pekee.<sup>[[9]](#references)</sup>
 
-#### Tathmini ya awali ya picha nzima ya media
+#### Kuchunguza picha kamili ya media
 
-Kwanza hakikisha kwamba upataji umekamilika, ukubwa wa faili ni thabiti, na hakuna mchakato wa kuandika unaoendelea kuitumia. Ikiwa jina la faili linaonyesha anwani ya mwanzo/mwisho, linganisha safu hiyo na idadi halisi ya byte. Rejesha GPT katika hali ya kusoma pekee na uambatishe safu inayohitajika tu; **usiendeshe** `vgchange -ay` kwenye physical volume isiyoaminika kwenye workstation, kwa sababu migongano ya volume group na uandishi usiokusudiwa vinaweza kutokea.<sup>[[9]](#references)</sup>
+Kwanza thibitisha kuwa upataji umekamilika, ukubwa wa picha ni thabiti, na hakuna mchakato wa uandishi unaoishikilia. Ikiwa jina la faili lina anwani ya mwanzo/mwisho, linganisha masafa hayo na idadi halisi ya baiti. Rejesha GPT katika hali ya kusoma pekee na uambatishe masafa yanayohitajika pekee; **usiendeshe** `vgchange -ay` dhidi ya volume halisi isiyoaminika kwenye workstation kwa sababu migongano ya vikundi vya volume na uandishi usiokusudiwa vinaweza kutokea.<sup>[[9]](#references)</sup>
 
 ```bash
 stat -c '%s bytes' firmware.bin
@@ -236,20 +237,20 @@ sudo losetup --find --show --read-only \
   --offset "$PART_OFF" --sizelimit "$PART_LEN" firmware.bin
 ```
 
-Pendelea kutumia VM inayoweza kutupwa ikiwa logic ya awali ya init au stack ya LVM inahitaji kuona image nzima. Boot logs za kihistoria kutoka kwenye partition ya kawaida ya boot ni muhimu hasa: bootloader huenda ilinakili offsets za proprietary-container, urefu wa components, uteuzi wa slot, kanuni za alignment na uthibitishaji wa signature. Tumia thamani hizo kutenganisha command line/kernel/initramfs iliyopachikwa, kisha thibitisha kila matokeo kivyake kwa `file`, magic bytes na `binwalk`; kusoma hadi mwisho wa container kunaweza kuongeza initrd, object ya ACPI au signature kwenye kernel kimakosa.<sup>[[9]](#references)</sup>
+Pendelea VM ya muda unapohitaji logic ya awali ya init au stack ya LVM kuona image nzima. Kumbukumbu za zamani za boot kutoka partition ya kawaida ya boot zina manufaa hasa: huenda bootloader ilirekodi offsets za proprietary container, urefu wa components, uteuzi wa slot, kanuni za alignment, na uthibitishaji wa signature. Tumia thamani hizo kutenganisha command line/kernel/initramfs iliyopachikwa, kisha thibitisha kila towe kivyake kwa `file`, magic bytes na `binwalk`; kusoma hadi mwisho wa container kunaweza kuambatanisha initrd, object ya ACPI, au signature kwenye kernel kimakosa.<sup>[[9]](#references)</sup>
 
 #### Rejesha ramani ya block ya wakati wa boot
 
-Toa initramfs ya kernel na uchanganue kinyume `/init` yake pamoja na library zozote za storage. Katika [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/), fuata marejeleo ya string za `/proc/cmdline`, `/dev/mapper/`, `dmsetup`, `BLKGETSIZE64` na njia za partition; kisha fuatilia code inayochagua slot amilifu ya A/B na kuunda jedwali. Sehemu nzuri za kuanzia katika radare2 ni `r2 -A init`, `afl`, `pdf @ main` na `pdf @ fcn.xxxxx`.<sup>[[9]](#references)</sup>
+Toa initramfs ya kernel na fanya reverse engineering ya `/init` yake pamoja na maktaba zozote za storage. Katika [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/), fuatilia marejeo ya strings za `/proc/cmdline`, `/dev/mapper/`, `dmsetup`, `BLKGETSIZE64`, na njia za partition; kisha fuatilia code inayochagua slot hai ya A/B na kuunda table. Sehemu nzuri za kuanzia katika radare2 ni `r2 -A init`, `afl`, `pdf @ main`, na `pdf @ fcn.xxxxx`.<sup>[[9]](#references)</sup>
 
-Target ya linear huweka masafa yanayofuatana ya kifaa pepe kwenye masafa ya kifaa kimoja au zaidi vinavyotoa hifadhi. Jedwali la sehemu mbili lililorejeshwa huwa na muundo huu (nafasi na urefu wote ni sekta za baiti 512):<sup>[[9]](#references)[[10]](#references)</sup>
+Linear target huweka safu zinazofuatana za kifaa pepe kwenye safu za kifaa kimoja au zaidi vinavyohifadhi data. Table ya sehemu mbili iliyorejeshwa kwa kawaida huwa na muundo huu (nafasi na urefu wote ni sekta za baiti 512):<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```text
 0              <seg1_sectors> linear /dev/mmcblk0p2 0
 <seg1_sectors> <seg2_sectors> linear /dev/mmcblk0p4 <tail_start>
 ```
 
-Rudia hesabu za machine-code kwa usahihi, ikijumuisha upana wa integer, shifts na ubadilishaji wa vipimo. Kwa mfano, usemi ufuatao hukata ukubwa wa byte hadi mpaka wa 4-KiB na ndipo tu kuubadilisha kuwa sectors za 512-byte; kuubadilisha na `p4_bytes // 512` huhamisha sehemu ya mwisho iliyochaguliwa kwa `p4_bytes % 4096` kila mara partition inapokuwa haijaambatanishwa na page.<sup>[[9]](#references)</sup>
+Rudia hesabu za machine-code kwa usahihi, ikijumuisha upana wa integer, shifts, na ubadilishaji wa vipimo. Kwa mfano, usemi ufuatao huzungusha ukubwa wa byte kwenda chini hadi mpaka wa 4-KiB, kisha tu huubadilisha kuwa sectors za 512-byte; kuubadilisha na `p4_bytes // 512` huhamisha sehemu ya mwisho iliyochaguliwa kwa `p4_bytes % 4096` kila mara partition inapokuwa haijalinganishwa na page.<sup>[[9]](#references)</sup>
 
 ```python
 p4_sectors = (p4_bytes >> 12) << 3
@@ -257,11 +258,11 @@ effective_bytes = p4_sectors * 512
 tail_start = effective_bytes - tail_distance
 ```
 
-Rekonstrua picha bapa ya uchanganuzi kwa kunakili safu kwa mpangilio wa jedwali, kwa kutumia vipande vyenye ukubwa uliowekewa kikomo badala ya kupakia dump nzima ya media kwenye memory. Hii pia huepusha kuunda vifaa vya mapper upande wa host. Hifadhi offsets zilizotokana na GPT, idadi za sekta zilizogeuzwa, na urefu wa matokeo kama madai tofauti.<sup>[[9]](#references)</sup>
+Jenga upya image tambarare ya uchanganuzi kwa kunakili ranges kwa mpangilio wa jedwali, ukitumia chunks zenye ukubwa uliowekewa kikomo badala ya kupakia media dump nzima kwenye memory. Hii pia huepusha kuunda mapper devices upande wa host. Weka offsets zilizotokana na GPT, idadi za sectors zilizogeuzwa, na urefu wa output kama assertions tofauti.<sup>[[9]](#references)</sup>
 
-#### Tofautisha uharibifu na hitilafu ya mara kwa mara ya uundaji upya
+#### Tofautisha uharibifu na kosa la mara kwa mara la ujenzi upya
 
-Kwa SquashFS, hakikisha kuwa magic ni `hsqs` na usimbue uga wa little-endian wa biti 64 `bytes_used` kwenye offset 40 ya superblock kabla ya kuendesha `unsquashfs`. Ikiwa uchimbuaji utashindwa katika miundo kadhaa isiyohusiana, tafuta katika eneo pana linalozunguka nafasi zinazotarajiwa na utake wagombeaji wenye miundo thabiti: block ya metadata inayoweza decompressed, maingizo kadhaa ya saraka yanayofuatana na yaliyo halali, uga za inode zinazowezekana, inode ya root inayolingana na idadi ya inode, au muundo halali wa integrity-metadata. Kulingana na ulinganifu mmoja wa magic pekee hakutoshi.<sup>[[9]](#references)</sup>
+Kwa SquashFS, kagua magic ya `hsqs` na decode field ya `bytes_used` ya little-endian yenye biti 64 kwenye offset 40 ya superblock kabla ya kuendesha `unsquashfs`. Ikiwa extraction itashindwa katika miundo kadhaa isiyohusiana, tafuta kwenye window pana inayozunguka nafasi zinazotarajiwa na uhakikishe kuna candidates imara za kimuundo: metadata block inayoweza decompressiwa, directory entries kadhaa halali zinazofuatana, inode fields zinazoonekana kuwa zinazowezekana, root inode inayolingana na idadi ya inode, au muundo halali wa integrity metadata. Kulingana na magic match moja pekee haitoshi.<sup>[[9]](#references)</sup>
 
 ```python
 import struct
@@ -274,17 +275,19 @@ nominal_end = (bytes_used + 4095) & ~4095
 print(hex(bytes_used), hex(nominal_end))
 ```
 
-Wakati delta ileile yenye saini inafanya miundo huru iwe halali—kwa mfano, metadata ya directory na rekodi ya verity—chanzo kinachowezekana zaidi ni hitilafu ya kimfumo ya mwanzo wa segment badala ya bytes zilizokosekana. Rudi kwenye hesabu iliyogeuzwa na utafute mabaki yaliyotupwa, signedness, overflow, au rounding ya sector/page kabla ya kujaribu kurejesha orphan au kurekebisha metadata ya filesystem.<sup>[[9]](#references)</sup>
+Wakati delta ileile yenye saini inafanya miundo huru kuwa halali—kwa mfano, metadata ya saraka na rekodi ya verity—sababu inayowezekana ni hitilafu ya kimfumo ya mwanzo wa segment, badala ya kukosekana kwa baiti. Rudi kwenye hesabu iliyogeuzwa na utafute mabaki yaliyotupiliwa mbali, signedness, overflow au rounding ya sector/page kabla ya kujaribu kurejesha orphan au kufanya patching ya metadata ya filesystem.<sup>[[9]](#references)</sup>
 
-Hatimaye, weka mipaka ya ulinzi tofauti: volumes za LUKS zilizofungwa kwa TPM hulinda usiri wa data, ilhali mapping ya dm-verity yenye saini hulinda integrity ya root filesystem. TPM ya software haiwezi kurejesha key iliyofungwa kwa TPM halisi ya awali, na kuwasha SquashFS iliyorekebishwa kupitia init ya utafiti pekee inayoacha uthibitishaji wa verity hakubuni saini yake wala kuvunja dm-verity.<sup>[[9]](#references)</sup>
+Hatimaye, weka mipaka ya ulinzi ikiwa tofauti: volumes za LUKS zilizofungwa kwa TPM hulinda usiri wa data, ilhali mapping ya dm-verity iliyotiwa saini hulinda uadilifu wa root filesystem. TPM ya software haiwezi kurejesha key iliyofungwa kwa TPM halisi ya awali, na kuwasha SquashFS iliyorekebishwa kupitia init ya utafiti pekee inayoacha uthibitishaji wa verity hakufanyi saini yake kuwa bandia wala hakuvunji dm-verity.<sup>[[9]](#references)</sup>
 
-## Analyzing Firmware
+## Kuchambua Firmware
 
-Firmware inapopatikana, ni muhimu kuichambua ili kuelewa muundo wake na udhaifu unaoweza kuwepo. Mchakato huu unahusisha kutumia zana mbalimbali kuchanganua na kutoa data muhimu kutoka kwenye image ya firmware.
+Mara firmware inapopatikana, ni muhimu kuichanganua ili kuelewa muundo wake na udhaifu unaoweza kuwapo. Mchakato huu unahusisha kutumia zana mbalimbali kuchambua na kutoa data muhimu kutoka kwenye picha ya firmware.
 
-### Zana za Awali za Uchambuzi
+### Zana za Uchambuzi wa Awali
 
-Seti ya amri imetolewa kwa ukaguzi wa awali wa faili ya binary (inayorejelewa kama `<bin>`). Amri hizi husaidia kutambua aina za faili, kutoa strings, kuchanganua data ya binary, na kuelewa maelezo ya partition na filesystem:
+Kwa zana na usomaji zaidi kuhusu uchambuzi wa firmware, angalia [sehemu ya firmware katika Zana na Rasilimali za Watu Wengine](../../generic-methodologies-and-resources/third-party-tools-and-resources.md#firmware).
+
+Seti ya amri imetolewa kwa ukaguzi wa awali wa faili ya binary (inayorejelewa kama `<bin>`). Amri hizi husaidia kutambua aina za faili, kutoa strings, kuchambua data ya binary na kuelewa maelezo ya partitions na filesystem:
 
 ```bash
 file <bin>
@@ -295,13 +298,13 @@ hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 
-Ili kutathmini hali ya usimbaji fiche ya image, hukaguliwa **entropy** kwa kutumia `binwalk -E <bin>`. **Entropy** ya chini huashiria kutokuwepo kwa usimbaji fiche, ilhali **entropy** ya juu huashiria uwezekano wa usimbaji fiche au ukandamizaji.
+Ili kutathmini hali ya usimbaji fiche wa image, **entropy** hukaguliwa kwa kutumia `binwalk -E <bin>`. Entropy ya chini hudokeza ukosefu wa usimbaji fiche, ilhali entropy ya juu huashiria uwezekano wa usimbaji fiche au ukandamizaji.
 
-Kwa kutoa **embedded files**, inapendekezwa kutumia zana na nyenzo kama nyaraka za **file-data-carving-recovery-tools** na **binvis.io** kwa ukaguzi wa faili.
+Kwa kutoa **faili zilizopachikwa**, inapendekezwa kutumia zana na nyenzo kama nyaraka za **file-data-carving-recovery-tools** na **binvis.io** kwa ukaguzi wa faili.
 
-### Kutoa Filesystem
+### Kutoa Mfumo wa Faili
 
-Kwa kutumia `binwalk -ev <bin>`, kwa kawaida mtu anaweza kutoa filesystem, mara nyingi kwenye saraka inayopewa jina la aina ya filesystem (kwa mfano, squashfs, ubifs). Hata hivyo, **binwalk** inaposhindwa kutambua aina ya filesystem kwa sababu ya kukosekana kwa magic bytes, utoaji wa faili kwa mikono huhitajika. Hii huhusisha kutumia `binwalk` kupata offset ya filesystem, kisha kutumia amri ya `dd` kuchonga filesystem:
+Kwa kutumia `binwalk -ev <bin>`, kwa kawaida mtu anaweza kutoa mfumo wa faili, mara nyingi kwenye folda iliyopewa jina la aina ya mfumo wa faili (kwa mfano, squashfs, ubifs). Hata hivyo, **binwalk** inaposhindwa kutambua aina ya mfumo wa faili kwa sababu magic bytes hazipo, utoaji wa faili kwa mkono unahitajika. Hii huhusisha kutumia `binwalk` kutafuta offset ya mfumo wa faili, kisha kutumia amri ya `dd` kutoa mfumo huo wa faili:
 
 ```bash
 $ binwalk DIR850L_REVB.bin
@@ -309,43 +312,43 @@ $ binwalk DIR850L_REVB.bin
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
 
-Baadaye, kulingana na aina ya filesystem (k.m., squashfs, cpio, jffs2, ubifs), hutumika commands tofauti ili kutoa maudhui kwa mikono.
+Baadaye, kulingana na aina ya filesystem (kwa mfano, squashfs, cpio, jffs2, ubifs), hutumika amri tofauti kutoa maudhui kwa mikono.
 
 ### Uchambuzi wa Filesystem
 
-Baada ya kutoa filesystem, huanza kutafuta dosari za usalama. Huchunguzwa daemons za mtandao zisizo salama, credentials zilizowekwa moja kwa moja kwenye code, API endpoints, utendaji wa update server, code ambayo haijacompile, startup scripts, na compiled binaries kwa ajili ya uchambuzi wa offline.
+Baada ya kutoa filesystem, utafutaji wa dosari za usalama huanza. Huchunguzwa daemoni za mtandao zisizo salama, credentials zilizowekwa moja kwa moja kwenye code, API endpoints, utendaji wa seva za masasisho, code ambayo haijacompile, startup scripts na compiled binaries kwa ajili ya uchambuzi wa offline.
 
-**Maeneo muhimu** na **vitu** vya kukagua ni pamoja na:
+**Maeneo muhimu** na **vipengee** vya kukagua ni pamoja na:
 
 - **etc/shadow** na **etc/passwd** kwa credentials za watumiaji
-- Vyeti na keys za SSL katika **etc/ssl**
-- Configuration na script files kwa uwezekano wa udhaifu
-- Binaries zilizopachikwa kwa uchambuzi zaidi
-- Web servers na binaries zinazotumiwa sana kwenye vifaa vya IoT
+- Vyeti vya SSL na keys katika **etc/ssl**
+- Faili za usanidi na script kwa uwezekano wa udhaifu
+- Embedded binaries kwa uchambuzi zaidi
+- Web servers na binaries zinazotumika kwa kawaida katika vifaa vya IoT
 
-Tools kadhaa husaidia kufichua taarifa nyeti na udhaifu ndani ya filesystem:
+Zana kadhaa husaidia kugundua taarifa nyeti na udhaifu ndani ya filesystem:
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) na [**Firmwalker**](https://github.com/craigz28/firmwalker) kwa kutafuta taarifa nyeti
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) na [**Firmwalker**](https://github.com/craigz28/firmwalker) kwa utafutaji wa taarifa nyeti
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) kwa uchambuzi wa kina wa firmware
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), na [**EMBA**](https://github.com/e-m-b-a/emba) kwa uchambuzi wa static na dynamic
 
 ### Ukaguzi wa Usalama wa Compiled Binaries
 
-Source code na compiled binaries zinazopatikana kwenye filesystem lazima zichunguzwe kwa makini ili kubaini udhaifu. Tools kama **checksec.sh** kwa Unix binaries na **PESecurity** kwa Windows binaries husaidia kutambua binaries zisizolindwa ambazo zinaweza kutumiwa vibaya.
+Source code na compiled binaries zinazopatikana kwenye filesystem lazima zikaguliwe kwa udhaifu. Zana kama **checksec.sh** kwa Unix binaries na **PESecurity** kwa Windows binaries husaidia kutambua binaries zisizo na ulinzi ambazo zinaweza kutumiwa vibaya.
 
-## Kukusanya cloud config na credentials za MQTT kupitia tokens zinazotokana na URL
+## Kukusanya usanidi wa cloud na credentials za MQTT kupitia tokeni za URL zinazotokana na device ID
 
-Hubs nyingi za IoT huchukua configuration ya kila kifaa kutoka kwenye cloud endpoint inayoonekana hivi:<sup>[[5]](#references)</sup>
+Hubs nyingi za IoT hupata usanidi wa kila kifaa kutoka kwenye cloud endpoint inayofanana na hii:<sup>[[5]](#references)</sup>
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
-Wakati wa uchambuzi wa firmware unaweza kugundua kuwa `<token>` hutokana na kifaa chenyewe kwa kutumia device ID na secret iliyowekwa moja kwa moja kwenye code, kwa mfano:
+Wakati wa uchambuzi wa firmware, unaweza kugundua kuwa `<token>` hutokana na device ID ndani ya kifaa kwa kutumia secret iliyowekwa moja kwa moja kwenye code, kwa mfano:
 
-- token = MD5( deviceId || STATIC_KEY ) na huwakilishwa kama hex ya herufi kubwa
+- token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
 
-Muundo huu humwezesha yeyote anayejua deviceId na STATIC_KEY kutengeneza upya URL na kupata cloud config, ambayo mara nyingi hufichua credentials za MQTT zilizo kwenye plaintext na topic prefixes.
+Muundo huu humwezesha mtu yeyote anayepata deviceId na STATIC_KEY kutengeneza upya URL na kupakua usanidi wa cloud, ambao mara nyingi hufichua credentials za MQTT zilizo katika maandishi wazi na viambishi awali vya topic.
 
-Utaratibu wa vitendo:
+Mtiririko wa kazi wa vitendo:
 
 1) Toa deviceId kutoka kwenye UART boot logs
 
@@ -355,7 +358,7 @@ Utaratibu wa vitendo:
 picocom -b 115200 /dev/ttyUSB0
 ```
 
-- Tafuta mistari inayochapisha muundo wa URL ya cloud config na anwani ya broker, kwa mfano:
+- Tafuta mistari inayochapisha muundo wa URL ya usanidi wa cloud na anwani ya broker, kwa mfano:
 
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
@@ -364,9 +367,9 @@ MQTT: mqtt://mq-gw.vendor.tld:8001
 
 2) Rejesha STATIC_KEY na algorithm ya token kutoka kwenye firmware
 
-- Pakia binaries kwenye Ghidra/radare2 na utafute njia ya config ("/pf/") au matumizi ya MD5.
-- Thibitisha algorithm (k.m., MD5(deviceId||STATIC_KEY)).
-- Tengeneza token katika Bash na uandike digest kwa herufi kubwa:
+- Pakia binaries kwenye Ghidra/radare2 na utafute config path ("/pf/") au matumizi ya MD5.
+- Thibitisha algorithm (kwa mfano, MD5(deviceId||STATIC_KEY)).
+- Tengeneza token kwa Bash na uweke digest kwa herufi kubwa:
 
 ```bash
 DEVICE_ID="d88b00112233"
@@ -374,9 +377,9 @@ STATIC_KEY="cf50deadbeefcafebabe"
 printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
 
-3) Kusanya config ya cloud na credentials za MQTT
+3) Kusanya usanidi wa cloud na taarifa za uthibitishaji za MQTT
 
-- Unda URL na upakue JSON kwa curl; ichanganue kwa jq ili kutoa secrets:
+- Unda URL na upakue JSON kwa kutumia curl; ichanganue kwa jq ili kutoa siri:
 
 ```bash
 API_HOST="https://api.vendor.tld"
@@ -385,9 +388,9 @@ curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
 
-4) Tumia vibaya MQTT ya maandishi wazi na ACL dhaifu za topic (ikiwa zipo)
+4) Tumia vibaya MQTT ya maandishi wazi na ACL za topic dhaifu (ikiwa zipo)
 
-- Tumia credentials zilizopatikana kujiandikisha kwenye topics za maintenance na kutafuta matukio nyeti:
+- Tumia credentials zilizopatikana kufanya subscribe kwenye maintenance topics na kutafuta matukio nyeti:
 
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
@@ -395,10 +398,10 @@ mosquitto_sub -h <broker> -p <port> -V mqttv311 \
   -t "<topic_prefix>/<deviceId>/admin" -v
 ```
 
-5) Orodhesha vitambulisho vya vifaa vinavyotabirika (kwa kiwango kikubwa, ukiwa na idhini)
+5) Orodhesha device IDs zinazotabirika (kwa kiwango kikubwa, ukiwa na idhini)
 
-- Mifumo mingi hujumuisha baiti za OUI ya mtengenezaji/bidhaa/aina zikifuatiwa na kiambishi tamati cha mfuatano.
-- Unaweza kupitia vitambulisho vinavyowezekana, kutengeneza tokens na kupata configs kwa njia ya programu:
+- Mifumo mingi huweka byte za OUI/product/type za vendor, zikifuatiwa na kiambishi tamati cha mfuatano.
+- Unaweza kujaribu IDs zinazowezekana kwa mfululizo, kupata tokens na kupakua configs kwa njia ya programu:
 
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
@@ -409,60 +412,61 @@ for SUF in $(seq -w 000000 0000FF); do
 done
 ```
 
-Vidokezo
-- Pata idhini ya wazi kila wakati kabla ya kujaribu kufanya enumeration kwa wingi.
-- Inapowezekana, pendelea emulation au static analysis ili kupata siri bila kurekebisha hardware lengwa.
+Maelezo
+- Pata idhini ya wazi kila wakati kabla ya kujaribu kufanya enumeration ya kiwango kikubwa.
+- Pendelea emulation au static analysis ili kurejesha siri bila kurekebisha hardware lengwa inapowezekana.
 
-Mchakato wa ku-emulate firmware huwezesha **dynamic analysis** ya uendeshaji wa kifaa au programu mahususi. Mbinu hii inaweza kukumbana na changamoto zinazohusiana na hardware au utegemezi wa architecture, lakini kuhamisha root filesystem au binary mahususi kwenye kifaa chenye architecture na endianness zinazolingana, kama Raspberry Pi, au kwenye virtual machine iliyotayarishwa awali, kunaweza kurahisisha majaribio zaidi.
 
-### Ku-emulate Binary Mahususi
+Mchakato wa ku-emulate firmware huwezesha **dynamic analysis** ya utendakazi wa kifaa au programu mahususi. Mbinu hii inaweza kukumbana na changamoto zinazohusiana na utegemezi wa hardware au usanifu, lakini kuhamisha root filesystem au binary mahususi kwenye kifaa chenye usanifu na endianness inayolingana, kama Raspberry Pi, au kwenye virtual machine iliyoundwa mapema kunaweza kurahisisha majaribio zaidi.
 
-Unapochunguza programu moja, ni muhimu kutambua endianness na CPU architecture ya programu hiyo.
+### Kuiga Binary za Programu Binafsi
 
-#### Mfano wa MIPS Architecture
+Unapochunguza programu moja, ni muhimu kutambua endianness na usanifu wa CPU wa programu hiyo.
 
-Ili ku-emulate binary ya MIPS architecture, unaweza kutumia amri:
+#### Mfano wa Usanifu wa MIPS
+
+Ili ku-emulate binary ya usanifu wa MIPS, unaweza kutumia amri:
 
 ```bash
 file ./squashfs-root/bin/busybox
 ```
 
-Na ili kusakinisha zana muhimu za uigaji:
+Na kusakinisha zana muhimu za uigaji:
 
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
 
-Kwa MIPS (big-endian), hutumika `qemu-mips`; kwa binaries za little-endian, chaguo ni `qemu-mipsel`.
+Kwa MIPS (big-endian), hutumika `qemu-mips`, na kwa binary za little-endian, chaguo litakuwa `qemu-mipsel`.
 
 #### Uigaji wa Usanifu wa ARM
 
-Kwa binaries za ARM, mchakato unafanana, huku emulator ya `qemu-arm` ikitumika kwa uigaji.
+Kwa binary za ARM, mchakato ni sawa, huku emulator ya `qemu-arm` ikitumika kwa uigaji.
 
-### Uigaji Kamili wa Mfumo
+### Uigaji wa Mfumo Kamili
 
-Zana kama [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), na nyinginezo hurahisisha uigaji kamili wa firmware, huendesha mchakato kiotomatiki na kusaidia katika uchanganuzi wa wakati wa utekelezaji.
+Zana kama [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) na nyinginezo hurahisisha uigaji kamili wa firmware, kwa kujiendeshea mchakato na kusaidia uchanganuzi wa nguvu.
 
 ### Kujenga upya mifumo ya faili ya root iliyogawanywa na kuthibitishwa kwa ajili ya uigaji
 
-Ikiwa superblock ya SquashFS inaweza kusomeka lakini offsets za inode, directory au jedwali la fragment haziwezekani, usiibadilishe `unsquashfs` mara moja. Fanya reverse engineering ya binary ya boot ya mapema na uunde upya grafu ya vifaa vya block inayoundwa nayo: mifumo iliyopachikwa inaweza kuonyesha partition ya root inayoonekana ya kawaida, lakini ikaunda mfumo halisi wa faili kwa kutumia mapping ya `dm-linear` inayoongeza sekta zilizokopwa kutoka partition nyingine. Ukaguzi wa superblock pekee unaweza kufaulu hata kama kila block ya metadata inayofuata imehamishwa.<sup>[[11]](#references)</sup>
+Ikiwa superblock ya SquashFS inaweza kusomeka lakini offsets za inode, directory au fragment-table haziwezekani, usifanye marekebisho kwa `unsquashfs` mara moja. Reverse engineer binary ya early boot na uzalishe upya grafu ya block-device inayoundwa nayo: mifumo iliyopachikwa inaweza kuonyesha partition ya root ya kawaida lakini ikaunda mfumo halisi wa faili kwa kutumia mapping ya `dm-linear` inayoongeza sectors zilizokopwa kutoka partition nyingine. Ukaguzi wa superblock pekee unaweza kufanikiwa hata kama kila block ya metadata inayofuata imehamishwa.<sup>[[11]](#references)</sup>
 
-Hifadhi hesabu za firmware kama zilivyo. Hasa, bainisha kama urefu ni bytes, sekta za biti 512 au kurasa za 4 KiB; rudia shifts na truncation kwa mpangilio wake wa awali; na zingatia maeneo ya mwisho yanayotegemea bank katika miundo ya A/B. Kwa mfano, `(partition_bytes >> 12) << 3` kwanza hukata thamani hadi kwenye mpaka wa 4 KiB, kisha huonyesha matokeo kama sekta za biti 512; kuibadilisha na `partition_bytes // 512` kunaweza kusogeza eneo lililoongezwa kwa kilobytes chache na kuharibu majedwali yote ya SquashFS yanayofuata.<sup>[[11]](#references)</sup>
+Hifadhi hesabu za firmware kama zilivyo. Hasa, tambua ikiwa urefu umeonyeshwa kwa bytes, sectors za 512-byte au kurasa za 4 KiB; zalisha upya shifts na truncation kwa mpangilio wake wa awali; na zingatia maeneo ya mwisho yanayotegemea bank katika mipangilio ya A/B. Kwa mfano, `(partition_bytes >> 12) << 3` kwanza hukata hadi mpaka wa 4 KiB, kisha huonyesha matokeo kwa sectors za 512-byte; kuibadilisha na `partition_bytes // 512` kunaweza kusogeza eneo lililoongezwa kwa kilobytes chache na kuharibu jedwali zote za SquashFS zinazofuata.<sup>[[11]](#references)</sup>
 
-Mtiririko mzuri wa uthibitishaji ni:<sup>[[11]](#references)</sup>
+Mtiririko mzuri wa kazi wa uthibitishaji ni:<sup>[[11]](#references)</sup>
 
-1. Pata kila segment ya `dm-linear`—kifaa chanzo, sekta ya kuanzia na urefu—kutoka kwenye binary ya verifier/init.
-2. Unganisha au mapisha maeneo hayo bila kubadilisha semantiki zake za alignment.
-3. Ikiwa uchimbuaji bado unashindwa, tafuta ndani ya eneo dogo tu linalozunguka mpaka uliotabiriwa, na hitaji miundo kadhaa halali ya metadata mfululizo badala ya kukubali superblock inayoonekana kuwa sahihi pekee.
-4. Tumia `unsquashfs` ambayo haijabadilishwa kwenye image iliyojengwa upya; kufanikiwa kupitia directories na fragments zote ni ushahidi imara zaidi kuliko `unsquashfs -stat`.
+1. Pata segmenti za kila `dm-linear` pamoja na source device, start sector na urefu wake kutoka kwenye binary ya verifier/init.
+2. Unganisha au mapua extents bila kubadilisha semantiki zake za alignment.
+3. Ikiwa uchimbaji bado unashindwa, tafuta ndani ya eneo dogo tu karibu na mpaka uliokadiriwa, na uhakikishe kuna miundo kadhaa halali ya metadata mfululizo badala ya kukubali superblock inayoonekana kuwa sawa pekee.
+4. Endesha `unsquashfs` ambayo haijafanyiwa marekebisho dhidi ya image iliyojengwa upya; kufanikiwa kupitia directory na fragment zote ni ushahidi thabiti zaidi kuliko `unsquashfs -stat`.
 
 #### Ubadilishaji wa dm-verity unaodhibitiwa na mchambuzi
 
-Mchambuzi anapodhibiti kernel ya QEMU, initramfs na diski pepe, root iliyorekebishwa inaweza kuwashwa kwa kubadilisha PID 1 ya uthibitishaji ya vendor na init ndogo iliyounganishwa statically. Huu ni **ubadilishaji wa boot chain wa maabara**, si kuvunja dm-verity, sahihi yake ya RSA, Secure Boot au ufunguo uliofungwa kwa TPM.<sup>[[11]](#references)</sup>
+Mchambuzi anapodhibiti kernel ya QEMU, initramfs na diski pepe, root iliyorekebishwa inaweza kuwashwa kwa kubadilisha PID 1 ya uthibitishaji ya mtengenezaji na init ndogo iliyounganishwa kwa statically. Huu ni **lab boot-chain substitution**, si kuvunja dm-verity, saini yake ya RSA, Secure Boot au ufunguo uliofungwa kwenye TPM.<sup>[[11]](#references)</sup>
 
-Init mbadala inapaswa kuiga sehemu za kiutendaji za njia ya awali ya boot: mount `devtmpfs`, kuita `setsid()`, kuunganisha `/dev/console` na file descriptors 0–2, mount `/proc` na `/sys`, kusubiri kifaa cha block kilichotolewa, mount root iliyohaririwa kwa hali ya kusoma pekee, kutenganisha pseudo-filesystems za root ya awali, kuhamisha mount mpya juu ya `/`, kutumia `chroot`, na kutekeleza `/sbin/init` ya awali ya firmware kwa `execve()`. Kutenganisha `/dev`, `/proc` na `/sys` **kabla** ya `MS_MOVE` huepusha kutenganisha kwa bahati mbaya mount points za root mpya.<sup>[[11]](#references)</sup>
+Init mbadala inapaswa kuiga sehemu za kiutendaji za njia ya awali ya boot: mount `devtmpfs`, ita `setsid()`, unganisha `/dev/console` na file descriptor 0–2, mount `/proc` na `/sys`, subiri kifaa cha block kilichotolewa, mount root iliyohaririwa iwe ya kusoma pekee, detach pseudo-filesystem za old-root, hamisha mount mpya juu ya `/`, tekeleza `chroot`, kisha tekeleza `execve()` ya `/sbin/init` asilia ya firmware. Kutenganisha `/dev`, `/proc` na `/sys` **kabla** ya `MS_MOVE` huepusha kutenganisha kwa bahati mbaya mount point za root mpya.<sup>[[11]](#references)</sup>
 
-Weka hali ya kifaa inayoweza kubadilika tofauti na root iliyorekebishwa isiyoweza kubadilika. Overlay ya qcow2 inaweza kuhifadhi hali ya LVM ya diski asili huku diski ya pili ya virtio ya kusoma pekee ikitoa SquashFS iliyohaririwa:<sup>[[11]](#references)</sup>
+Weka hali ya kifaa inayoweza kubadilika tofauti na root isiyobadilika iliyorekebishwa. Overlay ya qcow2 inaweza kuhifadhi hali ya LVM ya diski asilia, huku diski ya pili ya virtio ya kusoma pekee ikitoa SquashFS iliyohaririwa:<sup>[[11]](#references)</sup>
 
 ```bash
 qemu-img create -f qcow2 -F raw -b emmc.raw overlay.qcow2
@@ -472,9 +476,9 @@ qemu-system-x86_64 ... -kernel bzImage -initrd custom-initramfs.cpio.gz \
   -drive if=virtio,format=raw,readonly=on,file=rootfs-edited.squashfs
 ```
 
-#### Utatuzi wa hitilafu za hali ya image nje ya mtandao
+#### Utatuzi wa hitilafu za hali ya image ukiwa nje ya mtandao
 
-Kagua hali endelevu nje ya guest wakati kuwasha kunapochelewa, script za uanzishaji zinapofuta data, au logging ya console isiyotegemewa inapoficha hitilafu. Usiambatishe overlay inayotumiwa na VM inayoendeshwa; ifichue kwa `qemu-nbd`, zuia ugunduzi wa LVM kwenye partition ya NBD iliyokusudiwa, na uzime volume group kabla ya kuikata.<sup>[[11]](#references)</sup>
+Kagua hali endelevu nje ya guest wakati kuwaka kwa polepole, scripts za kuanzisha zinazoharibu, au logging ya console isiyotegemewa kunaficha hitilafu. Usiambatishe kamwe overlay inayotumiwa na VM inayoendelea kufanya kazi; ifanye ipatikane kupitia `qemu-nbd`, zuia ugunduzi wa LVM kwenye partition ya NBD iliyokusudiwa, na uzime volume group kabla ya kukata muunganisho wake.<sup>[[11]](#references)</sup>
 
 ```bash
 sudo modprobe nbd max_part=16
@@ -485,17 +489,17 @@ sudo vgchange -an VG_NAME
 sudo qemu-nbd --disconnect /dev/nbd0
 ```
 
-Kwa utenganishaji wa hitilafu unaoweza kurudiwa, andika faili za alama zenye mihuri ya muda kwenye volume thabiti inayoweza kuandikiwa, kisha uzithibitishe ukiwa offline; `/dev/kmsg`, FIFOs na consoles za muda zinaweza kutoa matokeo hasi ya uongo kutokana na rate limiting au mchakato kufa mapema. Pia linganisha interfaces halisi katika tabaka mbalimbali kabla ya kubadilisha msimbo usiohusika: `uname -r` dhidi ya `/lib/modules/`, vipengele vya ext4 vilivyo kwenye diski dhidi ya usanidi wa kernel, na kizazi cha Mesa `libGL` dhidi ya DRI driver ABI na majina ya driver yanayotokana na PCI. Kipengele kinaweza kuwepo na hata `dlopen()` ikafanikiwa, lakini bado kisiweze kutumika kwa sababu mtumiaji wake anatarajia ABI tofauti.<sup>[[11]](#references)</sup>
+Kwa utengaji wa hitilafu unaoweza kurudiwa, andika faili za alama zenye mihuri ya muda kwenye volume thabiti inayoweza kuandikiwa na uzihakiki ukiwa offline; `/dev/kmsg`, FIFO na konsoli za muda zinaweza kusababisha matokeo hasi ya uongo kwa sababu ya udhibiti wa kasi au mchakato kufa mapema. Pia linganisha interfaces halisi katika tabaka zote kabla ya kubadilisha msimbo usiohusiana: `uname -r` dhidi ya `/lib/modules/`, vipengele vya ext4 vilivyo kwenye diski dhidi ya usanidi wa kernel, na kizazi cha Mesa `libGL` dhidi ya ABI ya kiendeshi cha DRI na majina ya viendeshi yanayotokana na PCI. Kipengele kinaweza kuwepo na hata `dlopen()` kufanya kazi kwa mafanikio, lakini bado kisiweze kutumika kwa sababu sehemu inayokitumia inatarajia ABI tofauti.<sup>[[11]](#references)</sup>
 
 ## Dynamic Analysis kwa Vitendo
 
-Katika hatua hii, mazingira ya kifaa halisi au kilichoigwa hutumiwa kwa uchambuzi. Ni muhimu kudumisha ufikiaji wa shell kwa OS na filesystem. Uigaji huenda usiige kikamilifu mwingiliano wa hardware, hivyo wakati mwingine uigaji huhitaji kuwashwa upya. Uchambuzi unapaswa kuchunguza tena filesystem, kutumia vibaya webpages na huduma za mtandao zilizo wazi, na kuchunguza udhaifu wa bootloader. Majaribio ya uadilifu wa firmware ni muhimu ili kutambua udhaifu unaoweza kusababishwa na backdoor.
+Katika hatua hii, mazingira ya kifaa halisi au kilichoigwa hutumika kufanya uchanganuzi. Ni muhimu kudumisha ufikiaji wa shell kwenye OS na mfumo wa faili. Uigaji huenda usifanane kikamilifu na mwingiliano wa maunzi, hivyo huenda ikahitajika kuanzisha upya uigaji mara kwa mara. Uchanganuzi unapaswa kukagua tena mfumo wa faili, kutumia vibaya kurasa za wavuti na huduma za mtandao zilizo wazi, na kuchunguza udhaifu wa bootloader. Majaribio ya uadilifu wa firmware ni muhimu ili kubaini udhaifu unaoweza kusababishwa na backdoor.
 
 ## Mbinu za Runtime Analysis
 
 Runtime analysis huhusisha kuingiliana na mchakato au binary katika mazingira yake ya uendeshaji, kwa kutumia zana kama gdb-multiarch, Frida na Ghidra kuweka breakpoints na kutambua udhaifu kupitia fuzzing na mbinu nyingine.
 
-Kwa embedded targets zisizo na debugger kamili, **nakili `gdbserver` iliyounganishwa kwa njia tuli** kwenye kifaa na uunganishe nayo kwa mbali:<sup>[[6]](#references)</sup>
+Kwa targets zilizopachikwa zisizo na debugger kamili, **nakili `gdbserver` iliyounganishwa tuli** kwenye kifaa na uunganishe nayo kwa mbali:<sup>[[6]](#references)</sup>
 
 ```bash
 # On device
@@ -508,99 +512,99 @@ gdb-multiarch /path/to/targetd
 target remote <device-ip>:1234
 ```
 
-### Uchoraji wa ramani ya ujumbe wa Zigbee / radio-co-processor
+### Upangaji wa ujumbe wa Zigbee / radio-co-processor
 
-Kwenye IoT hubs, RF stack mara nyingi hugawanywa kati ya **radio MCU** na mchakato wa Linux userland. Workflow muhimu ni kuchora ramani ya njia:<sup>[[8]](#references)</sup>
+Kwenye hub za IoT, RF stack mara nyingi hugawanywa kati ya **radio MCU** na mchakato wa Linux userland. Njia muhimu ya kufuatilia ni:<sup>[[8]](#references)</sup>
 
-1. **RF frame** inayosafirishwa hewani
+1. **RF frame** hewani
 2. **controller-side parser** kwenye radio MCU
 3. **serial/UART text au TLV protocol** inayotumwa kwa Linux (kwa mfano `/dev/tty*`)
 4. **application dispatcher** kwenye daemon kuu
 5. **protocol-specific handler / state machine**
 
-Muundo huu unaleta maeneo mawili ya reversing badala ya moja. Ikiwa controller inabadilisha binary radio frames kuwa protocol ya maandishi kama `Group,Command,arg1,arg2,...`, tambua:
+Muundo huu huunda maeneo mawili ya kufanya reversing badala ya moja. Ikiwa controller inabadilisha binary radio frames kuwa protocol ya maandishi kama `Group,Command,arg1,arg2,...`, tafuta:
 
 - **message groups** na dispatch tables
-- Ujumbe upi unaweza kutoka kwenye **network** dhidi ya controller yenyewe
-- **manufacturer-specific discriminator fields** halisi (kwa mfano Zigbee `manufacturer_code` na `cluster_command` maalum)
-- Ni handlers zipi zinazofikiwa tu wakati wa **commissioning**, discovery, au awamu za kupakua firmware/model
+- Ujumbe gani unaweza kutoka **network** dhidi ya kutoka kwa controller yenyewe
+- Sehemu halisi za **manufacturer-specific discriminator** (kwa mfano Zigbee `manufacturer_code` na custom `cluster_command`)
+- Ni handlers zipi zinazoweza kufikiwa tu wakati wa **commissioning**, discovery, au awamu za upakuaji wa firmware/model
 
-Kwa Zigbee hasa, rekodi pairing traffic na uangalie kama kifaa lengwa bado kinatumia **Link Key** chaguomsingi `ZigBeeAlliance09`. Ikiwa ndivyo, kunasa commissioning traffic kunaweza kufichua **Network Key**. Zigbee 3.0 install codes hupunguza hatari hii, kwa hiyo hakikisha kama kifaa kilichojaribiwa kinazitekeleza kweli.
+Kwa Zigbee hasa, nasa pairing traffic na uangalie kama kifaa bado kinatumia **Link Key** ya chaguo-msingi `ZigBeeAlliance09`. Ikiwa ndivyo, kunusa commissioning traffic kunaweza kufichua **Network Key**. Zigbee 3.0 install codes hupunguza hatari hii, kwa hiyo bainisha kama kifaa kilichojaribiwa kinazitekeleza kweli.
 
 ### Manufacturer-specific protocol handlers na ufikikaji unaodhibitiwa na FSM
 
-Amri za vendor-specific Zigbee/ZCL mara nyingi huwa shabaha bora kuliko clusters zilizosanifishwa kwa sababu hupeleka data kwenye **custom parsing code** na **FSMs** za ndani zenye uthibitishaji ambao haujajaribiwa sana.<sup>[[8]](#references)</sup>
+Amri za Zigbee/ZCL za vendor-specific mara nyingi huwa lengo bora kuliko clusters zilizosanifishwa kwa sababu hutumia **custom parsing code** na **FSMs** za ndani zenye validation ambayo haijajaribiwa sana.<sup>[[8]](#references)</sup>
 
-Workflow ya vitendo:
+Mtiririko wa kazi wa vitendo:
 
-- Reverse command dispatcher hadi upate **vendor-only handler**.
-- Tambua majedwali ya **FSM state**, **event**, **check**, **action**, na **next-state**.
-- Tambua **transitional states** zinazoendelea zenyewe na matawi ya retry/error ambayo hatimaye hufanya reset au kufuta state inayodhibitiwa na mshambuliaji.
-- Thibitisha ni mabadilishano gani halali ya protocol yanahitajika ili kuweka daemon katika state inayoweza kudhulumiwa, badala ya kudhani handler yenye hitilafu inaweza kufikiwa wakati wowote.
+- Fanya reverse ya command dispatcher hadi upate **vendor-only handler**.
+- Pata jedwali za **FSM state**, **event**, **check**, **action**, na **next-state**.
+- Tambua **transitional states** zinazoendelea zenyewe, pamoja na matawi ya retry/error ambayo hatimaye huweka upya au kuachilia state inayodhibitiwa na mshambuliaji.
+- Thibitisha ni mabadilishano gani halali ya protocol yanayohitajika ili kuiweka daemon kwenye hali iliyo hatarini, badala ya kudhani handler yenye hitilafu inaweza kufikiwa kila wakati.
 
-Kwa protocols zinazotegemea muda, packet replay kutoka kwenye Python framework inaweza kuwa ya polepole mno. Njia inayotegemewa zaidi ni kuiga kifaa halali kwenye hardware halisi (kwa mfano **nRF52840**) kwa kutumia stack ya kiwango cha vendor, ili kuonyesha **endpoints**, **attributes**, na muda sahihi wa commissioning.
+Kwa protocol zinazohitaji muda sahihi, packet replay kutoka Python framework inaweza kuwa polepole mno. Njia ya kuaminika zaidi ni kuiga kifaa halali kwenye hardware halisi (kwa mfano **nRF52840**) kwa kutumia stack ya kiwango cha vendor ili uweze kufichua **endpoints**, **attributes**, na muda sahihi wa commissioning.
 
-### Aina ya hitilafu ya fragmented-download katika embedded daemons
+### Aina ya hitilafu ya upakuaji uliogawanywa vipande kwenye embedded daemons
 
-Aina ya hitilafu inayojirudia kwenye firmware hujitokeza katika upakuaji wa **fragmented blob/model/configuration**:<sup>[[8]](#references)</sup>
+Aina ya hitilafu ya firmware inayojirudia hutokea kwenye upakuaji uliogawanywa vipande wa **blob/model/configuration**:<sup>[[8]](#references)</sup>
 
-1. **Fragment ya kwanza** (`offset == 0`) huhifadhi `ctx->total_size` na kutenga kumbukumbu kwa `malloc(total_size)`.
+1. **First fragment** (`offset == 0`) huhifadhi `ctx->total_size` na kutenga `malloc(total_size)`.
 2. Fragments zinazofuata hukagua tu sehemu za **packet-local** zinazodhibitiwa na mshambuliaji, kama vile `packet_total_size >= offset + chunk_len`.
-3. Nakala hutumia `memcpy(&ctx->buffer[offset], chunk, chunk_len)` bila kuhakiki dhidi ya **ukubwa wa awali uliotengewa**.
+3. Nakala hutumia `memcpy(&ctx->buffer[offset], chunk, chunk_len)` bila kukagua dhidi ya **original allocated size**.
 
 Hii humwezesha mshambuliaji kutuma:
 
-- Fragment halali ya kwanza yenye ukubwa mdogo uliotangazwa, ili kulazimisha allocation ndogo ya heap.
-- Fragment ya baadaye yenye **offset inayotarajiwa** lakini `chunk_len` kubwa zaidi.
-- Ukubwa wa packet-local ulioghushiwa unaopita ukaguzi mpya huku bado ukisababisha overflow ya buffer iliyotengewa awali.
+- First fragment halali yenye total size iliyotangazwa kuwa **ndogo** ili kulazimisha ugawaji mdogo wa heap.
+- Fragment ya baadaye yenye **expected offset** lakini `chunk_len` kubwa zaidi.
+- Packet-local size ya kughushi inayotimiza ukaguzi mpya huku bado ikifurika buffer iliyotengwa awali.
 
-Ikiwa njia yenye hitilafu iko nyuma ya commissioning logic, exploitation lazima ijumuishe **device emulation** ya kutosha ili kupeleka kifaa lengwa kwenye state inayotarajiwa ya model-download au blob-download kabla ya kutuma fragments zilizoharibika.
+Wakati njia iliyo hatarini iko nyuma ya commissioning logic, exploitation lazima ijumuisha **device emulation** ya kutosha ili kuifikisha target kwenye hali inayotarajiwa ya model-download au blob-download kabla ya kutuma fragments zenye hitilafu.
 
 ### Vichochezi vya `free()` vinavyoendeshwa na protocol
 
-Kwenye embedded daemons, njia rahisi zaidi ya kusababisha heap metadata exploitation mara nyingi si “kusubiri cleanup”, bali **kulazimisha error handling ya protocol yenyewe**:<sup>[[8]](#references)</sup>
+Kwenye embedded daemons, njia rahisi zaidi ya kuchochea heap metadata exploitation mara nyingi si "kusubiri usafishaji" bali **kulazimisha error handling ya protocol yenyewe**:<sup>[[8]](#references)</sup>
 
-- Tuma fragments za ufuatiliaji zilizoharibika ili kupeleka FSM kwenye states za **retry** au **error**.
-- Vuka kiwango cha juu cha retries ili daemon ifanye **reset context** na kufuta buffer iliyoharibika.
-- Tumia `free()` hii inayotabirika kusababisha allocator-side primitives kabla mchakato hauja-crash kwa sababu nyingine.
+- Tuma follow-up fragments zenye hitilafu ili kusukuma FSM kwenye hali za **retry** au **error**.
+- Vuka kiwango cha juu cha retries ili daemon **iweke upya context** na kuachilia buffer iliyoharibiwa.
+- Tumia `free()` hii inayotabirika kuchochea allocator-side primitives kabla mchakato hauja-crash kwa sababu zisizohusiana.
 
-Hii ni muhimu hasa dhidi ya allocators za aina ya **musl/uClibc/dlmalloc** kwenye embedded Linux, ambapo kuharibu chunk metadata kunaweza kubadilisha unlink/unbin logic kuwa write primitive. Mbinu thabiti ni kuharibu **size field** ili kuelekeza allocator traversal kwenye **fake chunks zilizowekwa ndani ya buffer iliyo-overflow**, badala ya kuharibu mara moja pointers halisi za bin na ku-crash mchakato.
+Hii ni muhimu hasa dhidi ya allocators zinazofanana na **musl/uClibc/dlmalloc** kwenye embedded Linux, ambapo kuharibu chunk metadata kunaweza kubadilisha unlink/unbin logic kuwa write primitive. Mbinu thabiti ni kuharibu **size field** ili kuelekeza allocator traversal kwenye **fake chunks zilizowekwa ndani ya buffer iliyofurika**, badala ya kuharibu mara moja bin pointers halisi na ku-crash mchakato.
 
-## Binary Exploitation na Proof-of-Concept
+## Binary Exploitation and Proof-of-Concept
 
-Kutengeneza PoC kwa vulnerabilities zilizotambuliwa kunahitaji uelewa wa kina wa usanifu wa kifaa lengwa na ujuzi wa programming katika lugha za kiwango cha chini. Binary runtime protections ni nadra kwenye embedded systems, lakini zinapokuwepo, mbinu kama Return Oriented Programming (ROP) zinaweza kuhitajika.
+Kutengeneza PoC ya vulnerabilities zilizotambuliwa kunahitaji uelewa wa kina wa target architecture na programu katika lugha za kiwango cha chini. Binary runtime protections ni nadra kwenye embedded systems, lakini zinapokuwepo, mbinu kama Return Oriented Programming (ROP) zinaweza kuhitajika.
 
-### Vidokezo vya uClibc fastbin exploitation (embedded Linux)
+### Vidokezo vya u-exploit wa uClibc fastbin (embedded Linux)
 
-- **Fastbins + consolidation:** uClibc hutumia fastbins zinazofanana na za glibc. Allocation kubwa inayofuata inaweza kusababisha `__malloc_consolidate()`, kwa hiyo fake chunk yoyote lazima ipite ukaguzi (ukubwa unaokubalika, `fd = 0`, na chunks zinazozunguka zinazoonekana kuwa “in use”).<sup>[[6]](#references)</sup>
-- **Binaries zisizo PIE chini ya ASLR:** ikiwa ASLR imewezeshwa lakini binary kuu ni **non-PIE**, anwani za `.data/.bss` ndani ya binary hubaki thabiti. Unaweza kulenga eneo ambalo tayari linafanana na heap chunk header halali ili kuelekeza fastbin allocation kwenye **function pointer table**.
-- **NUL inayosimamisha parser:** JSON inapochanganuliwa, `\x00` kwenye payload inaweza kusimamisha uchanganuzi huku ikiacha bytes zinazofuata zinazodhibitiwa na mshambuliaji kwa stack pivot/ROP chain.
+- **Fastbins + consolidation:** uClibc hutumia fastbins zinazofanana na za glibc. Ugawaji mkubwa wa baadaye unaweza kuchochea `__malloc_consolidate()`, kwa hiyo fake chunk yoyote lazima ipite ukaguzi (size inayokubalika, `fd = 0`, na chunks zinazoizunguka kuonekana kama "in use").<sup>[[6]](#references)</sup>
+- **Binaries zisizo za PIE chini ya ASLR:** ikiwa ASLR imewashwa lakini binary kuu ni **non-PIE**, anwani za `.data/.bss` ndani ya binary hazibadiliki. Unaweza kulenga eneo ambalo tayari linafanana na heap chunk header halali ili kufanya fastbin allocation iishie kwenye **function pointer table**.
+- **NUL inayosimamisha parser:** JSON inapochanganuliwa, `\x00` ndani ya payload inaweza kusimamisha uchanganuzi huku ikiweka bytes za mshambuliaji zilizo nyuma yake kwa stack pivot/ROP chain.
 - **Shellcode kupitia `/proc/self/mem`:** ROP chain inayopiga `open("/proc/self/mem")`, `lseek()`, na `write()` inaweza kuweka shellcode inayoweza kutekelezwa kwenye mapping inayojulikana na kisha kurukia humo.
 
-## Operating Systems Zilizotayarishwa kwa Firmware Analysis
+## Mifumo ya uendeshaji iliyoandaliwa kwa Uchambuzi wa Firmware
 
-Operating systems kama [AttifyOS](https://github.com/adi0x90/attifyos) na [EmbedOS](https://github.com/scriptingxss/EmbedOS) hutoa mazingira yaliyosanidiwa awali kwa ajili ya upimaji wa usalama wa firmware, yakiwa na zana zinazohitajika.
+Mifumo ya uendeshaji kama [AttifyOS](https://github.com/adi0x90/attifyos) na [EmbedOS](https://github.com/scriptingxss/EmbedOS) hutoa mazingira yaliyosanidiwa awali kwa ajili ya kupima usalama wa firmware, yakiwa na zana zinazohitajika.
 
-## OS Zilizotayarishwa kwa Uchambuzi wa Firmware
+## OS zilizoandaliwa kwa ajili ya kuchambua Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ni distro iliyoundwa kukusaidia kufanya tathmini ya usalama na penetration testing ya vifaa vya Internet of Things (IoT). Huokoa muda mwingi kwa kutoa mazingira yaliyosanidiwa awali yenye zana zote zinazohitajika.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Operating system ya upimaji wa usalama wa embedded, inayotegemea Ubuntu 18.04 na iliyosheheni awali zana za upimaji wa usalama wa firmware.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ni distro iliyokusudiwa kukusaidia kufanya tathmini ya usalama na penetration testing ya vifaa vya Internet of Things (IoT). Huokoa muda mwingi kwa kutoa mazingira yaliyosanidiwa awali yenye zana zote zinazohitajika tayari zimewekwa.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Mfumo wa uendeshaji wa kupima embedded security, unaotegemea Ubuntu 18.04 na ukiwa na zana za kupima usalama wa firmware zilizowekwa awali.
 
-## Firmware Downgrade Attacks na Njia za Update Zisizo Salama
+## Mashambulizi ya Firmware Downgrade na Mbinu za Kusasisha Zisizo Salama
 
-Hata vendor anapotekeleza ukaguzi wa cryptographic signature kwa firmware images, **ulinzi dhidi ya version rollback (downgrade) mara nyingi huachwa**. Boot- au recovery-loader inapothibitisha tu signature kwa kutumia public key iliyopachikwa lakini hailinganishi *version* (au monotonic counter) ya image inayowekwa, mshambuliaji anaweza kusakinisha kihalali **firmware ya zamani, yenye udhaifu, ambayo bado ina signature halali** na hivyo kurejesha vulnerabilities zilizokuwa zimerekebishwa.<sup>[[4]](#references)</sup>
+Hata vendor anapotekeleza ukaguzi wa saini za cryptographic kwa firmware images, ulinzi dhidi ya kurudisha toleo nyuma (downgrade) mara nyingi hukosekana. Boot- au recovery-loader inapothibitisha tu saini kwa public key iliyopachikwa lakini hailinganishi *version* (au monotonic counter) ya image inayowekwa, mshambuliaji anaweza kusakinisha kihalali **firmware ya zamani iliyo hatarini ambayo bado ina saini halali**, na hivyo kurudisha vulnerabilities zilizorekebishwa.<sup>[[4]](#references)</sup>
 
-Workflow ya kawaida ya shambulio:
+Mtiririko wa kawaida wa shambulio:
 
-1. **Pata image ya zamani iliyosainiwa**
-   * Ichukue kutoka kwenye tovuti ya umma ya vendor ya kupakua, CDN au tovuti ya usaidizi.
-   * Itoe kutoka kwenye companion mobile/desktop applications (kwa mfano ndani ya Android APK kwenye `assets/firmware/`).
-   * Ipate kutoka kwenye third-party repositories kama VirusTotal, Internet archives, forums, n.k.
-2. **Pakia au toa image kwa kifaa** kupitia njia yoyote ya update iliyo wazi:
+1. **Pata image ya zamani yenye saini**
+   * Ichukue kutoka kwenye tovuti ya umma ya upakuaji ya vendor, CDN au support site.
+   * Itangue kutoka kwenye companion mobile/desktop applications (kwa mfano ndani ya Android APK chini ya `assets/firmware/`).
+   * Iipate kutoka kwenye third-party repositories kama VirusTotal, Internet archives, forums, n.k.
+2. **Pakia au toa image kwa kifaa** kupitia update channel yoyote iliyo wazi:
    * Web UI, mobile-app API, USB, TFTP, MQTT, n.k.
-   * Vifaa vingi vya IoT vya watumiaji vina HTTP(S) endpoints *zisizohitaji uthibitishaji* ambazo hupokea firmware blobs zilizosimbwa kwa Base64, huzifungua upande wa server na kuanzisha recovery/upgrade.
-3. Baada ya downgrade, exploit udhaifu uliorekebishwa kwenye release mpya zaidi (kwa mfano command-injection filter iliyoongezwa baadaye).
-4. Kwa hiari, rudisha image ya hivi karibuni au zima updates ili kuepuka kugunduliwa baada ya kupata persistence.
+   * Vifaa vingi vya IoT vya watumiaji vina HTTP(S) endpoints *zisizohitaji uthibitishaji* zinazokubali firmware blobs zilizowekwa kwenye Base64, kuzifungua upande wa server na kuanzisha recovery/upgrade.
+3. Baada ya downgrade, exploit vulnerability iliyorekebishwa kwenye toleo jipya zaidi (kwa mfano command-injection filter iliyoongezwa baadaye).
+4. Kwa hiari, flash image ya hivi karibuni tena au zima updates ili kuepuka kugunduliwa baada ya kupata persistence.
 
 ### Mfano: Command Injection Baada ya Downgrade
 
@@ -611,11 +615,11 @@ Content-Type: application/octet-stream
 Content-Length: 0
 ```
 
-Katika firmware yenye udhaifu (iliyorejeshwa kwenye toleo la zamani), parameter ya `md5` inaunganishwa moja kwa moja kwenye amri ya shell bila kusafishwa, hivyo kuruhusu kuingiza amri kiholela (hapa, kuwezesha ufikiaji wa root kupitia SSH key). Matoleo ya baadaye ya firmware yaliongeza kichujio cha msingi cha herufi, lakini kutokuwepo kwa ulinzi dhidi ya downgrade kunafanya marekebisho hayo yasiwe na maana.<sup>[[4]](#references)</sup>
+Katika firmware iliyo hatarini (iliyoshushwa hadi toleo la zamani), parameter ya `md5` inaunganishwa moja kwa moja kwenye amri ya shell bila kusafishwa, hivyo kuruhusu injection ya amri zozote (hapa — kuwezesha ufikiaji wa root kwa kutumia SSH key). Matoleo ya baadaye ya firmware yaliongeza kichujio cha msingi cha herufi, lakini kutokuwepo kwa ulinzi dhidi ya downgrade kunafanya marekebisho hayo yasiwe na maana.<sup>[[4]](#references)</sup>
 
 ### Kutoa Firmware Kutoka kwa Programu za Simu
 
-Wauzaji wengi hujumuisha picha kamili za firmware ndani ya programu zao saidizi za simu ili programu iweze kusasisha kifaa kupitia Bluetooth/Wi-Fi. Vifurushi hivi mara nyingi huhifadhiwa bila usimbaji fiche ndani ya APK/APEX, katika njia kama `assets/fw/` au `res/raw/`. Zana kama `apktool`, `ghidra`, au hata `unzip` ya kawaida hukuwezesha kutoa picha zilizosainiwa bila kugusa maunzi halisi.<sup>[[4]](#references)</sup>
+Wauzaji wengi hujumuisha picha kamili za firmware ndani ya programu zao za simu zinazotumika pamoja na kifaa, ili programu iweze kukisasisha kupitia Bluetooth/Wi-Fi. Vifurushi hivi mara nyingi huhifadhiwa bila usimbaji fiche ndani ya APK/APEX, katika njia kama `assets/fw/` au `res/raw/`. Zana kama `apktool`, `ghidra`, au hata `unzip` ya kawaida hukuwezesha kutoa picha zilizotiwa saini bila kugusa maunzi halisi.<sup>[[4]](#references)</sup>
 
 ```
 $ apktool d vendor-app.apk -o vendor-app
@@ -623,52 +627,52 @@ $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
 
-### Kupita anti-rollback inayotekelezwa na updater pekee katika miundo ya slot za A/B
+### Kupita ulinzi wa anti-rollback unaotekelezwa na updater pekee katika miundo ya slot za A/B
 
-Baadhi ya vendors hutekeleza **ratchet** ya kuzuia downgrade, lakini ndani ya logic ya *updater* pekee (kwa mfano, routine ya UDS kupitia CAN, amri ya recovery, au agent ya OTA ya userspace). Ikiwa **bootloader** baadaye hukagua tu signature/CRC ya image na kuamini jedwali la partition au metadata ya slot, ulinzi wa rollback bado unaweza kupitwa.<sup>[[7]](#references)</sup>
+Baadhi ya vendor hutekeleza **ratchet** ya kuzuia downgrade, lakini kwenye mantiki ya *updater* pekee (kwa mfano, routine ya UDS kupitia CAN, amri ya recovery, au wakala wa OTA wa userspace). Ikiwa **bootloader** baadaye hukagua tu saini/CRC ya image na kuamini jedwali la partition au metadata ya slot, ulinzi wa rollback bado unaweza kupitwa.<sup>[[7]](#references)</sup>
 
 Muundo dhaifu wa kawaida:
 
-- Metadata ya firmware huwa na descriptor ya version na **security ratchet** / counter ya monotonic.
-- Updater hulinganisha ratchet ya image na thamani iliyohifadhiwa kwenye persistent storage na kukataa images za zamani zilizosainiwa.
-- **Bootloader** haisomi ratchet hiyo na huthibitisha tu header, CRC na signature kabla ya kuwasha slot iliyochaguliwa.
-- Uamilishaji wa slot huhifadhiwa kando katika jedwali la partition au counter ya generation kwa kila slot na **haujaunganishwa kwa njia ya cryptographic** na digest halisi ya firmware iliyothibitishwa.
+- Metadata ya firmware ina maelezo ya toleo na **security ratchet** / counter inayoongezeka tu.
+- Updater hulinganisha ratchet ya image na thamani iliyohifadhiwa kwenye storage endelevu na kukataa image za zamani zilizosainiwa.
+- **Bootloader** haichanganui ratchet hiyo na huthibitisha tu header, CRC, na saini kabla ya kuwasha slot iliyochaguliwa.
+- Uamilishaji wa slot huhifadhiwa kando kwenye jedwali la partition au counter ya generation ya kila slot na **haujaunganishwa kwa njia ya kriptografia** na digest halisi ya firmware iliyothibitishwa.
 
-Hii huunda primitive ya **kuthibitisha image moja / kuwasha image nyingine** katika mifumo ya dual-slot. Ikiwa mshambuliaji anaweza kufanya updater itie alama slot B kuwa lengwa la kuwashwa linalofuata kwa kutumia image ya sasa iliyosainiwa, kisha baadaye kuandika upya slot B kabla ya reboot, bootloader bado inaweza kuwasha image iliyoshushwa toleo kwa sababu huamini tu metadata ya slot ambayo tayari imehifadhiwa.
+Hii hutengeneza primitive ya **thibitisha-image-moja / washa-image-nyingine** katika mifumo yenye slot mbili. Ikiwa mshambuliaji anaweza kuifanya updater iashirie slot B kuwa lengo la kuwasha linalofuata kwa kutumia image ya sasa iliyosainiwa, kisha baadaye aandike upya slot B kabla ya kuwasha upya, bootloader bado inaweza kuwasha image iliyoshushwa toleo kwa sababu inaamini tu metadata ya slot iliyokwishawekwa.
 
 Mfumo wa kawaida wa matumizi mabaya:
 
-1. Pakia firmware **ya sasa iliyosainiwa** kwenye slot isiyotumika na uendeshe routine ya kawaida ya uthibitishaji/ubadilishaji ili layout itie alama slot hiyo kuwa inayofuata kuamilishwa.
-2. **Usifanye reboot bado**. Ingia tena kwenye routine ya kuandaa/kufuta slot katika session hiyo hiyo.
-3. Tumia vibaya hali ya zamani ya boot au logic ya zamani ya uteuzi wa slot ili updater ifute **slot ileile ya kimwili** iliyopandishwa muda mfupi uliopita.
+1. Pakia firmware **ya sasa iliyosainiwa** kwenye slot tulivu na utekeleze routine ya kawaida ya uthibitishaji/kubadilisha slot ili mpangilio uashirie slot hiyo kuwa inayofuata kuwa amilifu.
+2. **Usiwasha upya bado**. Ingia tena kwenye routine ya kuandaa/kufuta slot katika kipindi hicho hicho.
+3. Tumia vibaya hali ya kuwasha iliyopitwa na wakati au mantiki ya kuchagua slot iliyopitwa na wakati ili updater ifute **slot ileile halisi** iliyopandishwa muda mfupi uliopita.
 4. Andika firmware **ya zamani lakini bado iliyosainiwa** kwenye slot hiyo.
-5. Ruka routine ya uthibitishaji inayotekeleza ratchet na ufanye reboot moja kwa moja.
-6. Bootloader huchagua slot iliyopandishwa, huthibitisha signature/integrity pekee, na kuwasha image ya zamani.
+5. Ruka routine ya uthibitishaji inayotekeleza ratchet na uwashe upya moja kwa moja.
+6. Bootloader huchagua slot iliyopandishwa, hukagua saini/uadilifu pekee, kisha huwasha image ya zamani.
 
-Mambo ya kutafuta unapofanya reverse engineering ya utekelezaji wa update wa A/B:
+Mambo ya kuangalia unapofanya reverse engineering ya utekelezaji wa masasisho ya A/B:
 
-- Uteuzi wa slot unaotokana na **bendera za wakati wa kuwasha** ambazo hazisasishwi baada ya ubadilishaji kufanikiwa.
-- Routine ya aina ya `prepare_passive_slot()` inayofuta slot kulingana na hali ya zamani badala ya **layout ya sasa iliyothibitishwa**.
-- Function ya aina ya `part_write_layout()` inayoongeza tu **generation counter** / bendera ya active na haihifadhi hash ya image iliyothibitishwa.
-- Ukaguzi wa ratchet unaotekelezwa kwenye userspace au code ya updater, lakini **sio** kwenye ROM / bootloader / hatua za secure boot.
-- Routines za kufuta au recovery zinazoacha slot ikiwa imetiwa alama kuwa inaweza kuwashwa hata baada ya maudhui yake kufutwa na kuandikwa upya.
+- Uchaguzi wa slot unatokana na **bendera za wakati wa kuwasha** ambazo hazisasishwi baada ya kubadilisha slot kwa mafanikio.
+- Routine ya aina ya `prepare_passive_slot()` inayofuta slot kwa kutumia hali iliyopitwa na wakati badala ya **mpangilio wa sasa uliothibitishwa**.
+- Function ya aina ya `part_write_layout()` inayoongeza tu **generation counter** / bendera amilifu na haihifadhi hash ya image iliyothibitishwa.
+- Ukaguzi wa ratchet unatekelezwa kwenye userspace au msimbo wa updater, lakini **si** kwenye hatua za ROM / bootloader / secure boot.
+- Routine za kufuta au recovery zinazoacha slot ikiwa imewekewa alama ya kuwashika hata baada ya maudhui yake kufutwa na kuandikwa upya.
 
-### Orodha ya Kukagua Logic ya Update
+### Orodha ya Kukagua Mantiki ya Usasishaji
 
-* Je, usafirishaji/uthibitishaji wa *update endpoint* umelindwa vya kutosha (TLS + authentication)?
-* Je, kifaa hulinganisha **namba za version** au **monotonic anti-rollback counter** kabla ya ku-flash?
-* Je, image huthibitishwa ndani ya secure boot chain (kwa mfano, signatures hukaguliwa na code ya ROM)?
-* Je, **bootloader hutekeleza ratchet ileile** kama updater, badala ya kukagua signature/CRC pekee?
-* Je, metadata ya uamilishaji wa slot **imefungamanishwa na digest/version ya firmware iliyothibitishwa**, au slot inaweza kubadilishwa baada ya kupandishwa?
-* Baada ya ubadilishaji wa slot kufanikiwa, je, kifaa hulazimishwa kufanya reboot au bado routines za baadaye za update/kufuta zinaweza kufikiwa katika session hiyo hiyo?
-* Je, code ya userland hufanya ukaguzi mwingine wa sanity (kwa mfano, ramani ya partition inayoruhusiwa, namba ya model)?
-* Je, mtiririko wa update wa *sehemu* au wa *backup* hutumia tena logic ileile ya uthibitishaji?
+* Je, usafirishaji/uthibitishaji wa *endpoint ya update* umelindwa vya kutosha (TLS + uthibitishaji)?
+* Je, kifaa hulinganisha **nambari za toleo** au **counter ya anti-rollback inayoongezeka tu** kabla ya ku-flash?
+* Je, image inathibitishwa ndani ya secure boot chain (kwa mfano, saini hukaguliwa na msimbo wa ROM)?
+* Je, **bootloader hutekeleza ratchet ileile** kama updater, badala ya kukagua saini/CRC pekee?
+* Je, metadata ya uamilishaji wa slot **imeunganishwa na digest/toleo la firmware lililothibitishwa**, au slot inaweza kurekebishwa baada ya kupandishwa?
+* Baada ya kubadilisha slot kwa mafanikio, je, kifaa hulazimishwa kuwasha upya au routine za baadaye za kusasisha/kufuta bado zinaweza kufikiwa katika kipindi hicho hicho?
+* Je, msimbo wa userland hufanya ukaguzi wa ziada wa usahihi (kwa mfano, ramani ya partition zinazoruhusiwa, nambari ya modeli)?
+* Je, mtiririko wa masasisho wa *sehemu* au wa *backup* hutumia tena mantiki ileile ya uthibitishaji?
 
-> 💡  Ikiwa mojawapo ya yaliyo hapo juu haipo, kuna uwezekano platform inaweza kushambuliwa kwa rollback.
+> 💡  Ikiwa lolote kati ya yaliyo hapo juu halipo, huenda mfumo uko hatarini kwa mashambulizi ya rollback.
 
-## Firmware hatarishi ya kufanya mazoezi
+## Firmware dhaifu ya kufanyia mazoezi
 
-Ili kufanya mazoezi ya kugundua udhaifu kwenye firmware, tumia miradi ifuatayo ya firmware hatarishi kama mwanzo.
+Ili kufanya mazoezi ya kugundua udhaifu kwenye firmware, tumia miradi ifuatayo ya firmware dhaifu kama mwanzo.
 
 - OWASP IoTGoat
   - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -683,22 +687,22 @@ Ili kufanya mazoezi ya kugundua udhaifu kwenye firmware, tumia miradi ifuatayo y
 - Damn Vulnerable IoT Device (DVID)
   - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## Kurejesha funguo za usimbuaji za firmware kutoka hali ya KMS/Vault iliyopachikwa
+## Kurejesha funguo za kusimbua firmware kutoka kwenye hali ya KMS/Vault iliyopachikwa
 
-Wakati image ya update inachanganya metadata ndogo ya plaintext na blob kubwa yenye entropy nyingi, kagua container kabla ya kujaribu brute-force:<sup>[[1]](#references)</sup>
+Image ya update inapochanganya metadata ndogo iliyo katika maandishi wazi na blob kubwa yenye entropy ya juu, kagua kontena kabla ya kujaribu brute-force:<sup>[[1]](#references)</sup>
 
-- Toa headers, offsets na mipaka ya mistari kwa kutumia `hexdump`, `xxd`, `strings -tx`, `base64 -d`, na `binwalk -E`.
-- `Salted__` kwa kawaida humaanisha umbizo la OpenSSL `enc`: bytes 8 zinazofuata ni salt na bytes zilizobaki ni ciphertext.
-- Sehemu ya Base64 inayodecode hadi bytes `256` kamili ni kidokezo kikubwa kwamba unatazama ciphertext ya RSA-2048 inayofunga password/random session key ya firmware.
-- Nyenzo za PGP zilizotenganishwa kwenye faili hiyo hiyo mara nyingi hulinda uhalisi pekee; usidhani kuwa ndiyo njia ya kulinda usiri.
+- Tupa headers, offsets na mipaka ya mistari kwa kutumia `hexdump`, `xxd`, `strings -tx`, `base64 -d`, na `binwalk -E`.
+- `Salted__` kwa kawaida humaanisha umbizo la OpenSSL `enc`: baiti 8 zinazofuata ni salt na baiti zilizobaki ni ciphertext.
+- Sehemu ya Base64 inayosimbuliwa na kuwa baiti `256` kamili ni kidokezo kikubwa kwamba unatazama ciphertext ya RSA-2048 inayofunga nenosiri/funguo ya session ya firmware iliyozalishwa bila mpangilio.
+- Nyenzo ya PGP iliyotenganishwa iliyo kwenye faili hiyohiyo mara nyingi hulinda uhalisi pekee; usidhani ndiyo njia ya kuweka usiri.
 
-Ikiwa utafutaji wa funguo tuli (`grep`, `strings`, utafutaji wa PEM/PGP) haufanikiwi, fanya reverse engineering ya **njia ya uendeshaji ya decrypt** badala ya kutafuta private keys pekee:
+Ikiwa kutafuta funguo tuli (`grep`, `strings`, utafutaji wa PEM/PGP) hakufanikiwa, fanya reverse engineering ya **njia ya usimbuaji inayotumika** badala ya kutafuta funguo za faragha pekee:
 
-- Decompile updater / binary ya usimamizi na ufuatilie ni nani anayesoma blob iliyosimbwa, helper/API gani inayoifungua, na jina gani la kimantiki la key inaloomba.
-- Tafuta kwenye root filesystem iliyotolewa hali ya KMS (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`) pamoja na unit files na init scripts.
-- Chukulia `vault operator unseal ...` ya plaintext, recovery keys, bootstrap tokens, au scripts za local KMS auto-unseal kuwa sawa na nyenzo za private key.
+- Decompile binary ya updater / management na ufuatilie ni nani anayesoma blob iliyosimbwa, helper/API gani inayoifungua, na jina gani la kimantiki la ufunguo inayoiomba.
+- Tafuta hali ya KMS (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`) pamoja na unit files na init scripts kwenye root filesystem iliyotolewa.
+- Chukulia amri za maandishi wazi za `vault operator unseal ...`, funguo za recovery, bootstrap tokens, au scripts za ndani za KMS auto-unseal kuwa sawa na nyenzo za funguo za faragha.
 
-Ikiwa appliance inasafirisha binary asilia ya Vault na storage backend, kuendesha tena mazingira hayo kwa kawaida ni rahisi kuliko kutekeleza upya mambo ya ndani ya Vault:
+Ikiwa appliance ina binary asili ya Vault na storage backend, kuendesha tena mazingira hayo huwa rahisi kuliko kutekeleza upya mambo ya ndani ya Vault:
 
 ```bash
 vault server -config=/tmp/vault.hcl
@@ -715,14 +719,14 @@ FINAL=$(vault operator generate-root -nonce="$NONCE" "<share3>" 2>&1 | sed 's/\x
 TOKEN=$(vault operator generate-root -decode="$(printf '%s\n' "$FINAL" | awk '/Root Token/ {print $3}')" -otp="$OTP")
 ```
 
-Ukiwa na root kwenye KMS iliyoklonishwa:
+Ukiwa na root kwenye KMS iliyoklonwa:
 
-- Fanya transit keys ziweze kuhamishwa nje ya clone iliyotengwa pekee: `vault write transit/keys/<name>/config exportable=true`
+- Fanya transit keys ziweze kuhamishwa nje ndani ya clone iliyotengwa pekee: `vault write transit/keys/<name>/config exportable=true`
 - Hamisha unwrap key: `vault read transit/export/encryption-key/<name>`
-- Jaribu recovered RSA key ukitumia jozi halisi ya padding/hash inayotumiwa na KMS. Kushindwa kwa decrypt ya PKCS#1 v1.5 na decrypt ya kawaida ya OAEP **hakuthibitishi** kuwa key si sahihi; mtiririko mwingi unaotumia Vault hutumia OAEP yenye SHA-256, ilhali maktaba nyingi hutumia SHA-1 kama chaguo-msingi.
-- Ikiwa payload inaanza na `Salted__`, tekeleza upya KDF ya OpenSSL ya mtengenezaji kwa usahihi (`EVP_BytesToKey`, mara nyingi MD5 kwenye vifaa vya zamani) kabla ya kujaribu decrypt ya AES-CBC.
+- Jaribu RSA key iliyorejeshwa ukitumia jozi halisi ya padding/hash inayotumiwa na KMS. Kushindwa kwa decryption ya PKCS#1 v1.5 na kwa OAEP ya kawaida **hakuthibitishi** kuwa key si sahihi; mifumo mingi inayotumia Vault hutumia OAEP yenye SHA-256, ilhali maktaba za kawaida hutumia SHA-1 kama chaguomsingi.
+- Ikiwa payload inaanza na `Salted__`, fuatisha KDF ya OpenSSL ya mtengenezaji jinsi ilivyo hasa (`EVP_BytesToKey`, mara nyingi MD5 kwenye vifaa vya zamani) kabla ya kujaribu decryption ya AES-CBC.
 
-Hii hubadilisha “firmware iliyosimbwa” kuwa tatizo pana zaidi: **rejesha operational keys za upande wa kifaa, kisha tekeleza upya offline vigezo halisi vya unwrap + KDF**.
+Hii inabadilisha tatizo la "firmware iliyosimbwa kwa njia fiche" kuwa tatizo la jumla zaidi: **rejesha operational keys za upande wa appliance, kisha fuatisha offline vigezo halisi vya unwrap + KDF**.
 
 ## Mafunzo na Vyeti
 
@@ -730,19 +734,19 @@ Hii hubadilisha “firmware iliyosimbwa” kuwa tatizo pana zaidi: **rejesha ope
 
 ## References
 
-- [1] [Kuvunja Firmware kwa Claude: Ujuzi wa Kiwango cha Mtaalamu, Uhuru wa Kiwango cha Mwanzilishi](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
+- [1] [Kuvunja Usimbaji wa Firmware kwa Claude: Ujuzi wa Kiwango cha Mtaalamu, Uhuru wa Kiwango cha Mwanzilishi](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
 - [2] [Mbinu ya Kupima Usalama wa Firmware](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [3] [Practical IoT Hacking: Mwongozo Mahususi wa Kushambulia Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-- [4] [Kutumia zero-days kwenye hardware iliyoachwa – blogu ya Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [3] [Udukuzi wa IoT kwa Vitendo: Mwongozo Kamili wa Kushambulia Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [4] [Kutumia zero-days kwenye vifaa vilivyoachwa — blogu ya Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [5] [Jinsi Kifaa Mahiri cha $20 Kilivyonipa Ufikiaji wa Nyumba Yako](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-- [6] [Sasa Unaniona: Sasa Umepwnwa](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [7] [Synacktiv - Kutumia Tesla Wall Connector kupitia kiunganishi chake cha charge port - Sehemu ya 2: kukwepa ulinzi dhidi ya downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
-- [8] [Ifanye Iwakae: Kutumia Philips Hue Bridge kupitia Over-the-Air](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [6] [Sasa Unamwona mi: Sasa Umepwniwa](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [7] [Synacktiv - Kutumia Tesla Wall Connector kupitia kiunganishi chake cha chaji - Sehemu ya 2: kukwepa uzuiaji wa downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [8] [Ifanye Iwake: Kutumia Philips Hue Bridge kupitia Over-the-Air](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 - [9] [ROOT Tesla OS kwenye QEMU Sehemu ya 1: Kufungua kifurushi](https://cn0xroot.wordpress.com/2026/09/19/root-tesla-os-on-qemu-part-1-unpacking)
 - [10] [Nyaraka za Linux kernel - dm-linear](https://docs.kernel.org/admin-guide/device-mapper/linear.html)
 - [11] [ROOT Tesla OS kwenye QEMU Sehemu ya 2: Kutatua hitilafu na kurekebisha](https://cn0xroot.wordpress.com/2026/09/20/root_tesla_os_on_qemu_part_2_debugging_fixing)
-- [12] [Nywila za Dell BIOS: Usimbaji fiche dhaifu wa XOR huruhusu kurejesha kutoka SPI Flash (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
+- [12] [Nywila za Dell BIOS: Usimbaji hafifu wa XOR unaruhusu kurejesha kutoka SPI Flash (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
 - [13] [R3n5k1/dellpwn - Zana za kurejesha nywila za Dell BIOS](https://github.com/R3n5k1/dellpwn)
-- [14] [VoidStar Security — Kujiimarisha katika Hardware Hacking Sehemu ya 2](https://voidstarsec.com/blog/brushing-up-part-2)
-- [15] [Jinsi na Kwa Nini Tulivyonhack Cypherock Hardware Wallet: Hadithi Kamili](https://www.darknavy.org/blog/how_and_why_we_hacked_cypherock_hardware_wallet_the_full_story/)
+- [14] [VoidStar Security — Kukumbushia Udukuzi wa Vifaa, Sehemu ya 2](https://voidstarsec.com/blog/brushing-up-part-2)
+- [15] [Jinsi na Kwa Nini Tulidukua Wallet ya Vifaa ya Cypherock: Hadithi Kamili](https://www.darknavy.org/blog/how_and_why_we_hacked_cypherock_hardware_wallet_the_full_story/)
 {{#include ../../banners/hacktricks-training.md}}
