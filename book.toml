@@ -31,6 +31,7 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/pentesting-web/deserialization/ruby-_json-pollution.html" = "../parameter-pollution.html"
 "/reversing/word-macros.html" = "../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.html"
 "/network-services-pentesting/pentesting-web/buckets/index.html" = "../index.html"
 "/network-services-pentesting/pentesting-web/buckets/firebase-database.html" = "../../../pentesting-web/firebase-realtime-database.html"
