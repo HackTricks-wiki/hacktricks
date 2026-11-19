@@ -1471,6 +1471,8 @@ Good hunting opportunities mentioned by the authors:
 - P3 is a **cross-process transfer trick**, not a full execution primitive by itself: the copied parameter still needs an execute-permission change and an execution redirection method.
 - `RtlCreateProcessReflection` / Dirty Vanity was considered by the authors but rejected because it internally reaches suspicious primitives such as `NtWriteVirtualMemory` and `NtCreateThreadEx`.
 
+For payload delivery into an **existing** Windows process through thread descriptions, followed by waiting-thread return-address hijacking, see [Thread Name-Calling and Waiting Thread Hijacking](windows-process-injection-thread-name-calling-waiting-thread-hijacking.md).
+
 ## Console STDIN pipe injection
 
 An interactive console child can also be used as the **payload-transfer primitive**. The injector redirects the child's standard input to a pipe and sends a marker followed by shellcode. After the console program reads the data into its own private memory, the injector finds that buffer, makes it executable and redirects a child thread to it. This avoids `VirtualAllocEx` and `WriteProcessMemory`, but it is still process injection rather than a general EDR bypass.<sup>[[41]](#references)</sup>
