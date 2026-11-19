@@ -468,6 +468,7 @@
   - [Windows Enumeration with .NET](windows-hardening/basic-powershell-for-pentesters/dotnet-enumeration.md)
   - [PowerView/SharpView](windows-hardening/basic-powershell-for-pentesters/powerview.md)
 - [Antivirus (AV) Bypass](windows-hardening/av-bypass.md)
+  - [Thread Name-Calling and Waiting Thread Hijacking](windows-hardening/windows-process-injection-thread-name-calling-waiting-thread-hijacking.md)
   - [Virtualized Payload Execution and Custom VM Evasion](windows-hardening/virtualized-payload-execution.md)
 - [Cobalt Strike](windows-hardening/cobalt-strike.md)
 - [Mythic](windows-hardening/mythic.md)
