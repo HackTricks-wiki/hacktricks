@@ -17,12 +17,12 @@
 - Model execution, fine-tuning, serving and hosted tools → `src/AI/AI-Model-Tools-and-Platforms.md`, separate from attacks and architecture. Burp Intruder, extensions and Session Switcher → `src/pentesting-web/burp-suite.md`, separate from checklist and IDOR.
 - OT safety/planning → `src/industrial-control-systems/README.md`; Modbus → `src/network-services-pentesting/pentesting-modbus.md`; OPC UA/BACnet → Network Services.
 - Android acquisition/imaging/LiME → `src/generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md`; Mobile owns app testing; malware separate.
-- Firmware acquisition, package decryption, updates and early boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay under firmware, not Stack Overflow.
+- Firmware acquisition, decryption, updates and boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay there.
 - Relocated from TODO: Rust → `src/generic-methodologies-and-resources/rust-basics.md`; investment terms → `src/blockchain/blockchain-and-crypto-currencies/investment-terms.md`; cookies → `src/welcome/cookies-policy.md`; recon/reputation/breach APIs → `src/generic-methodologies-and-resources/external-recon-methodology/reconnaissance-and-threat-intelligence-apis.md`.
 - Referer leakage and Referrer-Policy → `src/pentesting-web/referer-header-and-referrer-policy.md`; OAuth links there. Exfiltration overview maps other routes.
 - UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
-- Blockchain chapters → top-level Blockchain & Smart Contract Security (`blockchain-and-crypto-currencies/README.md` entry). Bitcoin P2P stays in Network Services, DApp tests in Web, cryptocurrency privacy in Privacy.
+- Blockchain → top-level Blockchain; Bitcoin P2P stays in Network, DApp tests in Web, cryptocurrency privacy in Privacy.
 - Electron renderer/IPC → `src/desktop-application-security/electron-desktop-apps/README.md` and context-isolation siblings; updater → sibling `electron-auto-update-trust-boundaries.md`; local ASAR/snapshot → sibling `electron-local-code-injection-and-snapshot-tampering.md`. Linux/macOS retain OS-local injection; 80/443 is a client pivot.
 - VM guest surfaces → `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md`, linking QEMU/KVM, VirtualBox and VMware chapters. Slirp allocator stays in `libc-heap/` but appears with guest-to-host cases in SUMMARY.
 - SOAP/REST API methodology → `src/pentesting-web/web-api-pentesting.md`; GraphQL endpoint/security testing → `src/pentesting-web/graphql.md` beneath it in SUMMARY. 80/443 links to both; Cloud keeps provider APIs.
@@ -34,7 +34,7 @@
 - Public HTTP/TCP relay exposure → `src/generic-hacking/expose-local-to-the-internet.md`, beside tunneling.
 - PHP multipart temp-upload LFI race/PHP 7.0–7.2 crash variant → `src/pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md#segmentation-fault-variant-on-php-70-and-72`; phpinfo, session upload progress and filters are distinct primitives.
 - Chosen-input MD5 suffix/`0e` search → `src/crypto/hashes/README.md#chosen-input-md5-hash-searches`; PHP type-juggling/version caveats → `network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling`. Distinct, cross-linked.
-- WSGI/uWSGI, Zabbix, CCTV stay in `network-services-pentesting/pentesting-web/` under 80/443; Web/SSRF link to WSGI.
+- WSGI/uWSGI, Zabbix, CCTV stay under Network 80/443; Web/SSRF link to WSGI.
 - AI fuzzing/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source review/mobile/kernel audits → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`. Split by research task, not platform.
 - Python expression-evaluation confirmation (`"+str(True)+"`) → `src/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md#python-expression-evaluation-probe`; HTTP/web entry links directly there, not to a generic Python web-tech stub.
 - Remote MCP testing → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Distinct prerequisites.
@@ -47,6 +47,7 @@
 - PHP `pcntl_exec` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md#pcntl_exec-command-execution-with-disabled-functions`; Apache `mod_cgi` stays separate.
 - Recursive CSS `@import` stays with CSS injection; LESS compilation is distinct.
 - Format-string arbitrary-write `FmtStr` template → `src/binary-exploitation/format-strings/README.md#pwntools-template`; arbitrary-read examples stay separate. Old URL redirects.
+- Rails synthetic `_json` body-parameter collision → `src/pentesting-web/parameter-pollution.md#ruby-on-rails-_json-parameter-pollution`, not deserialization. Ruby tricks and deserialization context link directly; the old standalone URL redirects. Keep Rails parser/version caveat and example with JSON injection.
 - Adobe Reader PDF-upload XXE/SOP → `src/pentesting-web/file-upload/README.md#pdf-upload-adobe-reader-xxe-and-same-origin-policy-bypass`; Web XXE links there.
 - FTP bounce scan → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-attack.md`; relay/retrieval → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-protocol-relay.md`. Distinct tasks.
 - Cookie-bomb → Cookies; `onerror` oracle → XS-Leaks.
@@ -54,13 +55,10 @@
 
 - Cross-surface tool catalog → `src/generic-methodologies-and-resources/third-party-tools-and-resources.md`; OSINT/web/Windows/firmware headings stay together as a discovery index, linked from task pages.
 
-## Researcher entry points
+## Researcher lookup terms
 
-- Board debug/glitching → Hardware; RFID/NFC → Radio. OT safety → ICS; protocols → Network. Android images → Forensics; app/eSIM → Mobile; guests → VM Escape.
-- 401/403 → Web authorization; LFI upload race → Web File Inclusion.
-- `nosniff`, UTF-16 script, ICO width → XS-Leaks; cross-origin script inclusion → XSSI; in-origin script injection → XSS.
-- `R_PROFILE`, `RUBYOPT`, `ERL_AFLAGS` → macOS interpreter startup chapter.
-- Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; injection and probe share an origin, unlike XS-Leaks. Old page redirects.
+- Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`, unlike XS-Leaks. Old URL redirects.
+- `nosniff`/ICO width → XS-Leaks; cross-origin script inclusion → XSSI; in-origin script injection → XSS.
 
 ## Deferred
 
