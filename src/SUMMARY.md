@@ -823,7 +823,6 @@
   - [Exploiting \_\_VIEWSTATE without knowing the secrets](pentesting-web/deserialization/exploiting-__viewstate-parameter.md)
   - [Python Yaml Deserialization](pentesting-web/deserialization/python-yaml-deserialization.md)
   - [JNDI - Java Naming and Directory Interface & Log4Shell](pentesting-web/deserialization/jndi-java-naming-and-directory-interface-and-log4shell.md)
-  - [Ruby Json Pollution](pentesting-web/deserialization/ruby-_json-pollution.md)
   - [Ruby Class Pollution](pentesting-web/deserialization/ruby-class-pollution.md)
 - [Domain/Subdomain takeover](pentesting-web/domain-subdomain-takeover.md)
 - [Email Injections](pentesting-web/email-injections.md)
