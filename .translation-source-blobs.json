@@ -873,7 +873,7 @@
     "src/pentesting-web/deserialization/java-jsf-viewstate-.faces-deserialization.md": "b6bf9d49416c31134da552ec78da86ae131ba0e5",
     "src/pentesting-web/deserialization/java-signedobject-gated-deserialization.md": "ed813321a75f26a90a641d2ad34f8d56575e5cc6",
     "src/pentesting-web/deserialization/java-transformers-to-rutime-exec-payload.md": "7ce65e3fa5aa35c34e1a95522a9f1aeac56d5839",
-    "src/pentesting-web/deserialization/jndi-java-naming-and-directory-interface-and-log4shell.md": "e26e07de0fbc9e94b75975e556df2da5a90cdcf0",
+    "src/pentesting-web/deserialization/jndi-java-naming-and-directory-interface-and-log4shell.md": "6e864466486122fda6b13e4d54382fcca5ee0710",
     "src/pentesting-web/deserialization/livewire-hydration-synthesizer-abuse.md": "784bd0333949515f6261f8e214f6ad15c7c91af5",
     "src/pentesting-web/deserialization/nodejs-proto-prototype-pollution/README.md": "887342511c5f26aebb4d59433bf12aee9673950f",
     "src/pentesting-web/deserialization/nodejs-proto-prototype-pollution/client-side-prototype-pollution.md": "fb0a922c4222dc9cc44bf256d7fa1f02c9eb15ec",
