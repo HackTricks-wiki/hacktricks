@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Thread Name-Calling (TNC) transfers bytes into a running process without `WriteProcessMemory`; Waiting Thread Hijacking (WTH) runs them on an existing thread without `SetThreadContext` or creating a remote thread.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup> These are **process-injection primitives, not privilege-escalation vulnerabilities**: the injector still needs access to the target process and thread.<sup>[[3]](#references)</sup> See [Antivirus (AV) Bypass](av-bypass.md) for other injection and evasion approaches.
+Thread Name-Calling (TNC) transfers bytes into a running process without `WriteProcessMemory`; Waiting Thread Hijacking (WTH) runs them on an existing thread without `SetThreadContext` or creating a remote thread.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup> These are **process-injection primitives, not privilege-escalation vulnerabilities**: the injector still needs access to the target process and thread. The thread-description APIs require Windows 10 version 1607 or later.<sup>[[1]](#references)[[3]](#references)</sup> See [Antivirus (AV) Bypass](av-bypass.md) for other injection and evasion approaches.
 
 ## Thread Name-Calling: target-side payload copying
 
 `NtSetInformationThread(ThreadNameInformation)` copies a supplied `UNICODE_STRING` into the thread-name storage. Calling `GetThreadDescription` **inside the target** then creates a user-mode heap copy of that name. This separates payload transfer from the final memory copy: the injector can read the returned heap **pointer**, while an APC running `RtlMoveMemory` inside the target copies the bytes to their destination.<sup>[[1]](#references)</sup> The original technique also supports special user APCs; the WhisperHijack implementation instead uses ordinary `NtQueueApcThread` on a waiting thread.<sup>[[1]](#references)[[3]](#references)</sup>
 
-For each chunk of at most `0xFFFE` bytes, the PoC uses this ordering. A duplicated auto-reset event signals completion only after the target has filled the scratch slot; the injector waits for that signal before reading the pointer. The last APC must finish before the thread name is replaced with the next chunk.<sup>[[3]](#references)[[4]](#references)</sup>
+For each chunk of at most `0xFFFE` bytes, the PoC uses this ordering. A duplicated auto-reset event signals completion only after the target has filled the scratch slot; the injector waits for that signal before reading the pointer. The event acknowledges the heap-pointer APC, not the subsequent copy APC. The PoC alerts the same thread after queuing the copy and relies on APC ordering rather than a second completion signal.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```text
 NtSetInformationThread(ThreadNameInformation, chunk)
@@ -32,7 +32,7 @@ In the x64 PoC, the stub has an 8-byte saved-return slot at `+0x00`, instruction
 
 ## Combining TNC and WTH without cross-process writes
 
-WhisperHijack demonstrates the combined workflow against an existing native x64 process. Build its x64 solution and run the executable without arguments; the Writer searches for a candidate process/thread, while a Flipper child inherits the handles needed for the final hand-off. The process handle requests `PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE`, **not** `PROCESS_VM_WRITE`; the current PoC nevertheless opens the thread with `THREAD_ALL_ACCESS`. Access checks and process mitigations still apply.<sup>[[3]](#references)[[4]](#references)</sup>
+WhisperHijack demonstrates the combined workflow against an existing native x64 process. Its Writer selects a candidate process/thread, while a Flipper child inherits the handles needed for the final hand-off. The process handle requests `PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE`, **not** `PROCESS_VM_WRITE`; the current PoC nevertheless opens the thread with `THREAD_ALL_ACCESS`. Access checks and process mitigations still apply.<sup>[[3]](#references)[[4]](#references)</sup>
 
 The combined PoC uses this sequence; the memory copy APCs execute in the target rather than through a handle with remote-write rights.<sup>[[4]](#references)</sup>
 
@@ -50,5 +50,3 @@ The absence of `NtWriteVirtualMemory` does **not** mean there are no target writ
 - [2] [Check Point Research – Waiting Thread Hijacking](https://research.checkpoint.com/2025/waiting-thread-hijacking/)
 - [3] [Maldev Academy – WhisperHijack PoC and README](https://github.com/Maldev-Academy/WhisperHijack)
 - [4] [Maldev Academy – WhisperHijack Main.c implementation](https://raw.githubusercontent.com/Maldev-Academy/WhisperHijack/main/WhisperHijack/Main.c)
-
-{{#include ../banners/hacktricks-training.md}}
