@@ -140,6 +140,8 @@ cat (Get-PSReadlineOption).HistorySavePath
 cat (Get-PSReadlineOption).HistorySavePath | sls passw
 ```
 
+A writable [PowerShell profile](../basic-powershell-for-pentesters/#powershell-profile-startup-injection) is a separate startup-execution lead; check whether a more privileged user actually loads that profile before treating it as escalation.
+
 ### PowerShell Transcript files
 
 You can learn how to turn this on in [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)
@@ -2636,6 +2638,8 @@ You have to compile the project using the correct version of .NET ([see this](ht
 C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the code with the version given in "Build Engine version" line
 ```
 
+
+
 ## References
 
 - [1] [Windows Privilege Escalation Fundamentals](http://www.fuzzysecurity.com/tutorials/16.html)
@@ -2682,5 +2686,4 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [42] [Microsoft Security Response Center - CVE-2025-27727](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-27727)
 - [43] [MDSec - Total Recall: Retracing Your Steps Back to NT AUTHORITY\SYSTEM](https://www.mdsec.co.uk/2026/02/total-recall-retracing-your-steps-back-to-nt-authoritysystem/)
 - [44] [NCC Group - Windows MIDI Services shared-memory offsets privilege escalation advisory](https://nccgroup.com/research/technical-advisory-microsoft-windows-midi-service-module-escalation-of-privileges-cve-2026-62688)
-
 {{#include ../../banners/hacktricks-training.md}}
