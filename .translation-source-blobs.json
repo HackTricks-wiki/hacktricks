@@ -502,7 +502,7 @@
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-julia-applications-injection.md": "866d6bd01a888aecd9fbc3388b0ab6d091fb59cb",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/README.md": "6daa50e2f1dca76a86c682c697aa3167117b0fd6",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md": "8799ce27823f0bba3c235d91c188006e40ea98a3",
-    "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/macos-dyld-process.md": "3212934bd854ec81426f1c8a0a9fb1a80dee6427",
+    "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/macos-dyld-process.md": "194a86ab74dcaa4b29bd2af3329aea797c74c08b",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-lua-applications-injection.md": "95e72805a1c8a35254b005ae5ef7550554ade80b",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-nodejs-applications-injection.md": "538d1746235347b98241a2073e16032839b0ab9a",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-octave-applications-injection.md": "47334971982a2c9bac1404e06fc80a21cb6fe951",
@@ -1119,7 +1119,7 @@
     "src/windows-hardening/authentication-credentials-uac-and-efs.md": "5371917ebe7562773ef4274ab463398cf2ab4782",
     "src/windows-hardening/authentication-credentials-uac-and-efs/README.md": "4d9ca02b0308cc9025a146813d4b838638dd320e",
     "src/windows-hardening/authentication-credentials-uac-and-efs/uac-user-account-control.md": "31dd66dd9e7c88a13b9df86a6e436a28f13baf0c",
-    "src/windows-hardening/av-bypass.md": "c418dcb736020eadf85a729dd1b75a4e6b43e60c",
+    "src/windows-hardening/av-bypass.md": "7372faf31e29d4e9fa4838e1721b1ab1a7427766",
     "src/windows-hardening/basic-cmd-for-pentesters.md": "4729e7d3682c7716ebc1fcfc843566f21674cb3e",
     "src/windows-hardening/basic-powershell-for-pentesters/README.md": "2d9268291824c146cb17268b7e00c9a1a0aeca6a",
     "src/windows-hardening/basic-powershell-for-pentesters/dotnet-enumeration.md": "024f916a54faa57fb2464cba9ebbabedce4839ff",
@@ -1180,6 +1180,7 @@
     "src/windows-hardening/windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md": "76e69e038403866ea73fbd040ccd9802d90e4744",
     "src/windows-hardening/windows-local-privilege-escalation/windows-c-payloads.md": "438dd68ae682c61480bc4c4974ad257c3c8e8dd7",
     "src/windows-hardening/windows-local-privilege-escalation/windows-kernel-rootkits-and-dkom.md": "7c26a1739924114aef61282bced1ce9e56c4a39b",
-    "src/windows-hardening/windows-local-privilege-escalation/windows-registry-hive-exploitation.md": "816b9a334c4e92d418bfc8bdee282cd9384c1f2b"
+    "src/windows-hardening/windows-local-privilege-escalation/windows-registry-hive-exploitation.md": "816b9a334c4e92d418bfc8bdee282cd9384c1f2b",
+    "src/windows-hardening/windows-process-injection-thread-name-calling-waiting-thread-hijacking.md": "ca4db3ba9bb63fd5c5eaeb9d05d84f4ec60f4680"
   }
 }
