@@ -2,8 +2,7 @@
 
 ## Principles
 
-- One home per mechanism; entry points retain prerequisites and link.
-- Use headings for one task/mechanism; split by task or prerequisites, not size.
+- One home per mechanism; entry points retain prerequisites and link; split by task/prerequisite, not size.
 - Main: general techniques; Cloud: provider/IAM; use public URLs.
 - Removed chapters need whole-page redirects; preserve content/current links.
 - Keep PoCs with mechanisms; code size does not justify splitting.
@@ -53,7 +52,8 @@
 - Cookie-bomb → Cookies; `onerror` oracle → XS-Leaks.
 - Office VBA junk/UserForms → `src/generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md#vba-macro-analysis-junk-code-and-userforms`; Revit RFA OLE/ECC exploit → `src/binary-exploitation/revit-rfa-ole-compound-file-exploitation.md` (separate parser task).
 
-- Cross-surface tool catalog → `src/generic-methodologies-and-resources/third-party-tools-and-resources.md`; OSINT/web/Windows/firmware headings stay together as a discovery index, linked from task pages.
+- Cross-surface tool catalog → `src/generic-methodologies-and-resources/third-party-tools-and-resources.md`; OSINT/web/Windows/firmware discovery index, linked from task pages.
+- SQLMap request/detection/flags/`--eval`/tamper → `src/pentesting-web/sql-injection/sqlmap.md`; delayed stored-payload workflow → `sqlmap/second-order-injection-sqlmap.md`. Keep one tool cheatsheet; old nested index redirects.
 
 ## Researcher lookup terms
 
