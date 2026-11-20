@@ -25,6 +25,12 @@ void _init() {
 //gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
 
+### OCR output as a constrained file write
+
+An OCR service that lets a caller select the output filename can turn image text into an arbitrary-file-write primitive. Unlike a direct upload, the written bytes are the **recognized text**, not the image bytes: render a short script as high-contrast text, submit the image, and inspect the OCR result before relying on its syntax. If the service accepts a `.php` destination under a web-executable directory, request the saved file after confirming the recognition is exact. In MakeSense, the OCR endpoint was reached on `localhost:8001` after local access. Its root-run web application saved recognized text under `/saved/`, and requesting the resulting PHP returned `uid=0`.<sup>[[37]](#references)</sup>
+
+The privilege gained on execution is that of the **PHP-serving process**, not automatically that of the OCR writer. Confirm both the destination's execution mapping and the runtime identity; a root OCR writer paired with an unprivileged web server would not by itself make the PHP run as root.<sup>[[37]](#references)</sup> For the related direct [web-root file-write pattern](../../pentesting-web/file-upload/), see File Upload.
+
 ### Git hooks
 
 **Git hooks** are executable scripts run for events in a repository, including commit and merge operations. If a **privileged script or user** performs those actions and an attacker can **write in the `.git` folder**, the hook can be used for **privilege escalation**.<sup>[[13]](#references)</sup>
@@ -436,4 +442,5 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 - [34] [`openat2(2)` — Linux manual page](https://man7.org/linux/man-pages/man2/openat2.2.html)
 - [35] [systemd generator documentation](https://github.com/systemd/systemd/blob/main/man/systemd.generator.xml)
 - [36] [Elastic Security Labs — Linux Detection Engineering: persistence mechanisms](https://www.elastic.co/security-labs/threat-command/primer-on-persistence-mechanisms)
+- [37] [0xdf — HTB: MakeSense](https://0xdf.gitlab.io/2026/10/31/htb-makesense.html)
 {{#include ../../banners/hacktricks-training.md}}
