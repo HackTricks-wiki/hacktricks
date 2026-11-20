@@ -36,12 +36,24 @@ curl -s https://target/.well-known/agent.json | jq .
 
 From the card, write down:
 
-- Every service `url` (often an internal hostname, a staging URL or a different port than the public site).
+- Every service `url`: in 1.0 these are under `supportedInterfaces`, while older cards may expose a top-level `url`. Record each endpoint and transport, including internal hostnames, staging URLs and alternate ports.<sup>[[1]](#references)[[7]](#references)</sup>
 - `skills`: they show what the agent can do and which tools or data are behind it.
 - `securitySchemes` / `security`: if they are empty or missing, the agent is probably meant to be called without credentials.
 - `capabilities.pushNotifications` and `capabilities.extendedAgentCard` (in 0.3 `supportsAuthenticatedExtendedCard`).
 
 The spec says the public card should not contain credentials or internal implementation details, so internal URLs, keys or detailed tool lists in a public card are already a finding.<sup>[[1]](#references)</sup>
+
+### Agent Card name collision in a multi-agent host
+
+A card's `name` is a human-readable label, not a stable routing identity.<sup>[[1]](#references)[[5]](#references)</sup> If a host registers two distinct remote peers under the same local name, its agent tree, generated tool name, client map or broker route may send a task intended for the trusted peer to the other peer.<sup>[[5]](#references)</sup> This requires the attacker-controlled peer to be admitted to the **same routing namespace**; publishing a duplicate card on the Internet alone is not enough.<sup>[[5]](#references)</sup>
+
+Test the host's **admission-to-dispatch** path with two controlled peers, distinct URLs and a harmless marker:<sup>[[5]](#references)</sup>
+
+1. Record the trusted peer's card, origin and local selector. Register a second peer whose card has the same `name` but whose URL points to an endpoint you control.
+2. Trigger the operation that selects the trusted peer by name. Try both registration orders and, if names become tool identifiers, the host's normal name normalization. Capture which endpoint receives the marker and which agent returns the response.
+3. Change only the second card's name and repeat. A request reaching the second endpoint only in the collision case proves wrong-peer dispatch. Separately check whether any sensitive context or credential was actually attached; the name collision by itself does **not** prove credential or tool-authority transfer.
+
+If the caller addresses a fixed, origin-bound endpoint rather than resolving a card name, this test does not apply.<sup>[[5]](#references)</sup> For subsequent malicious peer responses and prompt-injection impact, follow [AI Agent Security Methodology](AI-Agent-Security-Methodology.md#exploitation-cross-a-trust-boundary).
 
 ## Testing A2A endpoints
 
@@ -83,6 +95,22 @@ Vulnerable: B receives A's history, artifacts or status, or can change A's task.
 
 When `capabilities.pushNotifications` is true, the client gives the agent a webhook URL, and the agent later sends `POST` requests with task updates to that URL. The spec says agents should reject private ranges, localhost and link-local addresses, and use allowlists.<sup>[[1]](#references)</sup> Create a task, register a push notification config whose `url` points to your OAST host to confirm outbound requests, and then (only if the scope allows it) to internal targets such as `http://127.0.0.1:<port>/` or `http://169.254.169.254/`. Compare errors and timing to map internal services. The agent also adds the configured authentication header to these requests, so check that it is not sent to an attacker-chosen host when you can change the URL of another user's config. See [SSRF](../pentesting-web/ssrf-server-side-request-forgery/).
 
+### File-URL Parts as a second SSRF entry point
+
+A2A 1.0 lets a message or artifact carry a file reference as a `Part` with `url` (0.3 uses `kind: "file"` and `file.uri`).<sup>[[1]](#references)[[4]](#references)[[7]](#references)</sup> The protocol carries the reference; fetching it is application behavior, not a requirement of the A2A SDK.<sup>[[6]](#references)</sup> This is separate from the push-notification callback URL above. Test both directions: a client-supplied file sent to an A2A server, and a file URL returned by a lower-trust peer to an orchestrator.<sup>[[1]](#references)[[6]](#references)</sup>
+
+For an authorized 1.0 JSON-RPC endpoint, replace the normal text part with a URL to a unique OAST path and check **which component** makes the request:<sup>[[1]](#references)[[7]](#references)</sup>
+
+```bash
+curl -s https://target/a2a -H 'Content-Type: application/json' -H 'A2A-Version: 1.0' -d '{
+  "jsonrpc":"2.0","id":1,"method":"SendMessage",
+  "params":{"message":{"role":"ROLE_USER",
+    "messageId":"6f1c2b9e-0000-4000-8000-000000000003",
+    "parts":[{"url":"https://oast.example/part-probe","filename":"probe.txt","mediaType":"text/plain"}]}}}'
+```
+
+Only if the recipient dereferences it should you test in-scope internal destinations, redirects and DNS resolution changes using the [SSRF workflow](../pentesting-web/ssrf-server-side-request-forgery/). A valid `Part` or a successful task response alone does not prove SSRF; confirm the fetch at the destination and whether the fetched content reaches the agent.<sup>[[6]](#references)</sup>
+
 ### Extended agent card access
 
 `GetExtendedAgentCard` must require authentication and may return more skills and configuration than the public card.<sup>[[1]](#references)</sup> Call it without credentials and with a low-privilege identity, and compare the result with the public card.
@@ -95,11 +123,15 @@ When an agent needs extra authorization during a task, it moves the task to `TAS
 
 Agent card fields and task results are also untrusted input for the calling agent. Test them with the indirect prompt injection techniques in [AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection) and the inter-agent trust checks in [AI Agent Security Methodology](AI-Agent-Security-Methodology.md).
 
+
+
 ## References
 
 - [1] [A2A Protocol Specification](https://a2a-protocol.org/latest/specification/)
 - [2] [Google Developers Blog — Announcing the Agent2Agent Protocol (A2A)](https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/)
 - [3] [A2A specification v0.2.5](https://github.com/a2aproject/A2A/blob/v0.2.5/docs/specification.md)
 - [4] [A2A specification v0.3.0](https://github.com/a2aproject/A2A/blob/v0.3.0/docs/specification.md)
-
+- [5] [Agent Name Collision Attacks in Multi-Agent Systems](https://arxiv.org/abs/2609.27624)
+- [6] [A2A .NET SDK Security Guide](https://github.com/a2aproject/a2a-dotnet/blob/main/docs/security.md)
+- [7] [A2A Python v1.0 Migration Guide](https://github.com/a2aproject/a2a-python/blob/main/docs/migrations/v1_0/README.md)
 {{#include ../banners/hacktricks-training.md}}
