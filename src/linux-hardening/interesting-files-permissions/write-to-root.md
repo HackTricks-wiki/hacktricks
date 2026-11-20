@@ -25,6 +25,12 @@ void _init() {
 //gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
 
+### OCR output as a constrained file write
+
+An OCR service that lets a caller choose the saved filename can turn recognized image text into a **constrained file-write** primitive. The saved bytes are the recognized text, not the image bytes, so check the OCR output for syntax errors. If the allowed destination is web-executable and permits a `.php` filename, that text can execute when requested. In MakeSense, a locally reachable OCR application saved the text under `/saved/`; its root-run PHP server then executed the saved file as root. The write was confined to that directory, with no demonstrated path traversal.<sup>[[37]](#references)</sup>
+
+The privilege gained on execution is that of the **PHP-serving process**, not automatically that of the OCR writer. Confirm the destination's execution mapping and runtime identity; a root OCR writer paired with an unprivileged web server would not make the PHP run as root.<sup>[[37]](#references)</sup> Compare the direct [web-root upload pattern](../../pentesting-web/file-upload/).
+
 ### Git hooks
 
 **Git hooks** are executable scripts run for events in a repository, including commit and merge operations. If a **privileged script or user** performs those actions and an attacker can **write in the `.git` folder**, the hook can be used for **privilege escalation**.<sup>[[13]](#references)</sup>
@@ -398,6 +404,8 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 
 
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
@@ -436,4 +444,4 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 - [34] [`openat2(2)` — Linux manual page](https://man7.org/linux/man-pages/man2/openat2.2.html)
 - [35] [systemd generator documentation](https://github.com/systemd/systemd/blob/main/man/systemd.generator.xml)
 - [36] [Elastic Security Labs — Linux Detection Engineering: persistence mechanisms](https://www.elastic.co/security-labs/threat-command/primer-on-persistence-mechanisms)
-{{#include ../../banners/hacktricks-training.md}}
+- [37] [0xdf — HTB: MakeSense](https://0xdf.gitlab.io/2026/10/31/htb-makesense.html)
