@@ -2,54 +2,77 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Die meeste CTF-beeldstego val in een van hierdie kategorieë:
+Die meeste CTF-beeldstego val in een van die volgende kategorieë:
 
-- LSB/bit-vlakke (PNG/BMP)
-- Metadata-/kommentaar-payloads
+- LSB/bit-planes (PNG/BMP)
+- Metadata-/comment-payloads
 - PNG-chunk-afwykings / herstel van korrupsie
-- JPEG DCT-domein-gereedskap (OutGuess, ens.)
+- JPEG DCT-domain-tools (OutGuess, ens.)
 - Raamgebaseer (GIF/APNG)
 
-## Vinnige triage
+## Vinnige aanvanklike ondersoek
 
-Prioritiseer bewyse op houervlak voordat jy die inhoud diep ontleed:
+Gee bewyse op containervlak voorkeur bo diep inhoudsontleding. Sien die [algemene stego-werkvloei](../workflow/) vir lêeridentifikasie en carving voordat jy beeldspesifieke toetse uitvoer.
 
-- Valideer die lêer en inspekteer die struktuur: `file`, `magick identify -verbose`, formaatvalideerders (bv. `pngcheck`).
-- Onttrek metadata en sigbare stringe: `exiftool -a -u -g1`, `strings`.
+- Valideer die lêer en ondersoek die struktuur: `file`, `magick identify -verbose`, formaatvalideerders (bv. `pngcheck`).
+- Onttrek metadata en sigbare strings: `exiftool -a -u -g1`, `strings`.
 - Kyk vir ingebedde/bygevoegde inhoud: `binwalk` en inspeksie van die lêereinde (`tail | xxd`).
-- Kies ’n roete volgens die houer:
-  - PNG/BMP: bit-vlakke/LSB en afwykings op chunk-vlak.
-  - JPEG: metadata + DCT-domein-gereedskap (OutGuess/F5-stylfamilies).
-  - GIF/APNG: raamonttrekking, raamverskille, palettruuks.
+- Kies ’n rigting volgens die container:
+  - PNG/BMP: bit-planes/LSB en afwykings op chunk-vlak.
+  - JPEG: metadata + DCT-domain-gereedskap (OutGuess/F5-agtige families).
+  - GIF/APNG: raamonttrekking, verskilbepaling tussen rame, palettruuks.
 
-## Bit-vlakke / LSB
+## Bit-planes / LSB
 
 ### Tegniek
 
-PNG/BMP is gewild in CTF’s omdat hulle pixels stoor op ’n manier wat **manipulasie op bitvlak** maklik maak. Die klassieke versteek-/onttrekmeganisme is:
+PNG/BMP is gewild in CTF’s omdat hulle pixels stoor op ’n manier wat **bitvlak-manipulasie** maklik maak. Die klassieke versteek-/onttrekkingsmetode werk soos volg:
 
 - Elke pixelkanaal (R/G/B/A) het verskeie bisse.
-- Die **minste betekenisvolle bis** (LSB) van elke kanaal verander die beeld baie min.
-- Aanvallers versteek data in daardie lae-bisposisies, soms met ’n stapgrootte, permutasie of kanaalkeuse.
+- Die **minste beduidende bis** (LSB) van elke kanaal verander die beeld baie min.
+- Aanvallers versteek data in daardie laeorde-bisse, soms met ’n stride, permutasie of keuse van kanaal per kanaal.
 
-Wat om in uitdagings te verwag:
+Wat jy in uitdagings kan verwag:
 
-- Die payload is in net een kanaal (bv. R se LSB).
+- Die payload is in slegs een kanaal (bv. die `R` LSB).
 - Die payload is in die alfakanaal.
 - Die payload word ná onttrekking saamgepers/geënkodeer.
-- Die boodskap is oor vlakke versprei of met XOR tussen vlakke versteek.
+- Die boodskap is oor bit-planes versprei of via XOR tussen bit-planes versteek.
 
-Bykomende families wat jy kan teëkom (afhanklik van die implementering):
+Bykomende families wat jy kan teëkom (afhangend van die implementering):
 
-- **LSB-aanpassing** (nie net die bis omkeer nie, maar aanpassings van +/-1 om by die teikenbis te pas)
-- **Palet-/indeksgebaseerde versteeking** (geïndekseerde PNG/GIF: payload in kleurindekse eerder as rou RGB)
-- **Slegs-alfakanaal-payloads** (heeltemal onsigbaar in ’n RGB-aansig)
+- **LSB matching** (nie net die bis omkeer nie, maar aanpassings van +/-1 om by die teikenbis te pas)
+- **Palette/index-based hiding** (geïndekseerde PNG/GIF: payload in kleurindekse eerder as rou RGB)
+- **Alpha-only payloads** (heeltemal onsigbaar in die RGB-aansig)
+
+### Geïndekseerde-kleurpaletindekse
+
+’n Geïndekseerde PNG of GIF stoor ’n palet**indeks** per pixel, nie ’n RGB-drietal nie. Twee indekse kan na dieselfde sigbare kleur verwys, dus kan omskakeling na RGB voordat jy dit ontleed die versteekte onderskeid uitwis. Ondersoek duplikaat- of byna-duplikaatpaletinskrywings en lewer dan ’n binêre masker van pixels met elke verdagte indeks. Dit het versteekte teks en QR-kodeveranderinge in onlangse GIF-uitdagings onthul.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+
+Vir ’n geïndekseerde PNG met een raam (of die **eerste raam** van ’n GIF), behou Pillow se `P`-modus en verander `target` na ’n interessante indeks wat deur die skrip gerapporteer word. Gaan deursigtigheid (`tRNS` of GIF-deursigtigheidsindeks) sowel as RGB na wanneer jy indekse kies.<sup>[[3]](#references)[[5]](#references)</sup>
+
+```python
+from PIL import Image
+im = Image.open("suspect.png")
+assert im.mode == "P", "requires indexed pixels; do not convert to RGB"
+used = sorted(set(im.getdata()))
+palette = im.getpalette()
+for i in used:
+    same = [j for j in used if j != i and palette[3*i:3*i+3] == palette[3*j:3*j+3]]
+    if same:
+        print(i, "shares RGB with", same)
+target = 1  # replace with an index to isolate
+mask = bytes(255 if i == target else 0 for i in im.getdata())
+Image.frombytes("L", im.size, mask).save("index-mask.png")
+```
+
+Vir geanimeerde GIF's, inspekteer rame afsonderlik. Pillow skakel gewoonlik latere rame na RGB/RGBA om wanneer dit saamgestel word; `GifImagePlugin.LOADING_STRATEGY = GifImagePlugin.LoadingStrategy.RGB_AFTER_DIFFERENT_PALETTE_ONLY` behou P-modus slegs solank die palet nie verander nie. As 'n raam 'n plaaslike palet het of reeds saamgestel is, inspekteer die oorspronklike geïndekseerde raamdata eerder as om RGB-omgeskakelde pixels as indekse te behandel.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ### Gereedskap
 
 #### zsteg
 
-`zsteg` tel baie LSB-/bitvlak-onttrekkingspatrone vir PNG/BMP op:
+`zsteg` lys baie LSB-/bitvlak-ekstraksiepatrone vir PNG/BMP:
 
 ```bash
 zsteg -a file.png
@@ -59,39 +82,75 @@ Repo: https://github.com/zed-0xff/zsteg
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: voer ’n reeks transformasies uit (metadata, beeldtransformasies, brute-forcing van LSB-variante).
+- `stegoVeritas`: voer ’n reeks transformasies uit (metadata, beeldtransformasies, brute-forsering van LSB-variante).
 - `stegsolve`: handmatige visuele filters (kanaalisolasie, vlakinspeksie, XOR, ens.).
 
 Stegsolve-aflaai: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
 #### FFT-gebaseerde sigbaarheidstruuks
 
-FFT is nie LSB-ekstraksie nie; dit is vir gevalle waar inhoud doelbewus in frekwensieruimte of subtiele patrone versteek word.
+FFT is nie LSB-ekstraksie nie; dit word gebruik vir gevalle waar inhoud doelbewus in frekwensieruimte of subtiele patrone versteek is.
 
 - EPFL-demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-Webgebaseerde triage wat dikwels in CTFs gebruik word:
+Webgebaseerde triage wat dikwels in CTF’s gebruik word:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## PNG-internals: chunks, korrupsie en versteekte data
+## PNG-internals: stukke, korrupsie en versteekte data
 
 ### Tegniek
 
-PNG is ’n chunk-gebaseerde formaat. In baie uitdagings word die payload op die container-/chunk-vlak gestoor, eerder as in pixelwaardes:
+PNG is ’n stukgebaseerde formaat. In baie uitdagings word die loonvrag op houer-/stukvlak gestoor, eerder as in pixelwaardes:
 
-- **Ekstra grepe ná `IEND`** (baie kykers ignoreer agteraan gevoegde grepe)
-- **Nie-standaard ancillary chunks** wat payloads bevat; sien die [PNG chunk-walker- en carving-werkvloei](../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/png-tricks.md#extract-ancillary-chunk-payloads).
-- **Korrupte opskrifte** wat dimensies versteek of parsers laat faal totdat dit reggestel word
+- **Ekstra grepe ná `IEND`** (baie kykers ignoreer agteraanhangende grepe)
+- **Nie-standaard hulpstukke** wat loonvragte bevat; sien die [PNG-stukstapper en uitsny-werkvloei](../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/png-tricks.md#extract-ancillary-chunk-payloads).
+- **Korrupte opskrifte** wat dimensies versteek of ontleders laat faal totdat dit reggestel is
 
-Belangrike chunk-liggings om na te gaan:
+Stukke met ’n hoë seinwaarde om na te gaan:
 
 - `tEXt` / `iTXt` / `zTXt` (teksmetadata, soms saamgepers)
-- `iCCP` (ICC-profiel) en ander ancillary chunks wat as draer gebruik word
+- `iCCP` (ICC-profiel) en ander hulpstukke wat as draer gebruik word
 - `eXIf` (EXIF-data in PNG)
+
+### PNG-skandeerlyn-filtergrepe as draer
+
+PNG stoor een filtertipegreep (0–4) voor elke skandeerlyn in die gedekomprimeerde `IDAT`-stroom. Hierdie grepe is nie pixelwaardes nie; gedekodeerde RGB-pixels behou nie die oorspronklike filterkeuses nie, en herkodering kan dit verander. ’n Enkodeerder kan filters wettiglik laat wissel, maar doelbewuste patrone kan ’n klein boodskap enkodeer; ’n onlangse uitdaging het filterwaardes 1–4 as tweebis-simbole gebruik. Inspekteer die **oorspronklike lêer** en voeg al die `IDAT`-data saam voordat jy dit dekomprimeer. Vir die volgende nie-geïnterlinieerde 8-bis RGB/RGBA-geval is die stapwydte die breedte maal die kanaaltelling; Adam7-beelde vereis skandeerlynwydtes spesifiek vir elke deurloop.<sup>[[3]](#references)[[7]](#references)</sup>
+
+<details>
+<summary>Lys PNG-skandeerlyn-filtergrepe sonder herkodering</summary>
+
+```python
+from pathlib import Path
+import struct, sys, zlib
+b = Path(sys.argv[1]).read_bytes()
+assert b[:8] == b"\x89PNG\r\n\x1a\n"
+w, h, depth, color, comp, method, interlace = struct.unpack(">IIBBBBB", b[16:29])
+assert (depth, color, comp, method, interlace) in ((8, 2, 0, 0, 0), (8, 6, 0, 0, 0))
+stride = w * (3 if color == 2 else 4)
+off, parts = 8, []
+while off + 12 <= len(b):
+    n = int.from_bytes(b[off:off+4], "big")
+    kind = b[off+4:off+8]
+    assert off + n + 12 <= len(b)
+    if kind == b"IDAT":
+        parts.append(b[off+8:off+8+n])
+    off += n + 12
+    if kind == b"IEND":
+        break
+raw = zlib.decompress(b"".join(parts))
+assert len(raw) == h * (stride + 1)
+filters = raw[::stride+1]
+assert all(f <= 4 for f in filters)
+print(filters.hex(" "))
+```
+
+</details>
+
+Voer dit uit as `python3 filters.py suspect.png`. Kontroleer of die filtervolgorde, eerder as die gedekodeerde pixels, ’n geloofwaardige simboolkartering volg. Die keuse van kartering is uitdagingspesifiek; variasie alleen is nie bewys van steganografie nie.<sup>[[3]](#references)[[7]](#references)</sup>
 
 ### Triage-opdragte
 
@@ -102,7 +161,7 @@ pngcheck -v file.png
 
 Waarna om te kyk:
 
-- Vreemde breedte-/hoogte-/bisdiepte-/kleurtipekombinasies
+- Vreemde kombinasies van breedte/hoogte/bisdiepte/kleurtipe
 - CRC-/chunk-foute (pngcheck wys gewoonlik die presiese offset)
 - Waarskuwings oor bykomende data ná `IEND`
 
@@ -116,7 +175,7 @@ exiftool -a -u -g1 file.png
 Nuttige verwysings:
 
 - PNG-spesifikasie (struktuur, chunks): https://www.w3.org/TR/PNG/
-- Lêerformaat-truuks (PNG/JPEG/GIF-randgevalle): https://github.com/corkami/docs
+- Lêerformaattruuks (PNG/JPEG/GIF-hoekgevalle): https://github.com/corkami/docs
 
 ## JPEG: metadata, DCT-domeinnutsgoed en ELA-beperkings
 
@@ -125,9 +184,9 @@ Nuttige verwysings:
 JPEG word nie as rou pixels gestoor nie; dit word in die DCT-domein saamgepers. Daarom verskil JPEG-stego-nutsgoed van PNG LSB-nutsgoed:
 
 - Metadata-/kommentaar-payloads is op lêervlak (hoë seinwaarde en vinnig om te inspekteer)
-- DCT-domein-stego-nutsgoed bed die bits in frekwensiekoëffisiënte in
+- Stego-nutsgoed in die DCT-domein plaas bisse in frekwensiekoëffisiënte in
 
-Beskou JPEG prakties as:
+Behandel JPEG in die praktyk as:
 
 - ’n Houer vir metadatasegmente (hoë seinwaarde, vinnig om te inspekteer)
 - ’n Saamgeperste seindomein (DCT-koëffisiënte) waarin gespesialiseerde stego-nutsgoed werk
@@ -140,24 +199,24 @@ strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
 
-Hoë-sein-liggings:
+Plekke met sterk aanduidings:
 
 - EXIF/XMP/IPTC-metadata
 - JPEG-kommentaarsegment (`COM`)
 - Toepassingsegmente (`APP1` vir EXIF, `APPn` vir verskafferdata)
 
-### Algemene nutsmiddels
+### Algemene nutsgoed
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-As jy spesifiek met steghide-payloads in JPEGs werk, oorweeg dit om `stegseek` te gebruik (vinniger brute force as ouer skripte):
+As jy spesifiek met steghide-payloads in JPEG's te doen het, oorweeg dit om `stegseek` te gebruik (vinniger bruteforce as ouer skripte):
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
-### Error Level Analysis
+### Foutvlak-analise
 
-ELA beklemtoon verskillende herkompressie-artefakte; dit kan jou na streke wys wat geredigeer is, maar dit is nie op sy eie ’n stego-detector nie:
+ELA beklemtoon verskillende herkompressie-artefakte; dit kan jou na areas lei wat geredigeer is, maar is nie op sigself 'n stego-detektor nie:
 
 - [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
@@ -165,11 +224,11 @@ ELA beklemtoon verskillende herkompressie-artefakte; dit kan jou na streke wys w
 
 ### Tegniek
 
-Vir geanimeerde beelde, neem aan dat die boodskap:
+Neem by geanimeerde beelde aan dat die boodskap:
 
-- In ’n enkele raam is (maklik), of
-- Oor rame versprei is (volgorde maak saak), of
-- Slegs sigbaar is wanneer jy opeenvolgende rame diff
+- In 'n enkele raam is (maklik), of
+- Oor rame versprei is (die volgorde maak saak), of
+- Slegs sigbaar is wanneer opeenvolgende rame vergelyk word
 
 ### Rame onttrek
 
@@ -177,24 +236,24 @@ Vir geanimeerde beelde, neem aan dat die boodskap:
 ffmpeg -i anim.gif frame_%04d.png
 ```
 
-Behandel rame soos normale PNG's: `zsteg`, `pngcheck`, kanaalisolasie.
+Behandel rame dan soos gewone PNG's: `zsteg`, `pngcheck`, kanaal-isolasie.
 
 Alternatiewe nutsmiddels:
 
-- `gifsicle --explode anim.gif` (vinnige raamonttrekking)
+- `gifsicle --explode anim.gif` (vinnige raamekstraksie)
 - `imagemagick`/`magick` vir transformasies per raam
 
-Raamvergelyking is dikwels deurslaggewend:
+Raamverskille is dikwels deurslaggewend:
 
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
 
-### APNG-piksel-telling-enkodering
+### APNG-piekseltellingkodering
 
-- Bespeur APNG-houers: `exiftool -a -G1 file.png | grep -i animation` of `file`.
-- Onttrek rame sonder om die tydsberekening te verander: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
-- Herwin loonvragte wat as pikseltellings per raam geënkodeer is:
+- Bespeur APNG-houers: `exiftool -a -G1 file.png | grep -i animation` or `file`.
+- Onttrek rame sonder hertydsberekening: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
+- Herwin loonvragte wat as piekseltellings per raam gekodeer is:
 
 ```python
 from PIL import Image
@@ -207,22 +266,22 @@ for f in sorted(glob.glob('frames/frame_*.png')):
 print(bytes(out).decode('latin1'))
 ```
 
-Geanimeerde uitdagings kan elke byte enkodeer as die aantal kere wat ’n spesifieke kleur in elke frame voorkom; deur die tellings aan mekaar te voeg, word die boodskap gerekonstrueer.<sup>[[1]](#references)</sup>
+Geanimeerde uitdagings kan elke byte enkodeer as die aantal kere wat ’n spesifieke kleur in elke raam voorkom; deur die tellings aaneen te voeg, word die boodskap gerekonstrueer.<sup>[[1]](#references)</sup>
 
-## Wagwoordbeskermde inbedding
+## Inbedding met wagwoordbeskerming
 
-As jy vermoed dat die inbedding met ’n wagfrase beskerm word eerder as deur pixelvlakmanipulasie, is dit gewoonlik die vinnigste benadering.
+As jy vermoed dat die inbedding met ’n wagwoordfrase beskerm word eerder as deur manipulasie op pixelvlak, is dit gewoonlik die vinnigste manier.
 
 ### steghide
 
-Ondersteun `JPEG, BMP, WAV, AU` en kan geënkripteerde payloads inbed of uittrek.
+Ondersteun `JPEG, BMP, WAV, AU` en kan geënkripteerde payloads inbed en onttrek.
 
 ```bash
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
 
-Repo: https://github.com/StefanoDeVuono/steghide
+Bewaarplek: https://github.com/StefanoDeVuono/steghide
 
 ### StegCracker
 
@@ -240,7 +299,15 @@ Repo: https://github.com/dhsdshdhk/stegpy
 
 
 
+
+
 ## References
 
-- [1] [Flagvent 2025 (Medium) — pienk, Kersvader se wenslys, Kersfees-metadata, vasgelegde geraas](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa se wenslys, Kersfees-metadata, vasgelegde geraas](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [HackVent 2024-verslag — verwronge kleure](https://www.bigigloo.de/download/Write-Up_HackVent_2024.pdf)
+- [3] [Portable Network Graphics (PNG)-spesifikasie, derde uitgawe](https://www.w3.org/TR/png-3/)
+- [4] [XESXOR — diep onder is daar iets in die water](https://www.xesxor.com/writeups/custom-other-deep-down-there-s-something-in-the-water)
+- [5] [Pillow-beeldlêerformate — GIF](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html)
+- [6] [GIF89a-spesifikasie](https://giflib.sourceforge.net/gifstandard/GIF89a.html)
+- [7] [Afterimage Protocol — CTF-verslag](https://github.com/Team-Cyfer-Trace/Crest-CTF-2.0-Writeup-by-Cyfer-Trace/blob/main/stegno/Afterimage-Protocol/writeup.md)
 {{#include ../../banners/hacktricks-training.md}}
