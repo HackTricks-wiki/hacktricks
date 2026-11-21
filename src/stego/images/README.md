@@ -12,7 +12,7 @@ Most CTF image stego reduces to one of these buckets:
 
 ## Quick triage
 
-Prioritize container-level evidence before deep content analysis:
+Prioritize container-level evidence before deep content analysis. See the [general stego workflow](../workflow/) for file identification and carving before image-specific tests.
 
 - Validate the file and inspect structure: `file`, `magick identify -verbose`, format validators (e.g., `pngcheck`).
 - Extract metadata and visible strings: `exiftool -a -u -g1`, `strings`.
@@ -44,6 +44,29 @@ Additional families you may encounter (implementation-dependent):
 - **LSB matching** (not just flipping the bit, but +/-1 adjustments to match target bit)
 - **Palette/index-based hiding** (indexed PNG/GIF: payload in color indices rather than raw RGB)
 - **Alpha-only payloads** (completely invisible in RGB view)
+
+### Indexed-color palette indices
+
+An indexed PNG or GIF stores a palette **index** per pixel, not an RGB triplet. Two indices can map to the same visible color, so converting to RGB before analysis can erase the hidden distinction. Inspect duplicate or near-duplicate palette entries, then render a binary mask of pixels using each suspicious index. This has revealed hidden text and QR-code changes in recent GIF challenges.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+
+For a single-frame indexed PNG (or the **first frame** of a GIF), keep Pillow's `P` mode and change `target` to an interesting index reported by the script. Check transparency (`tRNS` or GIF transparency index) as well as RGB when choosing indices.<sup>[[3]](#references)[[5]](#references)</sup>
+
+```python
+from PIL import Image
+im = Image.open("suspect.png")
+assert im.mode == "P", "requires indexed pixels; do not convert to RGB"
+used = sorted(set(im.getdata()))
+palette = im.getpalette()
+for i in used:
+    same = [j for j in used if j != i and palette[3*i:3*i+3] == palette[3*j:3*j+3]]
+    if same:
+        print(i, "shares RGB with", same)
+target = 1  # replace with an index to isolate
+mask = bytes(255 if i == target else 0 for i in im.getdata())
+Image.frombytes("L", im.size, mask).save("index-mask.png")
+```
+
+For animated GIFs, inspect frames separately. Pillow normally converts later frames to RGB/RGBA while compositing; `GifImagePlugin.LOADING_STRATEGY = GifImagePlugin.LoadingStrategy.RGB_AFTER_DIFFERENT_PALETTE_ONLY` keeps `P` mode only while the palette does not change. If a frame has a local palette or has already been composited, inspect its original indexed frame data instead of treating RGB-converted pixels as indices.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ### Tooling
 
@@ -92,6 +115,42 @@ High-signal chunk locations to review:
 - `tEXt` / `iTXt` / `zTXt` (text metadata, sometimes compressed)
 - `iCCP` (ICC profile) and other ancillary chunks used as a carrier
 - `eXIf` (EXIF data in PNG)
+
+### PNG scanline-filter bytes as a carrier
+
+PNG stores one filter-type byte (0–4) before each scanline in the decompressed `IDAT` stream. These bytes are not pixel values; decoded RGB pixels do not preserve the original filter choices, and re-encoding can change them. An encoder may legitimately vary filters, but deliberate patterns can encode a small message; a recent challenge used filter values 1–4 as two-bit symbols. Inspect the **original file** and concatenate all `IDAT` data before decompressing. For the following non-interlaced, 8-bit RGB/RGBA case, the stride is width times channel count; Adam7 images require pass-specific scanline widths.<sup>[[3]](#references)[[7]](#references)</sup>
+
+<details>
+<summary>List PNG scanline filter bytes without re-encoding</summary>
+
+```python
+from pathlib import Path
+import struct, sys, zlib
+b = Path(sys.argv[1]).read_bytes()
+assert b[:8] == b"\x89PNG\r\n\x1a\n"
+w, h, depth, color, comp, method, interlace = struct.unpack(">IIBBBBB", b[16:29])
+assert (depth, color, comp, method, interlace) in ((8, 2, 0, 0, 0), (8, 6, 0, 0, 0))
+stride = w * (3 if color == 2 else 4)
+off, parts = 8, []
+while off + 12 <= len(b):
+    n = int.from_bytes(b[off:off+4], "big")
+    kind = b[off+4:off+8]
+    assert off + n + 12 <= len(b)
+    if kind == b"IDAT":
+        parts.append(b[off+8:off+8+n])
+    off += n + 12
+    if kind == b"IEND":
+        break
+raw = zlib.decompress(b"".join(parts))
+assert len(raw) == h * (stride + 1)
+filters = raw[::stride+1]
+assert all(f <= 4 for f in filters)
+print(filters.hex(" "))
+```
+
+</details>
+
+Run it as `python3 filters.py suspect.png`. Check whether the filter sequence, rather than the decoded pixels, follows a plausible symbol mapping. The choice of mapping is challenge-specific; variation alone is not proof of steganography.<sup>[[3]](#references)[[7]](#references)</sup>
 
 ### Triage commands
 
@@ -240,7 +299,15 @@ Repo: https://github.com/dhsdshdhk/stegpy
 
 
 
+
+
 ## References
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [HackVent 2024 write-up — Twisted Colors](https://www.bigigloo.de/download/Write-Up_HackVent_2024.pdf)
+- [3] [Portable Network Graphics (PNG) Specification, Third Edition](https://www.w3.org/TR/png-3/)
+- [4] [XESXOR — Deep Down There's something in the water](https://www.xesxor.com/writeups/custom-other-deep-down-there-s-something-in-the-water)
+- [5] [Pillow image file formats — GIF](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html)
+- [6] [GIF89a specification](https://giflib.sourceforge.net/gifstandard/GIF89a.html)
+- [7] [Afterimage Protocol — CTF write-up](https://github.com/Team-Cyfer-Trace/Crest-CTF-2.0-Writeup-by-Cyfer-Trace/blob/main/stegno/Afterimage-Protocol/writeup.md)
 {{#include ../../banners/hacktricks-training.md}}
