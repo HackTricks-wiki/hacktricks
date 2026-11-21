@@ -345,7 +345,7 @@
     - [macOS Sealed System Volume & DataVault](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sealed-system-volume-and-datavault.md)
     - [macOS Input Monitoring, Screen Capture & Accessibility](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-input-monitoring-screen-capture-accessibility.md)
     - [macOS FS Tricks](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/README.md)
-      - [macOS xattr-acls extra stuff](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/macos-xattr-acls-extra-stuff.md)
+      - [AppleDouble ACL Quarantine Bypass Reproduction](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/macos-appledouble-acl-quarantine-bypass.md)
   - [macOS Users & External Accounts](macos-hardening/macos-security-and-privilege-escalation/macos-users.md)
 - [macOS Red Teaming](macos-hardening/macos-red-teaming/README.md)
   - [macOS MDM](macos-hardening/macos-red-teaming/macos-mdm/README.md)
