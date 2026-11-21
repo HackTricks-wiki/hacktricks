@@ -17,7 +17,7 @@
 - OT safety/planning → `src/industrial-control-systems/README.md`; Modbus → `src/network-services-pentesting/pentesting-modbus.md`; OPC UA/BACnet → Network Services.
 - Android acquisition/imaging/LiME → `src/generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md`; Mobile owns app testing; malware separate.
 - Firmware acquisition, decryption, updates and boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay there.
-- Relocated from TODO: Rust → `src/generic-methodologies-and-resources/rust-basics.md`; investment terms → `src/blockchain/blockchain-and-crypto-currencies/investment-terms.md`; cookies → `src/welcome/cookies-policy.md`; recon/reputation/breach APIs → `src/generic-methodologies-and-resources/external-recon-methodology/reconnaissance-and-threat-intelligence-apis.md`.
+- Former TODO topics: Rust → generic methodologies; investment terms → Blockchain; cookies → Welcome; recon APIs → External Recon.
 - Referer leakage and Referrer-Policy → `src/pentesting-web/referer-header-and-referrer-policy.md`; OAuth links there. Exfiltration overview maps other routes.
 - UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
@@ -38,7 +38,8 @@
 - Python expression-evaluation confirmation (`"+str(True)+"`) → `src/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md#python-expression-evaluation-probe`; HTTP/web entry links directly there, not to a generic Python web-tech stub.
 - Remote MCP testing → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Distinct prerequisites.
 - eSIM/eUICC, Java Card and OTA/APDU → `src/mobile-pentesting/esim-javacard-exploitation.md`; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
-- Cross-platform collection tools → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay local.
+- Cross-platform collection tools → generic methodologies; OS-specific procedures stay local.
+- macOS AppleDouble/ACL quarantine PoC → `src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/macos-appledouble-acl-quarantine-bypass.md`; FS Tricks and Gatekeeper link there, while Gatekeeper keeps distinct CVE/application variants.
 - macOS interpreter startup (PHP, Lua, Julia, Octave, R, Ruby, Erlang/Elixir) → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`; runtime prerequisites stay under headings, distinct from shell/Python/PowerShell.
 - MIFARE Classic balance tampering → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; Proxmark remains tool reference.
 - PostgreSQL `lo_import`/`dblink_connect` exfiltration → `src/pentesting-web/sql-injection/postgresql-injection/README.md`; other dblink tasks remain separate.

