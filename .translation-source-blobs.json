@@ -852,7 +852,7 @@
     "src/pentesting-web/clickjacking.md": "23d66690d94287c8cb14e1ae655da75848a811f2",
     "src/pentesting-web/client-side-path-traversal.md": "d7dd8739aba34caf8a623d2c52f4a101d22ff43c",
     "src/pentesting-web/client-side-template-injection-csti.md": "b7cbe291d4ff6be851f789f751addfd57fb568f2",
-    "src/pentesting-web/command-injection.md": "346d076018bb68ebe9b1386b04f6929e16d18921",
+    "src/pentesting-web/command-injection.md": "711c96ad2b9371875d3218e820184ecacf855373",
     "src/pentesting-web/commons-text-string-interpolation.md": "2e1b43763ed451f775a2003b037796f56adca136",
     "src/pentesting-web/content-security-policy-csp-bypass/README.md": "9dfffa1d42578a548355f3f0a2d8d97fcf8f4fb5",
     "src/pentesting-web/content-security-policy-csp-bypass/csp-bypass-self-+-unsafe-inline-with-iframes.md": "2ba7a6543ca1187f8627af5e726ed991c980d60f",
