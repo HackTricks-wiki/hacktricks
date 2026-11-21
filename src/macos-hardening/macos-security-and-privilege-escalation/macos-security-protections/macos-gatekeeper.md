@@ -5,29 +5,29 @@
 
 ## Gatekeeper
 
-**Gatekeeper** es una función de seguridad desarrollada para los sistemas operativos Mac, diseñada para garantizar que los usuarios **ejecuten únicamente software de confianza** en sus sistemas. Funciona **validando el software** que un usuario descarga e intenta abrir desde **fuentes ajenas al App Store**, como una app, un plug-in o un paquete de instalación.
+**Gatekeeper** es una función de seguridad desarrollada para los sistemas operativos Mac, diseñada para garantizar que los usuarios **ejecuten únicamente software de confianza** en sus sistemas. Funciona **validando el software** que un usuario descarga e intenta abrir desde **fuentes ajenas a App Store**, como una app, un plug-in o un paquete de instalación.
 
-El mecanismo clave de Gatekeeper es su proceso de **verificación**. Comprueba si el software descargado está **firmado por un desarrollador reconocido**, para garantizar su autenticidad. Además, comprueba si el software está **notarizado por Apple**, lo que confirma que no contiene contenido malicioso conocido y que no se ha manipulado desde la notarización.
+El mecanismo clave de Gatekeeper es su proceso de **verificación**. Comprueba si el software descargado está **firmado por un desarrollador reconocido**, lo que garantiza su autenticidad. Además, determina si el software ha sido **notarizado por Apple**, confirmando que no contiene contenido malicioso conocido y que no ha sido manipulado después de la notarización.
 
-Además, Gatekeeper refuerza el control del usuario y la seguridad al **pedir a los usuarios que aprueben la apertura** del software descargado la primera vez. Esta protección ayuda a evitar que los usuarios ejecuten inadvertidamente código ejecutable potencialmente dañino que podrían haber confundido con un archivo de datos inofensivo.
+Asimismo, Gatekeeper refuerza el control del usuario y la seguridad al **solicitar a los usuarios que aprueben la apertura** del software descargado la primera vez. Esta medida de seguridad ayuda a evitar que los usuarios ejecuten inadvertidamente código ejecutable potencialmente dañino que podrían haber confundido con un archivo de datos inofensivo.
 
 ### Firmas de aplicaciones
 
-Las firmas de aplicaciones, también conocidas como firmas de código, son un componente fundamental de la infraestructura de seguridad de Apple. Se utilizan para **verificar la identidad del autor del software** (el desarrollador) y garantizar que el código no se haya manipulado desde la última vez que se firmó.
+Las firmas de aplicaciones, también conocidas como firmas de código, son un componente fundamental de la infraestructura de seguridad de Apple. Se utilizan para **verificar la identidad del autor del software** (el desarrollador) y garantizar que el código no haya sido manipulado desde la última vez que se firmó.
 
-Así es como funciona:
+Así funciona:
 
-1. **Firmar la aplicación:** Cuando un desarrollador está listo para distribuir su aplicación, la **firma con una clave privada**. Esta clave privada está asociada a un **certificado que Apple emite al desarrollador** cuando se inscribe en el Apple Developer Program. El proceso de firma consiste en crear un hash criptográfico de todas las partes de la app y cifrarlo con la clave privada del desarrollador.
-2. **Distribuir la aplicación:** Después, la aplicación firmada se distribuye a los usuarios junto con el certificado del desarrollador, que contiene la clave pública correspondiente.
-3. **Verificar la aplicación:** Cuando un usuario descarga la aplicación e intenta ejecutarla, el sistema operativo de su Mac utiliza la clave pública del certificado del desarrollador para descifrar el hash. Luego, vuelve a calcular el hash según el estado actual de la aplicación y lo compara con el hash descifrado. Si coinciden, significa que **la aplicación no se ha modificado** desde que el desarrollador la firmó, y el sistema permite que se ejecute.
+1. **Firma de la aplicación:** Cuando un desarrollador está listo para distribuir su aplicación, la **firma con una clave privada**. Esta clave privada está asociada a un **certificado que Apple emite al desarrollador** cuando se inscribe en el Apple Developer Program. El proceso de firma consiste en crear un hash criptográfico de todas las partes de la app y cifrarlo con la clave privada del desarrollador.
+2. **Distribución de la aplicación:** A continuación, la aplicación firmada se distribuye a los usuarios junto con el certificado del desarrollador, que contiene la clave pública correspondiente.
+3. **Verificación de la aplicación:** Cuando un usuario descarga e intenta ejecutar la aplicación, el sistema operativo de su Mac utiliza la clave pública del certificado del desarrollador para descifrar el hash. Luego vuelve a calcular el hash según el estado actual de la aplicación y lo compara con el hash descifrado. Si coinciden, significa que **la aplicación no se ha modificado** desde que el desarrollador la firmó, y el sistema permite ejecutarla.
 
-Las firmas de aplicaciones son una parte esencial de la tecnología Gatekeeper de Apple. Cuando un usuario intenta **abrir una aplicación descargada de Internet**, Gatekeeper verifica su firma. Si está firmada con un certificado que Apple emitió a un desarrollador conocido y el código no se ha manipulado, Gatekeeper permite que la aplicación se ejecute. De lo contrario, la bloquea y alerta al usuario.
+Las firmas de aplicaciones son una parte esencial de la tecnología Gatekeeper de Apple. Cuando un usuario intenta **abrir una aplicación descargada de Internet**, Gatekeeper verifica la firma de la aplicación. Si está firmada con un certificado emitido por Apple a un desarrollador conocido y el código no ha sido manipulado, Gatekeeper permite ejecutarla. De lo contrario, bloquea la aplicación y alerta al usuario.
 
-Desde macOS Catalina, **Gatekeeper también comprueba si Apple ha notarizado la aplicación**, lo que añade otra capa de seguridad. El proceso de notarización comprueba si la aplicación presenta problemas de seguridad conocidos y código malicioso. Si supera estas comprobaciones, Apple añade un ticket a la aplicación que Gatekeeper puede verificar.
+Desde macOS Catalina, **Gatekeeper también comprueba si Apple ha notarizado la aplicación**, lo que añade otra capa de seguridad. El proceso de notarización comprueba si la aplicación presenta problemas de seguridad conocidos y código malicioso y, si supera estas comprobaciones, Apple añade un ticket a la aplicación que Gatekeeper puede verificar.
 
 #### Comprobar firmas
 
-Al analizar una **muestra de malware**, siempre deberías **comprobar la firma** del binario, ya que el **desarrollador** que lo firmó podría estar ya **vinculado** con **malware**.
+Al analizar una **muestra de malware**, siempre debes **comprobar la firma** del binario, ya que el **desarrollador** que lo firmó podría estar ya **relacionado** con **malware**.
 
 ```bash
 # Get signer
@@ -48,18 +48,18 @@ codesign -s <cert-name-keychain> toolsdemo
 
 ### Notarización
 
-El proceso de notarización de Apple sirve como protección adicional para proteger a los usuarios del software potencialmente dañino. Consiste en que **el desarrollador envía su aplicación para que la examine** el **Apple Notary Service**, que no debe confundirse con App Review. Este servicio es un **sistema automatizado** que analiza el software enviado para detectar **contenido malicioso** y posibles problemas con la firma de código.
+El proceso de notarización de Apple sirve como medida de protección adicional para proteger a los usuarios de software potencialmente dañino. Consiste en que el **desarrollador envíe su aplicación para que la examine** el **Notary Service de Apple**, que no debe confundirse con App Review. Este servicio es un **sistema automatizado** que analiza el software enviado para detectar **contenido malicioso** y posibles problemas con la firma de código.
 
-Si el software **supera** esta inspección sin generar inquietudes, el Notary Service genera un ticket de notarización. Luego, el desarrollador debe **adjuntar este ticket a su software**, en un proceso conocido como «stapling». Además, el ticket de notarización también se publica en línea, donde Gatekeeper, la tecnología de seguridad de Apple, puede acceder a él.
+Si el software **supera** esta inspección sin que surja ningún problema, Notary Service genera un ticket de notarización. A continuación, el desarrollador debe **adjuntar este ticket al software**, un proceso conocido como «stapling». Además, el ticket de notarización también se publica en línea, donde Gatekeeper, la tecnología de seguridad de Apple, puede acceder a él.
 
-Cuando el usuario instala o ejecuta el software por primera vez, la existencia del ticket de notarización —ya sea adjunto al ejecutable o encontrado en línea— **indica a Gatekeeper que Apple ha notarizado el software**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el cuadro de diálogo del primer inicio, que indica que Apple ha comprobado el software para detectar contenido malicioso. Este proceso aumenta la confianza de los usuarios en la seguridad del software que instalan o ejecutan en sus sistemas.
+Cuando el usuario instala o ejecuta el software por primera vez, la existencia del ticket de notarización, tanto si está adjunto al ejecutable como si se encuentra en línea, **informa a Gatekeeper de que Apple ha notarizado el software**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el cuadro de diálogo de inicio inicial, que indica que Apple ha comprobado el software en busca de contenido malicioso. De este modo, este proceso aumenta la confianza de los usuarios en la seguridad del software que instalan o ejecutan en sus sistemas.
 
-### spctl y syspolicyd
+### spctl & syspolicyd
 
 > [!CAUTION]
 > Ten en cuenta que, a partir de Sequoia, **`spctl`** ya no permite modificar la configuración de Gatekeeper.
 
-**`spctl`** es la herramienta CLI para enumerar e interactuar con Gatekeeper (con el daemon `syspolicyd` mediante mensajes XPC). Por ejemplo, es posible ver el **estado** de Gatekeeper con:
+**`spctl`** es la herramienta CLI para enumerar e interactuar con Gatekeeper (con el daemon `syspolicyd` mediante mensajes XPC). Por ejemplo, es posible ver el **estado** de GateKeeper con:
 
 ```bash
 # Check the status
@@ -67,13 +67,13 @@ spctl --status
 ```
 
 > [!CAUTION]
-> Ten en cuenta que las comprobaciones de firma de GateKeeper se realizan únicamente en **archivos con el atributo Quarantine**, no en todos los archivos.
+> Ten en cuenta que las comprobaciones de firma de GateKeeper se realizan solo en **archivos con el atributo de cuarentena**, no en todos los archivos.
 
 GateKeeper comprobará si, según las **preferencias y la firma**, se puede ejecutar un binario:
 
 <figure><img src="../../../images/image (1150).png" alt=""><figcaption></figcaption></figure>
 
-**`syspolicyd`** es el daemon principal responsable de aplicar Gatekeeper. Mantiene una base de datos ubicada en `/var/db/SystemPolicy`; puedes encontrar el código que da soporte a la [base de datos aquí](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/policydb.cpp) y la [plantilla SQL aquí](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/syspolicy.sql). Ten en cuenta que SIP no restringe la base de datos y que root puede escribir en ella. La base de datos `/var/db/.SystemPolicy-default` se utiliza como copia de seguridad original por si la otra se corrompe.
+**`syspolicyd`** es el daemon principal responsable de aplicar Gatekeeper. Mantiene una base de datos ubicada en `/var/db/SystemPolicy`; puedes encontrar el código que permite trabajar con la [base de datos aquí](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/policydb.cpp) y la [plantilla SQL aquí](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/syspolicy.sql). Ten en cuenta que SIP no restringe la base de datos y que root puede escribir en ella. La base de datos `/var/db/.SystemPolicy-default` se usa como copia de seguridad original por si la otra se corrompe.
 
 Además, los bundles **`/var/db/gke.bundle`** y **`/var/db/gkopaque.bundle`** contienen archivos con reglas que se insertan en la base de datos. Puedes consultar esta base de datos como root con:
 
@@ -91,10 +91,10 @@ anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists an
 [...]
 ```
 
-**`syspolicyd`** también expone un servidor XPC con distintas operaciones, como `assess`, `update`, `record` y `cancel`, a las que también se puede acceder mediante las API **`SecAssessment*`** de **`Security.framework`**. Además, **`spctl`** se comunica con **`syspolicyd`** mediante XPC.
+**`syspolicyd`** también expone un servidor XPC con distintas operaciones, como `assess`, `update`, `record` y `cancel`, a las que también se puede acceder mediante las API **`SecAssessment*`** de **`Security.framework`**. De hecho, **`spctl`** se comunica con **`syspolicyd`** mediante XPC.
 
-Observa que la primera regla terminaba en "**App Store**" y la segunda en "**Developer ID**", y que en la imagen anterior estaba **habilitada la ejecución de apps de App Store y de desarrolladores identificados**.\
-Si **modificas** esa configuración a App Store, **desaparecerán las reglas de "**Developer ID notarizado**"**.
+Observa que la primera regla terminaba en «**App Store**» y la segunda en «**Developer ID**», y que en la imagen anterior estaba **habilitada la ejecución de apps de App Store y de desarrolladores identificados**.\
+Si **modificas** esa configuración a App Store, las reglas «**Notarized Developer ID**» desaparecerán.
 
 También hay miles de reglas de **tipo GKE**:
 
@@ -107,19 +107,19 @@ cdhash H"0a71962e7a32f0c2b41ddb1fb8403f3420e1d861"|1|0|GKE
 cdhash H"8d0d90ff23c3071211646c4c9c607cdb601cb18f"|1|0|GKE
 ```
 
-Estos son los hashes que provienen de:
+Estos son hashes de:
 
 - `/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`
 - `/var/db/gke.bundle/Contents/Resources/gk.db`
 - `/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`
 
-O puedes listar la información anterior con:
+O puedes mostrar la información anterior con:
 
 ```bash
 sudo spctl --list
 ```
 
-Las opciones **`--master-disable`** y **`--global-disable`** de **`spctl`** **desactivarán** por completo estas comprobaciones de firma:
+Las opciones **`--master-disable`** y **`--global-disable`** de **`spctl`** **deshabilitan** por completo estas comprobaciones de firma:
 
 ```bash
 # Disable GateKeeper
@@ -135,13 +135,13 @@ Cuando esté completamente habilitada, aparecerá una nueva opción:
 
 <figure><img src="../../../images/image (1151).png" alt=""><figcaption></figcaption></figure>
 
-Es posible **comprobar si GateKeeper permitirá una App** con:
+Es posible **comprobar si GateKeeper permitirá una app** con:
 
 ```bash
 spctl --assess -v /Applications/App.app
 ```
 
-En macOS 14 y versiones posteriores, **`syspolicy_check`** es una herramienta de nivel superior útil para comprobar una aplicación empaquetada antes de distribuirla. Ofrece diagnósticos de ejecución confiable más prácticos que un resultado simple de `spctl`, aunque Apple sigue recomendando probar el flujo real de descarga, extracción y primer inicio, ya que también comprueba la propagación de la cuarentena.<sup>[[14]](#references)</sup>
+En macOS 14 y versiones posteriores, **`syspolicy_check`** es una herramienta de nivel superior útil para comprobar un bundle de aplicación antes de distribuirlo. Proporciona diagnósticos más prácticos sobre la ejecución de confianza que un resultado básico de `spctl`, aunque Apple sigue recomendando probar el proceso real de descarga, extracción y primer inicio, ya que también verifica la propagación de quarantine.<sup>[[14]](#references)</sup>
 
 ```bash
 # Check the complete app bundle before distribution
@@ -151,7 +151,7 @@ syspolicy_check distribution /path/to/App.app
 spctl --assess --type execute -vv /path/to/App.app
 ```
 
-Es posible añadir nuevas reglas en GateKeeper para permitir la ejecución de ciertas aplicaciones con:
+Es posible agregar nuevas reglas en GateKeeper para permitir la ejecución de ciertas apps con:
 
 ```bash
 # Check if allowed - nop
@@ -168,14 +168,14 @@ spctl --assess -v /Applications/App.app
 /Applications/App.app: accepted
 ```
 
-En cuanto a las **extensiones de kernel**, la carpeta `/var/db/SystemPolicyConfiguration` contiene archivos con listas de kexts que se pueden cargar. Además, `spctl` tiene el entitlement `com.apple.private.iokit.nvram-csr`, ya que puede añadir nuevas extensiones de kernel preaprobadas, que también deben guardarse en NVRAM en una clave `kext-allowed-teams`.
+Regarding **kernel extensions**, la carpeta `/var/db/SystemPolicyConfiguration` contiene archivos con listas de kexts que pueden cargarse. Además, `spctl` tiene el entitlement `com.apple.private.iokit.nvram-csr` porque puede añadir nuevas kernel extensions preaprobadas, que también deben guardarse en NVRAM con una clave `kext-allowed-teams`.
 
 #### Administración de Gatekeeper en macOS 15 (Sequoia) y versiones posteriores
 
-- Se ha eliminado el antiguo bypass de Finder **Ctrl+Abrir / Clic derecho → Abrir**; los usuarios deben permitir explícitamente una app bloqueada desde **Ajustes del Sistema → Privacidad y seguridad → Abrir de todos modos** después del primer diálogo de bloqueo.<sup>[[4]](#references)</sup>
-- `spctl --master-disable/--global-disable` ya no se aceptan como cambios de política desatendidos. Las operaciones que modifican la base de datos de reglas o el estado global de evaluación están obsoletas, así que usa `spctl` para la evaluación y configura la aplicación de políticas mediante la interfaz o MDM.
+- Se eliminó el bypass de Finder **Ctrl+Abrir / Clic derecho → Abrir** que llevaba mucho tiempo disponible; los usuarios deben permitir explícitamente una app bloqueada desde **Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente** después del primer diálogo de bloqueo.<sup>[[4]](#references)</sup>
+- `spctl --master-disable/--global-disable` ya no se aceptan para cambiar políticas de forma desatendida. Las operaciones que modifican la base de datos de reglas o el estado global de evaluación están obsoletas, así que usa `spctl` para la evaluación y configura la aplicación de políticas mediante la interfaz de usuario o MDM.
 
-A partir de macOS 15 Sequoia, los usuarios finales ya no pueden cambiar la política de Gatekeeper desde `spctl`. La administración se realiza mediante Ajustes del Sistema o implementando un perfil de configuración MDM con el payload `com.apple.systempolicy.control`. Ejemplo de fragmento de perfil para permitir App Store y desarrolladores identificados (pero no «Cualquier lugar»):
+Desde macOS 15 Sequoia, los usuarios finales ya no pueden cambiar la política de Gatekeeper desde `spctl`. La administración se realiza mediante Ajustes del Sistema o implementando un perfil de configuración MDM con el payload `com.apple.systempolicy.control`. Ejemplo de fragmento de perfil para permitir App Store y desarrolladores identificados (pero no «Anywhere»):
 
 <details>
 <summary>Perfil MDM para permitir App Store y desarrolladores identificados</summary>
@@ -218,24 +218,24 @@ A partir de macOS 15 Sequoia, los usuarios finales ya no pueden cambiar la polí
 
 ### Archivos en cuarentena
 
-Al **descargar** una aplicación o un archivo, algunas **aplicaciones** de macOS, como los navegadores web o los clientes de correo electrónico, **añaden un atributo extendido al archivo**, conocido comúnmente como "**quarantine flag**", al archivo descargado. Este atributo sirve como medida de seguridad para **marcar el archivo** como procedente de una fuente no confiable (internet) y potencialmente riesgosa. Sin embargo, no todas las aplicaciones añaden este atributo; por ejemplo, los clientes de BitTorrent más comunes suelen omitir este proceso.
+Al **descargar** una aplicación o un archivo, algunas **aplicaciones** específicas de macOS, como los navegadores web o los clientes de correo electrónico, **adjuntan un atributo extendido de archivo**, conocido comúnmente como la "**marca de cuarentena**", al archivo descargado. Este atributo actúa como medida de seguridad para **marcar el archivo** como procedente de una fuente no confiable (internet) y potencialmente portador de riesgos. Sin embargo, no todas las aplicaciones adjuntan este atributo; por ejemplo, los clientes de software BitTorrent suelen omitir este proceso.
 
-**La presencia de un quarantine flag activa la función de seguridad Gatekeeper de macOS cuando un usuario intenta ejecutar el archivo**.
+**La presencia de una marca de cuarentena indica a la función de seguridad Gatekeeper de macOS que se está intentando ejecutar el archivo**.
 
-Si el **quarantine flag no está presente** (como ocurre con los archivos descargados mediante algunos clientes de BitTorrent), es posible que no se realicen las **comprobaciones** de Gatekeeper. Por lo tanto, los usuarios deben tener cuidado al abrir archivos descargados de fuentes menos seguras o desconocidas.
+Si la **marca de cuarentena no está presente** (como ocurre con los archivos descargados mediante algunos clientes BitTorrent), es posible que **no se realicen las comprobaciones** de Gatekeeper. Por ello, los usuarios deben tener cuidado al abrir archivos descargados de fuentes menos seguras o desconocidas.
 
-> [!NOTE] > **Comprobar** la **validez** de las firmas de código es un proceso que consume muchos **recursos** e incluye generar **hashes** criptográficos del código y de todos los recursos incluidos en el paquete. Además, comprobar la validez del certificado implica realizar una **comprobación en línea** con los servidores de Apple para determinar si se revocó después de su emisión. Por estos motivos, no es **práctico realizar una comprobación completa de la firma de código y la notarización cada vez que se inicia una aplicación**.
+> [!NOTE] > **Comprobar** la **validez** de las firmas de código es un proceso que **consume muchos recursos** e incluye generar **hashes** criptográficos del código y de todos los recursos incluidos en el paquete. Además, comprobar la validez del certificado implica realizar una **comprobación en línea** en los servidores de Apple para ver si se ha revocado desde su emisión. Por estos motivos, no resulta **práctico realizar una comprobación completa de la firma de código y la notarización cada vez que se inicia una aplicación**.
 >
-> Por lo tanto, estas comprobaciones **solo se realizan al ejecutar aplicaciones con el atributo de cuarentena**.
+> Por lo tanto, estas comprobaciones **solo se realizan al ejecutar aplicaciones que tienen el atributo de cuarentena**.
 
 > [!WARNING]
-> Este atributo debe **establecerlo la aplicación que crea/descarga** el archivo.
+> Este atributo debe **establecerlo la aplicación que crea o descarga** el archivo.
 >
-> Sin embargo, los archivos en sandbox tendrán este atributo en todos los archivos que creen. Y las aplicaciones que no están en sandbox pueden establecerlo por sí mismas o especificar la clave [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) en **Info.plist**, lo que hará que el sistema establezca el atributo extendido `com.apple.quarantine` en los archivos creados.
+> Sin embargo, los archivos creados por aplicaciones en sandbox tendrán este atributo. Y las aplicaciones que no están en sandbox pueden establecerlo por sí mismas o especificar la clave [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) en **Info.plist**, lo que hará que el sistema establezca el atributo extendido `com.apple.quarantine` en los archivos creados.
 
-Además, todos los archivos creados por un proceso que llame a **`qtn_proc_apply_to_self`** quedan en cuarentena. También se puede usar la API **`qtn_file_apply_to_path`** para añadir el atributo de cuarentena a la ruta de un archivo especificado.
+Además, todos los archivos creados por un proceso que invoque **`qtn_proc_apply_to_self`** se ponen en cuarentena. O bien, la API **`qtn_file_apply_to_path`** añade el atributo de cuarentena a una ruta de archivo especificada.
 
-Es posible **comprobar su estado y activarlo/desactivarlo** (se requiere root) con:
+Es posible **comprobar su estado y habilitarlo/deshabilitarlo** (se requiere root) con:
 
 ```bash
 spctl --status
@@ -254,7 +254,7 @@ com.apple.macl
 com.apple.quarantine
 ```
 
-Comprueba el **valor** de los **atributos** **extendidos** y averigua qué aplicación escribió el atributo de cuarentena con:
+Comprueba el **valor** de los **atributos** **extendidos** y averigua qué app escribió el atributo quarantine con:
 
 ```bash
 xattr -l portada.png
@@ -272,11 +272,11 @@ com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
 # F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
 ```
 
-En realidad, un proceso «podría establecer flags de quarantine en los archivos que crea» (ya intenté aplicar el flag USER_APPROVED a un archivo creado, pero no se aplica):
+En realidad, un proceso «podría establecer flags de cuarentena en los archivos que crea» (ya intenté aplicar el flag USER_APPROVED a un archivo creado, pero no se aplica):
 
 <details>
 
-<summary>Código fuente: aplicar flags de quarantine</summary>
+<summary>Código fuente para aplicar flags de cuarentena</summary>
 
 ```c
 #include <stdio.h>
@@ -354,31 +354,31 @@ Y encuentra todos los archivos en cuarentena con:
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
 
-La información de cuarentena también se almacena en una base de datos central administrada por LaunchServices en **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**, que permite a la interfaz gráfica obtener datos sobre el origen de los archivos. Además, las aplicaciones que podrían estar interesadas en ocultar su origen pueden sobrescribirla. Esto también se puede hacer mediante las API de LaunchServices.
+La información de cuarentena también se almacena en una base de datos central gestionada por LaunchServices en **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**, que permite a la GUI obtener datos sobre el origen de los archivos. Además, las aplicaciones que quieran ocultar su origen pueden sobrescribir esta información. Esto también puede hacerse mediante las API de LaunchServices.
 
 #### **libquarantine.dylib**
 
 Esta biblioteca exporta varias funciones que permiten manipular los campos de atributos extendidos.
 
-Las API `qtn_file_*` se ocupan de las políticas de cuarentena de archivos; las API `qtn_proc_*` se aplican a los procesos (a los archivos creados por el proceso). Las funciones no exportadas `__qtn_syscall_quarantine*` son las que aplican las políticas: llaman a `mac_syscall` con "Quarantine" como primer argumento, lo que envía las solicitudes a `Quarantine.kext`.
+Las API `qtn_file_*` gestionan las políticas de cuarentena de archivos; las API `qtn_proc_*` se aplican a los procesos (a los archivos creados por el proceso). Las funciones no exportadas `__qtn_syscall_quarantine*` son las que aplican las políticas: llaman a `mac_syscall` con "Quarantine" como primer argumento, que envía las solicitudes a `Quarantine.kext`.
 
 #### **Quarantine.kext**
 
-La extensión del kernel solo está disponible a través de la **caché del kernel del sistema**; sin embargo, puedes descargar el **Kernel Debug Kit desde** [**https://developer.apple.com/**](https://developer.apple.com/), que incluye una versión de la extensión con símbolos.
+La extensión del kernel solo está disponible en la **caché del kernel del sistema**; sin embargo, puedes descargar el **Kernel Debug Kit desde** [**https://developer.apple.com/**](https://developer.apple.com/), que incluye una versión de la extensión con símbolos.
 
-Esta Kext usa MACF para interceptar varias llamadas y capturar todos los eventos del ciclo de vida de los archivos: creación, apertura, cambio de nombre, creación de hard links... incluso `setxattr`, para impedir que establezca el atributo extendido `com.apple.quarantine`.
+Esta Kext usa MACF para interceptar varias llamadas y así detectar todos los eventos del ciclo de vida de los archivos: creación, apertura, cambio de nombre, creación de enlaces duros... incluso `setxattr`, para impedir que establezca el atributo extendido `com.apple.quarantine`.
 
-También usa un par de MIB:
+También usa un par de MIBs:
 
 - `security.mac.qtn.sandbox_enforce`: aplica la cuarentena junto con Sandbox
 - `security.mac.qtn.user_approved_exec`: los procesos en cuarentena solo pueden ejecutar archivos aprobados
 
 #### Atributo extendido de procedencia (Ventura y versiones posteriores)
 
-macOS 13 Ventura introdujo un mecanismo de procedencia independiente que se completa la primera vez que se permite ejecutar una aplicación en cuarentena.<sup>[[2]](#references)</sup> Se crean dos artefactos:
+macOS 13 Ventura introdujo un mecanismo de procedencia independiente que se rellena la primera vez que se permite ejecutar una app en cuarentena.<sup>[[2]](#references)</sup> Se crean dos artefactos:
 
 - El atributo extendido `com.apple.provenance` en el directorio del bundle `.app` (un valor binario de tamaño fijo que contiene una clave primaria y flags).
-- Una fila en la tabla `provenance_tracking`, dentro de la base de datos ExecPolicy en `/var/db/SystemPolicyConfiguration/ExecPolicy/`, que almacena el cdhash y los metadatos de la aplicación.
+- Una fila en la tabla `provenance_tracking` dentro de la base de datos ExecPolicy en `/var/db/SystemPolicyConfiguration/ExecPolicy/`, que almacena el cdhash de la app y sus metadatos.
 
 Uso práctico:
 
@@ -395,13 +395,13 @@ log show --last 2d --style syslog --predicate 'process == "syspolicyd" && eventM
 
 ### XProtect
 
-XProtect es una función **antimalware** integrada en macOS. XProtect **comprueba cada aplicación cuando se inicia por primera vez o se modifica, comparándola con su base de datos** de malware conocido y tipos de archivo no seguros. Cuando descargas un archivo mediante ciertas aplicaciones, como Safari, Mail o Messages, XProtect lo analiza automáticamente. Si coincide con algún malware conocido de su base de datos, XProtect **impedirá que el archivo se ejecute** y te avisará de la amenaza.
+XProtect es una función **antimalware** integrada en macOS. XProtect **comprueba cada aplicación cuando se inicia por primera vez o se modifica y la compara con su base de datos** de malware conocido y tipos de archivos no seguros. Cuando descargas un archivo con ciertas aplicaciones, como Safari, Mail o Messages, XProtect lo analiza automáticamente. Si coincide con algún malware conocido de su base de datos, XProtect **impedirá que se ejecute** y te alertará de la amenaza.
 
 Apple **actualiza periódicamente** la base de datos de XProtect con nuevas definiciones de malware, y estas actualizaciones se descargan e instalan automáticamente en tu Mac. Esto garantiza que XProtect esté siempre al día con las amenazas conocidas más recientes.
 
-Sin embargo, cabe señalar que **XProtect no es una solución antivirus completa**. Solo comprueba una lista específica de amenazas conocidas y no realiza análisis en tiempo real al acceder a los archivos, como la mayoría de los antivirus.
+Sin embargo, cabe señalar que **XProtect no es una solución antivirus completa**. Solo comprueba una lista específica de amenazas conocidas y no realiza análisis en tiempo real como la mayoría de los antivirus.
 
-Puedes obtener información sobre la actualización más reciente de XProtect ejecutando:
+Puedes obtener información sobre la última actualización de XProtect ejecutando:
 
 ```bash
 system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
@@ -410,13 +410,13 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 XProtect se encuentra en una ubicación protegida por SIP: **/Library/Apple/System/Library/CoreServices/XProtect.bundle**. Dentro del bundle puedes encontrar información que utiliza XProtect:
 
 - **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**: Permite que el código con esos cdhashes use legacy entitlements.
-- **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: Lista de plugins y extensiones cuya carga está prohibida mediante BundleID y TeamID, o que indica una versión mínima.
-- **`XProtect.bundle/Contents/Resources/XProtect.yara`**: Reglas de Yara para detectar malware.
+- **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: Lista de plugins y extensiones cuya carga está prohibida mediante BundleID y TeamID, o indica una versión mínima.
+- **`XProtect.bundle/Contents/Resources/XProtect.yara`**: Reglas Yara para detectar malware.
 - **`XProtect.bundle/Contents/Resources/gk.db`**: Base de datos SQLite3 con hashes de aplicaciones bloqueadas y TeamIDs.
 
-Ten en cuenta que hay otra App relacionada con XProtect en **`/Library/Apple/System/Library/CoreServices/XProtect.app`** que no interviene en el proceso de Gatekeeper.
+Ten en cuenta que existe otra aplicación relacionada con XProtect en **`/Library/Apple/System/Library/CoreServices/XProtect.app`**, que no participa en el proceso de Gatekeeper.
 
-> XProtect Remediator: En las versiones modernas de macOS, Apple incluye escáneres bajo demanda (XProtect Remediator) que se ejecutan periódicamente mediante launchd para detectar y remediar familias de malware. Puedes observar estos análisis en los logs unificados:
+> XProtect Remediator: En las versiones modernas de macOS, Apple incluye scanners bajo demanda (XProtect Remediator) que se ejecutan periódicamente mediante launchd para detectar y remediar familias de malware. Puedes observar estos análisis en los registros unificados:
 >
 > ```bash
 > log show --last 2h --predicate 'subsystem == "com.apple.XProtectFramework" || category CONTAINS "XProtect"' --style syslog
@@ -425,27 +425,27 @@ Ten en cuenta que hay otra App relacionada con XProtect en **`/Library/Apple/Sys
 ### No es Gatekeeper
 
 > [!CAUTION]
-> Ten en cuenta que Gatekeeper **no se ejecuta cada vez** que ejecutas una aplicación; solo _**AppleMobileFileIntegrity**_ (AMFI) **verifica las firmas del código ejecutable** cuando ejecutas una app que Gatekeeper ya había ejecutado y verificado.
+> Ten en cuenta que Gatekeeper **no se ejecuta cada vez** que ejecutas una aplicación; _**AppleMobileFileIntegrity**_ (AMFI) solo **verifica las firmas del código ejecutable** cuando ejecutas una app que Gatekeeper ya había ejecutado y verificado.
 
-Por lo tanto, antes era posible ejecutar una app para que Gatekeeper la almacenara en caché y luego **modificar archivos no ejecutables de la aplicación** (como archivos asar de Electron o NIB) y, si no había otras protecciones, la aplicación se **ejecutaba** con las adiciones **maliciosas**.
+Por lo tanto, antes era posible ejecutar una app para que Gatekeeper la almacenara en caché y luego **modificar archivos no ejecutables de la aplicación** (como archivos asar de Electron o NIB). Si no había otras protecciones, la aplicación se **ejecutaba** con las adiciones **maliciosas**.
 
-Sin embargo, ahora esto no es posible porque macOS **impide modificar archivos** dentro de los bundles de aplicaciones. Así que, si intentas el ataque [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md), verás que ya no es posible aprovecharlo porque, después de ejecutar la app para que Gatekeeper la almacene en caché, no podrás modificar el bundle. Y si, por ejemplo, cambias el nombre del directorio Contents a NotCon (como se indica en el exploit) y luego ejecutas el binario principal de la app para que Gatekeeper lo almacene en caché, se generará un error y no se ejecutará.
+Sin embargo, ahora esto no es posible porque macOS **impide modificar archivos** dentro de los bundles de las aplicaciones. Por eso, si intentas el ataque [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md), verás que ya no es posible aprovecharlo porque, después de ejecutar la app para que Gatekeeper la almacene en caché, no podrás modificar el bundle. Y si, por ejemplo, cambias el nombre del directorio Contents a NotCon (como se indica en el exploit) y luego ejecutas el binario principal de la app para que Gatekeeper la almacene en caché, se producirá un error y no se ejecutará.
 
-## Bypasses de Gatekeeper
+## Gatekeeper Bypasses
 
-Cualquier forma de bypass de Gatekeeper (lograr que el usuario descargue algo y lo ejecute cuando Gatekeeper debería impedirlo) se considera una vulnerabilidad en macOS. Estos son algunos CVE asignados a técnicas que permitieron hacer bypass de Gatekeeper en el pasado:
+Cualquier forma de eludir Gatekeeper (conseguir que el usuario descargue algo y lo ejecute cuando Gatekeeper debería impedirlo) se considera una vulnerabilidad en macOS. Estos son algunos CVE asignados a técnicas que permitieron eludir Gatekeeper en el pasado:
 
 ### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 
-Se observó que, si se utiliza **Archive Utility** para extraer archivos, los archivos con **rutas de más de 886 caracteres** no reciben el atributo extendido com.apple.quarantine. Esto permite inadvertidamente que esos archivos **evadan las** comprobaciones de seguridad de Gatekeeper.<sup>[[5]](#references)</sup>
+Se observó que, si se utiliza **Archive Utility** para extraer archivos, los archivos con **rutas que superan los 886 caracteres** no reciben el atributo extendido com.apple.quarantine. Esta situación permite inadvertidamente que esos archivos **eludan las comprobaciones de seguridad de Gatekeeper**.<sup>[[5]](#references)</sup>
 
 Consulta el [**informe original**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) para obtener más información.<sup>[[5]](#references)</sup>
 
 ### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
 
-Cuando se crea una aplicación con **Automator**, la información sobre lo que debe ejecutar está dentro de `application.app/Contents/document.wflow`, no en el ejecutable. El ejecutable es solo un binario genérico de Automator llamado **Automator Application Stub**.
+Cuando se crea una aplicación con **Automator**, la información sobre lo que debe ejecutar se encuentra en `application.app/Contents/document.wflow`, no en el ejecutable. El ejecutable es simplemente un binario genérico de Automator llamado **Automator Application Stub**.
 
-Por lo tanto, podrías hacer que `application.app/Contents/MacOS/Automator\ Application\ Stub` **apunte mediante un enlace simbólico a otro Automator Application Stub dentro del sistema**, y ejecutará lo que haya dentro de `document.wflow` (tu script) **sin activar Gatekeeper**, porque el ejecutable real no tiene el xattr quarantine.<sup>[[6]](#references)</sup>
+Por lo tanto, se podía hacer que `application.app/Contents/MacOS/Automator\ Application\ Stub` **apuntara mediante un enlace simbólico a otro Automator Application Stub del sistema** y ejecutara lo que contiene `document.wflow` (tu script) **sin activar Gatekeeper**, porque el ejecutable real no tiene el xattr de quarantine.<sup>[[6]](#references)</sup>
 
 Ejemplo de ubicación esperada: `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
 
@@ -453,7 +453,7 @@ Consulta el [**informe original**](https://ronmasas.com/posts/bypass-macos-gatek
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-En este bypass, se creó un archivo zip con una aplicación, empezando la compresión desde `application.app/Contents` en lugar de `application.app`. Por lo tanto, el **atributo quarantine** se aplicó a todos los **archivos de `application.app/Contents`**, pero **no a `application.app`**, que era lo que Gatekeeper comprobaba. Así, se hizo bypass de Gatekeeper porque, al activarse `application.app`, **no tenía el atributo quarantine**.<sup>[[7]](#references)</sup>
+En este bypass se creó un archivo zip con una aplicación cuya compresión comenzaba desde `application.app/Contents` en lugar de `application.app`. Por lo tanto, el **atributo quarantine** se aplicaba a todos los **archivos de `application.app/Contents`**, pero **no a `application.app`**, que era lo que comprobaba Gatekeeper. Así, se eludía Gatekeeper porque, al abrir `application.app`, **no tenía el atributo quarantine**.<sup>[[7]](#references)</sup>
 
 ```bash
 zip -r test.app/Contents test.zip
@@ -463,7 +463,7 @@ Consulta el [**informe original**](https://www.jamf.com/blog/jamf-threat-labs-sa
 
 ### [CVE-2022-32910](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32910)
 
-Aunque los componentes son diferentes, la explotación de esta vulnerabilidad es muy similar a la anterior. En este caso, generaremos un Apple Archive a partir de **`application.app/Contents`**, por lo que **`application.app` no tendrá el atributo quarantine** al descomprimirse con **Archive Utility**.<sup>[[8]](#references)</sup>
+Aunque los componentes son diferentes, la explotación de esta vulnerabilidad es muy similar a la anterior. En este caso, generaremos un Apple Archive a partir de **`application.app/Contents`**, de modo que **`application.app` no obtenga el atributo de cuarentena** al descomprimirse con **Archive Utility**.<sup>[[8]](#references)</sup>
 
 ```bash
 aa archive -d test.app/Contents -o test.app.aar
@@ -482,9 +482,7 @@ xattr -w attrname vale /tmp/no-attr
 xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```
 
-Además, el formato de archivo **AppleDouble** copia un archivo, incluidos sus ACE.<sup>[[9]](#references)</sup>
-
-En el [**código fuente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) se puede ver que la representación textual de la ACL almacenada dentro del xattr llamado **`com.apple.acl.text`** se establecerá como ACL en el archivo descomprimido. Por lo tanto, si comprimiste una aplicación en un archivo zip con el formato de archivo **AppleDouble** y una ACL que impide que se escriban otros xattrs en ella... el xattr de quarantine no se estableció en la aplicación:
+Para el mecanismo `com.apple.acl.text`/AppleDouble y la reproducción completa del archivo sidecar, consulta [Reproducción de la evasión de quarantine mediante ACL de AppleDouble](macos-fs-tricks/macos-appledouble-acl-quarantine-bypass.md). La variante ZIP de la aplicación de Gatekeeper usa la siguiente secuencia:
 
 ```bash
 chmod +a "everyone deny write,writeattr,writeextattr" /tmp/test
@@ -493,7 +491,7 @@ python3 -m http.server
 # Download the zip from the browser and decompress it, the file should be without a quarantine xattr
 ```
 
-Consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para obtener más información.<sup>[[9]](#references)</sup> Consulta la [reproducción de AppleDouble/ACL](macos-fs-tricks/macos-xattr-acls-extra-stuff.md) para conocer los pasos de construcción y validación del sidecar.
+Consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para obtener más información.<sup>[[9]](#references)</sup>
 
 Ten en cuenta que esto también podría explotarse con AppleArchives:
 
@@ -510,7 +508,7 @@ Se descubrió que **Google Chrome no establecía el atributo de cuarentena** en 
 
 ### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
 
-AppleDouble almacena los atributos de un archivo en un archivo separado cuyo nombre empieza por `._`; esto permite copiar atributos **entre máquinas macOS**. Sin embargo, después de descomprimir un archivo AppleDouble, el archivo que empieza por `._` **no recibía el atributo de cuarentena**.<sup>[[11]](#references)</sup>
+AppleDouble almacena los atributos de un archivo en un archivo separado cuyo nombre empieza por `._`; esto ayuda a copiar los atributos de los archivos **entre equipos macOS**. Sin embargo, después de descomprimir un archivo AppleDouble, al archivo que empezaba por `._` **no se le asignaba el atributo de cuarentena**.<sup>[[11]](#references)</sup>
 
 ```bash
 mkdir test
@@ -522,8 +520,8 @@ aa archive -d test/ -o test.aar
 # If you download and decompress the resulting test.aar, test/._a won't have a quarantine attribute
 ```
 
-Al poder crear un archivo que no tuviera establecido el atributo de cuarentena, era **posible eludir Gatekeeper**. El truco consistía en **crear un archivo de aplicación DMG** siguiendo la convención de nombres AppleDouble (comenzando con `._`) y crear un **archivo visible como enlace simbólico a este archivo oculto** sin el atributo de cuarentena.\
-Cuando se **ejecuta el archivo DMG**, como no tiene el atributo de cuarentena, **eludirá Gatekeeper**.
+Al poder crear un archivo que no tuviera establecido el atributo de cuarentena, **era posible eludir Gatekeeper.** El truco consistía en **crear un archivo DMG de aplicación** usando la convención de nombres AppleDouble (empezando con `._`) y crear un **archivo visible como enlace simbólico a este archivo oculto** sin el atributo de cuarentena.\
+Cuando se **ejecuta el archivo DMG**, como no tiene un atributo de cuarentena, **eludirá Gatekeeper**.
 
 ```bash
 # Create an app bundle with the backdoor an call it app.app
@@ -543,21 +541,21 @@ aa archive -d s/ -o app.aar
 
 ### [CVE-2023-41067]
 
-Apple corrigió un error lógico de LaunchServices en macOS Sonoma 14.0 mediante comprobaciones mejoradas. El aviso público solo indica que una app podía eludir Gatekeeper, así que no infieras un formato de archivo portador ni una cadena de explotación específica basándote únicamente en la entrada de CVE.<sup>[[13]](#references)</sup>
+Apple corrigió un error lógico de LaunchServices en macOS Sonoma 14.0 mediante comprobaciones mejoradas. El aviso público solo indica que una app podía eludir Gatekeeper, así que no se debe inferir un formato contenedor ni una cadena de explotación específicos basándose únicamente en la entrada de la CVE.<sup>[[13]](#references)</sup>
 
 ### [CVE-2024-27853]
 
-Un bypass de Gatekeeper en macOS 14.4 (lanzado en marzo de 2024), causado por el manejo de ZIP maliciosos de `libarchive`, permitía a las apps eludir la evaluación. Actualiza a la versión 14.4 o posterior, donde Apple corrigió el problema.<sup>[[1]](#references)</sup>
+Un bypass de Gatekeeper en macOS 14.4 (lanzado en marzo de 2024), originado en el manejo de ZIP maliciosos por parte de `libarchive`, permitía que las apps eludieran la evaluación. Actualiza a la versión 14.4 o posterior, donde Apple corrigió el problema.<sup>[[1]](#references)</sup>
 
 ### [CVE-2024-44128](https://support.apple.com/en-us/121234)
 
-Un **workflow de Automator Quick Action** integrado en una app descargada podía activarse sin la evaluación de Gatekeeper, porque los workflows se trataban como datos y los ejecutaba el helper de Automator fuera del flujo habitual del aviso de notarización. Por tanto, un `.app` manipulado que incluyera una Quick Action para ejecutar un script de shell (p. ej., dentro de `Contents/PlugIns/*.workflow/Contents/document.wflow`) podía ejecutarse inmediatamente al iniciarse. Apple añadió un cuadro de diálogo de consentimiento adicional y corrigió el flujo de evaluación en Ventura **13.7**, Sonoma **14.7** y Sequoia **15**.<sup>[[3]](#references)</sup>
+Un **workflow de Automator Quick Action** incrustado en una app descargada podía ejecutarse sin la evaluación de Gatekeeper, porque los workflows se trataban como datos y el helper de Automator los ejecutaba fuera del flujo habitual del aviso de notarización. Por lo tanto, un `.app` creado para incluir una Quick Action que ejecuta un shell script (por ejemplo, dentro de `Contents/PlugIns/*.workflow/Contents/document.wflow`) podía ejecutarlo inmediatamente al iniciarse. Apple añadió un diálogo de consentimiento adicional y corrigió el proceso de evaluación en Ventura **13.7**, Sonoma **14.7** y Sequoia **15**.<sup>[[3]](#references)</sup>
 
-### Fallos de propagación de cuarentena en los límites de extracción y copia
+### Fallos de propagación de cuarentena durante la extracción y la copia
 
-Un estudio de 2024 encontró brechas de propagación en las versiones probadas de iZip (ZIP/TAR/7Z), Archiver (ARCHIVER/ZIP/TAR/7Z), BetterZip (ZIP/TAR/7Z), WinRAR (ZIP/TAR/7Z) y 7z Utility (DMG/ZIP/7Z); también observó que el atributo se perdía al copiar desde el host a la máquina virtual con VMware Tools. Desde entonces, varios proveedores anunciaron correcciones, así que considera estos nombres como pistas para **volver a probar versiones específicas**, no como una lista permanente de software vulnerable. El mismo problema de límites de confianza se aplica a los workflows nativos de Unix: `curl`/`scp` no añaden cuarentena, y `tar`/`unzip` de línea de comandos no la heredan automáticamente de un archivo portador.<sup>[[15]](#references)</sup>
+Un estudio de 2024 encontró brechas de propagación en las versiones probadas de iZip (ZIP/TAR/7Z), Archiver (ARCHIVER/ZIP/TAR/7Z), BetterZip (ZIP/TAR/7Z), WinRAR (ZIP/TAR/7Z) y 7z Utility (DMG/ZIP/7Z); también observó que el atributo se perdía al copiar desde el host a la máquina virtual con VMware Tools. Desde entonces, varios proveedores han anunciado correcciones, así que considera estos nombres como pistas para **volver a probar versiones específicas**, no como una lista permanente de software vulnerable. El mismo problema en los límites de confianza se aplica a los workflows nativos de Unix: `curl`/`scp` no añaden cuarentena, y la línea de comandos `tar`/`unzip` no la hereda automáticamente de un archivo contenedor.<sup>[[15]](#references)</sup>
 
-Para las pruebas ofensivas, compara el archivo portador y la app final después de **cada** transición entre navegador, cliente de correo, archivador, imagen de disco, sincronización en la nube, carpeta compartida y copia de máquina virtual. Un rechazo explícito de `spctl` no corrige la falta de un xattr: sin cuarentena, puede que el flujo habitual de Gatekeeper en la primera apertura ni siquiera solicite esa evaluación.<sup>[[15]](#references)</sup>
+Para pruebas ofensivas, compara el archivo contenedor y la app final después de **cada** transición por navegador, cliente de correo, archivo comprimido, imagen de disco, sincronización en la nube, carpeta compartida y copia a máquina virtual. Un rechazo explícito de `spctl` no corrige la ausencia de un xattr: sin cuarentena, es posible que la ruta habitual de Gatekeeper al abrir por primera vez ni siquiera solicite esa evaluación.<sup>[[15]](#references)</sup>
 
 ```bash
 # 1. Confirm the browser-downloaded carrier is quarantined
@@ -585,7 +583,7 @@ find ./out -type d -name '*.app' -prune -exec sh -c \
 
 Si no se añade el xattr de cuarentena a un bundle ".app", **Gatekeeper no se activará** al ejecutarlo.
 
-Consulta [macOS FS Tricks](macos-fs-tricks/README.md#avoid-quarantine-xattrs-tricks) para ver primitivas basadas en filesystem, flags, ACL y AppleDouble que pueden impedir la adición o descartar atributos extendidos.
+Consulta [Trucos de macOS FS](macos-fs-tricks/README.md#avoid-quarantine-xattrs-tricks) para conocer primitivas basadas en el sistema de archivos, flags, ACL y AppleDouble que pueden impedir o descartar atributos extendidos.
 
 
 
@@ -593,19 +591,19 @@ Consulta [macOS FS Tricks](macos-fs-tricks/README.md#avoid-quarantine-xattrs-tri
 
 ## References
 
-- [1] [Seguridad de la plataforma Apple: Sobre el contenido de seguridad de macOS Sonoma 14.4 (incluye CVE-2024-27853)](https://support.apple.com/en-us/HT214084)
-- [2] [Eclectic Light: Cómo macOS rastrea ahora la procedencia de las apps](https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/)
-- [3] [Apple: Sobre el contenido de seguridad de macOS Sonoma 14.7 / Ventura 13.7 (CVE-2024-44128)](https://support.apple.com/en-us/121234)
-- [4] [MacRumors: macOS 15 Sequoia elimina el bypass de Gatekeeper mediante Control-clic en «Abrir»](https://www.macrumors.com/2024/08/06/macos-sequoia-gatekeeper-security-change/)
+- [1] [Seguridad de la plataforma Apple: Acerca del contenido de seguridad de macOS Sonoma 14.4 (incluye CVE-2024-27853)](https://support.apple.com/en-us/HT214084)
+- [2] [Eclectic Light: Cómo macOS realiza ahora un seguimiento de la procedencia de las apps](https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/)
+- [3] [Apple: Acerca del contenido de seguridad de macOS Sonoma 14.7 / Ventura 13.7 (CVE-2024-44128)](https://support.apple.com/en-us/121234)
+- [4] [MacRumors: macOS 15 Sequoia elimina el bypass de Gatekeeper «Abrir» con Control-clic](https://www.macrumors.com/2024/08/06/macos-sequoia-gatekeeper-security-change/)
 - [5] [WithSecure Labs: El descubrimiento de CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 - [6] [CVE-2021-30990, cómo eludir Gatekeeper de macOS](https://ronmasas.com/posts/bypass-macos-gatekeeper)
 - [7] [Jamf Threat Labs identifica una vulnerabilidad de Safari que permite eludir Gatekeeper](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
-- [8] [Jamf Threat Labs identifica una vulnerabilidad de Archive Utility de macOS que permite eludir Gatekeeper (CVE-2022-32910)](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/)
-- [9] [El talón de Aquiles de Gatekeeper: descubriendo una vulnerabilidad de macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [8] [Jamf Threat Labs identifica una vulnerabilidad de macOS Archive Utility que permite eludir Gatekeeper (CVE-2022-32910)](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/)
+- [9] [El talón de Aquiles de Gatekeeper: Descubriendo una vulnerabilidad de macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 - [10] [F-Secure: Descubrimiento de un bypass de Gatekeeper (CVE-2023-27943)](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
-- [11] [Encontrar y notificar un exploit para eludir Gatekeeper con ayuda de Mac Monitor](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
-- [12] [CODE BLUE 2023: Eludir los mecanismos de seguridad y privacidad de macOS: de Gatekeeper a System Integrity Protection (Koh Nakagawa)](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf)
-- [13] [Apple: Sobre el contenido de seguridad de macOS Sonoma 14 (CVE-2023-41067)](https://support.apple.com/en-us/HT213940)
-- [14] [Foros para desarrolladores de Apple: Probar un producto notarizado](https://developer.apple.com/forums/thread/130560)
-- [15] [Unit 42: Eludir Gatekeeper: descubriendo debilidades en un mecanismo de seguridad de macOS](https://unit42.paloaltonetworks.com/gatekeeper-bypass-macos/)
+- [11] [Cómo encontrar e informar de un exploit para eludir Gatekeeper con ayuda de Mac Monitor](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
+- [12] [CODE BLUE 2023: Elusión de los mecanismos de seguridad y privacidad de macOS: de Gatekeeper a System Integrity Protection (Koh Nakagawa)](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf)
+- [13] [Apple: Acerca del contenido de seguridad de macOS Sonoma 14 (CVE-2023-41067)](https://support.apple.com/en-us/HT213940)
+- [14] [Apple Developer Forums: Cómo probar un producto notarizado](https://developer.apple.com/forums/thread/130560)
+- [15] [Unit 42: Elusión de Gatekeeper: Descubriendo debilidades en un mecanismo de seguridad de macOS](https://unit42.paloaltonetworks.com/gatekeeper-bypass-macos/)
 {{#include ../../../banners/hacktricks-training.md}}
