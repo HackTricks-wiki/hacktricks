@@ -89,6 +89,12 @@ Then, you can just create the HKCU entry and every time the user logs in, your b
 
 A machine-wide COM registration can become a DLL-planting primitive without changing the registry. Look for an `InprocServer32` value whose DLL is absent and whose final path can be created or modified by a low-privileged user. Planting the exact DLL name makes any process that activates the CLSID load attacker code. In the CrossDevice example, the registered path was `%PROGRAMDATA%\CrossDevice\CrossDevice.Streaming.Source.dll`, so a standard user could create the missing child directory and DLL.<sup>[[5]](#references)</sup>
 
+### Writable plugin maps as privileged COM activation paths
+
+A writable plugin-ID-to-CLSID map can let a less-privileged user choose which in-process COM server a privileged service loads, even when the class's machine-wide registration cannot be edited.<sup>[[8]](#references)[[9]](#references)</sup> In the reported Windows 11 `InstallService` case, standard users could modify `StaticPluginMap`; a non-built-in plugin ID selected a CLSID that the `LocalSystem` service passed to `CoCreateInstance` with `CLSCTX_INPROC_SERVER` and `IID_IInstallServicePlugin`.<sup>[[8]](#references)[[9]](#references)</sup> The registered DLL loads into the service process rather than a separate COM host.<sup>[[10]](#references)</sup>
+
+The relevant conditions are effective write access to the map, a reachable plugin request, and an `InprocServer32` DLL path the less-privileged user can control.<sup>[[8]](#references)[[9]](#references)</sup> The CrossDevice registration above supplied the path condition in the reported case.<sup>[[8]](#references)[[9]](#references)</sup> A successful plugin object must expose the requested interface, but the DLL is loaded before `CoCreateInstance` completes; failure to expose that interface does not by itself rule out code execution during loading.<sup>[[8]](#references)[[11]](#references)</sup> This service-dispatch route differs from the custom-`IMarshal` route below. For the separate file-path primitive, see [DLL Hijacking](dll-hijacking/).
+
 ### `IMarshal` as a cross-process DLL-load primitive
 
 COM normally represents an interface pointer with a standard `OBJREF` that refers the receiver back to the original object. An object that implements `IMarshal` can instead produce a custom `OBJREF`. Its `GetUnmarshalClass` method supplies the CLSID of the code that will reconstruct the object in the receiving process. That CLSID does not need to identify the original object. COM resolves it as an in-process server and loads the registered DLL before dispatching the requested interface method.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
@@ -262,6 +268,10 @@ Notes
 - [5] [Project Zero - Windows Exploitation Techniques: Dangling COM Object Registrations](https://projectzero.google/2026/09/windows-dangling-com.html)
 - [6] [Microsoft Learn - IMarshal interface](https://learn.microsoft.com/en-us/windows/win32/api/objidl/nn-objidl-imarshal)
 - [7] [Microsoft Open Specifications - MS-DCOM OBJREF](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dcom/fe6c5e46-adf8-4e34-a8de-3f756c875f31)
+- [8] [Dark Elevator PoC and technical write-up (califio)](https://github.com/califio/publications/tree/main/MADBugs/windows-CVE-2026-50343)
+- [9] [Dark Elevator: Windows Install Service Local Privilege Escalation (calif.io)](https://blog.calif.io/p/dark-elevator-windows-install-service)
+- [10] [CLSCTX enumeration (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/wtypesbase/ne-wtypesbase-clsctx)
+- [11] [CoCreateInstance function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/combaseapi/nf-combaseapi-cocreateinstance)
 
 {{#include ../../banners/hacktricks-training.md}}
 
