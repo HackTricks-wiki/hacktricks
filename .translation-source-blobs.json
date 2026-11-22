@@ -1153,7 +1153,7 @@
     "src/windows-hardening/windows-local-privilege-escalation/appenddata-addsubdirectory-permission-over-service-registry.md": "15344683445af23d6aab240a23b764f2c056a1bc",
     "src/windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md": "92227c14ca1aae1f138cce7b17d7bbd0a0e9048d",
     "src/windows-hardening/windows-local-privilege-escalation/cloud-files-placeholder-name-toctou.md": "f55e4e797acefaa64638bcfa4d2c58132acb0f9b",
-    "src/windows-hardening/windows-local-privilege-escalation/com-hijacking.md": "c74601f8275c48f82f80b3e5050432143b164ddf",
+    "src/windows-hardening/windows-local-privilege-escalation/com-hijacking.md": "8037a3a875dde47e9b2aa624ebb0e334d3da8701",
     "src/windows-hardening/windows-local-privilege-escalation/create-msi-with-wix.md": "f3eea43e46534944ac460a566339fb99d5cd0307",
     "src/windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md": "81441e262096dc6510b086bf26ef4f4f9de45fdd",
     "src/windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md": "ff8beaccb81fb1059529acad522abc0ed8113fd1",
