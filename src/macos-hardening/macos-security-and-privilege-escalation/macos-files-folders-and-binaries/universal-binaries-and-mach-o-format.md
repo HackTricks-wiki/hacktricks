@@ -1,12 +1,12 @@
-# macOS Universal binaries & Mach-O Format
+# macOS Universal binaries と Mach-O Format
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 基本情報
 
-macOSは**Mach-O**実行ファイル形式を使用します。**universal**（fat）binaryは、複数のアーキテクチャ固有のMach-Oスライスを1つのファイルに含みます。Appleのオープンソースヘッダー`fat.h`および`loader.h`では、このページで説明する構造体と定数が定義されています。 <sup>[[5]](#references)</sup>
+macOS は **Mach-O** 実行ファイル形式を使用します。**universal**（fat）binary は、複数のアーキテクチャ固有の Mach-O slice を1つのファイルに含みます。Apple のオープンソースヘッダー `fat.h` と `loader.h` では、このページで説明する構造体と定数が定義されています。 <sup>[[5]](#references)</sup>
 
-Mach-Oイメージは次の要素で構成されます。
+Mach-O image は次の要素で構成されます。
 
 - Header
 - Load Commands
@@ -35,9 +35,9 @@ struct fat_arch {
 };
 </code></pre>
 
-Headerには**magic** bytesがあり、その後にファイルに**含まれる**アーキテクチャの**数**（`nfat_arch`）が続きます。各アーキテクチャには`fat_arch` structがあります。
+Header には **magic** bytes があり、その後にファイルに**含まれる** **arch** の**数** (`nfat_arch`) が続きます。各 arch には `fat_arch` struct があります。
 
-次のように確認できます。
+次のコマンドで確認できます。
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -64,14 +64,14 @@ fat_magic FAT_MAGIC
 </strong>    align 2^14 (16384)
 </code></pre>
 
-または、[Mach-O View](https://sourceforge.net/projects/machoview/)ツールを使用します。
+または、[Mach-O View](https://sourceforge.net/projects/machoview/) tool を使用します。
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-ご想像のとおり、通常、2つのアーキテクチャ向けにコンパイルされたuniversal binaryは、1つのアーキテクチャ向けにコンパイルされたものの**2倍のサイズ**になります。
+通常、2つのアーキテクチャ向けにコンパイルされた universal binary は、1つの arch のみを対象にコンパイルされたものの**2倍のサイズ**になると考えられます。
 
 > [!TIP]
-> malwareや疑わしいアプリを調査するときは、`file`が「最適な」アーキテクチャを報告しても、それだけで終わらせないでください。universal binaryでは、各スライスに異なるimports、load commands、またはcompiler metadataが含まれている可能性があります。まず**すべての**スライスを列挙し、それぞれを個別に調査してください。
+> malware や不審なアプリをトリアージする際は、`file` が「最適な」アーキテクチャを報告しただけで調査を終えないでください。universal binary の各 slice で imports、load commands、compiler metadata が異なる場合があります。まず**すべての** slice を列挙し、その後それぞれを個別に調べてください。
 
 ```bash
 BIN=/path/to/bin
@@ -83,11 +83,28 @@ for A in $(lipo -archs "$BIN"); do
 done
 ```
 
-最近のmacOS SDKでは、`<mach-o/utils.h>`に`macho_for_each_slice()`や`macho_best_slice()`などのヘルパーも公開されています。後者はdyld/kernelが読み込むものをエミュレートするのに便利ですが、スキャナーはアーキテクチャ固有のコンテンツを見逃さないよう、すべてのsliceを引き続き走査する必要があります。<sup>[[1]](#references)</sup>
+最近の macOS SDK では、`<mach-o/utils.h>` の `macho_for_each_slice()` と `macho_best_slice()` も公開されています。Apple Silicon では、macOS 15 より前のバージョンで、`macho_best_slice()` が実行可能なサードパーティ製 `arm64` バイナリに対して誤って `EBADARCH` を返す場合がありました。この API は macOS 15 で修正されました。すべてのスライスを一覧表示するには、`macho_for_each_slice()` または `lipo -archs` を使用してください。最適なスライスの検索に失敗したことを、実行可能なスライスがない証拠として扱わないでください。<sup>[[1]](#references)[[7]](#references)</sup>
 
-## **Mach-Oヘッダー**
+### スライス間でコード署名を比較する
 
-ヘッダーには、ファイルがMach-Oファイルであることを識別するマジックバイトや、ターゲットアーキテクチャに関する情報など、ファイルの基本情報が含まれています。次のコマンドで見つけることができます: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+ユニバーサルバイナリの各アーキテクチャには、それぞれ独自の CodeDirectory と CDHash があります。署名済みの実行ファイルや特権ヘルパーを監査する場合は、**各スライスの署名**を調べてください。CDHash が異なるのは正常です。代わりに、署名 ID、CodeDirectory のフラグ、entitlements を比較してください。<sup>[[8]](#references)</sup>
+
+CDHash に一致するポリシーでは、1つのハッシュが識別するのは、アーキテクチャ固有の実行経路1つだけです。Apple は、スライスを列挙し、それぞれを調べるために `codesign --arch` を使用することを推奨しています。<sup>[[9]](#references)</sup>
+
+```bash
+BIN=/path/to/executable
+for A in $(lipo -archs "$BIN"); do
+  printf "\n== %s ==\n" "$A"
+  codesign -dvvv --arch "$A" "$BIN" 2>&1
+  codesign -d --entitlements - --arch "$A" "$BIN"
+done
+```
+
+署名構造と検証の詳細については、[macOS Code Signing](../macos-security-protections/macos-code-signing.md)を参照してください。
+
+## **Mach-O Header**
+
+ヘッダーには、ファイルがMach-Oファイルであることを識別するmagic bytesや、ターゲットアーキテクチャに関する情報など、ファイルの基本情報が含まれています。次の場所で確認できます: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
@@ -116,20 +133,20 @@ struct mach_header_64 {
 };
 ```
 
-### Mach-O ファイルタイプ
+### Mach-O ファイルの種類
 
-さまざまなファイルタイプがあり、[**こちらのソースコードの例**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h)で定義を確認できます。主なものは次のとおりです。
+ファイルの種類はいくつかあり、[**ソースコードの例はこちら**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h)で定義を確認できます。主なものは次のとおりです。
 
-- `MH_OBJECT`: 再配置可能なオブジェクトファイル（コンパイルの中間生成物で、まだ実行ファイルではありません）。
-- `MH_EXECUTE`: 実行ファイル。
+- `MH_OBJECT`: 再配置可能なオブジェクトファイル（コンパイルの中間生成物で、まだ実行可能ファイルではありません）。
+- `MH_EXECUTE`: 実行可能ファイル。
 - `MH_FVMLIB`: 固定 VM ライブラリファイル。
-- `MH_CORE`: コードダンプ。
-- `MH_PRELOAD`: プリロードされた実行ファイル（XNUではサポートされなくなりました）。
-- `MH_DYLIB`: 動的ライブラリ。
-- `MH_DYLINKER`: 動的リンカー。
-- `MH_BUNDLE`: 「プラグインファイル」。gccで -bundle を使用して生成され、`NSBundle` または `dlopen` で明示的に読み込まれます。
-- `MH_DYSM`: 付属の `.dSym` ファイル（デバッグ用のシンボルを含むファイル）。
-- `MH_KEXT_BUNDLE`: カーネル拡張機能。
+- `MH_CORE`: コアダンプ。
+- `MH_PRELOAD`: プリロードされた実行可能ファイル（XNUではサポートされなくなりました）。
+- `MH_DYLIB`: Dynamic Libraries。
+- `MH_DYLINKER`: Dynamic Linker。
+- `MH_BUNDLE`: 「プラグインファイル」。gccで `-bundle` を使用して生成され、`NSBundle` または `dlopen` によって明示的に読み込まれます。
+- `MH_DSYM`: 対応する `.dSYM` ファイル（デバッグ用のシンボルを含むファイル）。
+- `MH_KEXT_BUNDLE`: Kernel Extensions。
 
 ```bash
 # Checking the mac header of a binary
@@ -143,30 +160,30 @@ MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DY
 
 <figure><img src="../../../images/image (1133).png" alt=""><figcaption></figcaption></figure>
 
-## **Mach-O フラグ**
+## **Mach-Oフラグ**
 
 ソースコードでは、ライブラリの読み込みに役立ついくつかのフラグも定義されています。
 
-- `MH_NOUNDEFS`: 未定義の参照なし（完全にリンク済み）
-- `MH_DYLDLINK`: Dyld によるリンク
-- `MH_PREBOUND`: 動的参照が事前バインド済み
-- `MH_SPLIT_SEGS`: ファイルを読み取り専用セグメントと読み書き可能セグメントに分割
-- `MH_WEAK_DEFINES`: バイナリに weak 定義のシンボルがある
-- `MH_BINDS_TO_WEAK`: バイナリが weak シンボルを使用する
+- `MH_NOUNDEFS`: 未定義参照なし（完全にリンク済み）
+- `MH_DYLDLINK`: Dyldリンク
+- `MH_PREBOUND`: 動的参照が事前にバインドされている
+- `MH_SPLIT_SEGS`: ファイルが読み取り専用セグメントと読み書き可能セグメントに分割されている
+- `MH_WEAK_DEFINES`: バイナリに弱い定義のシンボルがある
+- `MH_BINDS_TO_WEAK`: バイナリが弱いシンボルを使用する
 - `MH_ALLOW_STACK_EXECUTION`: スタックを実行可能にする
-- `MH_NO_REEXPORTED_DYLIBS`: ライブラリに LC_REEXPORT コマンドがない
+- `MH_NO_REEXPORTED_DYLIBS`: ライブラリにLC_REEXPORTコマンドがない
 - `MH_PIE`: 位置独立実行ファイル
 - `MH_HAS_TLV_DESCRIPTORS`: スレッドローカル変数を含むセクションがある
-- `MH_NO_HEAP_EXECUTION`: ヒープ／データページでの実行を禁止
-- `MH_HAS_OBJC`: バイナリに Objective-C セクションがある
+- `MH_NO_HEAP_EXECUTION`: ヒープ／データページでの実行なし
+- `MH_HAS_OBJC`: バイナリにObjective-Cセクションがある
 - `MH_SIM_SUPPORT`: シミュレーターをサポート
-- `MH_DYLIB_IN_CACHE`: 共有ライブラリキャッシュ内の dylib／framework で使用される
+- `MH_DYLIB_IN_CACHE`: 共有ライブラリキャッシュ内のdylib／frameworkで使用される
 
-## **Mach-O ロードコマンド**
+## **Mach-Oロードコマンド**
 
-**ファイルのメモリ上のレイアウト**はここで指定され、**シンボルテーブルの位置**、実行開始時のメインスレッドのコンテキスト、必要な**共有ライブラリ**が詳しく記述されます。バイナリをメモリに読み込む処理について、動的ローダー **(dyld)** への指示が記載されています。
+ここでは、**ファイルのメモリ上のレイアウト**を指定します。これには、**シンボルテーブルの位置**、実行開始時のメインスレッドの状態、必要な**共有ライブラリ**が含まれます。バイナリをメモリに読み込む際の処理について、動的ローダー**（dyld）**に指示します。
 
-これは、前述の **`loader.h`** で定義されている **load_command** 構造体を使用します。
+ここでは、言及されている **`loader.h`** で定義された **load_command** 構造体を使用します。
 
 ```objectivec
 struct load_command {
@@ -175,20 +192,20 @@ struct load_command {
 };
 ```
 
-システムがそれぞれ異なる方法で処理する **Load Command は約50種類**あります。最も一般的なものは、`LC_SEGMENT_64`、`LC_LOAD_DYLINKER`、`LC_MAIN`、`LC_LOAD_DYLIB`、`LC_CODE_SIGNATURE` です。
+システムが異なる方法で処理する Load Command は約 **50種類**あります。最も一般的なものは、`LC_SEGMENT_64`、`LC_LOAD_DYLINKER`、`LC_MAIN`、`LC_LOAD_DYLIB`、`LC_CODE_SIGNATURE` です。
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> 基本的に、このタイプの Load Command は、バイナリの実行時に、Data セクションに示された **offsets** に従って、**\_\_TEXT**（実行コード）および **\_\_DATA**（プロセスのデータ）**segments** をどのようにロードするかを定義します。
+> 基本的に、この種類の Load Command は、バイナリの実行時に Data セクションで示される **オフセット**に従って、**\_\_TEXT**（実行コード）および **\_\_DATA**（プロセスのデータ）**セグメント**をどのようにロードするかを定義します。
 
-これらのコマンドは、プロセスの実行時に、その**仮想メモリ空間**に**マッピング**される**segments**を定義します。
+これらのコマンドは、プロセスの実行時にプロセスの**仮想メモリ空間**に**マッピング**される**セグメント**を定義します。
 
-**\_\_TEXT** segment のようにプログラムの実行コードを格納するものや、プロセスが使用するデータを含む **\_\_DATA** segment など、**さまざまなタイプ**の segments があります。これらの **segments は Mach-O ファイルの Data セクションにあります**。
+**\_\_TEXT**セグメント（プログラムの実行コードを格納）や、**\_\_DATA**セグメント（プロセスが使用するデータを格納）など、**さまざまな種類**のセグメントがあります。これらの**セグメントは Mach-O ファイルのデータセクション内にあります**。
 
-**各 segment** は、さらに複数の **sections** に**分割**できます。**Load Command の構造**には、それぞれの segment 内にある**これらの sections に関する情報**が含まれます。
+**各セグメント**はさらに複数の**セクション**に**分割**できます。**Load Command の構造体**には、各セグメント内の**これらのセクションに関する情報**が含まれています。
 
-ヘッダーの最初にあるのは、**segment header** です。
+ヘッダーでは、まず**セグメントヘッダー**を確認できます。
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
 	uint32_t	cmd;		/* LC_SEGMENT_64 */
@@ -205,11 +222,11 @@ struct load_command {
 };
 </code></pre>
 
-segment header の例：
+セグメントヘッダーの例：
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-このヘッダーは、その後にヘッダーが続く sections の**数**を定義します。
+このヘッダーは、その後にヘッダーが続くセクションの**数**を定義します。
 
 ```c
 struct section_64 { /* for 64-bit architectures */
@@ -232,61 +249,61 @@ struct section_64 { /* for 64-bit architectures */
 
 <figure><img src="../../../images/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-**section offset** (0x37DC) と、この場合は `0x18000` である**arch starts**の位置の**offset**を足すと、`0x37DC + 0x18000 = 0x1B7DC` になります。
+**section offset**（0x37DC）に、この場合は`0x18000`となる**arch starts**の位置の**offset**を足します --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
-次のコマンドを使って、**headers information**を**command line**から取得することもできます。
+次のコマンドラインを使って、**headers information**を取得することもできます:
 
 ```bash
 otool -lv /bin/ls
 ```
 
-この cmd によってロードされる一般的なセグメント:
+この cmd でロードされる一般的なセグメント:
 
-- **`__PAGEZERO`:** カーネルに対し、**アドレス 0** を**マップ**し、そこからの**読み取り、書き込み、実行を禁止**するよう指示します。構造体内の maxprot と minprot 変数は 0 に設定され、このページに**読み取り・書き込み・実行の権限がない**ことを示します。
-  - この割り当ては、**NULL pointer dereference vulnerabilities の緩和**に重要です。これは、XNU が最初のメモリページ（最初のページのみ）をアクセス不能にする hard page zero を強制するためです（i386 を除く）。バイナリは、小さな \_\_PAGEZERO（`-pagezero_size` を使用）を作成して最初の 4k をカバーし、残りの 32bit メモリをユーザーモードとカーネルモードの両方でアクセス可能にすることで、この要件を満たせます。
-- **`__TEXT`**: **読み取り**および**実行**権限（書き込み不可）を持つ**実行可能な** **コード**が含まれます。このセグメントの一般的なセクション:
+- **`__PAGEZERO`:** カーネルに対し、**アドレス 0** を **マップ** し、そこからの **読み取り、書き込み、実行をすべて禁止** するよう指示します。構造体内の maxprot と minprot 変数はゼロに設定され、このページには **読み取り・書き込み・実行の権限がない** ことを示します。
+  - この割り当ては、**NULL pointer dereference の脆弱性を緩和する** ために重要です。これは、XNU が最初のメモリページ（最初のページのみ）をアクセス不能にする hard page zero を強制するためです（i386 を除く）。バイナリは、小さな \_\_PAGEZERO（`-pagezero_size` を使用）を作成して最初の 4k をカバーし、残りの 32bit メモリをユーザーモードとカーネルモードの両方からアクセス可能にすることで、この要件を満たせます。
+- **`__TEXT`**: **読み取り** と **実行** の権限を持つ **実行可能** な **コード** を格納します（書き込み不可）**。** このセグメントの一般的なセクション:
   - `__text`: コンパイル済みバイナリコード
   - `__const`: 定数データ（読み取り専用）
   - `__[c/u/os_log]string`: C、Unicode、または os logs の文字列定数
-  - `__stubs` および `__stubs_helper`: dynamic library のロード処理中に使用される
-  - `__unwind_info`: Stack unwind データ。
-  - これらのコンテンツはすべて署名されていますが、実行可能としてもマークされています（string 専用セクションなど、この権限を必ずしも必要としないセクションを悪用する選択肢が増えます）。
-- **`__DATA`**: **読み取り**および**書き込み**可能なデータ（実行不可）が含まれます。
+  - `__stubs` と `__stubs_helper`: dynamic library のロード処理中に使用される
+  - `__unwind_info`: スタック unwind データ。
+  - これらの内容はすべて署名されている一方、実行可能としてマークされている点に注意してください（文字列専用セクションなど、この権限を必ずしも必要としないセクションの exploitation にも選択肢が増えます）。
+- **`__DATA`**: **読み取り可能** かつ **書き込み可能** なデータを格納します（実行不可）**。**
   - `__got:` Global Offset Table
-  - `__nl_symbol_ptr`: Non lazy（ロード時に bind）symbol pointer
-  - `__la_symbol_ptr`: Lazy（使用時に bind）symbol pointer
+  - `__nl_symbol_ptr`: 非 lazy（ロード時に bind）シンボルポインター
+  - `__la_symbol_ptr`: lazy（使用時に bind）シンボルポインター
   - `__const`: 読み取り専用データであるべき（実際はそうではない）
-  - `__cfstring`: CoreFoundation strings
-  - `__data`: Global variables（初期化済み）
-  - `__bss`: Static variables（未初期化）
+  - `__cfstring`: CoreFoundation 文字列
+  - `__data`: グローバル変数（初期化済み）
+  - `__bss`: static 変数（未初期化）
   - `__objc_*` (\_\_objc_classlist、\_\_objc_protolist など): Objective-C runtime が使用する情報
-- **`__DATA_CONST`**: \_\_DATA.\_\_const は定数であるとは限らず（書き込み権限があります）、他のポインターや GOT も同様です。このセクションは `mprotect` を使用して、`__const`、一部の initializer、GOT table（解決後）を**読み取り専用**にします。
-- **`__AUTH` / `__AUTH_CONST`**: 最近の Apple Silicon バイナリで一般的です。これらのセグメントには、ロード時または使用時に認証が必要なポインター（たとえば `__auth_got`）が格納されます。rebinding、hook、import-patching の手法が legacy の `__got` / `__la_symbol_ptr` セクションだけを確認する場合、最新の `arm64e` バイナリにある実際の call site を見落とすことがあります。これらのセクションの詳細については、[このページ](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md)を確認してください。
-- **`__LINKEDIT`**: symbol、string、relocation table のエントリーなど、linker（dyld）の情報が含まれます。`__TEXT` または `__DATA` のどちらにも属さないコンテンツを格納する汎用コンテナで、内容は他の load command で記述されます。
-  - dyld 情報: Rebase、Non-lazy/lazy/weak binding opcodes、export info
-  - Functions starts: 関数の開始アドレスのテーブル
+- **`__DATA_CONST`**: \_\_DATA.\_\_const は定数であるとは限らず（書き込み権限があります）、他のポインターや GOT も同様です。このセクションは `mprotect` を使用して、`__const`、一部の initializer、および GOT table（解決後）を **読み取り専用** にします。
+- **`__AUTH` / `__AUTH_CONST`**: 最近の Apple Silicon バイナリで一般的です。これらのセグメントには、ロード時または使用時に認証が必要なポインター（たとえば `__auth_got`）が格納されます。rebinding、hook、import-patching の手法で従来の `__got` / `__la_symbol_ptr` セクションしかチェックしない場合、最新の `arm64e` バイナリにおける実際の call site を見落とす可能性があります。これらのセクションの詳細は[このページ](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md)を確認してください。
+- **`__LINKEDIT`**: symbol、string、relocation table のエントリーなど、linker（dyld）向けの情報を格納します。`__TEXT` や `__DATA` に含まれない内容を収める汎用コンテナで、その内容は他の load command で記述されます。
+  - dyld 情報: Rebase、Non-lazy/lazy/weak binding opcode、export 情報
+  - Functions starts: 関数の開始アドレスの table
   - Data In Code: \_\_text 内のデータ領域
-  - SYmbol Table: バイナリ内の symbols
-  - Indirect Symbol Table: Pointer/stub symbols
+  - Symbol Table: バイナリ内のシンボル
+  - Indirect Symbol Table: ポインター/stub シンボル
   - String Table
   - Code Signature
-- **`__OBJC`**: Objective-C runtime が使用する情報が含まれます。この情報は、\_\_DATA セグメント内のさまざまな \_\_objc\_\* セクションにも存在する場合があります。
-- **`__RESTRICT`**: **`__restrict`** という単一のセクション（これも空）を持つ、コンテンツのないセグメントです。バイナリの実行時に DYLD の環境変数を無視するようにします。
+- **`__OBJC`**: Objective-C runtime が使用する情報を格納します。ただし、この情報は \_\_DATA セグメント内のさまざまな \_\_objc\_\* セクションにも含まれている場合があります。
+- **`__RESTRICT`**: **`__restrict`** という単一のセクションを持つ（こちらも空の）内容のないセグメントで、バイナリ実行時に DYLD 環境変数を無視するようにします。
 
-コードで確認できたように、**セグメントはフラグにも対応しています**（ただし、あまり使われません）。
+コードで確認できるように、**セグメントはフラグもサポートしています**（ただし、あまり使われていません）。
 
-- `SG_HIGHVM`: Core のみ（未使用）
+- `SG_HIGHVM`: Core 専用（未使用）
 - `SG_FVMLIB`: 未使用
 - `SG_NORELOC`: セグメントに relocation がない
-- `SG_PROTECTED_VERSION_1`: Encryption。たとえば Finder がテキスト `__TEXT` セグメントを暗号化するために使用します。
+- `SG_PROTECTED_VERSION_1`: 暗号化。たとえば Finder がテキストの `__TEXT` セグメントを暗号化するために使用します。
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** には、**entryoff 属性に entrypoint が格納されます。** ロード時に **dyld** はこの値を（メモリ上の）**バイナリのベースアドレスに加算**し、その後この命令に**ジャンプ**してバイナリのコードの実行を開始します。
+**`LC_MAIN`** は **entryoff 属性に** entrypoint を格納します。ロード時に **dyld** はこの値を（メモリ上の）**バイナリのベースアドレスに** 単純に **加算** し、バイナリのコードの実行を開始するために、この命令へ **ジャンプ** します。
 
-**`LC_UNIXTHREAD`** には、main thread の開始時にレジスターが持つべき値が含まれます。これはすでに非推奨ですが、**`dyld`** は今も使用しています。これによって設定されたレジスターの値は、次の方法で確認できます:
+**`LC_UNIXTHREAD`** は、main thread の開始時にレジスターが持つべき値を格納します。これはすでに deprecated ですが、**`dyld`** は現在も使用しています。これによって設定されたレジスターの値は、次のコマンドで確認できます:
 
 ```bash
 otool -l /usr/lib/dyld
@@ -319,8 +336,8 @@ Load command 13
 {{#endref}}
 
 
-**Mach-Oファイルのコード署名**に関する情報が含まれています。含まれているのは、**署名 blob**を**指す****オフセット**だけです。通常、これはファイルの末尾にあります。\
-このセクションの詳細については、[**こちらのブログ記事**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)および[**こちらのgist**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)を参照してください。<sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
+**Mach-Oファイルのコード署名**に関する情報を含みます。含まれるのは、**署名blobを指す****オフセット**のみです。通常、これはファイルの末尾にあります。\
+このセクションの詳細については、[**こちらのブログ記事**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)と[**こちらのgist**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)を参照してください。<sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
@@ -328,11 +345,11 @@ Load command 13
 
 ### **`LC_LOAD_DYLINKER`**
 
-共有ライブラリをプロセスのアドレス空間にマップする**動的リンカー実行ファイルへのパス**が含まれています。**値は常に`/usr/lib/dyld`に設定されています**。macOSでは、dylibのマッピングはカーネルモードではなく、**ユーザーモード**で行われる点に注意が必要です。
+共有ライブラリをプロセスのアドレス空間にマッピングする**ダイナミックリンカー実行ファイルへのパス**を含みます。**値は常に`/usr/lib/dyld`に設定されます**。macOSでは、dylibのマッピングがカーネルモードではなく**ユーザーモード**で行われる点に注意してください。
 
 ### **`LC_IDENT`**
 
-現在は廃止されていますが、panic時にダンプを生成するよう設定されている場合、Mach-O core dumpが作成され、カーネルバージョンが`LC_IDENT`コマンドに設定されます。
+廃止されていますが、パニック時にダンプを生成するよう設定されている場合は、Mach-Oコアダンプが作成され、カーネルバージョンが`LC_IDENT`コマンドに設定されます。
 
 ### **`LC_UUID`**
 
@@ -340,7 +357,7 @@ Load command 13
 
 ### **`LC_BUILD_VERSION`**
 
-最新のバイナリでは通常、このコマンドを使って**対象プラットフォーム**、**最小OSバージョン**、**SDKバージョン**、および任意でそのスライスのビルドに使用した**ツールのバージョン**を宣言します。攻撃やリバースの観点では、サンプルのビルド方法を特定したり、スライスごとに異なるSDKやdeployment targetでコンパイルされた不審なuniversal binaryを素早く見つけたりするのに非常に役立ちます。古いバイナリでは、代わりに`LC_VERSION_MIN_*`が使われている場合があります。
+最近のバイナリでは通常、このコマンドを使って**ターゲットプラットフォーム**、**最小OSバージョン**、**SDKバージョン**、および任意でそのスライスのビルドに使用した**ツールのバージョン**を宣言します。オフェンシブ／リバーシングの観点では、サンプルのビルド方法を特定したり、異なるSDKやデプロイメントターゲットでコンパイルされたスライスを含む不審なユニバーサルバイナリをすばやく見つけたりするのに非常に役立ちます。古いバイナリでは、代わりに`LC_VERSION_MIN_*`が使われる場合があります。
 
 ```bash
 vtool -show-build /bin/ls
@@ -349,16 +366,16 @@ otool -l /bin/ls | grep -A 8 LC_BUILD_VERSION
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
-プロセスの実行前に dyld に環境変数を指定できます。プロセス内で任意のコードを実行できてしまう可能性があるため、非常に危険です。そのため、このロードコマンドは `#define SUPPORT_LC_DYLD_ENVIRONMENT` が定義された dyld ビルドでのみ使用され、さらに処理対象はロードパスを指定する `DYLD_..._PATH` 形式の変数に限定されます。
+プロセスの実行前に dyld に環境変数を指定できます。プロセス内で任意のコードを実行できる可能性があるため、非常に危険です。そのため、この load command は `#define SUPPORT_LC_DYLD_ENVIRONMENT` を指定してビルドされた dyld でのみ使用され、さらに処理対象はロードパスを指定する `DYLD_..._PATH` 形式の変数に限定されます。
 
 ### **`LC_DYLD_EXPORTS_TRIE` and `LC_DYLD_CHAINED_FIXUPS`**
 
-最近のツールチェーンでは、古い `LC_DYLD_INFO[_ONLY]` opcode だけに頼らず、これらのコマンドに export/bind/rebase メタデータを格納することがよくあります。どちらも **`__LINKEDIT`** 内の領域を指す `linkedit_data_command` エントリです。
+最近の toolchain では、古い `LC_DYLD_INFO[_ONLY]` opcode だけに頼らず、これらの command に export/bind/rebase のメタデータを格納することがよくあります。どちらも **`__LINKEDIT`** 内のデータを指す `linkedit_data_command` エントリです。
 
 - **`LC_DYLD_EXPORTS_TRIE`**: イメージが export するシンボルを格納したコンパクトな trie。
-- **`LC_DYLD_CHAINED_FIXUPS`**: dyld が rebase と bind を適用するために使う、セグメントごとの fixup chain。Apple Silicon では、現代的な認証付きポインターの fixup の多くもここにあります。
+- **`LC_DYLD_CHAINED_FIXUPS`**: dyld が rebase と bind を適用するための、セグメントごとの fixup chain。Apple Silicon では、現代的な認証付きポインターの fixup も数多くここで確認できます。
 
-このメタデータは、import/export の再構築、`@rpath` でロードされた依存関係がそのように解決された理由の理解、または現代の `arm64e` ターゲットで hook/rebinding の試みが失敗した理由の特定にとても役立ちます。`dyld_info` は、ディスク上に単独のファイルとして存在しない **cache-only dylib パス** に対しても使用できます。多くのシステムライブラリが共有キャッシュ内にのみ存在する現代の macOS では、これは非常に便利です。<sup>[[2]](#references)</sup>
+このメタデータは、import/export の再構築、`@rpath` でロードされた依存ライブラリがそのように解決された理由の把握、あるいは現代の `arm64e` ターゲットで hook/rebinding が失敗した理由の調査に非常に役立ちます。`dyld_info` は、ディスク上に単独のファイルとして存在しない **cache-only dylib paths** に対しても使用できます。多くのシステムライブラリが shared cache 内にしか存在しない現代の macOS では、これは非常に便利です。<sup>[[2]](#references)</sup>
 
 ```bash
 dyld_info -arch arm64e -exports -fixup_chains -fixup_chain_details /bin/ls
@@ -366,19 +383,19 @@ dyld_info -arch arm64e -exports -fixup_chains -fixup_chain_details /bin/ls
 
 ### **`LC_FILESET_ENTRY`**
 
-この新しいロードコマンドは、主に**kernel collections / kernelcache形式のfileset**を調査する際に関係します。単独のイメージを表すのではなく、外側のMach-Oがコンテナとして機能し、各`LC_FILESET_ENTRY`が、独自のパス形式の**entry id**、VMアドレス、ファイルオフセットを持つ埋め込みMach-Oを指します。最新のmacOS/iOSのカーネルコンポーネントをリバースする場合、このコマンドが、トップレベルのコンテナと抽出または逆アセンブルしたい実際のイメージをつなぐ役割を果たすことがよくあります。
+この最新の load command は、主に **kernel collections / kernelcache-style fileset** の調査で重要になります。単独のイメージを表すのではなく、外側の Mach-O がコンテナとして機能し、各 `LC_FILESET_ENTRY` が、パスのような **entry id**、VM アドレス、ファイルオフセットを持つ埋め込み Mach-O を指します。最新の macOS/iOS のカーネルコンポーネントをリバースエンジニアリングする場合、このコマンドがトップレベルのコンテナと、抽出または逆アセンブルしたい実際のイメージをつなぐ役割を担うことがよくあります。
 
 ```bash
 otool -l /System/Library/KernelCollections/BootKernelExtensions.kc | grep -A 6 LC_FILESET_ENTRY
 ```
 
-実践的な抽出ワークフローについては、[macOS kernel extensions and kernelcache に関するこちらのページ](../mac-os-architecture/macos-kernel-extensions.md)を確認してください。
+実践的な抽出ワークフローについては、[macOSのカーネル拡張機能とkernelcacheに関するこちらのページ](../mac-os-architecture/macos-kernel-extensions.md)を確認してください。
 
 ### **`LC_LOAD_DYLIB`**
 
-この load command は、**dynamic** **library** の依存関係を記述し、**loader**（dyld）にその **library をロードしてリンクするよう指示**します。Mach-O binary が必要とする **各 library に対して**、`LC_LOAD_DYLIB` load command が存在します。
+このロードコマンドは、**動的**な**ライブラリ**依存関係を記述し、**ローダー**（dyld）に対して、そのライブラリを**ロードしてリンクするよう指示**します。Mach-Oバイナリが必要とする**各ライブラリに対して**、`LC_LOAD_DYLIB`ロードコマンドが存在します。
 
-- この load command は、型が **`dylib_command`** の構造体です（実際に依存する dynamic library を記述する struct dylib を含みます）。
+- このロードコマンドは、**`dylib_command`**型の構造体です（実際に依存する動的ライブラリを記述するstruct dylibを含みます）。
 
 ```objectivec
 struct dylib_command {
@@ -397,7 +414,7 @@ struct dylib {
 
 ![LC DYLD ENVIRONMENT - LC LOAD DYLIB: uint32 t 互換性バージョン; / ライブラリの互換性バージョン番号 /](<../../../images/image (486).png>)
 
-この情報は、次の CLI コマンドでも取得できます:
+この情報は、CLIからも取得できます:
 
 ```bash
 otool -L /bin/ls
@@ -407,52 +424,52 @@ otool -L /bin/ls
 	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
 
-Some potential malware related libraries are:
+マルウェアに関連する可能性のあるライブラリには、次のものがあります。
 
 - **DiskArbitration**: USBドライブの監視
 - **AVFoundation:** 音声と動画のキャプチャ
 - **CoreWLAN**: Wi-Fiスキャン
 
 > [!TIP]
-> Mach-Oバイナリには、**1つ以上の** **コンストラクタ**を含めることができ、**LC_MAIN**で指定されたアドレスより前に**実行**されます。\
-> コンストラクタのオフセットは、**\_\_DATA_CONST**セグメントの**\_\_mod_init_func**セクションに格納されています。
+> Mach-Oバイナリには1つまたは**複数の** **コンストラクタ**を含めることができ、これらは**LC_MAIN**で指定されたアドレスより前に**実行**されます。\
+> コンストラクタのオフセットは、**\_\_DATA_CONST**セグメント内の**\_\_mod_init_func**セクションに格納されています。
 
-## **Mach-Oデータ**
+## **Mach-Oのデータ**
 
-ファイルの中心にはデータ領域があり、これはload-commands領域で定義された複数のセグメントで構成されています。**各セグメントにはさまざまなデータセクションを格納でき**、各セクションには特定の種類の**コードまたはデータ**が格納されます。
+ファイルの中核にはデータ領域があり、これはload-commands領域で定義された複数のセグメントで構成されています。**各セグメントにはさまざまなデータセクションを格納でき**、各セクションには特定の種類の**コードまたはデータ**が格納されます。
 
 > [!TIP]
-> データは基本的に、load commands **LC_SEGMENTS_64**によって読み込まれるすべての**情報**を含む部分です。
+> データとは基本的に、load commands **LC_SEGMENTS_64**によって読み込まれるすべての**情報**を含む部分です。
 
 ![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../images/image (507) (3).png>)
 
 これには次のものが含まれます。
 
-- **関数テーブル:** プログラムの関数に関する情報を格納します。
+- **関数テーブル:** プログラムの関数に関する情報を保持します。
 - **シンボルテーブル**: バイナリが使用する外部関数に関する情報を含みます。
 - 内部関数や変数の名前などが含まれる場合もあります。
 
-確認には[**Mach-O View**](https://sourceforge.net/projects/machoview/)ツールを使用できます。
+確認するには、[**Mach-O View**](https://sourceforge.net/projects/machoview/)ツールを使用できます。
 
 <figure><img src="../../../images/image (1120).png" alt=""><figcaption></figcaption></figure>
 
-またはCLIから確認できます。
+またはcliから:
 
 ```bash
 size -m /bin/ls
 ```
 
-### 追記データと逆方向に解析されるオーバーレイ
+### 追加データと逆方向に解析されるオーバーレイ
 
-loaderは、名前付きMach-Oセクションではなく、追記データ内に設定を保持できます。その後、reverse parserは末尾のマーカーを基点にし、その直前に保存されたサイズを読み取り、その値を使って先行するblobの位置を特定して復号します。観測されたuniversal loaderの1つは、XOR暗号化されたダウンローダーURLにこのレイアウトを使用していました:<sup>[[6]](#references)</sup>
+ローダーは、名前付きの Mach-O セクションではなく、追加データ内に設定を保持できます。逆方向に解析するパーサーは、トレーラーマーカーを起点にし、その直前に格納されたサイズを読み取って、その値を使って先行する blob の位置を特定し、復号します。確認されたあるユニバーサルローダーは、XOR 暗号化されたダウンローダーの URL にこのレイアウトを使用していました:<sup>[[6]](#references)</sup>
 
 ```text
 [XOR-encrypted URL][8-byte ciphertext length][SONOMAC1]
 ```
 
-見慣れない binary を解析するときは、認識可能な終端マーカーの周辺のバイトを調べ、文字列や設定が load-command セクションに属すると決めつける前に、サイズを逆算する処理をすべて追跡してください。マーカーと XOR キーはサンプル固有です。再利用できる手法は、自己記述型トレーラーです。
+不慣れなバイナリをリバースする際は、見覚えのある終端マーカーの周辺のバイトを調べ、文字列や設定がロードコマンドセクションに属すると決めつける前に、サイズを逆算する処理をすべて追跡してください。マーカーと XOR key はサンプル固有です。再利用できる手法は、自己記述型トレーラーです。
 
-## Objective-C の一般的なセクション
+## Objective-C 共通セクション
 
 `__TEXT` セグメント (r-x):
 
@@ -466,23 +483,27 @@ loaderは、名前付きMach-Oセクションではなく、追記データ内�
 - `__objc_nlclslist`: Non-Lazy Objective-C クラスへのポインター
 - `__objc_catlist`: Categories へのポインター
 - `__objc_nlcatlist`: Non-Lazy Categories へのポインター
-- `__objc_protolist`: Protocols のリスト
+- `__objc_protolist`: Protocols リスト
 - `__objc_const`: 定数データ
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
 
-こちらも参照: [Reflective Mach-O Loading](../macos-proces-abuse/reflective-mach-o-loading.md#activating-objective-c-metadata)。
+こちらも参照: [Reflective Mach-O Loading](../macos-proces-abuse/reflective-mach-o-loading.md#activating-objective-c-metadata).
 
 ## Swift
 
 - `_swift_typeref`, `_swift3_capture`, `_swift3_assocty`, `_swift3_types, _swift3_proto`, `_swift3_fieldmd`, `_swift3_builtin`, `_swift3_reflstr`
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 ## References
 
-- [1] [Mach-O のスライスは、考えているほど単純ではない](https://objective-see.org/blog/blog_0x80.html)
+- [1] [Mach-O のスライスは、思ったほど単純ではない](https://objective-see.org/blog/blog_0x80.html)
 - [2] [dyld_info(1) の man ページ](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
-- [3] [自分自身の Entitlements を読み取る](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
+- [3] [自分の Entitlements を読む](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
 - [4] [carlospolop/machoreader.py (gist)](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)
-- [5] [Apple Open Source - Mach-O `fat.h` および `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
+- [5] [Apple オープンソース - Mach-O `fat.h` と `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
 - [6] [Kaspersky Securelist - MacSync macOS stealer の新バージョン、暗号資産愛好家と開発者を標的に](https://securelist.com/macsync-new-version/121383/)
+- [7] [The Art of Mac Malware, Volume 2 — バイナリの解析](https://taomm.org/vol2/pdfs/CH%202%20Parsing%20Binaries.pdf)
+- [8] [Apple Developer — TN3126: コード署名の内部: ハッシュ](https://developer.apple.com/documentation/technotes/tn3126-inside-code-signing-hashes.md)
+- [9] [Apple Developer — アプリとバイナリの許可と拒否](https://developer.apple.com/documentation/devicemanagement/allowing-and-denying-apps-and-binaries.md)
+{{#include ../../../banners/hacktricks-training.md}}
