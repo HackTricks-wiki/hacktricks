@@ -83,7 +83,24 @@ for A in $(lipo -archs "$BIN"); do
 done
 ```
 
-Recent macOS SDKs also expose helpers such as `macho_for_each_slice()` and `macho_best_slice()` in `<mach-o/utils.h>`. The latter is handy to emulate what dyld/kernel would load, but scanners should still iterate every slice to avoid missing arch-specific content.<sup>[[1]](#references)</sup>
+Recent macOS SDKs also expose `macho_for_each_slice()` and `macho_best_slice()` in `<mach-o/utils.h>`. On Apple Silicon, `macho_best_slice()` could incorrectly return `EBADARCH` for a runnable third-party `arm64` binary before macOS 15; the API was corrected in macOS 15. Use `macho_for_each_slice()` or `lipo -archs` to inventory every slice instead of treating a failed best-slice lookup as proof that no slice can run.<sup>[[1]](#references)[[7]](#references)</sup>
+
+### Compare code signatures across slices
+
+Each architecture in a universal binary has its own CodeDirectory and CDHash. When auditing a signed executable or privileged helper, inspect the **signature of each slice**. A different CDHash is normal; compare the signing identity, CodeDirectory flags and entitlements instead.<sup>[[8]](#references)</sup>
+
+For policies that match a CDHash, one hash identifies only one architecture-specific execution path. Apple recommends enumerating slices and using `codesign --arch` to inspect each one.<sup>[[9]](#references)</sup>
+
+```bash
+BIN=/path/to/executable
+for A in $(lipo -archs "$BIN"); do
+  printf "\n== %s ==\n" "$A"
+  codesign -dvvv --arch "$A" "$BIN" 2>&1
+  codesign -d --entitlements - --arch "$A" "$BIN"
+done
+```
+
+For the signature structure and validation details, see [macOS Code Signing](../macos-security-protections/macos-code-signing.md).
 
 ## **Mach-O Header**
 
@@ -128,7 +145,7 @@ There are different file types, you can find them defined in the [**source code 
 - `MH_DYLIB`: Dynamic Libraries
 - `MH_DYLINKER`: Dynamic Linker
 - `MH_BUNDLE`: "Plugin files". Generated using -bundle in gcc and explicitly loaded by `NSBundle` or `dlopen`.
-- `MH_DYSM`: Companion `.dSym` file (file with symbols for debugging).
+- `MH_DSYM`: Companion `.dSYM` file (file with symbols for debugging).
 - `MH_KEXT_BUNDLE`: Kernel Extensions.
 
 ```bash
@@ -476,7 +493,7 @@ See also: [Reflective Mach-O Loading](../macos-proces-abuse/reflective-mach-o-lo
 
 - `_swift_typeref`, `_swift3_capture`, `_swift3_assocty`, `_swift3_types, _swift3_proto`, `_swift3_fieldmd`, `_swift3_builtin`, `_swift3_reflstr`
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 ## References
 
@@ -486,3 +503,7 @@ See also: [Reflective Mach-O Loading](../macos-proces-abuse/reflective-mach-o-lo
 - [4] [carlospolop/machoreader.py (gist)](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)
 - [5] [Apple Open Source - Mach-O `fat.h` and `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
 - [6] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
+- [7] [The Art of Mac Malware, Volume 2 — Parsing Binaries](https://taomm.org/vol2/pdfs/CH%202%20Parsing%20Binaries.pdf)
+- [8] [Apple Developer — TN3126: Inside Code Signing: Hashes](https://developer.apple.com/documentation/technotes/tn3126-inside-code-signing-hashes.md)
+- [9] [Apple Developer — Allowing and denying apps and binaries](https://developer.apple.com/documentation/devicemanagement/allowing-and-denying-apps-and-binaries.md)
+{{#include ../../../banners/hacktricks-training.md}}
