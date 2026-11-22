@@ -34,8 +34,8 @@
 - [ ] [**User Privileges**](windows-local-privilege-escalation/index.html#users-and-groups)
 - [ ] Check [**current** user **privileges**](windows-local-privilege-escalation/index.html#users-and-groups)
 - [ ] Are you [**member of any privileged group**](windows-local-privilege-escalation/index.html#privileged-groups)?
-- [ ] Check if you have [any of these tokens enabled](windows-local-privilege-escalation/index.html#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
-- [ ] Check if you have [**SeManageVolumePrivilege**](windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md) to read raw volumes and bypass file ACLs
+- [ ] Check whether these [privileges are present in the current token](windows-local-privilege-escalation/access-tokens.md), even if shown as **Disabled**: **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege**. A disabled privilege can be enabled only if it is already in the token.<sup>[[3]](#references)[[4]](#references)</sup>
+- [ ] Check for [**SeManageVolumePrivilege**](windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md) as a volume-maintenance right. It does not, by itself, establish raw-volume read access; opening a disk or volume also has separate access requirements.<sup>[[5]](#references)[[6]](#references)</sup>
 - [ ] [**Users Sessions**](windows-local-privilege-escalation/index.html#logged-users-sessions)?
 - [ ] Check[ **users homes**](windows-local-privilege-escalation/index.html#home-folders) (access?)
 - [ ] Check [**Password Policy**](windows-local-privilege-escalation/index.html#password-policy)
@@ -96,7 +96,7 @@
 - [ ] [**SSH keys in registry**](windows-local-privilege-escalation/index.html#ssh-keys-in-registry)?
 - [ ] Passwords in [**unattended files**](windows-local-privilege-escalation/index.html#unattended-files)?
 - [ ] Any [**SAM & SYSTEM**](windows-local-privilege-escalation/index.html#sam-and-system-backups) backup?
-- [ ] If [**SeManageVolumePrivilege**](windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md) is present, try raw-volume reads for `SAM`, `SYSTEM`, DPAPI material, and `MachineKeys`
+- [ ] If a readable raw-volume handle is independently permitted, assess possible exposure of `SAM`, `SYSTEM`, DPAPI material, and `MachineKeys`; do not infer this access from **SeManageVolumePrivilege** alone.<sup>[[5]](#references)</sup>
 - [ ] [**Cloud credentials**](windows-local-privilege-escalation/index.html#cloud-credentials)?
 - [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/index.html#mcafee-sitelist.xml) file?
 - [ ] [**Cached GPP Password**](windows-local-privilege-escalation/index.html#cached-gpp-pasword)?
@@ -117,9 +117,14 @@
 
 - [ ] Check if you can abuse it
 
+
+
 ## References
 
 - [1] [Project Zero - Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
 - [2] [MDSec - RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-
+- [3] [Microsoft - Privileges](https://learn.microsoft.com/en-us/windows/win32/secauthz/privileges)
+- [4] [Microsoft - Changing Privileges in a Token](https://learn.microsoft.com/en-us/windows/win32/secbp/changing-privileges-in-a-token)
+- [5] [Microsoft - CreateFile physical disks and volumes](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
+- [6] [Microsoft - Managing Privileges in a File System](https://learn.microsoft.com/en-us/windows-hardware/drivers/ifs/privileges)
 {{#include ../banners/hacktricks-training.md}}
