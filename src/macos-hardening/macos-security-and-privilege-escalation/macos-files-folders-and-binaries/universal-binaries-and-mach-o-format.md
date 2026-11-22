@@ -1,12 +1,12 @@
-# Binaries za universal za macOS na Muundo wa Mach-O
+# macOS Universal binaries & Mach-O Format
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Taarifa za Msingi
 
-macOS hutumia umbizo la executable la **Mach-O**. Binary ya **universal**, au fat, huwa na slices nyingi za Mach-O maalum kwa kila architecture ndani ya faili moja. Headers za Apple za open-source `fat.h` na `loader.h` hufafanua miundo na constants zilizoelezwa kwenye ukurasa huu. <sup>[[5]](#references)</sup>
+macOS hutumia format ya executable ya **Mach-O**. Binary **universal**, au fat, huwa na slices nyingi za Mach-O zinazolenga architecture tofauti ndani ya faili moja. Header za open-source za Apple `fat.h` na `loader.h` hufafanua miundo na constants zilizoelezwa kwenye ukurasa huu. <sup>[[5]](#references)</sup>
 
-Image ya Mach-O ina:
+Image ya Mach-O imeundwa na:
 
 - Header
 - Load Commands
@@ -14,7 +14,7 @@ Image ya Mach-O ina:
 
 ![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../images/image (470).png>)
 
-## Fat Header
+## Kichwa cha Fat
 
 Tafuta faili kwa kutumia: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 
@@ -37,7 +37,7 @@ struct fat_arch {
 
 Header ina bytes za **magic** zikifuatiwa na **idadi** ya **archs** ambazo faili **ina** (`nfat_arch`), na kila arch itakuwa na struct ya `fat_arch`.
 
-Iangalie kwa kutumia:
+Ihakiki kwa:
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -68,10 +68,10 @@ au kwa kutumia zana ya [Mach-O View](https://sourceforge.net/projects/machoview/
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-Kama unavyoweza kufikiria, kwa kawaida binary ya universal iliyokompailiwa kwa architectures 2 huwa **na ukubwa mara mbili** ya ile iliyokompailiwa kwa arch 1 pekee.
+Kama unavyoweza kufikiria, kwa kawaida binary universal iliyokompiliwa kwa architectures 2 **huwa na ukubwa mara mbili** ya ile iliyokompiliwa kwa arch 1 pekee.
 
 > [!TIP]
-> Unapochunguza malware au apps zinazotia shaka, usiishie baada ya `file` kuripoti architecture “bora zaidi”. Binary ya universal inaweza kuficha imports, load commands au compiler metadata tofauti katika kila slice, kwa hiyo kwanza orodhesha **slices zote** kisha zikague kila moja kivyake:
+> Unapochunguza malware au apps zinazotia shaka, usiishie baada ya `file` kuripoti architecture "bora". Binary universal inaweza kuficha imports tofauti, load commands au metadata ya compiler katika kila slice, kwa hiyo orodhesha **slices zote** kwanza kisha uzichunguze kila moja kivyake:
 
 ```bash
 BIN=/path/to/bin
@@ -83,11 +83,28 @@ for A in $(lipo -archs "$BIN"); do
 done
 ```
 
-SDK za hivi karibuni za macOS pia hutoa helpers kama `macho_for_each_slice()` na `macho_best_slice()` katika `<mach-o/utils.h>`. Ya mwisho ni muhimu kuiga kile ambacho dyld/kernel ingeweza kupakia, lakini scanners zinapaswa bado kupitia kila slice ili kuepuka kukosa maudhui maalum kwa architecture.<sup>[[1]](#references)</sup>
+Recent macOS SDKs pia zinafichua `macho_for_each_slice()` na `macho_best_slice()` katika `<mach-o/utils.h>`. Kwenye Apple Silicon, kabla ya macOS 15, `macho_best_slice()` inaweza kurudisha `EBADARCH` kimakosa kwa binary ya `arm64` ya mtu mwingine inayoweza kutekelezwa; API hii ilirekebishwa katika macOS 15. Tumia `macho_for_each_slice()` au `lipo -archs` kuorodhesha kila slice badala ya kuchukulia utafutaji wa best-slice ulioshindwa kuwa uthibitisho kwamba hakuna slice inayoweza kutekelezwa.<sup>[[1]](#references)[[7]](#references)</sup>
+
+### Linganisha saini za code katika slices
+
+Kila architecture katika universal binary ina CodeDirectory na CDHash yake. Unakagua executable iliyotiwa saini au helper yenye ruhusa za juu, kagua **saini ya kila slice**. CDHash tofauti ni jambo la kawaida; badala yake, linganisha utambulisho wa kusaini, flags za CodeDirectory na entitlements.<sup>[[8]](#references)</sup>
+
+Kwa sera zinazolingana na CDHash, hash moja hutambua njia moja tu ya utekelezaji inayohusiana na architecture maalum. Apple inapendekeza kuorodhesha slices na kutumia `codesign --arch` kukagua kila moja.<sup>[[9]](#references)</sup>
+
+```bash
+BIN=/path/to/executable
+for A in $(lipo -archs "$BIN"); do
+  printf "\n== %s ==\n" "$A"
+  codesign -dvvv --arch "$A" "$BIN" 2>&1
+  codesign -d --entitlements - --arch "$A" "$BIN"
+done
+```
+
+Kwa maelezo kuhusu muundo wa signature na uthibitishaji, angalia [macOS Code Signing](../macos-security-protections/macos-code-signing.md).
 
 ## **Kichwa cha Mach-O**
 
-Kichwa kina taarifa za msingi kuhusu faili, kama vile magic bytes za kuitambua kama faili la Mach-O na taarifa kuhusu architecture lengwa. Unaweza kukipata kwa kutumia: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+Kichwa kina taarifa za msingi kuhusu faili, kama vile magic bytes zinazotambulisha kuwa faili ni Mach-O na taarifa kuhusu architecture lengwa. Unaweza kukipata hapa: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
@@ -118,18 +135,18 @@ struct mach_header_64 {
 
 ### Aina za Faili za Mach-O
 
-Kuna aina tofauti za faili, unaweza kuzipata zimefafanuliwa kwenye [**msimbo chanzo, kwa mfano hapa**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). Zilizo muhimu zaidi ni:
+Kuna aina tofauti za faili, unaweza kuzipata zimefafanuliwa katika [**source code kwa mfano hapa**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). Zilizo muhimu zaidi ni:
 
-- `MH_OBJECT`: Faili ya object inayoweza kuhamishwa (bidhaa za kati za usanidi, bado si executable).
-- `MH_EXECUTE`: Faili za executable.
+- `MH_OBJECT`: Faili ya object inayoweza kuunganishwa (matokeo ya kati ya compilation, bado si executables).
+- `MH_EXECUTE`: Faili zinazotekelezeka.
 - `MH_FVMLIB`: Faili ya maktaba ya Fixed VM.
-- `MH_CORE`: Dump za msimbo
-- `MH_PRELOAD`: Faili ya executable iliyopakiwa mapema (haitumiki tena katika XNU)
-- `MH_DYLIB`: Maktaba zinazobadilika
-- `MH_DYLINKER`: Dynamic Linker
-- `MH_BUNDLE`: "Faili za plugin". Hutengenezwa kwa kutumia -bundle katika gcc na hupakiwa waziwazi na `NSBundle` au `dlopen`.
-- `MH_DYSM`: Faili saidizi ya `.dSym` (faili yenye alama za utatuzi).
-- `MH_KEXT_BUNDLE`: Viendelezi vya kernel.
+- `MH_CORE`: Dumps za code.
+- `MH_PRELOAD`: Faili ya executable iliyopakiwa awali (haitumiki tena katika XNU).
+- `MH_DYLIB`: Maktaba zinazobadilika.
+- `MH_DYLINKER`: Dynamic Linker.
+- `MH_BUNDLE`: "Faili za plugin". Hutengenezwa kwa kutumia -bundle katika gcc na kupakiwa waziwazi na `NSBundle` au `dlopen`.
+- `MH_DSYM`: Faili ya ziada ya `.dSYM` (faili yenye symbols za debugging).
+- `MH_KEXT_BUNDLE`: Viendelezi vya Kernel.
 
 ```bash
 # Checking the mac header of a binary
@@ -139,34 +156,34 @@ Mach header
 MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DYLDLINK TWOLEVEL PIE
 ```
 
-Au kutumia [Mach-O View](https://sourceforge.net/projects/machoview/):
+Au kwa kutumia [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../images/image (1133).png" alt=""><figcaption></figcaption></figure>
 
-## **Bendera za Mach-O**
+## **Mach-O Flags**
 
-Msimbo chanzo pia hufafanua bendera kadhaa zinazotumika kupakia libraries:
+Msimbo chanzo pia hufafanua flags kadhaa zinazofaa kwa kupakia libraries:
 
 - `MH_NOUNDEFS`: Hakuna marejeleo yasiyofafanuliwa (imeunganishwa kikamilifu)
 - `MH_DYLDLINK`: Uunganishaji wa Dyld
 - `MH_PREBOUND`: Marejeleo ya dynamic yameunganishwa mapema.
-- `MH_SPLIT_SEGS`: Faili hugawanya sehemu za r/o na r/w.
-- `MH_WEAK_DEFINES`: Binary ina alama zilizofafanuliwa kwa udhaifu
-- `MH_BINDS_TO_WEAK`: Binary hutumia alama dhaifu
-- `MH_ALLOW_STACK_EXECUTION`: Fanya stack iweze kutekelezwa
+- `MH_SPLIT_SEGS`: Faili hugawanya segment za r/o na r/w.
+- `MH_WEAK_DEFINES`: Binary ina alama zilizofafanuliwa kwa weak
+- `MH_BINDS_TO_WEAK`: Binary hutumia alama za weak
+- `MH_ALLOW_STACK_EXECUTION`: Fanya stack iweze kutekeleza
 - `MH_NO_REEXPORTED_DYLIBS`: Library haina amri za LC_REEXPORT
-- `MH_PIE`: Executable Huru kwa Nafasi
-- `MH_HAS_TLV_DESCRIPTORS`: Kuna sehemu iliyo na vigeu vya ndani vya thread
+- `MH_PIE`: Executable Isiyojitegemea na Nafasi
+- `MH_HAS_TLV_DESCRIPTORS`: Kuna sehemu yenye vigeu vya thread-local
 - `MH_NO_HEAP_EXECUTION`: Hakuna utekelezaji kwa kurasa za heap/data
 - `MH_HAS_OBJC`: Binary ina sehemu za oBject-C
-- `MH_SIM_SUPPORT`: Usaidizi wa Simulator
-- `MH_DYLIB_IN_CACHE`: Hutumika kwa dylibs/frameworks zilizo kwenye cache ya shared library.
+- `MH_SIM_SUPPORT`: Usaidizi wa simulator
+- `MH_DYLIB_IN_CACHE`: Hutumika kwa dylibs/frameworks zilizo kwenye shared library cache.
 
-## **Amri za upakiaji za Mach-O**
+## **Mach-O Load commands**
 
-**Mpangilio wa faili kwenye kumbukumbu** umebainishwa hapa, ukieleza **mahali ilipo jedwali la alama**, muktadha wa thread kuu mwanzoni mwa utekelezaji, na **shared libraries** zinazohitajika. Maelekezo hutolewa kwa dynamic loader **(dyld)** kuhusu mchakato wa kupakia binary kwenye kumbukumbu.
+**Mpangilio wa faili kwenye kumbukumbu** umebainishwa hapa, ukifafanua **mahali pa jedwali la alama**, muktadha wa thread kuu wakati wa kuanza kutekeleza, na **shared libraries** zinazohitajika. Maagizo hutolewa kwa dynamic loader **(dyld)** kuhusu mchakato wa kupakia binary kwenye kumbukumbu.
 
-Hutumika muundo wa **load_command**, uliofafanuliwa kwenye **`loader.h`** iliyotajwa:
+Hii hutumia muundo wa **load_command**, uliofafanuliwa kwenye **`loader.h`** iliyotajwa:
 
 ```objectivec
 struct load_command {
@@ -180,15 +197,15 @@ Kuna takriban **aina 50 tofauti za load commands** ambazo mfumo huzishughulikia 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> Kimsingi, aina hii ya Load Command hufafanua **jinsi ya kupakia \_\_TEXT** (msimbo unaotekelezeka) **na sehemu za \_\_DATA** (data ya mchakato) kulingana na **offsets zilizoonyeshwa katika sehemu ya Data** wakati binary inaendeshwa.
+> Kimsingi, aina hii ya Load Command hufafanua **jinsi ya kupakia \_\_TEXT** (msimbo unaotekelezeka) **na \_\_DATA** (data ya mchakato) **segments** kulingana na **offsets zilizoonyeshwa katika sehemu ya Data** wakati binary inatekelezwa.
 
-Amri hizi **hufafanua segments** ambazo **huwekwa kwenye ramani** katika **nafasi ya virtual memory** ya mchakato unapotekelezwa.
+Amri hizi **hufafanua segments** ambazo **huwekwa** katika **nafasi ya kumbukumbu pepe** ya mchakato unapotekelezwa.
 
-Kuna **aina tofauti** za segments, kama vile segment ya **\_\_TEXT**, ambayo huhifadhi msimbo unaotekelezeka wa programu, na segment ya **\_\_DATA**, ambayo ina data inayotumiwa na mchakato. **Segments hizi ziko katika sehemu ya data** ya faili ya Mach-O.
+Kuna **aina tofauti** za segments, kama vile segment ya **\_\_TEXT**, inayohifadhi msimbo unaotekelezeka wa programu, na segment ya **\_\_DATA**, iliyo na data inayotumiwa na mchakato. **Segments hizi ziko katika sehemu ya data** ya faili ya Mach-O.
 
 **Kila segment** inaweza kugawanywa zaidi katika **sections** nyingi. **Muundo wa load command** una **taarifa** kuhusu **sections hizi** ndani ya segment husika.
 
-Kwenye header, kwanza unapata **segment header**:
+Kwanza kwenye header utapata **segment header**:
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
 	uint32_t	cmd;		/* LC_SEGMENT_64 */
@@ -209,7 +226,7 @@ Mfano wa segment header:
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-Header hii hufafanua **idadi ya sections ambazo headers zake huonekana baada yake**:
+Header hii hufafanua **idadi ya sections ambazo headers zake huonekana baada** yake:
 
 ```c
 struct section_64 { /* for 64-bit architectures */
@@ -228,65 +245,65 @@ struct section_64 { /* for 64-bit architectures */
 };
 ```
 
-Mfano wa **section header**:
+Mfano wa **kichwa cha sehemu**:
 
 <figure><img src="../../../images/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-Uki **ongeza** **section offset** (0x37DC) kwenye **offset** ambapo **arch** inaanzia, katika hali hii `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+Ukiongeza **offset ya sehemu** (0x37DC) na **offset** ambapo **usanifu** huanza, katika hali hii `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
-Pia inawezekana kupata **headers information** kutoka kwenye **command line** kwa kutumia:
+Pia inawezekana kupata **maelezo ya vichwa** kutoka kwa **command line** kwa kutumia:
 
 ```bash
 otool -lv /bin/ls
 ```
 
-Vipande vya kawaida vinavyopakiwa na cmd hii:
+Sehemu za kawaida zinazopakiwa na cmd hii:
 
-- **`__PAGEZERO`:** Huelekeza kernel **kufanya map** ya **anwani sifuri** ili **isiweze kusomwa, kuandikiwa au kutekelezewa**. Vigeu vya maxprot na minprot katika muundo huwekwa kuwa sifuri kuonyesha kuwa **ukurasa huu hauna ruhusa za kusoma-kuandika-kutekeleza**.
-  - Ugawaji huu ni muhimu ili **kupunguza uwezekano wa udhaifu wa NULL pointer dereference**. Hii ni kwa sababu XNU hutekeleza ukurasa sifuri usiobadilika unaohakikisha kuwa ukurasa wa kwanza wa kumbukumbu (wa kwanza tu) hauwezi kufikiwa (isipokuwa katika i386). Binary inaweza kutimiza mahitaji haya kwa kuunda \_\_PAGEZERO ndogo (kwa kutumia `-pagezero_size`) inayofunika 4k ya kwanza na kufanya sehemu iliyobaki ya kumbukumbu ya 32bit ipatikane katika hali za user na kernel.
-- **`__TEXT`**: Ina **code** **inayotekelezeka** yenye ruhusa za **kusoma** na **kutekeleza** (haiwezi kuandikiwa)**.** Sehemu za kawaida za segment hii:
-  - `__text`: Code ya binary iliyokusanywa
-  - `__const`: Data zisizobadilika (kusoma tu)
-  - `__[c/u/os_log]string`: Mifuatano isiyobadilika ya C, Unicode au os logs
-  - `__stubs` na `__stubs_helper`: Hutumika wakati wa mchakato wa kupakia dynamic library
+- **`__PAGEZERO`:** Inaelekeza kernel **kufanya map** ya **anwani sifuri** ili **isiweze kusomwa, kuandikiwa au kutekelezewa**. Vigeu vya maxprot na minprot katika muundo huwekwa kuwa sifuri kuashiria kuwa **hakuna ruhusa za kusoma-kuandika-kutekeleza kwenye ukurasa huu**.
+  - Ugawaji huu ni muhimu ili **kupunguza hatari ya udhaifu wa NULL pointer dereference**. Hii ni kwa sababu XNU hutekeleza ukurasa sifuri usiobadilika, unaohakikisha kuwa ukurasa wa kwanza wa kumbukumbu (ukurasa wa kwanza pekee) hauwezi kufikiwa (isipokuwa kwenye i386). Binary inaweza kutimiza hitaji hili kwa kutengeneza \_\_PAGEZERO ndogo (kwa kutumia `-pagezero_size`) ili kufunika 4k za kwanza huku sehemu iliyobaki ya kumbukumbu ya 32bit ikifikika katika hali za mtumiaji na kernel.
+- **`__TEXT`**: Ina **msimbo** **tekelezi** wenye ruhusa za **kusoma** na **kutekeleza** (bila ruhusa ya kuandika)**.** Sehemu za kawaida za segment hii:
+  - `__text`: Msimbo wa binary uliokusanywa
+  - `__const`: Data isiyobadilika (ya kusoma pekee)
+  - `__[c/u/os_log]string`: Mifuatano isiyobadilika ya C, Unicode au kumbukumbu za os
+  - `__stubs` na `__stubs_helper`: Hutumika wakati wa upakiaji wa dynamic library
   - `__unwind_info`: Data ya stack unwind.
-  - Kumbuka kwamba maudhui haya yote yamesainiwa, lakini pia yamewekwa kuwa yanatekelezeka (jambo linalotoa chaguo zaidi za exploitation kwa sehemu ambazo si lazima zihitaji ruhusa hii, kama vile sehemu maalumu za mifuatano).
-- **`__DATA`**: Ina data **inayoweza kusomwa** na **kuandikiwa** (haiwezi kutekelezwa)**.**
+  - Kumbuka kuwa maudhui haya yote yametiwa sahihi lakini pia yamewekewa alama ya kutekelezeka (jambo linalotoa chaguo zaidi za exploitation kwa sehemu ambazo hazihitaji lazima ruhusa hii, kama sehemu maalum za mifuatano).
+- **`__DATA`**: Ina data ambayo **inaweza kusomwa** na **kuandikiwa** (haiwezi kutekelezwa)**.**
   - `__got:` Global Offset Table
-  - `__nl_symbol_ptr`: Kielekezi cha symbol kisicho lazy (hufungwa wakati wa kupakia)
-  - `__la_symbol_ptr`: Kielekezi cha symbol cha lazy (hufungwa kinapotumika)
-  - `__const`: Inapaswa kuwa data ya kusoma tu (lakini sivyo hasa)
+  - `__nl_symbol_ptr`: Kielekezi cha alama kisicho lazy (huunganishwa wakati wa upakiaji)
+  - `__la_symbol_ptr`: Kielekezi cha alama cha lazy (huunganishwa kinapotumika)
+  - `__const`: Inapaswa kuwa data ya kusoma pekee (lakini si hivyo kwa hakika)
   - `__cfstring`: Mifuatano ya CoreFoundation
-  - `__data`: Vigeu vya kimataifa (ambavyo vimeanzishwa)
+  - `__data`: Vigeu vya kimataifa (vilivyoanzishwa)
   - `__bss`: Vigeu tuli (ambavyo havijaanzishwa)
   - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, n.k.): Taarifa zinazotumiwa na Objective-C runtime
-- **`__DATA_CONST`**: \_\_DATA.\_\_const haijahakikishwa kuwa isiyobadilika (ina ruhusa za kuandikiwa), wala viashiria vingine na GOT. Sehemu hii huweka `__const`, baadhi ya vianzilishi na jedwali la GOT (baada ya kutatuliwa) kuwa **la kusoma tu** kwa kutumia `mprotect`.
-- **`__AUTH` / `__AUTH_CONST`**: Hupatikana kwa kawaida katika binaries za Apple Silicon za hivi karibuni. Segments hizi hushikilia viashiria vinavyopaswa kuthibitishwa wakati wa kupakia au kutumia (kwa mfano `__auth_got`). Ikiwa mbinu ya rebinding, hook au import-patching hukagua tu sehemu za zamani za `__got` / `__la_symbol_ptr`, huenda ikakosa maeneo halisi ya wito katika binaries za kisasa za `arm64e`. Kwa maelezo zaidi kuhusu sehemu hizi, angalia [ukurasa huu](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
-- **`__LINKEDIT`**: Ina taarifa za linker (dyld) kama vile maingizo ya jedwali la symbol, string na relocation. Ni kontena la jumla la maudhui ambayo hayamo katika `__TEXT` au `__DATA`, na maudhui yake yanafafanuliwa katika load commands nyingine.
-  - Taarifa za dyld: Rebase, opcodes za Non-lazy/lazy/weak binding na maelezo ya export
-  - Mwanzo wa functions: Jedwali la anwani za mwanzo wa functions
+- **`__DATA_CONST`**: \_\_DATA.\_\_const haijahakikishiwa kuwa thabiti (ina ruhusa za kuandika), na vivyo hivyo kwa vielekezi vingine na GOT. Sehemu hii hutumia `mprotect` kufanya `__const`, baadhi ya vianzilishi na jedwali la GOT (baada ya kutatuliwa) **zisomwe pekee**.
+- **`__AUTH` / `__AUTH_CONST`**: Hupatikana kwa kawaida katika binary za hivi karibuni za Apple Silicon. Segment hizi huhifadhi vielekezi vinavyopaswa kuthibitishwa wakati wa upakiaji au matumizi (kwa mfano `__auth_got`). Ikiwa mbinu ya rebinding, hook au import-patching hukagua tu sehemu za zamani za `__got` / `__la_symbol_ptr`, huenda ikakosa sehemu halisi za miito katika binary za kisasa za `arm64e`. Kwa maelezo zaidi kuhusu sehemu hizi, angalia [ukurasa huu](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+- **`__LINKEDIT`**: Ina taarifa za linker (dyld), kama vile maingizo ya jedwali la alama, mifuatano na relocation. Ni chombo cha jumla cha maudhui ambayo hayako kwenye `__TEXT` wala `__DATA`, na maudhui yake yanafafanuliwa katika amri nyingine za upakiaji.
+  - Taarifa za dyld: Rebase, opcode za binding zisizo-lazy/lazy/weak na taarifa za export
+  - Functions starts: Jedwali la anwani za kuanzia za functions
   - Data In Code: Visiwa vya data ndani ya \_\_text
-  - Jedwali la SYmbol: Symbols katika binary
-  - Jedwali la Indirect Symbol: Symbols za pointer/stub
-  - Jedwali la String
-  - Sahihi ya Code
-- **`__OBJC`**: Ina taarifa zinazotumiwa na Objective-C runtime. Hata hivyo, taarifa hizi zinaweza pia kupatikana katika segment ya \_\_DATA, ndani ya sehemu mbalimbali za \_\_objc\_\*.
-- **`__RESTRICT`**: Segment isiyo na maudhui yenye sehemu moja inayoitwa **`__restrict`** (ambayo pia haina maudhui), inayohakikisha kwamba binary inapotekelezwa, itapuuza vigeu vya mazingira vya DYLD.
+  - SYmbol Table: Alama katika binary
+  - Indirect Symbol Table: Alama za pointer/stub
+  - String Table
+  - Code Signature
+- **`__OBJC`**: Ina taarifa zinazotumiwa na Objective-C runtime. Hata hivyo, taarifa hii inaweza pia kupatikana katika segment ya \_\_DATA, ndani ya sehemu mbalimbali za \_\_objc\_\*.
+- **`__RESTRICT`**: Segment isiyo na maudhui, yenye sehemu moja inayoitwa **`__restrict`** (ambayo pia haina maudhui), inayohakikisha kuwa binary inapotekelezwa, itapuuza vigeu vya mazingira vya DYLD.
 
-Kama ilivyowezekana kuona kwenye code, **segments pia zinatumia flags** (ingawa hazitumiki sana):
+Kama inavyoonekana kwenye msimbo, **segment pia zinaweza kuwa na flags** (ingawa hazitumiki sana):
 
 - `SG_HIGHVM`: Core pekee (haitumiki)
 - `SG_FVMLIB`: Haitumiki
 - `SG_NORELOC`: Segment haina relocation
-- `SG_PROTECTED_VERSION_1`: Usimbaji fiche. Hutumiwa, kwa mfano, na Finder kusimba segment ya maandishi `__TEXT`.
+- `SG_PROTECTED_VERSION_1`: Usimbaji fiche. Kwa mfano, hutumiwa na Finder kusimba segment ya maandishi `__TEXT`.
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** ina entrypoint katika **sifa ya entryoff.** Wakati wa kupakia, **dyld** huongeza tu thamani hii kwenye **base ya binary** (iliyo kwenye kumbukumbu), kisha **huruka** hadi kwenye instruction hii ili kuanza kutekeleza code ya binary.
+**`LC_MAIN`** ina entrypoint katika sifa ya **entryoff.** Wakati wa upakiaji, **dyld** huongeza tu thamani hii kwenye **msingi wa binary** (ulio kwenye kumbukumbu), kisha **hurukia** kwenye instruction hii ili kuanza kutekeleza msimbo wa binary.
 
-**`LC_UNIXTHREAD`** ina thamani ambazo register lazima ziwe nazo wakati wa kuanzisha thread kuu. Hii tayari iliondolewa matumizi, lakini **`dyld`** bado huitumia. Inawezekana kuona thamani za register zilizowekwa na hii kwa kutumia:
+**`LC_UNIXTHREAD`** ina thamani ambazo register lazima ziwe nazo wakati wa kuanzisha main thread. Hii tayari iliacha kutumika, lakini **`dyld`** bado huitumia. Inawezekana kuona thamani za register zilizowekwa na hii kwa kutumia:
 
 ```bash
 otool -l /usr/lib/dyld
@@ -319,28 +336,28 @@ Load command 13
 {{#endref}}
 
 
-Ina taarifa kuhusu **code signature ya faili la Macho-O**. Ina **offset** pekee inayo**elekeza** kwenye **signature blob**. Kwa kawaida huwa mwishoni kabisa mwa faili.\
+Ina taarifa kuhusu **saini ya code ya faili la Mach-O**. Ina **offset** pekee inayoelekeza kwenye **signature blob**. Kwa kawaida huwa mwishoni kabisa mwa faili.\
 Unaweza kupata maelezo zaidi kuhusu sehemu hii katika [**chapisho hili la blogu**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) na [**gist hii**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).<sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-Huwezesha usimbaji fiche wa binary. Hata hivyo, bila shaka, mshambulizi akifanikiwa kuathiri mchakato, ataweza kutoa nakala ya kumbukumbu bila usimbaji fiche.
+Hutoa usaidizi kwa usimbaji fiche wa binary. Hata hivyo, bila shaka, mshambuliaji akifaulu kuathiri process, ataweza kutoa dump ya kumbukumbu bila usimbaji fiche.
 
 ### **`LC_LOAD_DYLINKER`**
 
-Ina **njia ya faili ya kitekelezi ya dynamic linker** ambayo huweka shared libraries kwenye anwani za kumbukumbu za mchakato. **Thamani yake huwa `/usr/lib/dyld`** kila wakati. Ni muhimu kutambua kwamba katika macOS, uwekaji ramani wa dylib hufanyika katika **user mode**, si katika kernel mode.
+Ina **path ya executable ya dynamic linker** inayopanga shared libraries kwenye address space ya process. **Thamani huwekwa kuwa `/usr/lib/dyld` kila wakati**. Ni muhimu kutambua kwamba katika macOS, upangaji wa dylib hufanyika katika **user mode**, si katika kernel mode.
 
 ### **`LC_IDENT`**
 
-Imepitwa na wakati, lakini mipangilio inapowekwa ili kuzalisha dumps panapotokea panic, huundwa Mach-O core dump na toleo la kernel huwekwa kwenye amri ya `LC_IDENT`.
+Imepitwa na wakati, lakini mipangilio inapowekwa ili kuzalisha dumps wakati wa panic, hutengenezwa core dump ya Mach-O na toleo la kernel huwekwa kwenye command ya `LC_IDENT`.
 
 ### **`LC_UUID`**
 
-UUID ya nasibu. Haifai kwa jambo lolote moja kwa moja, lakini XNU huihifadhi pamoja na taarifa nyingine za mchakato. Inaweza kutumika katika ripoti za crash.
+UUID ya nasibu. Haitumiki moja kwa moja kwa chochote, lakini XNU huihifadhi pamoja na taarifa nyingine za process. Inaweza kutumika katika crash reports.
 
 ### **`LC_BUILD_VERSION`**
 
-Binary za kisasa kwa kawaida huwa na amri hii ya kutangaza **jukwaa lengwa**, **toleo la chini kabisa la OS**, **toleo la SDK**, na kwa hiari **matoleo ya zana** zilizotumika kujenga slice hiyo. Kwa mtazamo wa offensive/reversing, hii ni muhimu sana kubaini jinsi sample ilivyoundwa na kugundua haraka universal binaries zisizo za kawaida ambapo slice moja ilikompilishwa kwa SDK au deployment target tofauti. Binary za zamani bado zinaweza kutumia `LC_VERSION_MIN_*` badala yake.
+Binary za kisasa kwa kawaida huwa na command hii ya kutangaza **platform lengwa**, **toleo la chini kabisa la OS**, **toleo la SDK**, na, kwa hiari, **matoleo ya tools** yaliyotumika kutengeneza slice hiyo. Kwa mtazamo wa offensive/reversing, hii ni muhimu sana kwa kutambua jinsi sample ilivyotengenezwa na kutambua haraka universal binaries zisizo za kawaida ambazo slice moja ilikompailiwa kwa SDK au deployment target tofauti. Binary za zamani zinaweza kutumia `LC_VERSION_MIN_*` badala yake.
 
 ```bash
 vtool -show-build /bin/ls
@@ -349,16 +366,16 @@ otool -l /bin/ls | grep -A 8 LC_BUILD_VERSION
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
-Huruhusu kubainisha vigeu vya mazingira vya dyld kabla mchakato haujaendeshwa. Hili linaweza kuwa hatari sana kwa kuwa linaweza kuruhusu kutekeleza msimbo wowote ndani ya mchakato, kwa hiyo load command hii hutumika tu katika build ya dyld iliyo na `#define SUPPORT_LC_DYLD_ENVIRONMENT`, na uchakataji wake huzuiwa zaidi kwa vigeu vya umbo la `DYLD_..._PATH` vinavyobainisha njia za upakiaji.
+Huruhusu kubainisha vigeu vya mazingira kwa dyld kabla ya mchakato kutekelezwa. Hili linaweza kuwa hatari sana kwa kuwa linaweza kuruhusu kutekeleza msimbo wowote ndani ya mchakato, kwa hiyo amri hii ya upakiaji hutumiwa tu katika build za dyld zenye `#define SUPPORT_LC_DYLD_ENVIRONMENT`, na uchakataji wake huzuiwa zaidi kwa vigeu vya muundo wa `DYLD_..._PATH` vinavyobainisha njia za upakiaji.
 
 ### **`LC_DYLD_EXPORTS_TRIE` and `LC_DYLD_CHAINED_FIXUPS`**
 
-Toolchain za hivi karibuni mara nyingi huhifadhi metadata ya export/bind/rebase katika commands hizi badala ya kutegemea tu opcodes za zamani za `LC_DYLD_INFO[_ONLY]`. Zote ni entries za `linkedit_data_command` zinazoelekeza ndani ya **`__LINKEDIT`**:
+Toolchain za hivi karibuni mara nyingi huhifadhi metadata ya export/bind/rebase katika amri hizi badala ya kutegemea opcodes za zamani za `LC_DYLD_INFO[_ONLY]` pekee. Zote ni maingizo ya `linkedit_data_command` yanayoelekeza ndani ya **`__LINKEDIT`**:
 
-- **`LC_DYLD_EXPORTS_TRIE`**: Trie fupi yenye symbols zinazouzwa nje na image.
-- **`LC_DYLD_CHAINED_FIXUPS`**: Minyororo ya fixup kwa kila segment inayotumiwa na dyld kutekeleza rebases na binds. Kwenye Apple Silicon, hapa pia ndipo utakutana na fixup nyingi za kisasa za authenticated pointer.
+- **`LC_DYLD_EXPORTS_TRIE`**: Trie fupi yenye alama zinazotolewa na image.
+- **`LC_DYLD_CHAINED_FIXUPS`**: Minyororo ya fixup kwa kila segment inayotumiwa na dyld kutekeleza rebases na binds. Kwenye Apple Silicon, hapa pia utakutana na fixup nyingi za kisasa za pointer zilizothibitishwa.
 
-Metadata hii ni muhimu sana unapounda upya imports/exports, kuelewa kwa nini dependency iliyopakiwa kupitia `@rpath` ilisuluhishwa kwa njia fulani, au kubaini kwa nini jaribio la hook/rebinding lilishindwa kwenye target ya kisasa ya `arm64e`. `dyld_info` inaweza pia kutumika dhidi ya **njia za dylib zilizo kwenye cache pekee** ambazo hazipo kama faili za kujitegemea kwenye diski; hili ni muhimu sana kwenye macOS ya kisasa ambako library nyingi za mfumo zinapatikana tu kwenye shared cache.<sup>[[2]](#references)</sup>
+Metadata hii ni muhimu sana unapounda upya imports/exports, kuelewa kwa nini dependency iliyopakiwa kupitia `@rpath` ilitatuliwa kwa njia fulani, au kubaini kwa nini jaribio la hook/rebinding lilishindwa kwenye target ya kisasa ya `arm64e`. `dyld_info` inaweza pia kutumika kwenye **njia za dylib zinazopatikana kwenye cache pekee** ambazo hazipo kama faili huru kwenye diski. Hii ni muhimu sana kwenye macOS za kisasa ambapo maktaba nyingi za mfumo zinapatikana kwenye shared cache pekee.<sup>[[2]](#references)</sup>
 
 ```bash
 dyld_info -arch arm64e -exports -fixup_chains -fixup_chain_details /bin/ls
@@ -366,19 +383,19 @@ dyld_info -arch arm64e -exports -fixup_chains -fixup_chain_details /bin/ls
 
 ### **`LC_FILESET_ENTRY`**
 
-Amri hii ya kisasa ya upakiaji ni muhimu zaidi unapokagua **kernel collections / kernelcache-style filesets**. Badala ya kuwakilisha image moja inayojitegemea, Mach-O ya nje hufanya kazi kama kontena, na kila `LC_FILESET_ENTRY` huelekeza kwenye Mach-O iliyopachikwa yenye entry id yake inayofanana na njia, anwani ya VM na nafasi ya faili. Unapofanya reverse engineering ya vipengele vya kisasa vya kernel vya macOS/iOS, amri hii mara nyingi huwa kiungo kati ya kontena la kiwango cha juu na image halisi unayotaka kuitoa au kuichanganua kwa disassembly.
+Amri hii ya kisasa ya load inahusika zaidi unapokagua **kernel collections / kernelcache-style filesets**. Badala ya kuwakilisha image moja inayojitegemea, Mach-O ya nje hufanya kazi kama chombo, na kila `LC_FILESET_ENTRY` huelekeza kwenye Mach-O iliyopachikwa yenye entry id yake inayofanana na path, anwani ya VM na file offset. Unaporeverse vipengele vya kernel vya kisasa vya macOS/iOS, amri hii mara nyingi huwa kiungo kati ya chombo cha kiwango cha juu na image halisi unayotaka kutoa au ku-disassemble.
 
 ```bash
 otool -l /System/Library/KernelCollections/BootKernelExtensions.kc | grep -A 6 LC_FILESET_ENTRY
 ```
 
-Kwa workflows za uchimbuzi wa vitendo, angalia [ukurasa huu mwingine kuhusu macOS kernel extensions na kernelcache](../mac-os-architecture/macos-kernel-extensions.md).
+Kwa workflows za vitendo za uchimbaji, angalia [ukurasa huu mwingine kuhusu kernel extensions za macOS na kernelcache](../mac-os-architecture/macos-kernel-extensions.md).
 
 ### **`LC_LOAD_DYLIB`**
 
-Amri hii ya upakiaji hufafanua utegemezi wa **dynamic** **library** ambao **huelekeza** **loader** (dyld) **kupakia na ku-link library hiyo**. Kuna amri ya upakiaji ya `LC_LOAD_DYLIB` **kwa kila library** ambayo binary ya Mach-O inahitaji.
+Amri hii ya load inaelezea utegemezi wa **dynamic** **library** ambao **huielekeza** **loader** (dyld) **kupakia na ku-link library hiyo**. Kuna amri ya load ya `LC_LOAD_DYLIB` **kwa kila library** inayohitajika na binary ya Mach-O.
 
-- Amri hii ya upakiaji ni muundo wa aina ya **`dylib_command`** (ambao una struct ya dylib, inayofafanua dynamic library halisi inayotegemewa):
+- Amri hii ya load ni muundo wa aina ya **`dylib_command`** (ambao una struct ya dylib, inayoelezea dynamic library halisi ambayo inategemewa):
 
 ```objectivec
 struct dylib_command {
@@ -395,9 +412,9 @@ struct dylib {
 };
 ```
 
-![LC DYLD ENVIRONMENT - LC LOAD DYLIB: uint32 t nambari ya toleo la uoanifu; / nambari ya toleo la uoanifu la maktaba /](<../../../images/image (486).png>)
+![LC DYLD ENVIRONMENT - LC LOAD DYLIB: uint32 t toleo la uoanifu; / nambari ya toleo la uoanifu la maktaba /](<../../../images/image (486).png>)
 
-Unaweza pia kupata maelezo haya kupitia CLI kwa:
+Unaweza pia kupata taarifa hii kutoka kwenye CLI kwa kutumia:
 
 ```bash
 otool -L /bin/ls
@@ -407,32 +424,32 @@ otool -L /bin/ls
 	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
 
-Baadhi ya maktaba zinazoweza kuhusishwa na malware ni:
+Baadhi ya libraries zinazoweza kuhusishwa na malware ni:
 
 - **DiskArbitration**: Kufuatilia viendeshi vya USB
 - **AVFoundation:** Kunasa sauti na video
 - **CoreWLAN**: Kuchanganua Wi-Fi.
 
 > [!TIP]
-> Binary ya Mach-O inaweza kuwa na **constructor** moja au **zaidi**, ambazo **zitatekelezwa** **kabla** ya anwani iliyobainishwa kwenye **LC_MAIN**.\
-> Offsets za constructor zozote huhifadhiwa katika sehemu ya **\_\_mod_init_func** ya segment ya **\_\_DATA_CONST**.
+> Binary ya Mach-O inaweza kuwa na **constructors** moja au **zaidi**, ambazo **zitatekelezwa** **kabla** ya anwani iliyobainishwa katika **LC_MAIN**.\
+> Offsets za constructors zozote huhifadhiwa katika sehemu ya **\_\_mod_init_func** ya segment ya **\_\_DATA_CONST**.
 
 ## **Data ya Mach-O**
 
-Kiini cha faili kina eneo la data, ambalo linajumuisha segment kadhaa kama zilivyobainishwa katika eneo la load commands. **Aina mbalimbali za sehemu za data zinaweza kuwekwa ndani ya kila segment**, na kila sehemu **ikiwa na code au data** mahususi kwa aina fulani.
+Kiini cha faili kina eneo la data, ambalo linajumuisha segments kadhaa kama zilivyobainishwa katika eneo la load-commands. **Aina mbalimbali za sehemu za data zinaweza kuwekwa ndani ya kila segment**, huku kila sehemu **ikiwa na code au data** maalum kwa aina fulani.
 
 > [!TIP]
-> Kimsingi, data ni sehemu iliyo na **taarifa** zote zinazopakiwa na load commands **LC_SEGMENTS_64**
+> Data kimsingi ni sehemu iliyo na **taarifa** zote zinazopakiwa na load commands **LC_SEGMENTS_64**
 
 ![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../images/image (507) (3).png>)
 
 Hii inajumuisha:
 
-- **Jedwali la functions:** Linalohifadhi taarifa kuhusu functions za programu.
-- **Jedwali la symbols**: Lenye taarifa kuhusu function ya nje inayotumiwa na binary
-- Linaweza pia kuwa na majina ya functions za ndani, variables na mengineyo.
+- **Jedwali la functions:** Ambalo lina taarifa kuhusu functions za programu.
+- **Jedwali la symbols**: Ambalo lina taarifa kuhusu function ya nje inayotumiwa na binary
+- Pia linaweza kuwa na majina ya functions na variables za ndani, na mengineyo.
 
-Unaweza kukagua hili kwa kutumia zana ya [**Mach-O View**](https://sourceforge.net/projects/machoview/):
+Ili kulikagua, unaweza kutumia zana ya [**Mach-O View**](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../images/image (1120).png" alt=""><figcaption></figcaption></figure>
 
@@ -442,47 +459,51 @@ Au kupitia CLI:
 size -m /bin/ls
 ```
 
-### Data iliyoambatishwa na overlay zinazochanganuliwa kinyume
+### Data iliyoongezwa na overlays zinazochanganuliwa kinyume
 
-Loader inaweza kuhifadhi usanidi kwenye data iliyoambatishwa badala ya section ya Mach-O yenye jina. Kisha reverse parser hutumia alama ya mwisho kama sehemu ya kuanzia, husoma ukubwa uliohifadhiwa mara moja kabla yake, na hutumia thamani hiyo kupata na kusimbua blob iliyotangulia. Loader moja ya universal iliyozingatiwa ilitumia mpangilio huu kwa URL ya downloader iliyosimbwa kwa XOR:<sup>[[6]](#references)</sup>
+Loader inaweza kuhifadhi usanidi kwenye data iliyoongezwa badala ya sehemu ya Mach-O iliyopewa jina. Kisha reverse parser hujikita kwenye alama ya mwisho, husoma ukubwa uliohifadhiwa mara moja kabla yake, na hutumia thamani hiyo kupata na kusimbua blob iliyotangulia. Loader moja ya universal iliyozingatiwa ilitumia mpangilio huu kwa URL ya downloader iliyosimbwa kwa XOR:<sup>[[6]](#references)</sup>
 
 ```text
 [XOR-encrypted URL][8-byte ciphertext length][SONOMAC1]
 ```
 
-Unapofanya uchanganuzi wa nyuma wa binary usiyoifahamu, kagua baiti zilizo karibu na alama za mwisho zinazotambulika, na ufuatilie kila hesabu ya ukubwa inayofanywa kurudi nyuma kabla ya kudhani kuwa mifuatano au usanidi lazima viwe sehemu ya sehemu ya load-command. Alama na ufunguo wa XOR hutegemea sampuli; mbinu inayoweza kutumika tena ni trailer inayojieleza yenyewe.
+Unapochunguza binary usiyoifahamu, kagua bytes zilizo karibu na alama za mwisho zinazotambulika, na fuatilia kila hesabu ya ukubwa inayofanywa kurudi nyuma kabla ya kudhani kwamba strings au usanidi lazima viwe sehemu ya load-command. Alama na ufunguo wa XOR hutegemea sampuli husika; mbinu inayoweza kutumika tena ni trailer inayojieleza yenyewe.
 
 ## Sehemu za Kawaida za Objective-C
 
 Katika segment ya `__TEXT` (r-x):
 
-- `__objc_classname`: Majina ya class (mifuatano)
-- `__objc_methname`: Majina ya method (mifuatano)
-- `__objc_methtype`: Aina za method (mifuatano)
+- `__objc_classname`: Majina ya madarasa (strings)
+- `__objc_methname`: Majina ya mbinu (strings)
+- `__objc_methtype`: Aina za mbinu (strings)
 
 Katika segment ya `__DATA` (rw-):
 
-- `__objc_classlist`: Viashiria vya class zote za Objective-C
-- `__objc_nlclslist`: Viashiria vya class za Objective-C zisizocheleweshwa (Non-Lazy)
-- `__objc_catlist`: Kiashiria cha Categories
-- `__objc_nlcatlist`: Viashiria vya Categories zisizocheleweshwa (Non-Lazy)
-- `__objc_protolist`: Orodha ya protocols
-- `__objc_const`: Data thabiti
+- `__objc_classlist`: Pointers kwa madarasa yote ya Objective-C
+- `__objc_nlclslist`: Pointers kwa madarasa ya Objective-C yasiyo Lazy
+- `__objc_catlist`: Pointer kwa Categories
+- `__objc_nlcatlist`: Categories zisizo Lazy
+- `__objc_protolist`: Orodha ya Protocols
+- `__objc_const`: Data isiyobadilika
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
 
-Tazama pia: [Kupakia Mach-O kwa Reflective](../macos-proces-abuse/reflective-mach-o-loading.md#activating-objective-c-metadata).
+Tazama pia: [Upakiaji wa Mach-O kwa Reflective](../macos-proces-abuse/reflective-mach-o-loading.md#activating-objective-c-metadata).
 
 ## Swift
 
 - `_swift_typeref`, `_swift3_capture`, `_swift3_assocty`, `_swift3_types, _swift3_proto`, `_swift3_fieldmd`, `_swift3_builtin`, `_swift3_reflstr`
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 ## References
 
-- [1] [Vipande vya Mach-O si rahisi kama unavyoweza kufikiri](https://objective-see.org/blog/blog_0x80.html)
-- [2] [Ukurasa wa mwongozo wa dyld_info(1)](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
+- [1] [Vipande vya Mach-O si rahisi kuelewa kama unavyoweza kudhani](https://objective-see.org/blog/blog_0x80.html)
+- [2] [Ukurasa wa man wa dyld_info(1)](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
 - [3] [Kusoma Entitlements Zako Mwenyewe](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
 - [4] [carlospolop/machoreader.py (gist)](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)
-- [5] [Chanzo Huria cha Apple - Mach-O `fat.h` na `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
-- [6] [Kaspersky Securelist - Toleo jipya la mwizi wa macOS MacSync linalenga wapenda crypto na watengenezaji](https://securelist.com/macsync-new-version/121383/)
+- [5] [Apple Open Source - Mach-O `fat.h` na `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
+- [6] [Kaspersky Securelist - Toleo jipya la MacSync macOS stealer linalenga wapenda crypto na developers](https://securelist.com/macsync-new-version/121383/)
+- [7] [Sanaa ya Mac Malware, Juzuu ya 2 — Kuchanganua Binaries](https://taomm.org/vol2/pdfs/CH%202%20Parsing%20Binaries.pdf)
+- [8] [Apple Developer — TN3126: Ndani ya Code Signing: Hashes](https://developer.apple.com/documentation/technotes/tn3126-inside-code-signing-hashes.md)
+- [9] [Apple Developer — Kuruhusu na kukataa apps na binaries](https://developer.apple.com/documentation/devicemanagement/allowing-and-denying-apps-and-binaries.md)
+{{#include ../../../banners/hacktricks-training.md}}
