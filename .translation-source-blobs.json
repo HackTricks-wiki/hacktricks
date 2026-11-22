@@ -477,7 +477,7 @@
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-installers-abuse.md": "c955e7e058d7db22212887af296157bedbf5cdf0",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-memory-dumping.md": "bb53df747c133376dd7357e20d5bb2975f15b1bc",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-sensitive-locations.md": "9ad8a1d2c240efb91c65462c2e8f22266a5efcfe",
-    "src/macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md": "5122a1853bc5cee0a9984618f29ea1dbe5a11a72",
+    "src/macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md": "dd99ce201e44ce7d1dda970390829b7d1a53a473",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-gcd-grand-central-dispatch.md": "88b9fbfa21d1379323008608a87019a687d716e0",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-privilege-escalation.md": "ca438de6a6700b46d5f93bf9b720f565ec546d13",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/README.md": "419113c2db8b88e14fe62f8ccb468dd18461f0e0",
