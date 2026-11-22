@@ -5,7 +5,7 @@
 - One home per mechanism; entry points retain prerequisites and link; split by task/prerequisite, not size.
 - Main: general techniques; Cloud: provider/IAM; use public URLs.
 - Removed chapters need whole-page redirects; preserve content/current links.
-- Keep PoCs with mechanisms; code size does not justify splitting.
+- Keep PoCs with mechanisms; size alone does not justify splitting.
 
 ## Canonical locations and boundaries
 
@@ -14,10 +14,10 @@
 - POSIX CPU timer TOCTOU/IRQ/task-work, ptrace PoCs, Chronomaly → `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`; Linux Hardening links; exploits in Binary, assessment in Linux.
 - Board/side-channel/fault/signal → Hardware Hacking; physical, firmware, radio separate.
 - Model execution, fine-tuning, serving and hosted tools → `src/AI/AI-Model-Tools-and-Platforms.md`, separate from attacks and architecture. Burp Intruder, extensions and Session Switcher → `src/pentesting-web/burp-suite.md`, separate from checklist and IDOR.
+- WebRTC media-server DTLS/ICE race DoS → `src/network-services-pentesting/webrtc-media-server-dtls-race-dos.md`, next to TURN relay; media-session targets belong with exposed services, not generic network methodology. The mechanisms and prerequisites remain distinct.
 - OT safety/planning → `src/industrial-control-systems/README.md`; Modbus → `src/network-services-pentesting/pentesting-modbus.md`; OPC UA/BACnet → Network Services.
 - Android acquisition/imaging/LiME → `src/generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md`; Mobile owns app testing; malware separate.
 - Firmware acquisition, decryption, updates and boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay there.
-- Former TODO topics: Rust → generic methodologies; investment terms → Blockchain; cookies → Welcome; recon APIs → External Recon.
 - Referer leakage and Referrer-Policy → `src/pentesting-web/referer-header-and-referrer-policy.md`; OAuth links there. Exfiltration overview maps other routes.
 - UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
@@ -30,7 +30,6 @@
 - RDPexec → `src/network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session`; Windows Lateral Movement links directly there, avoiding a procedure-free stub.
 - Python `venv` and wheel builds → `src/generic-methodologies-and-resources/python/basic-python.md#virtual-environments-and-wheel-builds-venv`; the Python hub links to this heading, not a thin setup page.
 - 401/403 authorization bypasses → `src/pentesting-web/403-and-401-bypasses.md`; broader request/response behavior → `src/pentesting-web/special-http-headers.md`. The 80/443 service overview links to both and retains product discovery; old routes redirect.
-- Public HTTP/TCP relay exposure → `src/generic-hacking/expose-local-to-the-internet.md`, beside tunneling.
 - PHP multipart temp-upload LFI race/PHP 7.0–7.2 crash variant → `src/pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md#segmentation-fault-variant-on-php-70-and-72`; phpinfo, session upload progress and filters are distinct primitives.
 - Chosen-input MD5 suffix/`0e` search → `src/crypto/hashes/README.md#chosen-input-md5-hash-searches`; PHP type-juggling/version caveats → `network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling`. Distinct, cross-linked.
 - WSGI/uWSGI, Zabbix, CCTV stay under Network 80/443; Web/SSRF link to WSGI.
