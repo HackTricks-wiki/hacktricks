@@ -6,6 +6,8 @@
 
 This page consolidates general Windows privilege-escalation methodology from several foundational guides.<sup>[[1]](#references)[[3]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[11]](#references)</sup> Its practical enumeration flow also draws on community workshops and checklists.<sup>[[4]](#references)[[9]](#references)[[10]](#references)</sup> The historical attack material includes the DerbyCon presentation on Windows privilege escalation.<sup>[[5]](#references)</sup>
 
+For a compact review, use the [local privilege escalation checklist](../checklist-windows-privilege-escalation.md).
+
 ## Initial Windows Theory
 
 ### Access Tokens
@@ -2637,6 +2639,8 @@ You have to compile the project using the correct version of .NET ([see this](ht
 ```
 C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the code with the version given in "Build Engine version" line
 ```
+
+
 
 
 
