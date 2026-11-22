@@ -723,7 +723,7 @@
     "src/network-services-pentesting/pentesting-smb/rpcclient-enumeration.md": "5a55391eb419365618ac2e5cb324212a116848da",
     "src/network-services-pentesting/pentesting-smtp/README.md": "505633a4ceafed97360a3de0e40416fe91d93169",
     "src/network-services-pentesting/pentesting-smtp/smtp-commands.md": "351d06d228c9ea722672a74d6ccacc4972a40d74",
-    "src/network-services-pentesting/pentesting-smtp/smtp-smuggling.md": "161a59ad5f736abaa55b738c792a44a576f6b6bd",
+    "src/network-services-pentesting/pentesting-smtp/smtp-smuggling.md": "64b17e5c80cb118b42833bd1c4342e08ac72607f",
     "src/network-services-pentesting/pentesting-snmp/README.md": "d83b289ec3039f1c200b91692f37b9f0839bab44",
     "src/network-services-pentesting/pentesting-snmp/cisco-snmp.md": "d67fcbd7f61f26dfd2108b9c8c514ffb7bc40e9d",
     "src/network-services-pentesting/pentesting-snmp/snmp-rce.md": "098c27237a00ca391eab37efe19b233f3b4294a7",
