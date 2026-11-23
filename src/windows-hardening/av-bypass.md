@@ -284,7 +284,7 @@ python syswhispers.py --preset injection --method indirect --resolve from_disk -
 python syswhispers.py --functions NtAllocateVirtualMemory,NtCreateThreadEx --resolve hw_breakpoint
 ```
 
-When parsing clean x64 `ntdll` syscall exports for an SSN, allow both `4C 8B D1 B8` (`mov r10, rcx; mov eax, imm32`) and the same sequence preceded by `F3 0F 1E FA` (`endbr64`). The latter is a CET-prefixed stub: a parser that assumes the SSN is always at one fixed offset will miss it. One observed loader takes the SSN from a clean disk-mapped `ntdll`, then scans executable sections of the **loaded** `ntdll` for `0F 05 C3` (`syscall; ret`) and uses that in-module gate for indirect calls. If initialization fails, its `GetProcAddress` fallback restores functionality but no longer avoids a hooked export entrypoint.<sup>[[54]](#references)</sup>
+When parsing clean x64 `ntdll` syscall exports for an SSN, allow both `4C 8B D1 B8` (`mov r10, rcx; mov eax, imm32`) and the same sequence preceded by `F3 0F 1E FA` (`endbr64`). The latter is a CET-prefixed stub: a parser that assumes the SSN is always at one fixed offset will miss it. If indirect-syscall initialization fails and the loader falls back to `GetProcAddress`, calls through those exports may again encounter user-mode hooks.<sup>[[54]](#references)</sup>
 
 ## AMSI (Anti-Malware Scan Interface)
 
