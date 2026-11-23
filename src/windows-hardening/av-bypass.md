@@ -284,6 +284,8 @@ python syswhispers.py --preset injection --method indirect --resolve from_disk -
 python syswhispers.py --functions NtAllocateVirtualMemory,NtCreateThreadEx --resolve hw_breakpoint
 ```
 
+When parsing clean x64 `ntdll` syscall exports for an SSN, allow both `4C 8B D1 B8` (`mov r10, rcx; mov eax, imm32`) and the same sequence preceded by `F3 0F 1E FA` (`endbr64`). The latter is a CET-prefixed stub: a parser that assumes the SSN is always at one fixed offset will miss it. If indirect-syscall initialization fails and the loader falls back to `GetProcAddress`, calls through those exports may again encounter user-mode hooks.<sup>[[54]](#references)</sup>
+
 ## AMSI (Anti-Malware Scan Interface)
 
 AMSI was created to prevent "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)". Initially, AVs were only capable of scanning **files on disk**, so if you could somehow execute payloads **directly in-memory**, the AV couldn't do anything to prevent it, as it didn't have enough visibility.
@@ -1606,5 +1608,6 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [51] [Kaspersky Securelist – NetamLoader XAML-based .NET loading framework](https://securelist.com/netamloader/121676)
 - [52] [Microsoft Learn – AMSI_RESULT enumeration](https://learn.microsoft.com/en-us/windows/win32/api/amsi/ne-amsi-amsi_result)
 - [53] [Microsoft Learn – IAntimalware::Scan method](https://learn.microsoft.com/en-us/windows/win32/api/amsi/nf-amsi-iantimalware-scan)
+- [54] [Zscaler ThreatLabz - 2CLoader technical analysis](https://zscaler.com/blogs/security-research/2cloader-new-malware-loader-delivering-vidar-and-remus)
 
 {{#include ../banners/hacktricks-training.md}}
