@@ -415,7 +415,7 @@
     "src/linux-hardening/main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md": "cdc4a082721eef9f0567534a6848df81b03596a4",
     "src/linux-hardening/main-system-information/kernel-lpe-cves/open-vswitch-forwarded-skb-marker-stripping-esp-page-cache-write.md": "7016d1a9d1ff8e445f8d70f1a539faf3e056e461",
     "src/linux-hardening/main-system-information/kernel-lpe-cves/vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md": "b160a877a4d5bb12b2871ad0ec78614ce22360ad",
-    "src/linux-hardening/main-system-information/kernel-modules-and-modprobe.md": "d26d177f8a688525c873599107b35d9186f2c0d7",
+    "src/linux-hardening/main-system-information/kernel-modules-and-modprobe.md": "dcd35aec53a701d2b89e9aa74b5dbaccf75bb12f",
     "src/linux-hardening/main-system-information/kernel-vulnerability-assessment.md": "52349e7bef292451ba722cc76a35cc8be616c748",
     "src/linux-hardening/main-system-information/linux-privilege-escalation-checklist.md": "ffc5b16f5d34fa60f84bf0c77b254a7a00baff71",
     "src/linux-hardening/main-system-information/sudo-command-abuse.md": "402a8760b103596058f6f1b8f97757656129ebd4",
