@@ -151,6 +151,27 @@ cat /tmp/modprobe-helper-ran 2>/dev/null
 
 On hardened systems, this should fail when permissions prevent unprivileged writes to `kernel.modprobe`, the helper path is not writable, or module autoloading is disabled.<sup>[[1]](#references)</sup>
 
+### Unprivileged AF_ALG autoload trigger
+
+The filesystem trigger above uses privileged `mount`.<sup>[[1]](#references)</sup> Where AF_ALG sockets are available, an unprivileged caller can instead bind one to a deliberately nonexistent type.<sup>[[17]](#references)[[18]](#references)</sup> `alg_bind()` then requests `algif-<type>` through `request_module()`, which invokes the configured module helper.<sup>[[17]](#references)[[18]](#references)[[19]](#references)</sup> This still works after the Linux 6.14 removal of legacy unknown-binary-format autoloading.<sup>[[11]](#references)[[17]](#references)</sup> A failed `bind()` is expected because the type does not exist; check the helper's side effect rather than the socket return value.<sup>[[17]](#references)[[18]](#references)</sup>
+
+In an authorized lab, first arrange the controlled helper or `modprobe.d` rule, then trigger one request without `sudo` or `CAP_SYS_MODULE`.<sup>[[17]](#references)[[18]](#references)</sup> Python 3.6+ accepts an AF_ALG `(type, name)` bind tuple.<sup>[[20]](#references)</sup>
+
+```bash
+cat /proc/sys/kernel/modprobe
+cat /proc/sys/crypto/af_alg_restrict 2>/dev/null
+python3 - <<'PYCODE'
+import socket
+with socket.socket(socket.AF_ALG, socket.SOCK_SEQPACKET, 0) as s:
+    try:
+        s.bind(("htprobe", "unused"))
+    except OSError as exc:
+        print(f"bind returned: {exc}")
+PYCODE
+```
+
+This path requires a usable AF_ALG socket and a nonempty `kernel.modprobe`.<sup>[[1]](#references)[[18]](#references)</sup> On kernels with `/proc/sys/crypto/af_alg_restrict`, value `2` disables AF_ALG socket creation; value `1` restricts algorithms but does not stop the missing-type request in `alg_bind()`.<sup>[[18]](#references)[[21]](#references)</sup> An LSM may reject the module request before the helper is invoked.<sup>[[19]](#references)</sup>
+
 ### Writable `modprobe.d` configuration and `sudo modprobe -C`
 
 Before resolving a module, `modprobe` reads `.conf` files from configuration directories such as `/etc/modprobe.d`, `/run/modprobe.d`, `/usr/local/lib/modprobe.d`, `/usr/lib/modprobe.d`, and `/lib/modprobe.d`, in precedence order. A same-named file in a higher-priority directory shadows the lower-priority file. More importantly, an `install <module> <command>` directive runs an arbitrary shell command **instead of** inserting that module. Therefore, a writable configuration path can become delayed command execution under the credentials of a later privileged `modprobe` caller; kernel module signature enforcement does not authenticate this userspace command.<sup>[[16]](#references)</sup>
@@ -178,6 +199,14 @@ D="$(mktemp -d)"
 printf '%s\n' 'install ht_probe /bin/sh -c "id > /tmp/ht-modprobe-id"' > "$D/00-ht.conf"
 sudo /sbin/modprobe -C "$D" ht_probe
 cat /tmp/ht-modprobe-id
+```
+
+If a `modprobe.d` directory visible to the kernel's helper is writable, the same [AF_ALG autoload trigger](#unprivileged-af_alg-autoload-trigger) can run an `install algif-htprobe` directive immediately, without waiting for an administrator to call `modprobe`.<sup>[[16]](#references)[[18]](#references)[[19]](#references)</sup> For an authorized lab, place a harmless marker command in a writable `.conf`, confirm resolution with `modprobe -n -v algif-htprobe`, and then run the trigger above.<sup>[[8]](#references)[[16]](#references)</sup> `modules_disabled=1` and module signature enforcement block module insertion, not this userspace `install` command; an empty `kernel.modprobe` or blocked AF_ALG path does prevent this autoload route.<sup>[[1]](#references)[[2]](#references)[[16]](#references)[[18]](#references)[[19]](#references)</sup>
+
+```bash
+printf '%s\n' 'install algif-htprobe /bin/sh -c "id > /tmp/ht-modprobe-id"' > /etc/modprobe.d/zz-htprobe.conf
+modprobe -n -v algif-htprobe
+# Run the AF_ALG trigger above, then inspect /tmp/ht-modprobe-id.
 ```
 
 For mitigation, do not grant argument-unrestricted `modprobe` through sudo, keep every configuration directory root-owned and non-writable, and review unexpected `install`/`remove` directives. When a trusted administrative workflow must bypass such directives for one module, `modprobe --ignore-install` ignores them for that named module, but dependencies can still have their own commands.<sup>[[8]](#references)[[16]](#references)</sup>
@@ -228,6 +257,8 @@ cat /proc/sys/kernel/tainted
 
 Review unexpected module names, paths, dependencies, signatures, and load times. Kernel taint and unsigned-module messages are leads, not proof of a rootkit. If a rootkit is suspected, collect evidence from a trusted image or recovery environment before relying on live kernel output. The [kernel vulnerability assessment](kernel-vulnerability-assessment.md) page covers configuration and diagnostic exposure, including tracefs and pinned BPF objects.
 
+
+
 ## References
 
 - [1] [Documentation for /proc/sys/kernel/ — The Linux Kernel documentation](https://docs.kernel.org/admin-guide/sysctl/kernel.html)
@@ -246,4 +277,9 @@ Review unexpected module names, paths, dependencies, signatures, and load times.
 - [14] [rmmod(8) — Linux manual page](https://man7.org/linux/man-pages/man8/rmmod.8.html)
 - [15] [getcap(8) — Linux manual page](https://man7.org/linux/man-pages/man8/getcap.8.html)
 - [16] [modprobe.d(5) — Linux manual page](https://man7.org/linux/man-pages/man5/modprobe.d.5.html)
+- [17] [Reviving the modprobe_path Technique: Overcoming search_binary_handler() Patch — Theori](https://theori.io/blog/reviving-the-modprobe-path-technique-overcoming-search-binary-handler-patch)
+- [18] [AF_ALG bind and module request — Linux kernel source](https://github.com/torvalds/linux/blob/master/crypto/af_alg.c)
+- [19] [Module helper invocation — Linux kernel source](https://github.com/torvalds/linux/blob/master/kernel/module/kmod.c)
+- [20] [socket — Python documentation](https://docs.python.org/3/library/socket.html)
+- [21] [/proc/sys/crypto/ — Linux kernel documentation](https://docs.kernel.org/admin-guide/sysctl/crypto.html)
 {{#include ../../banners/hacktricks-training.md}}
