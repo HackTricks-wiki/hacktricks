@@ -411,6 +411,27 @@ SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
 ```
 
+### SSRS `RsReportServer.config` database connection
+
+On a host running SQL Server Reporting Services, a readable `RsReportServer.config` can contain an encrypted `<Dsn>` for the report-server database. Unlike credentials for external report data sources, which are encrypted in the report-server database with its symmetric key, this configuration value is protected with a **local machine-level key**.<sup>[[14]](#references)</sup>
+
+The observed attack extracted the `Dsn` and passed its Base64-decoded bytes to `ProtectedData.Unprotect` with `LocalMachine` scope.<sup>[[13]](#references)</sup>
+
+From the SSRS host, with permission to read the configuration file, locate the actual instance path and test the value in the same machine context:<sup>[[13]](#references)[[14]](#references)</sup>
+
+```powershell
+$path = 'C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\ReportServer\rsreportserver.config'
+$config = Get-Content $path -Raw
+$b64 = [regex]::Match($config, '<Dsn>([^<]+)</Dsn>').Groups[1].Value
+$blob = [Convert]::FromBase64String($b64)
+$plain = [Security.Cryptography.ProtectedData]::Unprotect($blob, $null, 'LocalMachine')
+[Text.Encoding]::UTF8.GetString($plain)
+```
+
+An empty or absent `Dsn` gives this method nothing to decrypt. The resulting connection string does **not** necessarily contain a reusable password: SSRS may use its service account or store separate `LogonUser`, `LogonDomain`, and `LogonCred` settings for a configured account. Copying only the encrypted value to another machine is not equivalent to decrypting it there.<sup>[[14]](#references)</sup>
+
+For other SQL Server access paths, see [MSSQL pentesting](../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/).
+
 ## Other tools
 
 ### HEKATOMB
@@ -502,5 +523,7 @@ Decryption yields the complete JSON configuration, including every **device post
 - [10] [Impacket – dpapi.py](https://github.com/fortra/impacket)
 - [11] [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
 - [12] [GhostPack SharpDPAPI/SharpChrome – Usage and options](https://github.com/GhostPack/SharpDPAPI)
+- [13] [CyberStrikeAI: LLM-Orchestrated C2 Automates Post-Exploitation to Domain Compromise](https://securelist.com/tr/cyberstrikeai-attacks/121715)
+- [14] [Microsoft Learn - Store Encrypted Report Server Data](https://learn.microsoft.com/en-us/sql/reporting-services/install-windows/ssrs-encryption-keys-store-encrypted-report-server-data?view=sql-server-ver16)
 
 {{#include ../../banners/hacktricks-training.md}}
