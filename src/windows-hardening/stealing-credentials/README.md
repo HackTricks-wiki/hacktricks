@@ -214,6 +214,8 @@ impacket-secretsdump -sam sam -security security -system system LOCAL
 
 You can perform copy of protected files using this service. You need to be Administrator.
 
+For a different workflow using already-exposed snapshots on a readable network share, see [SMB Previous Versions](../../network-services-pentesting/pentesting-smb/#read-previous-versions-exposed-by-a-share).
+
 #### Using vssadmin
 
 vssadmin binary is only available in Windows Server versions
@@ -558,6 +560,8 @@ This means **hardware binding prevents off-device export but not same-user use o
 - Investigate repeated **Google Password Manager recovery PIN** prompts or unexpected re-onboarding.
 - Remember that WebAuthn **`signCount`** is often not useful for synced passkeys because it may remain constant, so classic clone detection is weak.
 
+
+
 ## References
 
 - [1] [Unit 42 – An Investigation Into Years of Undetected Operations Targeting High-Value Sectors](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
@@ -578,5 +582,4 @@ This means **hardware binding prevents off-device export but not same-user use o
 - [16] [S12 DumpNTDS.cpp](https://github.com/S12cybersecurity/HandleRedirect/blob/main/DumpNTDS/DumpNTDS/DumpNTDS.cpp)
 - [17] [VMkatz - supported inputs and quick start](https://github.com/nikaiw/VMkatz)
 - [18] [0xdf - HTB: Checkpoint](https://0xdf.gitlab.io/2026/10/24/htb-checkpoint.html)
-
 {{#include ../../banners/hacktricks-training.md}}
