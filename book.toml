@@ -31,6 +31,7 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/windows-hardening/active-directory-methodology/ad-certificates/index.html" = "../ad-certificates.html"
 "/generic-methodologies-and-resources/pentesting-network/webrtc-dos.html" = "../../network-services-pentesting/webrtc-media-server-dtls-race-dos.html"
 "/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/macos-xattr-acls-extra-stuff.html" = "macos-appledouble-acl-quarantine-bypass.html"
 "/pentesting-web/sql-injection/sqlmap/index.html" = "../sqlmap.html"
