@@ -47,11 +47,11 @@ Defined within AD, these templates outline the settings and permissions for issu
 
 The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.<sup>[[4]](#references)</sup>
 
-For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.
+For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.<sup>[[4]](#references)</sup>
 
 ### Template Enrollment Rights
 
-These rights are specified through Access Control Entries (ACEs), detailing permissions like:
+These rights are specified through Access Control Entries (ACEs), detailing permissions like:<sup>[[4]](#references)</sup>
 
 - **Certificate-Enrollment** and **Certificate-AutoEnrollment** rights, each associated with specific GUIDs.
 - **ExtendedRights**, allowing all extended permissions.
@@ -59,18 +59,18 @@ These rights are specified through Access Control Entries (ACEs), detailing perm
 
 ### Enterprise CA Enrollment Rights
 
-The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.
+The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.<sup>[[4]](#references)</sup>
 
 ### Additional Issuance Controls
 
-Certain controls may apply, such as:
+Certain controls may apply, such as:<sup>[[4]](#references)</sup>
 
 - **Manager Approval**: Places requests in a pending state until approved by a certificate manager.
 - **Enrolment Agents and Authorized Signatures**: Specify the number of required signatures on a CSR and the necessary Application Policy OIDs.
 
 ### Methods to Request Certificates
 
-Certificates can be requested through:
+Certificates can be requested through:<sup>[[4]](#references)</sup>
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.
 2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.
@@ -87,7 +87,7 @@ Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 
 ## Certificate Authentication
 
-Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.
+Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.<sup>[[4]](#references)</sup>
 
 ### Kerberos Authentication Process
 
@@ -108,13 +108,13 @@ Since the **KB5014754** rollout, modern Kerberos certificate auth is mostly abou
 
 ### Secure Channel (Schannel) Authentication
 
-Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access. The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.<sup>[[4]](#references)</sup>
+Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access.<sup>[[5]](#references)</sup> The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.<sup>[[4]](#references)</sup>
 
 Schannel is also the practical fallback when **PKINIT** is unavailable. For example, if a domain controller does not have a suitable **Smart Card Logon** certificate, `certipy auth`/PKINIT tooling may fail to get a TGT, but the same certificate can still be usable against **LDAPS** or **LDAP StartTLS** for authentication and LDAP operations.
 
 ### AD Certificate Services Enumeration
 
-AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges. Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
+AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges.<sup>[[4]](#references)</sup> Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.<sup>[[6]](#references)</sup>
 
 Commands for using these tools include:
 
@@ -146,9 +146,41 @@ certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
 
-{{#ref}}
-ad-certificates/domain-escalation.md
-{{#endref}}
+### Certify enumeration flags and PKINIT with Rubeus
+
+The following Certify command variants retain their distinct filters and output options.<sup>[[6]](#references)</sup>
+
+```bash
+# Enumerate trusted root CA certificates, Enterprise CAs and HTTP enrollment endpoints
+# Useful flags: /domain, /path, /hideAdmins, /showAllPermissions, /skipWebServiceChecks
+Certify.exe cas [/ca:SERVER\ca-name | /domain:domain.local | /path:CN=Configuration,DC=domain,DC=local] [/hideAdmins] [/showAllPermissions] [/skipWebServiceChecks]
+
+# Identify vulnerable certificate templates and filter for common abuse cases
+Certify.exe find
+Certify.exe find /vulnerable [/currentuser]
+Certify.exe find /enrolleeSuppliesSubject   # ESC1 candidates (CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT)
+Certify.exe find /clientauth                # templates with client-auth EKU
+Certify.exe find /showAllPermissions        # include template ACLs in output
+Certify.exe find /json /outfile:C:\Temp\adcs.json
+
+# Enumerate PKI object ACLs (Enterprise PKI container, templates, OIDs) – useful for ESC4/ESC7 discovery
+Certify.exe pkiobjects [/domain:domain.local] [/showAdmins]
+
+# Use Certipy for enumeration and identifying vulnerable templates
+certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
+
+# Enumerate Enterprise CAs and certificate templates with certutil
+certutil.exe -TCAInfo
+certutil -v -dstemplate
+```
+
+Rubeus can also use a password-protected PFX certificate for PKINIT authentication and request a TGT. The optional `/getcredentials` switch requests a U2U service ticket and attempts to recover the account NT hash:<sup>[[7]](#references)</sup>
+
+```powershell
+Rubeus.exe asktgt /user:<USER> /certificate:C:\temp\leaked.pfx /password:<PFX_PASSWORD> /getcredentials /ptt
+```
+
+For ESC-specific template and CA abuse, see [AD CS Domain Escalation](ad-certificates/domain-escalation.md).
 
 ---
 
@@ -197,5 +229,8 @@ Assess ESC11 on the host running the CA, which may be a domain member server rat
 - [2] [KB5014754: Certificate-based authentication changes on Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
 - [3] [Certificates security posture assessments - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
 - [4] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
+- [5] [What Is SSL/TLS Client Authentication & How Does It Work?](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [6] [GhostPack/Certify](https://github.com/GhostPack/Certify)
+- [7] [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
 
 {{#include ../../banners/hacktricks-training.md}}
