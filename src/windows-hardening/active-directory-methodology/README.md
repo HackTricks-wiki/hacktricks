@@ -583,6 +583,8 @@ laps.md
 
 ### Certificate Theft
 
+For AD CS enrollment, certificate mapping, and enumeration before pursuing certificate theft or template abuse, see the [AD Certificates overview](ad-certificates.md).
+
 **Gathering certificates** from the compromised machine could be a way to escalate privileges inside the environment:
 
 
