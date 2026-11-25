@@ -2330,7 +2330,7 @@ DEVICE=eth0
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Android rooting frameworks: manager-channel abuse
@@ -2339,7 +2339,7 @@ Android rooting framework'leri, ayrıcalıklı kernel işlevlerini userspace yö
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## Regex tabanlı exec aracılığıyla VMware Tools hizmet keşfi LPE (CWE-426) (CVE-2025-41244)
