@@ -44,6 +44,8 @@ This is a physical-process hazard, not a safe live-system proof of concept. Wher
 
 ## Protocol entry points
 
+- [Node-RED editor and Admin API flow deployment](../network-services-pentesting/pentesting-web/node-red.md) covers executable flows exposed through embedded OT web interfaces. Check reachability without deploying to a live process.<sup>[[5]](#references)</sup>
+
 - [Modbus testing](../network-services-pentesting/pentesting-modbus.md) covers Modbus TCP, serial variants, function codes, and register access.
 - [OPC UA testing](../network-services-pentesting/4840-pentesting-opc-ua.md) covers the industrial data-exchange service.
 - [BACnet testing](../network-services-pentesting/47808-udp-bacnet.md) covers building-automation control networks.
@@ -54,5 +56,6 @@ This is a physical-process hazard, not a safe live-system proof of concept. Wher
 - [2] [Synacktiv - Authentication bypass in Danfoss System-Managers SM800 and SC255](https://www.synacktiv.com/sites/default/files/2023-10/synacktiv-danfoss-sm800-sc255-sc355-auth-bypass.pdf)
 - [3] [Claroty Team82 - Freeze the Controller, Defrost the Food](https://claroty.com/team82/research/freeze-the-controller-defrost-the-food-uncovering-vulnerabilities-in-danfoss-refrigeration-controllers)
 - [4] [Pen Test Partners - You don't need a nation state to warm up a fridge](https://pentestpartners.com/security-blog/you-dont-need-a-nation-state-to-warm-up-a-fridge)
+- [5] [VulnCheck - Exploitation Targeting Node-RED, a Tool Embedded in ICS Products](https://vulncheck.com/blog/exploitation-targeting-node-red)
 
 {{#include ../banners/hacktricks-training.md}}
