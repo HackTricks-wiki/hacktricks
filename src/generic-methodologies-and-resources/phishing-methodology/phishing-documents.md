@@ -194,6 +194,18 @@ Don't forget that you cannot only steal the hash or the authentication but also 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
+## LNK to `ftp.exe` local-command staging
+
+A shortcut can start `ftp.exe -s:icon.ico` with a text command file disguised by an image extension.<sup>[[12]](#references)</sup> The `-s:` option reads local FTP commands; on Windows 8 and later, that file must be UTF-8 encoded.<sup>[[13]](#references)</sup> A line beginning with `!` runs a local command through `cmd /c`, without sending that command to an FTP server. An FTP connection is not required for this local execution path.<sup>[[14]](#references)</sup> In the reported chain, the FTP script reached a second command file. The complete `!` line matters: `!more res.ico` alone displays the file, while a pipe to `cmd` executes its contents.<sup>[[12]](#references)[[14]](#references)</sup>
+
+The same chain used a recurring task to reread a writable command file instead of installing a new executable for each update. The task action was `conhost --headless cmd /c more C:\Users\Public\Music\err.log|cmd`; the file held a command that fetched instructions when run. A related variant downloaded a replacement command file before a scheduled run. The file must be present and readable when the task fires; `conhost` does not elevate the task beyond its configured user token.<sup>[[12]](#references)</sup> See [scheduled-task execution](../../windows-hardening/lateral-movement/atexec.md) for task mechanics.
+
+## VHDX shortcut with hidden MSI and decoy document
+
+A mounted VHDX can show a visible LNK while keeping an MSI and a decoy spreadsheet hidden in the same volume. In the reported chain, the LNK used `cmd.exe /c Visa_Details.msi & Attachment-2.xls`. The `&` separator opens the decoy even if the installer command fails; the document opening is not proof of a successful installation. This is a delivery variation of [MSI custom-action execution](../../windows-hardening/windows-local-privilege-escalation/create-msi-with-wix.md), not an MSI privilege escalation by itself.<sup>[[12]](#references)</sup>
+
+For this MSI, `CustomAction.Type` **194** combines an EXE stored in the `Binary` table (**2**) with ignore-return-code (**64**) and asynchronous (**128**) flags. The **64 + 128** combination means Windows Installer does not wait for the EXE to finish; the 128 flag alone would wait at the end of the sequence.<sup>[[15]](#references)[[16]](#references)</sup> Check the action's `Source` against the `Binary` table and its placement in `InstallExecuteSequence` before attributing execution to that embedded EXE.<sup>[[12]](#references)[[15]](#references)</sup> A [WebDAV UNC path can deliver a remote MSI](../../network-services-pentesting/pentesting-web/put-method-webdav.md#remote-msi-from-a-webdav-unc-path), but that is a different entry point.
+
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
 Highly effective campaigns deliver a ZIP that contains two legitimate decoy documents (PDF/DOCX) and a malicious .lnk. The trick is that the actual PowerShell loader is stored inside the ZIP’s raw bytes after a unique marker, and the .lnk carves and runs it fully in memory.<sup>[[2]](#references)</sup>
@@ -421,4 +433,9 @@ Check the page about **places to steal NTLM creds**:
 - [9] [Elastic Security Labs – GrimResource: Microsoft Management Console for initial access and evasion](https://www.elastic.co/security-labs/threat-command/grimresource)
 - [10] [Microsoft Security Blog – Threat actors leverage tax season to deploy tax-themed phishing campaigns](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
 - [11] [Cisco Talos – UAT-11587 delivery chain and Antino backdoor](https://blog.talosintelligence.com/china-nexus-uat-11587-targets-government-and-policy-organizations-across-asia-with-antino-backdoor/)
+- [12] [FortiGuard Labs - BITTER Expands Its Arsenal with PapRAT](https://www.fortinet.com/blog/threat-research/bitter-expands-its-arsenal-with-paprat)
+- [13] [Microsoft Learn - ftp command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ftp)
+- [14] [LOLBAS - Ftp.exe](https://lolbas-project.github.io/lolbas/Binaries/Ftp/)
+- [15] [Microsoft Learn - Custom Action Type 2](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-2)
+- [16] [Microsoft Learn - Custom Action Return Processing Options](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-return-processing-options)
 {{#include ../../banners/hacktricks-training.md}}
