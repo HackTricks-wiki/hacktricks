@@ -2330,7 +2330,7 @@ En revanche, `/etc/init` est associé à **Upstart**, un système de **gestion d
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Frameworks de rooting Android : abus du canal du gestionnaire
@@ -2339,7 +2339,7 @@ Les frameworks de rooting Android s’appuient souvent sur un hook de syscall po
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## Découverte de services VMware Tools et élévation locale de privilèges (CWE-426) via une exécution basée sur regex (CVE-2025-41244)
