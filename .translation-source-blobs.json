@@ -1124,7 +1124,7 @@
     "src/windows-hardening/authentication-credentials-uac-and-efs.md": "5371917ebe7562773ef4274ab463398cf2ab4782",
     "src/windows-hardening/authentication-credentials-uac-and-efs/README.md": "4d9ca02b0308cc9025a146813d4b838638dd320e",
     "src/windows-hardening/authentication-credentials-uac-and-efs/uac-user-account-control.md": "31dd66dd9e7c88a13b9df86a6e436a28f13baf0c",
-    "src/windows-hardening/av-bypass.md": "42710a6754d7d5085456bef22c9f995e7f84832d",
+    "src/windows-hardening/av-bypass.md": "26f020e9c5a89afbd34830914d83c7f381403dee",
     "src/windows-hardening/basic-cmd-for-pentesters.md": "4729e7d3682c7716ebc1fcfc843566f21674cb3e",
     "src/windows-hardening/basic-powershell-for-pentesters/README.md": "d0dd691428f85d41c0716090d371fe0948ea79ae",
     "src/windows-hardening/basic-powershell-for-pentesters/dotnet-enumeration.md": "024f916a54faa57fb2464cba9ebbabedce4839ff",
