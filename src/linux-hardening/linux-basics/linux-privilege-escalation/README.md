@@ -2330,7 +2330,7 @@ O **systemd** surge como um gerenciador moderno de inicialização e serviços, 
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Frameworks de rooting do Android: abuso do canal do manager
@@ -2339,7 +2339,7 @@ Frameworks de rooting do Android geralmente usam hook em uma syscall para expor 
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## LPE na descoberta de serviços do VMware Tools (CWE-426) via execução baseada em regex (CVE-2025-41244)
