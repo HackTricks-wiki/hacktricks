@@ -2330,7 +2330,7 @@ DEVICE=eth0
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Android rooting frameworks: manager-channel 악용
@@ -2339,7 +2339,7 @@ Android rooting frameworks는 흔히 syscall을 후킹하여 userspace manager�
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## 정규식 기반 exec를 통한 VMware Tools 서비스 탐색 LPE (CWE-426) (CVE-2025-41244)
