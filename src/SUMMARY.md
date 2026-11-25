@@ -214,7 +214,6 @@
   - [Linux - Traffic Capture, Firewall, and Egress Triage](linux-hardening/network-information/traffic-capture-and-firewall-egress.md)
   - [Linux - Local Network and Socket Triage](linux-hardening/network-information/local-network-and-socket-triage.md)
   - [Linux - Socket Command Injection](linux-hardening/network-information/socket-command-injection.md)
-  - [Linux - Cisco - vmanage](linux-hardening/network-information/cisco-vmanage.md)
 - [Linux - Software Information (formerly “Software Information”)](linux-hardening/software-information/README.md) <!-- Original navigation label: [Software Information]() -->
   - [Linux - Local Web and Authentication Services](linux-hardening/software-information/local-web-and-auth-services.md)
   - [Linux - Databases and Secret Material](linux-hardening/software-information/databases-and-secret-material.md)
@@ -223,7 +222,6 @@
   - [Linux - Logstash](linux-hardening/software-information/logstash.md)
   - [Linux - Splunk LPE and Persistence](linux-hardening/software-information/splunk-lpe-and-persistence.md)
   - [Linux - Node inspector/CEF debug abuse](linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md)
-  - [Linux - Android Rooting Frameworks Manager Auth Bypass Syscall Hook](linux-hardening/software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md)
 - [Linux - Processes, Crontab, Systemd, D-Bus (formerly “Processes, Crontab, Systemd, D-Bus”)](linux-hardening/processes-crontab-systemd-dbus/README.md) <!-- Original navigation label: [Processes, Crontab, Systemd, D-Bus]() -->
   - [Linux - Process Enumeration and Service Paths](linux-hardening/processes-crontab-systemd-dbus/process-enumeration-and-service-paths.md)
   - [Linux - Cron Jobs and Systemd Timers](linux-hardening/processes-crontab-systemd-dbus/cron-and-systemd-timers.md)
@@ -482,6 +480,7 @@
   - [Android Anti Instrumentation And Ssl Pinning Bypass](mobile-pentesting/android-app-pentesting/android-anti-instrumentation-and-ssl-pinning-bypass.md)
   - [Android Application Level Virtualization](mobile-pentesting/android-app-pentesting/android-application-level-virtualization.md)
   - [Android Applications Basics](mobile-pentesting/android-app-pentesting/android-applications-basics.md)
+  - [Android Rooting Framework Manager Authentication Bypass (KernelSU/Magisk)](mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md)
   - [Android SELinux Policy Analysis](mobile-pentesting/android-app-pentesting/android-selinux-policy-analysis.md)
   - [Android Enterprise Work Profile Bypass](mobile-pentesting/android-app-pentesting/android-enterprise-work-profile-bypass.md)
   - [Android Hce Nfc Emv Relay Attacks](mobile-pentesting/android-app-pentesting/android-hce-nfc-emv-relay-attacks.md)
@@ -742,6 +741,7 @@
 - [11211 - Pentesting Memcache](network-services-pentesting/11211-memcache/README.md)
   - [Memcache Commands](network-services-pentesting/11211-memcache/memcache-commands.md)
 - [12346/udp - Pentesting Cisco Catalyst SD-WAN Control Plane](network-services-pentesting/12346-udp-pentesting-cisco-sd-wan-control-plane.md)
+- [Cisco SD-WAN Manager / vManage Local Privilege Escalation](network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md)
 - [15672 - Pentesting RabbitMQ Management](network-services-pentesting/15672-pentesting-rabbitmq-management.md)
 - [20000 - Pentesting DNP3](network-services-pentesting/20000-pentesting-dnp3.md)
 - [24007,24008,24009,49152 - Pentesting GlusterFS](network-services-pentesting/24007-24008-24009-49152-pentesting-glusterfs.md)
