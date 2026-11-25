@@ -2330,7 +2330,7 @@ S druge strane, `/etc/init` je povezan sa **Upstart-om**, novijim sistemom za **
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Android rooting frameworks: zloupotreba manager-channel-a
@@ -2339,7 +2339,7 @@ Android rooting frameworks obično zakače syscall kako bi userspace manager-u i
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## VMware Tools service discovery LPE (CWE-426) putem exec-a zasnovanog na regex-u (CVE-2025-41244)
