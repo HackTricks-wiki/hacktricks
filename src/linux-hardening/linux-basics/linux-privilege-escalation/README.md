@@ -2330,7 +2330,7 @@ DEVICE=eth0
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Android rooting frameworks: κατάχρηση του manager-channel
@@ -2339,7 +2339,7 @@ DEVICE=eth0
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## Εντοπισμός υπηρεσιών VMware Tools και LPE (CWE-426) μέσω exec βάσει regex (CVE-2025-41244)
