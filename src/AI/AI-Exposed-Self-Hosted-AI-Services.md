@@ -86,7 +86,7 @@ Test any endpoint that compiles, lints or "checks" user code for this pattern, a
 
 ### Auto-login and default superuser token routes
 
-Single-user tools often ship a shortcut that logs every visitor in as the administrator. In Langflow, when `AUTO_LOGIN` is enabled, `GET /api/v1/auto_login` returns tokens for the default superuser to any caller. When it is disabled, the route answers `Auto login is disabled.`.<sup>[[23]](#references)</sup> Langflow OSS 1.0.0 to 1.10.0 enabled it by default (CVE-2026-9103). Chaining it with the authenticated code-validation route above restores unauthenticated RCE (CVE-2026-9198).<sup>[[24]](#references)[[25]](#references)</sup> Current official release packages and Docker images disable automatic login and require a superuser password, but development branches keep it on.<sup>[[3]](#references)</sup>
+Single-user tools often ship a shortcut that logs every visitor in as the administrator. In Langflow, when `AUTO_LOGIN` is enabled, `GET /api/v1/auto_login` returns tokens for the default superuser to any caller. When it is disabled, the route answers `Auto login is disabled.`.<sup>[[23]](#references)</sup> Langflow OSS 1.0.0 to 1.10.0 enabled it by default (CVE-2026-9103). Chaining it with the authenticated code-validation route above restores unauthenticated RCE (CVE-2026-9198, reported by Harish Kolla).<sup>[[24]](#references)[[25]](#references)[[33]](#references)</sup> Current official release packages and Docker images disable automatic login and require a superuser password, but development branches keep it on.<sup>[[3]](#references)</sup>
 
 ```bash
 TOKEN=$(curl -s http://target:7860/api/v1/auto_login | jq -r .access_token)
@@ -170,5 +170,6 @@ Authentication on these servers can also come too late. In Chroma's Python FastA
 - [30] [Weaviate - Authentication](https://docs.weaviate.io/weaviate/configuration/authentication)
 - [31] [Milvus - Authenticate User Access](https://milvus.io/docs/authenticate.md)
 - [32] [HiddenLayer - ChromaToast Served Pre-Auth](https://www.hiddenlayer.com/research/chromatoast-served-pre-auth)
+- [33] [IBM Security Bulletin - Unauthenticated Remote Code Execution via Auto-Login Bypass and Code Validation (CVE-2026-9198)](https://www.ibm.com/support/pages/node/7278927)
 
 {{#include ../banners/hacktricks-training.md}}
