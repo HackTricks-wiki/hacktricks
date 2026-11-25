@@ -533,7 +533,7 @@
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-macf-mandatory-access-control-framework.md": "88f5ef6709f9ec18d763d59d1247784d1e9d051e",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sandbox/README.md": "d1f664037c9e3ccb0105f8dd1e1465737a676051",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sandbox/macos-default-sandbox-debug.md": "a71638d14950ea36eed55bec05a1fd417b05286c",
-    "src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sandbox/macos-sandbox-debug-and-bypass/README.md": "6d1561f54575410bb4ca6164921ffe6961c06691",
+    "src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sandbox/macos-sandbox-debug-and-bypass/README.md": "2b71835604a49a5c7681fe8bbbc40b347ce32552",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sandbox/macos-sandbox-debug-and-bypass/macos-office-sandbox-bypasses.md": "50bd3cf8f41d6858319b81d5a7935f57e6a6fdb5",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sealed-system-volume-and-datavault.md": "8634890d2c2c8e229a153938b111f181bbfe588e",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sip.md": "9d3eeb895e118cec172347c5695bf17789ffb835",
