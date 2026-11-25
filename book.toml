@@ -31,6 +31,8 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/linux-hardening/network-information/cisco-vmanage.html" = "../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.html"
+"/linux-hardening/software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.html" = "../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.html"
 "/windows-hardening/active-directory-methodology/ad-certificates/index.html" = "../ad-certificates.html"
 "/generic-methodologies-and-resources/pentesting-network/webrtc-dos.html" = "../../network-services-pentesting/webrtc-media-server-dtls-race-dos.html"
 "/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/macos-xattr-acls-extra-stuff.html" = "macos-appledouble-acl-quarantine-bypass.html"
