@@ -2330,7 +2330,7 @@ La directory `/etc/init.d` contiene gli **script** per System V init (SysVinit),
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Framework di rooting Android: abuso del canale di comunicazione del manager
@@ -2339,7 +2339,7 @@ I framework di rooting Android spesso applicano hook a una syscall per esporre f
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## LPE tramite service discovery di VMware Tools basato su regex (CWE-426) (CVE-2025-41244)
