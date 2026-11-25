@@ -2330,7 +2330,7 @@ Mặt khác, `/etc/init` liên quan đến **Upstart**, một hệ thống **qu�
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Framework rooting Android: lạm dụng kênh manager
@@ -2339,7 +2339,7 @@ Các framework rooting Android thường hook một syscall để cung cấp ch�
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## LPE qua phát hiện dịch vụ VMware Tools bằng regex-based exec (CWE-426) (CVE-2025-41244)
