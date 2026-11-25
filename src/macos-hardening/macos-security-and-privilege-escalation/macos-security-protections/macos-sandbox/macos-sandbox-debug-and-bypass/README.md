@@ -262,6 +262,27 @@ open /tmp/poc.app
 
 However, of course, this new process won't inherit entitlements or privileges from the parent process.
 
+### Replacing an inherited sandbox with spawn attributes (older macOS)
+
+A normal `posix_spawn()` child inherits its parent's sandbox. On macOS builds before the February 2026 fix, a sandboxed parent could instead pass a **built-in profile name** to the `Sandbox` MAC policy through `posix_spawnattr_setmacpolicyinfo_np()`. The child then received that profile *instead of* the parent's restrictions. The built-in `no-network` profile still allowed access to the user's home directory, so a child such as `/bin/bash` could act on files that the App Sandbox parent could not. This is different from the [LaunchServices `open` route](#not-inherited-restrictions), where a separate service starts the process. See [MACF policy-specific spawn attributes](../../macos-macf-mandatory-access-control-framework.md#policy-specific-spawn-attributes-as-a-macf-input) for the general input path.<sup>[[7]](#references)</sup>
+
+To test the boundary on an **affected, isolated macOS host**, create a harmless canary in the home directory outside the app container. Run the same child from an already-sandboxed parent first with ordinary `posix_spawn()` and then with a Sandbox spawn-attribute blob selecting `no-network`; compare whether the child can read the canary. The following fragment uses the private `sandbox_spawnattr_t` definition and function declarations in Siguza's [sample launcher](https://gist.github.com/Siguza/e9e6e2387b11ee5aec1b1c27c60d43ec). Add normal error handling when integrating it into a test app.<sup>[[7]](#references)[[8]](#references)</sup>
+
+```c
+sandbox_spawnattr_t sb;
+posix_spawnattr_t attr;
+pid_t pid;
+char *argv[] = {"/bin/bash", "-c", "cat \"$HOME/sandbox-canary.txt\"", NULL};
+sandbox_spawnattrs_init(&sb);
+sandbox_spawnattrs_setprofilename(&sb, "no-network");
+posix_spawnattr_init(&attr);
+posix_spawnattr_setmacpolicyinfo_np(&attr, "Sandbox", &sb, sizeof(sb));
+int err = posix_spawn(&pid, "/bin/bash", NULL, &attr, argv, environ);
+if (!err) waitpid(pid, NULL, 0);
+```
+
+A successful `posix_spawn()` return is not proof of escape: check the **child's effective file access** against the ordinary-child baseline. Patched systems reject a built-in profile requested by an already-sandboxed caller unless it has the private `com.apple.private.security.sandbox-spawnattrs` entitlement. Do not treat this historical behavior as a current bypass.<sup>[[7]](#references)</sup>
+
 ### Entitlements
 
 Note that even if some **actions** might be **allowed by at he sandbox** if an application has an specific **entitlement**, like in:
@@ -511,5 +532,7 @@ Process 2517 exited with status = 0 (0x00000000)
 - [4] [Mickey Jin - A New Era of macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) (unquarantined drops via XPC services: CVE-2023-27944, CVE-2023-32414, CVE-2023-42977, CVE-2024-27864)
 - [5] [The Eclectic Light Company - Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)
 - [6] [Vicarius vSociety - CVE-2023-26818 (Sandbox): macOS TCC Bypass w/ Telegram using DyLib Injection (Part 2)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)
+- [7] [Escaping the Apple Sandbox by Spawning an Executable](https://wts.dev/posts/sandbox-spawnattrs-escape/)
+- [8] [Siguza - sandbox-exec but for builtin profiles](https://gist.github.com/Siguza/e9e6e2387b11ee5aec1b1c27c60d43ec)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
