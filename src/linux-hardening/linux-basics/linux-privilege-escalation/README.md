@@ -2330,7 +2330,7 @@ Aan die ander kant word `/etc/init` met **Upstart** geassosieer, ’n nuwer **di
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Android-rootingframeworks: misbruik van bestuurderkanaal
@@ -2339,7 +2339,7 @@ Android-rootingframeworks haak gewoonlik by ’n syscall in om bevoorregte kerne
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## VMware Tools-diensontdekking-LPE (CWE-426) via regex-gebaseerde exec (CVE-2025-41244)
