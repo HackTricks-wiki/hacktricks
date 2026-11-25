@@ -2330,7 +2330,7 @@ Z kolei `/etc/init` jest powiązany z **Upstart**, nowszym **systemem zarządzan
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Frameworki rootowania Androida: nadużycie kanału komunikacji menedżera
@@ -2339,7 +2339,7 @@ Frameworki rootowania Androida często podpinają się pod syscall, aby udostęp
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## Wykrywanie usług VMware Tools LPE (CWE-426) za pomocą exec opartego na wyrażeniach regularnych (CVE-2025-41244)
