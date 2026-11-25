@@ -2330,7 +2330,7 @@ Kwa upande mwingine, `/etc/init` inahusishwa na **Upstart**, mfumo mpya zaidi wa
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Android rooting frameworks: matumizi mabaya ya manager-channel
@@ -2339,7 +2339,7 @@ Android rooting frameworks kwa kawaida huunganisha syscall ili kufichua utendaji
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## Ugunduzi wa huduma ya VMware Tools: LPE (CWE-426) kupitia exec inayotegemea regex (CVE-2025-41244)
