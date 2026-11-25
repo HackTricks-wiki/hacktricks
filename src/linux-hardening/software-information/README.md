@@ -11,5 +11,5 @@ Installed software adds authentication hooks, management interfaces, and service
 - [Logstash](logstash.md) covers service-specific attack surfaces.
 - [Splunk LPE and persistence](splunk-lpe-and-persistence.md) covers local escalation and persistence paths in Splunk deployments.
 - [Node inspector and CEF debugger abuse](electron-cef-chromium-debugger-abuse.md) covers exposed debugging interfaces.
-- [Android rooting framework manager auth bypass and syscall hooks](android-rooting-frameworks-manager-auth-bypass-syscall-hook.md) covers that specialized Linux-based software stack.
+- [Android rooting-framework manager authentication bypass and syscall hooks](../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md) covers local app-to-root escalation on already-rooted Android devices; its Android-specific prerequisites live with Mobile Pentesting.
 {{#include ../../banners/hacktricks-training.md}}

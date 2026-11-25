@@ -2330,7 +2330,7 @@ On the other hand, `/etc/init` is associated with **Upstart**, a newer **service
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Android rooting frameworks: manager-channel abuse
@@ -2339,7 +2339,7 @@ Android rooting frameworks commonly hook a syscall to expose privileged kernel f
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## VMware Tools service discovery LPE (CWE-426) via regex-based exec (CVE-2025-41244)
