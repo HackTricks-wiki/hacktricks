@@ -286,6 +286,14 @@ python syswhispers.py --functions NtAllocateVirtualMemory,NtCreateThreadEx --res
 
 When parsing clean x64 `ntdll` syscall exports for an SSN, allow both `4C 8B D1 B8` (`mov r10, rcx; mov eax, imm32`) and the same sequence preceded by `F3 0F 1E FA` (`endbr64`). The latter is a CET-prefixed stub: a parser that assumes the SSN is always at one fixed offset will miss it. If indirect-syscall initialization fails and the loader falls back to `GetProcAddress`, calls through those exports may again encounter user-mode hooks.<sup>[[54]](#references)</sup>
 
+### Alternate signed-DLL syscall exports (`tprtdll.dll`)
+
+On Windows 11 build 26100+ systems where `C:\Windows\System32\tprtdll.dll` is present, the PoC loads this Microsoft-signed DLL and resolves its `Nt*`/`Zw*` exports with `GetProcAddress` rather than calling the corresponding `ntdll.dll` entrypoints. It is a separate image with separate code addresses, so an inline patch confined to `ntdll` does not patch the corresponding `tprtdll` stub. Unlike the clean-`ntdll` SSN strategies above, the caller invokes the alternate export directly; verify that the module and each needed export exist before using the matching NT function prototype.<sup>[[55]](#references)</sup>
+
+The self-injection PoC uses `tprtdll!NtAllocateVirtualMemoryEx` to reserve RW memory, copies bytes locally with `memcpy`, changes the region to RX with `tprtdll!ZwProtectVirtualMemory`, then starts a thread with `tprtdll!RtlCreateUserThread`.<sup>[[56]](#references)</sup> For a remote process, the same allocation/protection/thread sequence requires an accessible target handle and `WriteProcessMemory` for the copy: this DLL does **not** export `NtOpenProcess`, `NtWriteVirtualMemory`, or `NtCreateThreadEx`.<sup>[[55]](#references)[[57]](#references)</sup> `RtlCreateUserThread` is a helper export rather than a `Nt`/`Zw` syscall stub, so alternate export resolution alone does not establish that its internal calls avoid `ntdll` hooks.<sup>[[55]](#references)[[56]](#references)</sup> The cross-process example also embeds `WinExec` and `ExitThread` addresses resolved in the injector, which must be valid in the target process for that payload to work.<sup>[[57]](#references)</sup>
+
+This only evades hooks on the specific `ntdll` entrypoints replaced with twin exports; it does not remove kernel or behavioral visibility.<sup>[[55]](#references)</sup> For an injection route that instead avoids remote writes and new threads, see [Thread Name-Calling and Waiting Thread Hijacking](windows-process-injection-thread-name-calling-waiting-thread-hijacking.md).
+
 ## AMSI (Anti-Malware Scan Interface)
 
 AMSI was created to prevent "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)". Initially, AVs were only capable of scanning **files on disk**, so if you could somehow execute payloads **directly in-memory**, the AV couldn't do anything to prevent it, as it didn't have enough visibility.
@@ -1609,5 +1617,8 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [52] [Microsoft Learn – AMSI_RESULT enumeration](https://learn.microsoft.com/en-us/windows/win32/api/amsi/ne-amsi-amsi_result)
 - [53] [Microsoft Learn – IAntimalware::Scan method](https://learn.microsoft.com/en-us/windows/win32/api/amsi/nf-amsi-iantimalware-scan)
 - [54] [Zscaler ThreatLabz - 2CLoader technical analysis](https://zscaler.com/blogs/security-research/2cloader-new-malware-loader-delivering-vidar-and-remus)
+- [55] [tprtdll-Injection overview and export inventory](https://github.com/ivancabrera02/tprtdll-Injection/blob/main/README.md)
+- [56] [Trusted-twin self-injection PoC](https://github.com/ivancabrera02/tprtdll-Injection/blob/main/trustedtwin_self.cpp)
+- [57] [Trusted-twin cross-process injection PoC](https://github.com/ivancabrera02/tprtdll-Injection/blob/main/trustedtwin_cross.cpp)
 
 {{#include ../banners/hacktricks-training.md}}
