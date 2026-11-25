@@ -2,10 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-लोकल listeners, Unix sockets और नेटवर्क-सामना करने वाले सॉफ़्टवेयर ऐसे रास्ते उजागर कर सकते हैं जो बाहरी scan में दिखाई नहीं देते। होस्ट की listening services और हर endpoint का स्वामी process देखकर शुरुआत करें।
+Local listeners, Unix sockets और network-facing software ऐसे रास्ते उजागर कर सकते हैं जो external scan में दिखाई नहीं देते। सबसे पहले host की listening services और हर endpoint के स्वामी process की जाँच करें।
 
-- [Traffic capture, firewall, and egress triage](traffic-capture-and-firewall-egress.md) में packet capture, filtering, proxies और connectivity tests शामिल हैं।
-- [Local network and socket triage](local-network-and-socket-triage.md) में loopback services, Unix sockets और container networks शामिल हैं।
+- [Traffic capture, firewall, और egress triage](traffic-capture-and-firewall-egress.md) में packet capture, filtering, proxies, और connectivity tests शामिल हैं।
+- [Local network और socket triage](local-network-and-socket-triage.md) में loopback services, Unix sockets, और container networks शामिल हैं।
 - [Socket command injection](socket-command-injection.md) में exposed local sockets के ज़रिए स्वीकार किए जाने वाले commands शामिल हैं।
-- [Cisco vManage](cisco-vmanage.md) में किसी उत्पाद-विशिष्ट target और उससे जुड़ी जाँचों का विवरण है।
+- Cisco SD-WAN Manager appliance पर foothold के लिए, [vManage local privilege escalation](../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md) देखें; इसका ConfD CLI, REST API, और root-owned import paths सामान्य socket triage से अलग हैं।
 {{#include ../../banners/hacktricks-training.md}}
