@@ -2329,7 +2329,7 @@ DEVICE=eth0
 
 
 {{#ref}}
-../../network-information/cisco-vmanage.md
+../../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md
 {{#endref}}
 
 ## Android rooting frameworks：manager-channel 滥用
@@ -2338,7 +2338,7 @@ Android rooting frameworks 通常会 hook 一个 syscall，以便向 userspace m
 
 
 {{#ref}}
-../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
+../../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
 ## 通过基于 regex 的 exec 发现 VMware Tools 服务并实现 LPE（CWE-426），CVE-2025-41244
