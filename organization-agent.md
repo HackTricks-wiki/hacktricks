@@ -45,6 +45,7 @@
 - Legacy PHP `safe_mode` Windows command-path, `fopen`, Linux `proc_open` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/legacy-php-safe-mode-bypasses.md`; Perl extension stays separate.
 - PHP `pcntl_exec` → `src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md#pcntl_exec-command-execution-with-disabled-functions`; Apache `mod_cgi` stays separate.
 - Recursive CSS `@import` stays with CSS injection; LESS compilation is distinct.
+- PHAR metadata object injection → `src/pentesting-web/deserialization/phar-deserialization.md`; File Inclusion keeps its distinct PHAR code-include example and links to the deserialization PoC. Old chapter URL redirects.
 - Format-string arbitrary-write `FmtStr` template → `src/binary-exploitation/format-strings/README.md#pwntools-template`; arbitrary-read examples stay separate. Old URL redirects.
 - Rails `_json` body-parameter collision → `src/pentesting-web/parameter-pollution.md#ruby-on-rails-_json-parameter-pollution`, not deserialization; context links directly. Keep version caveat and JSON example.
 - Adobe Reader PDF-upload XXE/SOP → `src/pentesting-web/file-upload/README.md#pdf-upload-adobe-reader-xxe-and-same-origin-policy-bypass`; Web XXE links there.
