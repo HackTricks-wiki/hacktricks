@@ -51,14 +51,14 @@ If PHP copies `$_SERVER['HTTP_X_FORWARDED_FOR']` into a string passed to [`syste
 
 ## Privileged loopback APIs after a web foothold
 
-A web-process shell can call local HTTP services even when their listeners are bound to `127.0.0.1`. In vulnerable Control Web Panel builds, the account dashboard executes as the hosting user, but the user API at `https://127.0.0.1:2302` executes as root. Its `/v1/restoredatabase/` POST route omits the access-token check and passes the `file` field into `shell_exec('mysql ... < ' . $file)`. From a hosting-user foothold, shell separators in `file` therefore execute as root. Confirm both the route's gate and the effective API process identity; loopback binding alone is not authentication. See [PHP execution after redirect](../../pentesting-web/login-bypass/README.md#php-execution-after-redirect) for one way to obtain that foothold.<sup>[[1]](#references)</sup>
+A web-process shell can call local HTTP services even when their listeners are bound to `127.0.0.1`. In the reported vulnerable Control Web Panel build, the account dashboard executes as the hosting user, but the user API at `https://127.0.0.1:2302` executes as root. Its `/v1/restoredatabase/` POST route omits the access-token check and passes the `file` field into `shell_exec('mysql ... < ' . $file)`. From a hosting-user foothold, shell separators in `file` therefore execute as root. Confirm both the route's gate and the effective API process identity; loopback binding alone is not authentication. See [PHP execution after redirect](../../pentesting-web/login-bypass/#php-execution-after-redirect) for one way to obtain that foothold. The reported flaws were fully fixed by CWP 1.29.<sup>[[1]](#references)</sup>
 
 ```bash
 curl -sk 'https://127.0.0.1:2302/v1/restoredatabase/' \
   --data-urlencode 'file=/dev/null ; id > /tmp/root-proof ; echo'
 ```
 
-The same API also has a distinct authentication-gate flaw: `access_token()` interpolates the supplied token into `WHERE authorization_code='$access_token' AND client_id='$user'`. A `UNION` row with the expected columns and a future expiry can satisfy the token check while commenting out the original client-ID condition. This unlocks protected routes such as `/v1/newpass/`, where raw `user` is appended to a root-owned `passwd` shell command. The token injection bypasses the gate; command execution still depends on that second sink. See [SQL injection authentication bypass](../../pentesting-web/login-bypass/README.md#sql-injection-authentication-bypass).<sup>[[1]](#references)</sup>
+The same API also has a distinct authentication-gate flaw: `access_token()` interpolates the supplied token into `WHERE authorization_code='$access_token' AND client_id='$user'`. A `UNION` row with the expected columns and a future expiry can satisfy the token check while commenting out the original client-ID condition. This unlocks protected routes such as `/v1/newpass/`, where raw `user` is appended to a root-owned `passwd` shell command. The token injection bypasses the gate; command execution still depends on that second sink. See [SQL injection authentication bypass](../../pentesting-web/login-bypass/#sql-injection-authentication-bypass).<sup>[[1]](#references)</sup>
 
 For the disclosed six-column gate, the injected token can provide a future expiry and suppress the remaining predicate; the column shape is specific to that build.<sup>[[1]](#references)</sup>
 
@@ -66,7 +66,7 @@ For the disclosed six-column gate, the injected token can provide a future expir
 ' UNION SELECT 'a','x','c','d','2099-01-01 00:00:00','f' -- -
 ```
 
-A separate tokenless `/v1/user_panel_dashboard/` route interpolates `user` into an `oauth_clients` lookup. This is blind database read with the API's MySQL-root connection, **not** root OS execution: the MySQL server runs as the `mysql` OS user. When the queried table is empty, a [constant derived-table timing probe](../../pentesting-web/sql-injection/README.md#exploiting-time-based-sqli) avoids losing the delay with the missing rows.<sup>[[1]](#references)</sup>
+A separate tokenless `/v1/user_panel_dashboard/` route interpolates `user` into an `oauth_clients` lookup. This is blind database read with the API's MySQL-root connection, **not** root OS execution: the MySQL server runs as the `mysql` OS user. When the queried table is empty, a [constant derived-table timing probe](../../pentesting-web/sql-injection/#exploiting-time-based-sqli) avoids losing the delay with the missing rows.<sup>[[1]](#references)</sup>
 
 ## Login credentials in access logs
 
@@ -145,5 +145,3 @@ A stored secret is useful for local escalation only if the current API identity 
 ## References
 
 - [1] [VulnCheck - CWP2Shell: The Login Page That Never Says No](https://www.vulncheck.com/blog/control-web-panel-pre-auth-module-dispatch-rce)
-
-{{#include ../../banners/hacktricks-training.md}}
