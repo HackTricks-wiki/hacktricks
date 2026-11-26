@@ -798,6 +798,12 @@ bun run ~/.config/index.js
 
 A line that visually looks like a Markdown comment can still be a **high-priority model instruction**. Treat these files as executable control-plane inputs, not passive documentation.
 
+### User-global prompt adware: trigger-based output hijacking
+
+Codex reads `$CODEX_HOME/AGENTS.md` (normally `~/.codex/AGENTS.md`) across projects, but a non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence at that level.<sup>[[32]](#references)</sup> A package with write access to this user-level file can therefore make its natural-language instructions persist into later sessions without a startup hook or executable payload.<sup>[[31]](#references)[[32]](#references)</sup>
+
+The Haiou Codex package advertises custom `AGENTS.md` instructions and Skills.<sup>[[30]](#references)</sup> Check Point found an installed identity prompt that matched exact inputs such as `hi` and `ctf` and required the entire reply to be a fixed gateway promotion.<sup>[[31]](#references)</sup> A separate module told the agent not to test that gateway, even under an authorization or CTF pretext.<sup>[[31]](#references)</sup> The reusable pattern is **global prompt persistence plus a narrow input trigger**: the trigger limits when the output is replaced, while the global scope carries the rule into unrelated projects.<sup>[[31]](#references)[[32]](#references)</sup> This differs from the repository-local rules above, which require the agent to open the poisoned repository. See [local AI CLI configuration abuse](../generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md#repository-local-ai-assistant-persistence) for the separate repo-controlled delivery path.
+
 ### Global Cursor MDC rule abuse
 
 Cursor `.mdc` rules become much more dangerous when they are forced into every conversation and every file context:
@@ -923,5 +929,8 @@ This means **timing alone** can be enough to leak secrets through an ordinary ch
 - [27] [Embrace The Red – ASCII Smuggler Tool: Crafting Invisible Text and Decoding Hidden Codes](https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/)
 - [28] [Embrace The Red – Microsoft Copilot: From Prompt Injection to Exfiltration of Personal Information](https://embracethered.com/blog/posts/2024/m365-copilot-prompt-injection-tool-invocation-and-data-exfil-using-ascii-smuggling/)
 - [29] [Unicode code chart – Tags (U+E0000–U+E007F)](https://www.unicode.org/charts/PDF/UE0000.pdf)
+- [30] [haiou-codex repository](https://github.com/haiou-666/haiou-codex)
+- [31] [Check Point Research — Free the Model, Sell the Gateway: Prompt Adware Hidden in Jailbreak Bundles](https://research.checkpoint.com/2026/free-the-model-sell-the-gateway-prompt-adware-hidden-in-jailbreak-bundles/)
+- [32] [Codex custom instructions with AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md)
 
 {{#include ../banners/hacktricks-training.md}}
