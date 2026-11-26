@@ -44,13 +44,13 @@ You can **share new tips and tricks with the community or fix bugs** you find in
 >
 > - **Can I copy some content from HackTricks and put it in my blog?**
 
-Yes, you can, but **don't forget to mention the specific link(s)** where the content was taken from.
+Original HackTricks text may be reused for **noncommercial purposes** under [CC BY-NC 4.0](../LICENSE.md).<sup>[[4]](#references)</sup> Give appropriate credit, link to the source and license, and indicate any changes.<sup>[[5]](#references)</sup> Separately credited third-party material may have different terms.<sup>[[4]](#references)</sup>
 
 > [!TIP]
 >
 > - **How can I reference a page of HackTricks?**
 
-As long as the link **of** the page(s) where you took the information from appears it's enough.\
+For a citation, link to the specific page. Reproducing or adapting text is different: follow the [license](../LICENSE.md), including its attribution, license-link and change-notice requirements.<sup>[[4]](#references)[[5]](#references)</sup>\
 If you need a bibtex you can use something like:
 
 ```latex
@@ -112,7 +112,7 @@ Copyright © All rights reserved unless otherwise specified.
 
 #### License Summary:
 
-- Attribution: You are free to:
+- Covered original text is available under [CC BY-NC 4.0](../LICENSE.md) for **noncommercial** use with attribution, subject to the full license.<sup>[[4]](#references)[[5]](#references)</sup> You are free to:
   - Share — copy and redistribute the material in any medium or format.
   - Adapt — remix, transform, and build upon the material.
 
@@ -147,5 +147,7 @@ This license does not grant any trademark or branding rights in relation to the 
 - [1] [HackTricks-wiki/hacktricks — GitHub repository](https://github.com/HackTricks-wiki/hacktricks)
 - [2] [HackTricks-wiki/hacktricks-cloud — GitHub repository](https://github.com/HackTricks-wiki/hacktricks-cloud)
 - [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
+- [4] [HackTricks license](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/LICENSE.md)
+- [5] [Creative Commons CC BY-NC 4.0 deed](https://creativecommons.org/licenses/by-nc/4.0/)
 
 {{#include ../banners/hacktricks-training.md}}
