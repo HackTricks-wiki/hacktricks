@@ -49,6 +49,25 @@ Reverse proxies can change which client headers an application trusts. Compare d
 
 If PHP copies `$_SERVER['HTTP_X_FORWARDED_FOR']` into a string passed to [`system()`](https://www.php.net/manual/en/function.system.php), review whether the reachable request path permits a caller-supplied header and whether shell metacharacters reach that string unchanged. A command such as `sudo iptables` embedded at the start does **not** make later shell-separated commands run as root; those run as the web worker unless a separate effective sudo rule permits escalation. Confirm the worker identity, the exact `sudo -l` grant and authentication requirement, and the command's argument boundary before claiming a root path. Inspect source and policy without sending an injection probe during routine host enumeration.
 
+## Privileged loopback APIs after a web foothold
+
+A web-process shell can call local HTTP services even when their listeners are bound to `127.0.0.1`. In vulnerable Control Web Panel builds, the account dashboard executes as the hosting user, but the user API at `https://127.0.0.1:2302` executes as root. Its `/v1/restoredatabase/` POST route omits the access-token check and passes the `file` field into `shell_exec('mysql ... < ' . $file)`. From a hosting-user foothold, shell separators in `file` therefore execute as root. Confirm both the route's gate and the effective API process identity; loopback binding alone is not authentication. See [PHP execution after redirect](../../pentesting-web/login-bypass/README.md#php-execution-after-redirect) for one way to obtain that foothold.<sup>[[1]](#references)</sup>
+
+```bash
+curl -sk 'https://127.0.0.1:2302/v1/restoredatabase/' \
+  --data-urlencode 'file=/dev/null ; id > /tmp/root-proof ; echo'
+```
+
+The same API also has a distinct authentication-gate flaw: `access_token()` interpolates the supplied token into `WHERE authorization_code='$access_token' AND client_id='$user'`. A `UNION` row with the expected columns and a future expiry can satisfy the token check while commenting out the original client-ID condition. This unlocks protected routes such as `/v1/newpass/`, where raw `user` is appended to a root-owned `passwd` shell command. The token injection bypasses the gate; command execution still depends on that second sink. See [SQL injection authentication bypass](../../pentesting-web/login-bypass/README.md#sql-injection-authentication-bypass).<sup>[[1]](#references)</sup>
+
+For the disclosed six-column gate, the injected token can provide a future expiry and suppress the remaining predicate; the column shape is specific to that build.<sup>[[1]](#references)</sup>
+
+```sql
+' UNION SELECT 'a','x','c','d','2099-01-01 00:00:00','f' -- -
+```
+
+A separate tokenless `/v1/user_panel_dashboard/` route interpolates `user` into an `oauth_clients` lookup. This is blind database read with the API's MySQL-root connection, **not** root OS execution: the MySQL server runs as the `mysql` OS user. When the queried table is empty, a [constant derived-table timing probe](../../pentesting-web/sql-injection/README.md#exploiting-time-based-sqli) avoids losing the delay with the missing rows.<sup>[[1]](#references)</sup>
+
 ## Login credentials in access logs
 
 If an application submits a login form with `GET`, the username and password can become query parameters in the request URI. A `POST` request can also contain a query string; using `POST` does not hide a secret accidentally placed in the URI, including a password entered into an unrelated form field. [Apache's common access-log request line](https://httpd.apache.org/docs/2.4/logs.html) records the method and URI, including its query string, when the configured format uses `%r`. An account allowed to read those logs, for example through the `adm` group on some Linux systems, may therefore find a credential lead. Check the actual log format and permissions, then verify the value is a secret, the account accepts it, and it crosses a privilege boundary. Do not assume the request body was logged or copy candidate values into shared output.
@@ -122,4 +141,9 @@ A service name or installed package is only a lead. The privilege boundary is th
 A host user may reach an AWS-compatible emulator running in a container through its published loopback endpoint. Correlate the live listener, endpoint and account selected by the client, and the emulator's installed authorization settings before assessing access to [Secrets Manager](https://docs.localstack.cloud/aws/services/secretsmanager/) or [KMS](https://docs.localstack.cloud/aws/services/kms/). In LocalStack, [IAM policy enforcement is a separate setting](https://docs.localstack.cloud/aws/developer-tools/security-testing/iam-policy-enforcement/); do not infer effective API permissions from a credential file, an IAM policy, or a listener alone. Confirm the behavior of the installed release and configuration.
 
 A stored secret is useful for local escalation only if the current API identity can retrieve it and a separate higher-privileged account accepts the recovered credential. An encrypted local blob also requires file read access, the matching usable KMS key and algorithm, and effective decrypt access. For an [asymmetric KMS key](https://docs.aws.amazon.com/cli/latest/reference/kms/decrypt.html), the decrypt request must specify the algorithm used to encrypt the blob. Keep automatic host inventory to process, listener, configuration-path, and file-permission evidence; do not request or print secret values or decrypted plaintext during routine enumeration.
+
+## References
+
+- [1] [VulnCheck - CWP2Shell: The Login Page That Never Says No](https://www.vulncheck.com/blog/control-web-panel-pre-auth-module-dispatch-rce)
+
 {{#include ../../banners/hacktricks-training.md}}
