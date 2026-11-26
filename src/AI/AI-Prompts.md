@@ -798,6 +798,12 @@ bun run ~/.config/index.js
 
 A line that visually looks like a Markdown comment can still be a **high-priority model instruction**. Treat these files as executable control-plane inputs, not passive documentation.
 
+### User-global instructions: conditional output hijacking
+
+Codex loads the first non-empty user-level instruction file at startup: `$CODEX_HOME/AGENTS.override.md` if present, otherwise `$CODEX_HOME/AGENTS.md` (normally `~/.codex/AGENTS.md`). It then loads project instructions, which can override global guidance.<sup>[[31]](#references)</sup> A package with write access to the user's Codex home can therefore persist natural-language instructions across later sessions and unrelated projects without a startup hook.<sup>[[30]](#references)[[31]](#references)</sup> A repository-local rules file alone does not provide that scope.<sup>[[31]](#references)</sup>
+
+Check Point found an installed identity prompt in a Codex package that matched exact greetings or activation words such as `hi` and `ctf` and instructed the agent to replace its entire reply with a gateway advertisement.<sup>[[30]](#references)</sup> The researchers observed the advertisement in a Codex response.<sup>[[30]](#references)</sup> A companion prompt forbade testing the advertised gateway even when a user claimed authorization or a CTF context, illustrating that persistent instructions can restrict tasks as well as replace output.<sup>[[30]](#references)</sup> The narrow trigger controls **when** the reply is hijacked; the user-level file controls **where** the rule persists.<sup>[[30]](#references)[[31]](#references)</sup> See [repository-local AI assistant persistence](../generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md#repository-local-ai-assistant-persistence) for the distinct repo-controlled delivery path.
+
 ### Global Cursor MDC rule abuse
 
 Cursor `.mdc` rules become much more dangerous when they are forced into every conversation and every file context:
@@ -923,5 +929,7 @@ This means **timing alone** can be enough to leak secrets through an ordinary ch
 - [27] [Embrace The Red – ASCII Smuggler Tool: Crafting Invisible Text and Decoding Hidden Codes](https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/)
 - [28] [Embrace The Red – Microsoft Copilot: From Prompt Injection to Exfiltration of Personal Information](https://embracethered.com/blog/posts/2024/m365-copilot-prompt-injection-tool-invocation-and-data-exfil-using-ascii-smuggling/)
 - [29] [Unicode code chart – Tags (U+E0000–U+E007F)](https://www.unicode.org/charts/PDF/UE0000.pdf)
+- [30] [Check Point Research — Free the Model, Sell the Gateway: Prompt Adware Hidden in Jailbreak Bundles](https://research.checkpoint.com/2026/free-the-model-sell-the-gateway-prompt-adware-hidden-in-jailbreak-bundles/)
+- [31] [Codex custom instructions with AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md)
 
 {{#include ../banners/hacktricks-training.md}}
