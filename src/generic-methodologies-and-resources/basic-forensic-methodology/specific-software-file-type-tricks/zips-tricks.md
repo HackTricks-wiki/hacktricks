@@ -1,67 +1,72 @@
-# Mbinu za ZIPs
+# Mbinu za ZIP
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** za kusimamia **zip files** ni muhimu kwa kuchunguza, kurekebisha, na kuvunja zip files. Hapa kuna utilities muhimu:<sup>[[1]](#references)</sup>
+**Zana za mstari wa amri** za kusimamia **faili za zip** ni muhimu kwa kutambua matatizo, kurekebisha na kuvunja ulinzi wa faili za zip. Hizi ni baadhi ya zana muhimu:<sup>[[1]](#references)</sup>
 
-- **`unzip`**: Hufichua sababu inayoweza kufanya zip file ishindwe kufunguka.
-- **`zipdetails -v`**: Hutoa uchanganuzi wa kina wa sehemu za format ya zip file.<sup>[[3]](#references)</sup>
-- **`zipinfo`**: Huorodhesha yaliyomo kwenye zip file bila kuyatoa.
-- **`zip -F input.zip --out output.zip`** na **`zip -FF input.zip --out output.zip`**: Hujaribu kurekebisha zip files zilizoharibika.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Tool ya brute-force cracking ya passwords za zip, inayofaa kwa passwords zenye hadi takriban herufi 7.
+- **`unzip`**: Huonyesha sababu zinazoweza kufanya faili ya zip ishindwe kufunguka.
+- **`zipdetails -v`**: Hutoa uchanganuzi wa kina wa sehemu za muundo wa faili ya zip.<sup>[[3]](#references)</sup>
+- **`zipinfo`**: Huorodhesha yaliyomo kwenye faili ya zip bila kuyatoa.
+- **`zip -F input.zip --out output.zip`** na **`zip -FF input.zip --out output.zip`**: Hujaribu kurekebisha faili za zip zilizoharibika.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Zana ya mashambulizi ya kamusi na brute-force dhidi ya nywila za ZIP; uwezekano wa kufanikiwa hutegemea nafasi ya utafutaji wa nywila.<sup>[[15]](#references)</sup>
 
-[Specification ya format ya Zip file](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) hutoa maelezo kamili kuhusu muundo na standards za zip files.<sup>[[4]](#references)</sup>
+[Vipimo vya muundo wa faili ya Zip](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) vina maelezo ya kina kuhusu muundo na viwango vya faili za zip.<sup>[[4]](#references)</sup>
 
-Ni muhimu kutambua kwamba ZIP files za kawaida zilizolindwa kwa password kwa ujumla huacha filenames na file sizes zikiwa zinaonekana, tofauti na header-encryption modes zinazoungwa mkono na RAR na 7z. Zaidi ya hayo, ZIP files zilizofichwa kwa kutumia method ya zamani ya ZipCrypto ziko hatarini kwa **plaintext attack** ikiwa nakala isiyofichwa ya file iliyocompressiwa inapatikana.<sup>[[1]](#references)</sup> Attack hii hutumia content inayojulikana kuvunja password ya ZIP, kama ilivyoelezwa katika [academic paper hii](https://math.ucr.edu/~mike/zipattacks.pdf) na kuonyeshwa katika [walk-through hii ya Hack This Site](https://www.hackthissite.org/articles/read/793).<sup>[[11]](#references)[[12]](#references)</sup> Hata hivyo, ZipCrypto known-plaintext attack haitumiki kwa entries zilizolindwa kwa encryption ya **AES-256**.<sup>[[1]](#references)</sup>
+Kwa kawaida, faili za ZIP zilizolindwa kwa nywila huacha majina na ukubwa wa faili zikiwa wazi, tofauti na hali za usimbaji fiche wa vichwa zinazotumika na RAR na 7z. Shambulio la known-plaintext dhidi ya ZipCrypto hurejesha **funguo za usimbaji fiche za ndani**, si lazima nywila ya awali; funguo hizo zinatosha kusimbua maingizo yaliyosimbwa kwa nywila hiyohiyo.<sup>[[13]](#references)</sup> Shambulio hilo linahitaji kujua baiti za mtiririko **kabla ya usimbaji fiche**: kwa faili iliyohifadhiwa bila kubanwa, hizi ni baiti za faili ya awali, lakini kwa faili ya DEFLATE ni baiti zilizobanwa, ambazo huenda zikahitaji kuundwa upya kwa matokeo yale yale ya ubano.<sup>[[13]](#references)[[14]](#references)</sup> Tazama [Shambulio la ZIP la known plaintext](../../../generic-hacking/brute-force.md#known-plaintext-zip-attack) kwa mwongozo wa vitendo. Kwa maelezo ya msingi kuhusu cryptanalysis, tazama [makala](https://math.ucr.edu/~mike/zipattacks.pdf) na [mwongozo wa hatua kwa hatua](https://www.hackthissite.org/articles/read/793).<sup>[[11]](#references)[[12]](#references)</sup> Shambulio hili la ZipCrypto halitumiki kwa maingizo ya ZIP yaliyosimbwa kwa AES.<sup>[[13]](#references)</sup>
 
 ---
 
-## Mbinu za anti-reversing katika APKs kwa kutumia ZIP headers zilizobadilishwa
+## Mbinu za anti-reversing katika APK kwa kutumia vichwa vya ZIP vilivyobadilishwa
 
-Modern Android malware droppers hutumia ZIP metadata iliyoharibiwa kuvuruga static tools (jadx/apktool/unzip), huku APK ikiendelea kusakinika kwenye device. Mbinu zinazotumika zaidi ni:<sup>[[2]](#references)</sup>
+Droppers za kisasa za Android malware hutumia metadata ya ZIP yenye hitilafu kuvuruga zana za uchanganuzi tuli (jadx/apktool/unzip), huku APK ikiendelea kusakinishika kwenye kifaa. Mbinu zinazotumika zaidi ni:<sup>[[2]](#references)</sup>
 
-- Fake encryption kwa kuweka bit 0 ya ZIP General Purpose Bit Flag (GPBF)
-- Kutumia vibaya Extra fields kubwa/custom ili kuchanganya parsers
-- Migongano ya majina ya file/directory ili kuficha artifacts halisi (kwa mfano, directory inayoitwa `classes.dex/` iliyo karibu na `classes.dex` halisi)
+- Kughushi usimbaji fiche kwa kuweka biti ya 0 ya ZIP General Purpose Bit Flag (GPBF)
+- Kutumia vibaya sehemu kubwa/maalum za Extra ili kuchanganya parser
+- Majina ya faili/saraka yanayogongana ili kuficha artifacts halisi (kwa mfano, saraka inayoitwa `classes.dex/` kando ya `classes.dex` halisi)
 
-### 1) Fake encryption (GPBF bit 0 set) bila crypto halisi
+### 1) Usimbaji fiche wa kughushi (GPBF bit 0 imewekwa) bila crypto halisi
 
 Dalili:
-- `jadx-gui` hushindwa na errors kama:
+- `jadx-gui` hushindwa na hitilafu kama hizi: **
+  
+  ```
+  java.util.zip.ZipException: invalid CEN header (encrypted entry)
+  ```
+- `unzip` huomba nenosiri kwa faili kuu za APK, ingawa APK halali haiwezi kuwa na `classes*.dex`, `resources.arsc`, au `AndroidManifest.xml` zilizosimbwa kwa njia fiche:
+  
+  ```bash
+  unzip sample.apk
+  [sample.apk] classes3.dex password:
+    skipping: classes3.dex                          incorrect password
+    skipping: AndroidManifest.xml/res/vhpng-xhdpi/mxirm.png  incorrect password
+    skipping: resources.arsc/res/domeo/eqmvo.xml            incorrect password
+    skipping: classes2.dex                          incorrect password
+  ```
 
-```text
-java.util.zip.ZipException: invalid CEN header (encrypted entry)
-```
-- `unzip` huomba password kwa core APK files ingawa APK halali haiwezi kuwa na `classes*.dex`, `resources.arsc`, au `AndroidManifest.xml` zilizofichwa:
+Ugunduzi kwa kutumia zipdetails:
 
-```bash
-unzip sample.apk
-[sample.apk] classes3.dex password:
-skipping: classes3.dex                          incorrect password
-skipping: AndroidManifest.xml/res/vhpng-xhdpi/mxirm.png  incorrect password
-skipping: resources.arsc/res/domeo/eqmvo.xml            incorrect password
-skipping: classes2.dex                          incorrect password
-```
-
-Detection kwa kutumia zipdetails:
 ```bash
 zipdetails -v sample.apk | less
 ```
-Angalia General Purpose Bit Flag kwa local na central headers. Thamani inayoashiria ni bit 0 kuwa imewekwa (Encryption) hata kwa core entries:
+
+Angalia General Purpose Bit Flag kwenye local na central headers. Thamani inayoashiria tatizo ni bit 0 ikiwa imewashwa (Encryption), hata kwa core entries:
+
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
-[Bit 0]   1 'Encryption'
-[Bits 1-2] 1 'Maximum Compression'
-[Bit 3]   1 'Streamed'
-[Bit 11]  1 'Language Encoding'
+  [Bit 0]   1 'Encryption'
+  [Bits 1-2] 1 'Maximum Compression'
+  [Bit 3]   1 'Streamed'
+  [Bit 11]  1 'Language Encoding'
 ```
-Heuristic: Ikiwa APK inasakinishwa na kuendeshwa kwenye kifaa, lakini entries za msingi zinaonekana kuwa "encrypted" kwa tools, GPBF imechezewa.
 
-Rekebisha kwa kufuta bit 0 ya GPBF katika Local File Headers (LFH) na entries za Central Directory (CD). Minimal byte-patcher:
+Heuristiki: Ikiwa APK inasakinishwa na kuendeshwa kwenye kifaa lakini maingizo muhimu yanaonekana kuwa "yamesimbwa kwa njia fiche" kwa zana, GPBF ilichezewa.
+
+Rekebisha kwa kufuta bit 0 ya GPBF katika maingizo ya Local File Headers (LFH) na Central Directory (CD). Kirekebishaji kidogo cha byte:
 
 <details>
-<summary>Minimal GPBF bit-clear patcher</summary>
+<summary>Kirekebishaji kidogo cha kufuta bit ya GPBF</summary>
+
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -70,62 +75,70 @@ SIG_LFH = b"\x50\x4b\x03\x04"  # Local File Header
 SIG_CDH = b"\x50\x4b\x01\x02"  # Central Directory Header
 
 def patch_flags(buf: bytes, sig: bytes, flag_off: int):
-out = bytearray(buf)
-i = 0
-patched = 0
-while True:
-i = out.find(sig, i)
-if i == -1:
-break
-flags, = struct.unpack_from('<H', out, i + flag_off)
-if flags & 1:  # encryption bit set
-struct.pack_into('<H', out, i + flag_off, flags & 0xFFFE)
-patched += 1
-i += 4  # move past signature to continue search
-return bytes(out), patched
+    out = bytearray(buf)
+    i = 0
+    patched = 0
+    while True:
+        i = out.find(sig, i)
+        if i == -1:
+            break
+        flags, = struct.unpack_from('<H', out, i + flag_off)
+        if flags & 1:  # encryption bit set
+            struct.pack_into('<H', out, i + flag_off, flags & 0xFFFE)
+            patched += 1
+        i += 4  # move past signature to continue search
+    return bytes(out), patched
 
 if __name__ == '__main__':
-inp, outp = sys.argv[1], sys.argv[2]
-data = open(inp, 'rb').read()
-data, p_lfh = patch_flags(data, SIG_LFH, 6)  # LFH flag at +6
-data, p_cdh = patch_flags(data, SIG_CDH, 8)  # CDH flag at +8
-open(outp, 'wb').write(data)
-print(f'Patched: LFH={p_lfh}, CDH={p_cdh}')
+    inp, outp = sys.argv[1], sys.argv[2]
+    data = open(inp, 'rb').read()
+    data, p_lfh = patch_flags(data, SIG_LFH, 6)  # LFH flag at +6
+    data, p_cdh = patch_flags(data, SIG_CDH, 8)  # CDH flag at +8
+    open(outp, 'wb').write(data)
+    print(f'Patched: LFH={p_lfh}, CDH={p_cdh}')
 ```
+
 </details>
 
 Matumizi:
+
 ```bash
 python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
-Sasa unapaswa kuona `General Purpose Flag  0000` kwenye entries za msingi, na tools zitaweza ku-parse APK tena.
 
-### 2) Large/custom Extra fields to break parsers
+Bit 0 pekee ndiyo inapaswa kubadilika: kwa mfano, `0A09` inakuwa `0A08`, si `0000`. Patcher hii ndogo hutafuta saini za vichwa katika baiti ghafi, kwa hivyo baiti zinazofanana na saini ndani ya data ya faili zinaweza kusababisha matokeo yasiyo sahihi; fanyia kazi nakala na uthibitishe orodha ya maingizo na vichwa kabla ya kutumia matokeo.<sup>[[4]](#references)</sup>
 
-Attackers huweka Extra fields kubwa kupita kiasi na IDs zisizo za kawaida kwenye headers ili kuathiri decompilers. Katika mazingira halisi unaweza kuona custom markers (kwa mfano, strings kama `JADXBLOCK`) zikiwa zimewekwa humo.
+### 2) Sehemu kubwa/maalum za Extra za kuvuruga parser
+
+Washambuliaji hujaza sehemu za Extra zilizozidi ukubwa na vitambulisho visivyo vya kawaida kwenye vichwa ili kuvuruga decompiler. Katika mifumo halisi unaweza kuona alama maalum (kwa mfano, mifuatano kama `JADXBLOCK`) iliyopachikwa humo.
 
 Ukaguzi:
+
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-Mifano iliyobainika: IDs zisizojulikana kama `0xCAFE` ("Java Executable") au `0x414A` ("JA:") zinazobeba payloads kubwa.<sup>[[2]](#references)</sup>
+
+Mifano iliyozingatiwa: ID zisizojulikana kama `0xCAFE` ("Java Executable") au `0x414A` ("JA:") zikiwa na payload kubwa.<sup>[[2]](#references)</sup>
 
 Heuristics za DFIR:
-- Toa alert wakati Extra fields ni kubwa isivyo kawaida kwenye core entries (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
-- Chukulia Extra IDs zisizojulikana kwenye entries hizo kuwa suspicious.
+- Toa tahadhari wakati sehemu za Extra ni kubwa isivyo kawaida kwenye entries kuu (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
+- Chukulia ID za Extra zisizojulikana kwenye entries hizo kuwa za kutiliwa shaka.
 
-Mitigation ya vitendo: kujenga upya archive (kwa mfano, kuunda upya ZIP ya files zilizotolewa) huondoa Extra fields hasidi. Ikiwa tools zinakataa kutoa files kwa sababu ya encryption bandia, kwanza clear GPBF bit 0 kama ilivyo hapo juu, kisha package upya:
+Hatua ya vitendo ya kupunguza hatari: kujenga upya archive (kwa mfano, kufunga tena kwa zip faili zilizotolewa) huondoa sehemu za Extra hasidi. Ikiwa zana zinakataa kutoa faili kwa sababu ya usimbaji fiche wa uongo, kwanza futa bit 0 ya GPBF kama ilivyoelezwa hapo juu, kisha funga faili upya:
+
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
-### 3) Migongano ya majina ya faili/ direktori (kuficha artifacts halisi)
 
-ZIP inaweza kuwa na faili `X` pamoja na direktori `X/`. Baadhi ya extractors na decompilers huchanganyikiwa na zinaweza kuweka juu ya au kuficha faili halisi kwa entry ya direktori. Hili limeonekana kwa entries zinazogongana na majina msingi ya APK kama `classes.dex`.
+### 3) Migongano ya majina ya faili/saraka (kuficha artifacts halisi)
 
-Triage na extraction salama:
+ZIP inaweza kuwa na faili `X` na saraka `X/`. Baadhi ya extractors na decompilers huchanganyikiwa na huenda zikaweka saraka juu ya faili halisi au kuificha. Hili limeonekana kwa entries zinazogongana na majina muhimu ya APK kama `classes.dex`.
+
+Tathmini ya awali na uchimbaji salama:
+
 ```bash
 # List potential collisions (names that differ only by trailing slash)
 zipinfo -1 sample.apk | awk '{n=$0; sub(/\/$/,"",n); print n}' | sort | uniq -d
@@ -136,44 +149,50 @@ unzip normalized.apk -d outdir
 # replace outdir/classes.dex? [y]es/[n]o/[A]ll/[N]one/[r]ename: r
 # new name: unk_classes.dex
 ```
-Utambuzi wa kiprogramu baada ya marekebisho:
+
+Utambuzi wa kiotomatiki baada ya marekebisho:
+
 ```python
 from zipfile import ZipFile
 from collections import defaultdict
 
 with ZipFile('normalized.apk') as z:
-names = z.namelist()
+    names = z.namelist()
 
 collisions = defaultdict(list)
 for n in names:
-base = n[:-1] if n.endswith('/') else n
-collisions[base].append(n)
+    base = n[:-1] if n.endswith('/') else n
+    collisions[base].append(n)
 
 for base, variants in collisions.items():
-if len(variants) > 1:
-print('COLLISION', base, '->', variants)
+    if len(variants) > 1:
+        print('COLLISION', base, '->', variants)
 ```
-Mawazo ya utambuzi kwa Blue-team:
-- Weka alama kwa APK ambazo local headers zake zinaonyesha encryption (GPBF bit 0 = 1), lakini bado zinaweza kusakinishwa/kuendeshwa.
-- Weka alama kwa Extra fields kubwa/zisizojulikana kwenye core entries (tafuta markers kama `JADXBLOCK`).
+
+Mawazo ya ugunduzi wa Blue-team:
+- Weka alama kwa APK ambazo local headers zake zinaonyesha usimbaji fiche (GPBF bit 0 = 1), lakini zinaweza kusakinishwa/kuendeshwa.
+- Weka alama kwa Extra fields kubwa/isiyojulikana kwenye core entries (tafuta viashiria kama `JADXBLOCK`).
 - Weka alama kwa path-collisions (`X` na `X/`) hasa kwa `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
 
 ---
 
 ## Mbinu nyingine hasidi za ZIP (2024–2026)
 
-### Concatenated central directories (multi-EOCD evasion)
+### Concatenated central directories (ukwepaji wa multi-EOCD)
 
-Katika phishing campaign ya 2024, attackers walituma blob moja ambayo kwa kweli ilikuwa **ZIP files mbili zilizounganishwa**. Kila moja ilikuwa na rekodi yake ya End of Central Directory (EOCD) na central directory. Extractors tofauti ziliparse directories tofauti (7-Zip ilisoma ya kwanza, huku WinRAR ikisoma ya mwisho), hivyo kuwawezesha attackers kuficha payloads ambazo baadhi tu ya tools ziliweza kuonyesha; scanners zinazokagua directory moja pekee zinaweza kukosa archive nyingine.<sup>[[5]](#references)[[6]](#references)</sup>
+Katika kampeni ya phishing ya 2024, washambuliaji walituma blob moja ambayo kwa hakika ilikuwa **faili mbili za ZIP zilizounganishwa**. Kila moja ilikuwa na rekodi yake ya End of Central Directory (EOCD) na central directory. Extractor tofauti zilisoma directories tofauti (7-Zip ilisoma ya kwanza, huku WinRAR ikisoma ya mwisho), na hivyo kuwawezesha washambuliaji kuficha payloads ambazo zilionyeshwa na baadhi tu ya zana; scanner zinazokagua directory moja tu zinaweza kukosa archive nyingine.<sup>[[5]](#references)[[6]](#references)</sup>
 
-**Amri za Triage**
+**Amri za uchunguzi wa awali**
+
 ```bash
 # Count EOCD signatures
 binwalk -R "PK\x05\x06" suspect.zip
 # Show EOCD records and their central-directory offsets
 zipdetails --scan -v suspect.zip | grep -ni -A2 "end central"
 ```
-Ikiwa zaidi ya EOCD moja itaonekana au kuna maonyo ya "data after payload", gawanya blob na kagua kila sehemu:
+
+Ikiwa zaidi ya EOCD moja itaonekana au kuna maonyo ya "data after payload", gawanya blob na ukague kila sehemu:
+
 ```bash
 # Recover the second archive from its first local-file-header offset.
 binwalk -R "PK\x03\x04" suspect.zip
@@ -182,42 +201,46 @@ OFF=123456
 dd if=suspect.zip bs=1 skip="$OFF" of=tail.zip
 7z l tail.zip   # list hidden content
 ```
-### Quoted-overlap / overlapping-entry bombs (non-recursive)
 
-Quoted-overlap ZIP bombs huunda **kernel** ndogo (DEFLATE block iliyobanwa kwa kiwango kikubwa) na kuitumia tena katika entries zinazoingiliana. Full-overlap variants huelekeza entries nyingi za central directory kwenye local header moja, huku quoted-overlap variants zikiweka nukuu za local headers ndani ya DEFLATE streams; construction iliyochapishwa hufikia zaidi ya 28M:1 bila nested archives.<sup>[[7]](#references)</sup>
+### Quoted-overlap / overlapping-entry bombs (zisizo za kujirudia)
 
-**Utambuzi wa haraka (duplicate LFH offsets)**
+Quoted-overlap ZIP bombs huunda **kernel** ndogo (block ya DEFLATE iliyobanwa sana) na kuitumia tena katika entries zinazopishana. Aina za overlap kamili huelekeza entries nyingi za central directory kwenye header moja ya ndani, ilhali aina za quoted-overlap hunukuu headers za ndani ndani ya DEFLATE streams; muundo uliochapishwa unafikia uwiano wa zaidi ya 28M:1 bila archives zilizowekwa ndani ya nyingine.<sup>[[7]](#references)</sup>
+
+**Ugunduzi wa haraka (offsets za LFH zilizorudiwa)**
+
 ```python
 # detect full-overlap variants by identical relative offsets
 import struct, sys
 buf=open(sys.argv[1],'rb').read()
 off=0; seen=set()
 while True:
-i = buf.find(b'PK\x01\x02', off)
-if i<0: break
-rel = struct.unpack_from('<I', buf, i+42)[0]
-if rel in seen:
-print('OVERLAP at offset', rel)
-break
-seen.add(rel); off = i+4
+    i = buf.find(b'PK\x01\x02', off)
+    if i<0: break
+    rel = struct.unpack_from('<I', buf, i+42)[0]
+    if rel in seen:
+        print('OVERLAP at offset', rel)
+        break
+    seen.add(rel); off = i+4
 ```
+
 **Ushughulikiaji**
-- Fanya ukaguzi wa dry-run: `zipdetails -v file.zip | grep -n "Local Header Offset"` na linganisha offsets za local-header zilizorejelewa pamoja na safu za data iliyobanwa; offsets zinazorudiwa zinaashiria variants zenye overlap kamili.<sup>[[7]](#references)[[8]](#references)</sup>
-- Weka kikomo cha ukubwa wa jumla unaokubaliwa baada ya kufunguliwa na idadi ya entries kabla ya extraction kwa kutumia parser; `zipinfo -t file.zip` huripoti jumla hizo lakini hailazimishi kikomo cha usalama.<sup>[[8]](#references)</sup>
-- Unapolazimika kufanya extraction, fanyia ndani ya cgroup/VM yenye vikomo vya CPU na disk (epuka crashes zinazosababishwa na inflation isiyo na kikomo).<sup>[[8]](#references)</sup>
+- Fanya ukaguzi wa dry-run: `zipdetails -v file.zip | grep -n "Local Header Offset"` na ulinganishe offsets za local-header zilizorejelewa na safu za data iliyobanwa; offsets zinazojirudia huashiria variants zenye mwingiliano kamili.<sup>[[7]](#references)[[8]](#references)</sup>
+- Weka ukomo wa jumla ya ukubwa unaokubaliwa baada ya kufunguliwa na idadi ya entries kabla ya kutoa faili kwa kutumia parser; `zipinfo -t file.zip` huripoti jumla lakini hailazimishi kikomo cha usalama.<sup>[[8]](#references)</sup>
+- Unapolazimika kutoa faili, fanya hivyo ndani ya cgroup/VM yenye vikomo vya CPU na diski (epuka kuharibika kwa mfumo kutokana na upanuzi usio na kikomo).<sup>[[8]](#references)</sup>
 
 ---
 
-### Mkanganyiko kati ya parser ya local-header na central-directory
+### Mkanganyiko wa parser kati ya local-header na central-directory
 
-Utafiti wa hivi karibuni wa differential-parser umeonyesha kuwa utata wa ZIP bado unaweza kutumiwa katika toolchains za kisasa. Wazo kuu ni rahisi: baadhi ya software huamini **Local File Header (LFH)**, huku nyingine zikiamini **Central Directory (CD)**, hivyo archive moja inaweza kuwasilisha filenames, paths, comments, offsets, au entry sets tofauti kwa tools tofauti.<sup>[[9]](#references)</sup>
+Utafiti wa hivi karibuni wa differential-parser umeonyesha kuwa utata wa ZIP bado unaweza kutumiwa vibaya katika toolchain za kisasa. Wazo kuu ni rahisi: baadhi ya programu huamini **Local File Header (LFH)** huku nyingine zikiamini **Central Directory (CD)**, kwa hiyo archive moja inaweza kuonyesha majina ya faili, njia, maoni, offsets au seti tofauti za entries kwa zana tofauti.<sup>[[9]](#references)</sup>
 
-Matumizi ya kiutendaji ya offensive:
-- Fanya upload filter, AV pre-scan, au package validator ione file salama katika CD, huku extractor ikifuata jina/path tofauti ya LFH.
-- Tumia vibaya majina yaliyorudiwa, entries zilizopo katika structure moja pekee, au metadata yenye utata ya Unicode path (kwa mfano, Info-ZIP Unicode Path Extra Field `0x7075`) ili parsers tofauti zijenge trees tofauti.
-- Unganisha hili na path traversal ili kugeuza mwonekano wa archive "usio na madhara" kuwa write-primitive wakati wa extraction. Kwa upande wa extraction, tazama [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
+Matumizi ya kiudukuzi:
+- Fanya kichujio cha upload, ukaguzi wa awali wa AV au validator ya package ione faili isiyo na madhara katika CD huku extractor ikitumia jina/njia tofauti ya LFH.
+- Tumia vibaya majina yanayojirudia, entries zilizopo kwenye muundo mmoja tu, au metadata ya njia ya Unicode yenye utata (kwa mfano, Info-ZIP Unicode Path Extra Field `0x7075`) ili parser tofauti zijenge upya miti tofauti.
+- Changanya hili na path traversal ili kubadilisha mwonekano wa archive "isiyo na madhara" kuwa primitive ya kuandika wakati wa kutoa faili. Kwa upande wa kutoa faili, angalia [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
 
 Uchunguzi wa awali wa DFIR:
+
 ```python
 # compare Central Directory names against the referenced Local File Header names
 import struct, sys
@@ -225,46 +248,54 @@ b = open(sys.argv[1], 'rb').read()
 lfh = {}
 i = 0
 while (i := b.find(b'PK\x03\x04', i)) != -1:
-n, e = struct.unpack_from('<HH', b, i + 26)
-lfh[i] = b[i + 30:i + 30 + n].decode('utf-8', 'replace')
-i += 4
+    n, e = struct.unpack_from('<HH', b, i + 26)
+    lfh[i] = b[i + 30:i + 30 + n].decode('utf-8', 'replace')
+    i += 4
 i = 0
 while (i := b.find(b'PK\x01\x02', i)) != -1:
-n = struct.unpack_from('<H', b, i + 28)[0]
-off = struct.unpack_from('<I', b, i + 42)[0]
-cd = b[i + 46:i + 46 + n].decode('utf-8', 'replace')
-if off in lfh and cd != lfh[off]:
-print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
-i += 4
+    n = struct.unpack_from('<H', b, i + 28)[0]
+    off = struct.unpack_from('<I', b, i + 42)[0]
+    cd = b[i + 46:i + 46 + n].decode('utf-8', 'replace')
+    if off in lfh and cd != lfh[off]:
+        print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
+    i += 4
 ```
-Iongeze kwa:
+
+Ikamilishe kwa:
+
 ```bash
 zipdetails -v suspect.zip | less
 zipinfo -v suspect.zip | grep -E "file name|offset|comment"
 ```
-Kanuni za utambuzi:
-- Kwa ingestion inayohusiana na usalama, kataa au tenga archives zenye majina ya LFH/CD yasiyolingana, filenames zilizorudiwa, rekodi nyingi za EOCD, au bytes zilizo nyuma ya EOCD ya mwisho.<sup>[[9]](#references)[[10]](#references)</sup>
-- Chukulia ZIP zinazotumia extra fields zisizo za kawaida za Unicode-path au comments zisizolingana kuwa za kutiliwa shaka ikiwa tools tofauti hazikubaliani kuhusu tree iliyotolewa.<sup>[[4]](#references)[[9]](#references)</sup>
-- Ikiwa uchanganuzi ni muhimu zaidi kuliko kuhifadhi bytes asilia, tengeneza upya archive kwa kutumia parser madhubuti baada ya extraction kwenye sandbox, kisha linganisha file list inayotokana na metadata asilia.
 
-Hili ni muhimu zaidi ya package ecosystems: aina hii ya utata inaweza kuficha payloads kutoka kwa mail gateways, static scanners, na custom ingestion pipelines ambazo "huangalia kwa haraka" yaliyomo kwenye ZIP kabla ya extractor tofauti kushughulikia archive.<sup>[[9]](#references)</sup>
+Heuristics:
+- Kwa uingizaji unaohusu usalama, kataa au tenga archive ambazo zina majina ya LFH/CD yasiyolingana, majina ya faili yanayojirudia, rekodi nyingi za EOCD, au baiti za ziada baada ya EOCD ya mwisho.<sup>[[9]](#references)[[10]](#references)</sup>
+- Chukulia ZIP zinazotumia sehemu za ziada zisizo za kawaida za njia za Unicode au maoni yasiyolingana kuwa za kutiliwa shaka ikiwa zana tofauti hazikubaliani kuhusu mti wa faili zilizotolewa.<sup>[[4]](#references)[[9]](#references)</sup>
+- Ikiwa uchanganuzi ni muhimu zaidi kuliko kuhifadhi baiti asili, fungua archive kwenye sandbox kisha uipange upya kwa kutumia parser madhubuti, na ulinganishe orodha ya faili iliyopatikana na metadata asili.
+
+Hili ni muhimu hata nje ya mifumo ikolojia ya package: aina hiyo hiyo ya utata inaweza kuficha payloads dhidi ya mail gateway, scanner tuli na mifumo maalum ya uingizaji ambayo hukagua kwa haraka yaliyomo kwenye ZIP kabla extractor tofauti haijashughulikia archive.<sup>[[9]](#references)</sup>
 
 ---
+
+
 
 
 
 ## References
 
 - [1] [Mwongozo wa Uchunguzi wa CTF (Blogu ya Mike, kategoria ya CTF)](https://michael-myers.github.io/blog/categories/ctf/)
-- [2] [GodFather – Sehemu ya 1 – Multistage dropper (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
-- [3] [zipdetails (IO::Compress script)](https://metacpan.org/dist/IO-Compress/view/bin/zipdetails)
-- [4] [Maelezo ya Muundo wa Faili ya ZIP (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
-- [5] [Muundo Unaobadilika wa ZIP Archives Umetumiwa Kuficha Malware Bila Kugunduliwa (Perception Point)](https://perception-point.io/news/flexible-structure-of-zip-archives-exploited-to-hide-malware-undetected/)
-- [6] [Hackers huficha malware katika shambulio jipya la faili za ZIP — concatenated ZIP central directories](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
-- [7] [A better zip bomb (David Fifield, USENIX WOOT 2019)](https://www.usenix.org/system/files/woot19-paper_fifield_0.pdf)
-- [8] [Kuelewa Zip Bombs: overlapping/quoted-overlap kernel construction](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
-- [9] [ZIP yangu si ZIP yako: Kutambua na Kutumia Semantic Gaps Kati ya ZIP Parsers (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
-- [10] [Kuzuia mashambulio ya mkanganyiko wa ZIP parser kwenye Python package installers](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
-- [11] [ZIP Attacks with Reduced Known Plaintext (Michael Stay, AccessData Corporation)](https://math.ucr.edu/~mike/zipattacks.pdf)
-- [12] [Hack This Site: Realistic Web Mission, Level 15 (known-plaintext ZIP attack)](https://www.hackthissite.org/articles/read/793)
+- [2] [GodFather – Sehemu ya 1 – Dropper ya hatua nyingi (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
+- [3] [zipdetails (script ya IO::Compress)](https://metacpan.org/dist/IO-Compress/view/bin/zipdetails)
+- [4] [Uainisho wa Umbizo la Faili la ZIP (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
+- [5] [Muundo Unaonyumbulika wa Archive za ZIP Umetumiwa Kuficha Malware Bila Kugunduliwa (Perception Point)](https://perception-point.io/news/flexible-structure-of-zip-archives-exploited-to-hide-malware-undetected/)
+- [6] [Wadukuzi Wanaficha Malware Katika Shambulio Jipya la Faili za ZIP — Saraka za kati za ZIP zilizounganishwa](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
+- [7] [Bomu bora zaidi la zip (David Fifield, USENIX WOOT 2019)](https://www.usenix.org/system/files/woot19-paper_fifield_0.pdf)
+- [8] [Kuelewa Mabomu ya Zip: ujenzi wa kernel unaopishana/unaorejelewa kwa nukuu](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
+- [9] [ZIP yangu si ZIP yako: Kutambua na Kutumia Pengo za Kisemantiki Kati ya ZIP Parser (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
+- [10] [Kuzuia mashambulizi ya kuchanganya ZIP parser kwenye visakinishi vya package za Python](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
+- [11] [Mashambulizi ya ZIP kwa Kutumia Plaintext Inayojulikana Kidogo (Michael Stay, AccessData Corporation)](https://math.ucr.edu/~mike/zipattacks.pdf)
+- [12] [Hack This Site: Misheni Halisi ya Wavuti, Kiwango cha 15 (shambulio la ZIP linalotumia plaintext inayojulikana)](https://www.hackthissite.org/articles/read/793)
+- [13] [Matumizi ya bkcrack](https://github.com/kimci86/bkcrack/blob/master/readme.md)
+- [14] [Mafunzo ya bkcrack ya kutumia plaintext inayojulikana](https://github.com/kimci86/bkcrack/blob/master/example/tutorial.md)
+- [15] [Hifadhi ya fcrackzip](https://github.com/hyc/fcrackzip)
 {{#include ../../../banners/hacktricks-training.md}}
