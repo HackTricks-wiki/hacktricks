@@ -55,6 +55,8 @@ Registry pulls are also a parser attack surface, because the server stores blobs
 
 ## APIs that execute code by design
 
+Related: [Flowise per-request workflow-code overrides](../pentesting-web/server-side-javascript-injection.md#per-request-workflow-code-overrides-flowise).
+
 ### Job submission APIs
 
 Distributed compute frameworks treat code execution as their main feature. The Ray Jobs API on the dashboard port (8265) accepts an `entrypoint` shell command and runs it on the cluster.<sup>[[19]](#references)</sup> The Oligo ShadowRay research reports that the Jobs API has no authorization and that the dashboard binds to `0.0.0.0`. The matching CVE-2023-48022 is disputed because Ray expects to run only inside a controlled network.<sup>[[20]](#references)</sup> Ray added optional token authentication (`RAY_AUTH_MODE=token`) in 2.52.0. Ray 2.59 enables it by default for local clusters started with `ray.init()`; `ray start --head` without an available token can still start unauthenticated. Ray documents a broader default-authentication rollout for 2.61, so check the deployed version and launch mode rather than assuming the dashboard is open.<sup>[[21]](#references)</sup>
@@ -171,5 +173,3 @@ Authentication on these servers can also come too late. In Chroma's Python FastA
 - [31] [Milvus - Authenticate User Access](https://milvus.io/docs/authenticate.md)
 - [32] [HiddenLayer - ChromaToast Served Pre-Auth](https://www.hiddenlayer.com/research/chromatoast-served-pre-auth)
 - [33] [IBM Security Bulletin - Unauthenticated Remote Code Execution via Auto-Login Bypass and Code Validation (CVE-2026-9198)](https://www.ibm.com/support/pages/node/7278927)
-
-{{#include ../banners/hacktricks-training.md}}
