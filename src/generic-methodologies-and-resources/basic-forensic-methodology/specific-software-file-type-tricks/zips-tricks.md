@@ -8,11 +8,11 @@
 - **`zipdetails -v`**: Offers detailed analysis of zip file format fields.<sup>[[3]](#references)</sup>
 - **`zipinfo`**: Lists contents of a zip file without extracting them.
 - **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Try to repair corrupted zip files.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for brute-force cracking of zip passwords, effective for passwords up to around 7 characters.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for dictionary and brute-force attacks on ZIP passwords; feasibility depends on the password search space.<sup>[[15]](#references)</sup>
 
 The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.<sup>[[4]](#references)</sup>
 
-It's crucial to note that traditional password-protected ZIP files generally leave filenames and file sizes visible, unlike header-encryption modes supported by RAR and 7z. Furthermore, ZIP files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available.<sup>[[1]](#references)</sup> This attack leverages the known content to crack the ZIP's password, as explained in [this academic paper](https://math.ucr.edu/~mike/zipattacks.pdf) and illustrated in [this Hack This Site walk-through](https://www.hackthissite.org/articles/read/793).<sup>[[11]](#references)[[12]](#references)</sup> However, the ZipCrypto known-plaintext attack does not apply to entries secured with **AES-256** encryption.<sup>[[1]](#references)</sup>
+Traditional password-protected ZIP files generally leave filenames and file sizes visible, unlike header-encryption modes supported by RAR and 7z. A ZipCrypto known-plaintext attack recovers **internal encryption keys**, not necessarily the original password; the keys suffice to decrypt entries encrypted with the same password.<sup>[[13]](#references)</sup> The attack needs known bytes of the stream **before encryption**: for a stored member, these are the original file bytes, but for a DEFLATE member they are the compressed bytes, which may require recreating the exact compression output.<sup>[[13]](#references)[[14]](#references)</sup> See [Known plaintext ZIP attack](../../../generic-hacking/brute-force.md#known-plaintext-zip-attack) for a practical workflow. For cryptanalysis background, see [the paper](https://math.ucr.edu/~mike/zipattacks.pdf) and [walk-through](https://www.hackthissite.org/articles/read/793).<sup>[[11]](#references)[[12]](#references)</sup> This ZipCrypto attack does not apply to AES-encrypted ZIP entries.<sup>[[13]](#references)</sup>
 
 ---
 
@@ -107,7 +107,7 @@ python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
 
-You should now see `General Purpose Flag  0000` on core entries and tools will parse the APK again.
+Only bit 0 should change: for example, `0A09` becomes `0A08`, not `0000`. This minimal patcher scans for header signatures in raw bytes, so signature-like bytes inside file data can cause false matches; work on a copy and confirm the resulting entry list and headers before using the output.<sup>[[4]](#references)</sup>
 
 ### 2) Large/custom Extra fields to break parsers
 
@@ -279,6 +279,8 @@ This matters beyond package ecosystems: the same ambiguity class can hide payloa
 
 
 
+
+
 ## References
 
 - [1] [CTF Forensics Field Guide (Mike's Blog, CTF category)](https://michael-myers.github.io/blog/categories/ctf/)
@@ -293,5 +295,7 @@ This matters beyond package ecosystems: the same ambiguity class can hide payloa
 - [10] [Preventing ZIP parser confusion attacks on Python package installers](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
 - [11] [ZIP Attacks with Reduced Known Plaintext (Michael Stay, AccessData Corporation)](https://math.ucr.edu/~mike/zipattacks.pdf)
 - [12] [Hack This Site: Realistic Web Mission, Level 15 (known-plaintext ZIP attack)](https://www.hackthissite.org/articles/read/793)
-
+- [13] [bkcrack usage](https://github.com/kimci86/bkcrack/blob/master/readme.md)
+- [14] [bkcrack known-plaintext tutorial](https://github.com/kimci86/bkcrack/blob/master/example/tutorial.md)
+- [15] [fcrackzip repository](https://github.com/hyc/fcrackzip)
 {{#include ../../../banners/hacktricks-training.md}}
