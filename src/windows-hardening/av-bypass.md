@@ -1384,6 +1384,16 @@ Detection ideas
 - Remote threads or context pivots that begin execution inside a legitimate DLL export whose first bytes were recently modified.
 - Suspicious `VirtualProtect(Ex)` / `WriteProcessMemory` sequences against DLL `.text` pages followed by thread creation.
 
+## Shared-section injection with x86 thread-context redirection
+
+A cross-process stage can be transferred through two views of the **same section** instead of `WriteProcessMemory`. In the analyzed x86 chain, an injector prepared a clone in its own process, mapped the section into both processes, wrote the clone through its local view, and redirected a target thread to a bootstrap in the remote view. The target's original image stayed mapped, so this is not [process hollowing](../reversing/common-api-used-in-malware.md#process-hollowing-aka-runpe).<sup>[[58]](#references)</sup>
+
+One general implementation uses a page-file-backed mapping from `CreateFileMapping(INVALID_HANDLE_VALUE, ...)` with executable-compatible protection and `MapViewOfFile2` for the local and target views. The target process handle needs `PROCESS_VM_OPERATION`; the thread handle needs context-setting rights. `MapViewOfFile2` requires Windows 10 version 1703 or later. Map the views before computing the bootstrap address: the local and remote bases can differ, so the target address is **remote view base + bootstrap offset**, not a pointer into the injector's view.<sup>[[59]](#references)[[60]](#references)[[61]](#references)</sup>
+
+The observed injector had two x86 entry routes. For an already-running target, it suspended a selected thread and redirected `EIP` through the bootstrap. For a newly launched suspended SysWOW64 host, it placed the remote bootstrap address in `CONTEXT.Eax` before resuming the primary thread. The latter relies on that suspended-start path consuming `EAX`; setting `EAX` alone does not redirect an arbitrary running thread's instruction pointer. A 64-bit injector controlling a WOW64 thread must use the WOW64 context APIs, and `SetThreadContext` should be called only while the thread is suspended.<sup>[[58]](#references)[[61]](#references)</sup>
+
+The bootstrap can signal arrival through the shared view, initialize its stage, and continue execution in the target. This avoids a full-stage remote write and a new cross-process thread, **not** process/thread access checks or telemetry from section mapping and context changes. For a different no-remote-write transfer mechanism, see [Thread Name-Calling and Waiting Thread Hijacking](windows-process-injection-thread-name-calling-waiting-thread-hijacking.md).<sup>[[58]](#references)</sup>
+
 ## Process Parameter Poisoning (P3)
 
 Process Parameter Poisoning (P3) is a **process-injection / EDR-evasion** technique that avoids the classic remote write path (`VirtualAllocEx` + `WriteProcessMemory`). Instead of copying bytes into an already running target, it abuses the fact that Windows **copies selected `CreateProcessW` startup parameters into the child process** and stores them inside `PEB->ProcessParameters` (`RTL_USER_PROCESS_PARAMETERS`).<sup>[[28]](#references)[[29]](#references)</sup>
@@ -1622,5 +1632,9 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [55] [tprtdll-Injection overview and export inventory](https://github.com/ivancabrera02/tprtdll-Injection/blob/main/README.md)
 - [56] [Trusted-twin self-injection PoC](https://github.com/ivancabrera02/tprtdll-Injection/blob/main/trustedtwin_self.cpp)
 - [57] [Trusted-twin cross-process injection PoC](https://github.com/ivancabrera02/tprtdll-Injection/blob/main/trustedtwin_cross.cpp)
+- [58] [Morphisec – From Business Emails to XLoader: An Order Lure That Led to In-Memory Injection](https://www.morphisec.com/blog/from-business-emails-to-xloader-an-order-lure-that-led-to-in-memory-injection/)
+- [59] [Microsoft Learn – CreateFileMappingA function](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createfilemappinga)
+- [60] [Microsoft Learn – MapViewOfFile2 function](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-mapviewoffile2)
+- [61] [Microsoft Learn – SetThreadContext function](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setthreadcontext)
 
 {{#include ../banners/hacktricks-training.md}}

