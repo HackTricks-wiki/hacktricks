@@ -31,6 +31,7 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/network-services-pentesting/pentesting-web/jsp.html" = "../../pentesting-web/xss-cross-site-scripting/index.html"
 "/pentesting-web/file-inclusion/phar-deserialization.html" = "../deserialization/phar-deserialization.html"
 "/linux-hardening/network-information/cisco-vmanage.html" = "../../network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.html"
 "/linux-hardening/software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.html" = "../../mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.html"
