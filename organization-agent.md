@@ -2,21 +2,21 @@
 
 ## Principles
 
-- One home per mechanism; entry points retain prerequisites and link; split by task/prerequisite, not size.
-- Main: general techniques; Cloud: provider/IAM; use public URLs.
-- Removed chapters need whole-page redirects; preserve content/current links.
+- One home per mechanism; link from prerequisite-specific entry points; split by task, not size.
+- Main owns general techniques; Cloud owns provider/IAM; use public URLs.
+- Removed chapters need whole-page redirects and content/link preservation.
 
 ## Canonical locations and boundaries
 
-- Rlogin/Rsh trusted-host → `src/network-services-pentesting/pentesting-rlogin.md`; Rexec separate.
-- SCM/SCMR execution (PsExec, WinExec, SMBExec, SCMExec, SharpMove) → `src/windows-hardening/lateral-movement/psexec-and-winexec.md`; scheduler, DCOM, WMI, WinRM and RDP stay separate.
-- POSIX CPU timer TOCTOU/ptrace PoCs → `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`; Linux links to Binary.
 - Board/fault/side-channel/signal → Hardware; firmware/radio separate.
-- AI model execution/serving → `src/AI/AI-Model-Tools-and-Platforms.md`, apart from attacks. Burp Intruder/extensions/Session Switcher → `src/pentesting-web/burp-suite.md`, apart from IDOR.
-- WebRTC media-server DTLS/ICE race DoS → `src/network-services-pentesting/webrtc-media-server-dtls-race-dos.md`, next to distinct TURN relay; service exposure, not generic methodology.
-- OT safety/planning → `src/industrial-control-systems/README.md`; Modbus → `src/network-services-pentesting/pentesting-modbus.md`; OPC UA/BACnet → Network Services.
+- Rlogin/Rsh trusted-host → `src/network-services-pentesting/pentesting-rlogin.md`; Rexec separate.
+- SCMR execution (PsExec, WinExec, SMBExec, SCMExec, SharpMove) → `src/windows-hardening/lateral-movement/psexec-and-winexec.md`; scheduler/DCOM/WMI/WinRM/RDP separate.
+- POSIX CPU timer TOCTOU/ptrace → `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`; Linux links to Binary.
+- AI model serving → `src/AI/AI-Model-Tools-and-Platforms.md`; Burp tools → `src/pentesting-web/burp-suite.md`, not IDOR.
+- WebRTC media-server DTLS/ICE race DoS → `src/network-services-pentesting/webrtc-media-server-dtls-race-dos.md`; TURN relay distinct.
+- OT safety → `src/industrial-control-systems/README.md`; Modbus → `src/network-services-pentesting/pentesting-modbus.md`; OPC UA/BACnet in Network.
 - Android acquisition/imaging/LiME → `src/generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md`; Mobile owns app testing; malware separate.
-- Firmware acquisition, decryption, updates and boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay there.
+- Firmware acquisition/decryption/updates/boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay.
 - Referer leakage and Referrer-Policy → `src/pentesting-web/referer-header-and-referrer-policy.md`; OAuth links there. Exfiltration overview maps other routes.
 - UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
@@ -31,10 +31,10 @@
 - 401/403 authorization bypasses → `src/pentesting-web/403-and-401-bypasses.md`; broader request/response behavior → `src/pentesting-web/special-http-headers.md`. The 80/443 service overview links to both and retains product discovery; old routes redirect.
 - PHP temp-upload LFI race/crash variant → `src/pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md#segmentation-fault-variant-on-php-70-and-72`; phpinfo, session progress and filters stay distinct.
 - Chosen-input MD5 suffix/`0e` search → `src/crypto/hashes/README.md#chosen-input-md5-hash-searches`; PHP type-juggling/version caveats → `network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling`. Distinct, cross-linked.
-- WSGI/uWSGI, Zabbix, CCTV stay under Network 80/443; Web/SSRF link to WSGI.
-- AI fuzzing/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source/mobile/kernel review → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`; task split.
+- AI fuzzing/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source/mobile/kernel review → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`.
+- WSGI/uWSGI, Zabbix, CCTV → Network 80/443; Web/SSRF links to WSGI.
 - Python expression-evaluation probe → `src/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md#python-expression-evaluation-probe`; web entry links directly there.
-- Remote MCP testing → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Distinct prerequisites.
+- Remote MCP testing → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`.
 - eSIM/eUICC, Java Card and OTA/APDU → `src/mobile-pentesting/esim-javacard-exploitation.md`; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
 - Android rooting-framework manager auth bypass (KernelSU/Magisk; rooted app foothold) → `src/mobile-pentesting/android-app-pentesting/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md`; Linux privesc links directly, kernel exploits remain Binary.
 - vManage local ConfD/REST/import → `src/network-services-pentesting/cisco-sd-wan-manager-local-privilege-escalation.md`; UDP/12346 separate.
@@ -50,15 +50,17 @@
 - Rails `_json` body-parameter collision → `src/pentesting-web/parameter-pollution.md#ruby-on-rails-_json-parameter-pollution`, not deserialization; context links directly. Keep version caveat and JSON example.
 - Adobe Reader PDF-upload XXE/SOP → `src/pentesting-web/file-upload/README.md#pdf-upload-adobe-reader-xxe-and-same-origin-policy-bypass`; Web XXE links there.
 - FTP bounce scan → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-attack.md`; relay/retrieval → `src/network-services-pentesting/pentesting-ftp/ftp-bounce-protocol-relay.md`. Distinct tasks.
-- Cookie-bomb → Cookies; `onerror` oracle → XS-Leaks.
 - Office VBA junk/UserForms → `src/generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md#vba-macro-analysis-junk-code-and-userforms`; Revit RFA OLE/ECC → Binary (separate parser task).
 - AD CS overview, enrollment enumeration, PKINIT/Schannel mapping and hardening → `src/windows-hardening/active-directory-methodology/ad-certificates.md`; ESC exploitation/theft/persistence stay in `ad-certificates/` siblings. Duplicate overview URL redirects.
-- Cross-surface tool catalog → `src/generic-methodologies-and-resources/third-party-tools-and-resources.md`; task pages link there.
+- Cross-surface tools → `src/generic-methodologies-and-resources/third-party-tools-and-resources.md`; task pages link there.
 - SQLMap request/detection/flags/`--eval`/tamper → `src/pentesting-web/sql-injection/sqlmap.md`; delayed stored-payload workflow → `sqlmap/second-order-injection-sqlmap.md`. Keep one tool cheatsheet; old nested index redirects.
 
 ## Researcher lookup terms
 
-- Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`, unlike XS-Leaks. Old URL redirects.
+- JSP `getContextPath()` resource-URL manipulation/XSS → `src/pentesting-web/xss-cross-site-scripting/README.md#jsp-context-path-resource-url-manipulation`; 80/443 and Tomcat link there. Attribute-context XSS, not a JSP platform guide.
+
+- Cookie-bomb → Cookies; `onerror` oracle → XS-Leaks.
+- Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`, not XS-Leaks; old URL redirects.
 - `nosniff`/ICO width → XS-Leaks; cross-origin script inclusion → XSSI; in-origin script injection → XSS.
 
 ## Deferred
