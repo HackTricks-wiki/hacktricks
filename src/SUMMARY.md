@@ -602,7 +602,6 @@
   - [JBOSS](network-services-pentesting/pentesting-web/jboss.md)
   - [Jira & Confluence](network-services-pentesting/pentesting-web/jira.md)
   - [Joomla](network-services-pentesting/pentesting-web/joomla.md)
-  - [JSP](network-services-pentesting/pentesting-web/jsp.md)
   - [Java Servlet-Filter Memory Shells](network-services-pentesting/pentesting-web/java-servlet-filter-memory-shells.md)
   - [Laravel](network-services-pentesting/pentesting-web/laravel.md)
   - [MeshCentral](network-services-pentesting/pentesting-web/meshcentral.md)
