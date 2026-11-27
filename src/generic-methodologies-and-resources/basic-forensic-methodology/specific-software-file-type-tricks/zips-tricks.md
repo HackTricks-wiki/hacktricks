@@ -1,67 +1,72 @@
-# ZIP tricks
+# Trikovi sa ZIP-ovima
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** za upravljanje **zip files** ključni su za dijagnostikovanje, popravku i crackovanje zip files. Evo nekoliko važnih utilities:<sup>[[1]](#references)</sup>
+**Alati komandne linije** za upravljanje **ZIP datotekama** neophodni su za dijagnostikovanje, popravku i probijanje ZIP datoteka. Evo nekoliko ključnih uslužnih programa:<sup>[[1]](#references)</sup>
 
-- **`unzip`**: Otkriva zašto zip file možda ne može da se dekompresuje.
-- **`zipdetails -v`**: Pruža detaljnu analizu polja zip file formata.<sup>[[3]](#references)</sup>
-- **`zipinfo`**: Prikazuje sadržaj zip file-a bez njegovog raspakivanja.
-- **`zip -F input.zip --out output.zip`** i **`zip -FF input.zip --out output.zip`**: Pokušavaju da poprave oštećene zip files.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Alat za brute-force crackovanje zip passwords, efikasan za passwords dužine do približno 7 karaktera.
+- **`unzip`**: Otkriva zašto ZIP datoteka možda ne može da se raspakuje.
+- **`zipdetails -v`**: Pruža detaljnu analizu polja formata ZIP datoteke.<sup>[[3]](#references)</sup>
+- **`zipinfo`**: Prikazuje sadržaj ZIP datoteke bez raspakivanja.
+- **`zip -F input.zip --out output.zip`** i **`zip -FF input.zip --out output.zip`**: Pokušavaju da poprave oštećene ZIP datoteke.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Alat za napade rečnikom i brute-force napade na ZIP lozinke; izvodljivost zavisi od prostora za pretragu lozinki.<sup>[[15]](#references)</sup>
 
-[Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) pruža sveobuhvatne detalje o strukturi i standardima zip files.<sup>[[4]](#references)</sup>
+[Specifikacija formata Zip datoteke](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) pruža sveobuhvatne detalje o strukturi i standardima ZIP datoteka.<sup>[[4]](#references)</sup>
 
-Važno je napomenuti da tradicionalni password-protected ZIP files uglavnom ostavljaju filenames i file sizes vidljivim, za razliku od header-encryption režima koje podržavaju RAR i 7z. Pored toga, ZIP files encrypted starijom metodom ZipCrypto ranjivi su na **plaintext attack** ako je dostupna nešifrovana kopija compressed file-a.<sup>[[1]](#references)</sup> Ovaj napad koristi poznati sadržaj za crackovanje ZIP password-a, kao što je objašnjeno u [ovom akademskom radu](https://math.ucr.edu/~mike/zipattacks.pdf) i prikazano u [ovom Hack This Site vodiču](https://www.hackthissite.org/articles/read/793).<sup>[[11]](#references)[[12]](#references)</sup> Međutim, ZipCrypto known-plaintext attack ne primenjuje se na entries zaštićene **AES-256** encryption-om.<sup>[[1]](#references)</sup>
+Tradicionalne ZIP datoteke zaštićene lozinkom uglavnom ostavljaju nazive datoteka i njihove veličine vidljivim, za razliku od režima šifrovanja zaglavlja koje podržavaju RAR i 7z. Napad poznatim otvorenim tekstom na ZipCrypto oporavlja **interne ključeve za šifrovanje**, a ne nužno originalnu lozinku; ti ključevi su dovoljni za dešifrovanje stavki šifrovanih istom lozinkom.<sup>[[13]](#references)</sup> Za napad su potrebni poznati bajtovi toka **pre šifrovanja**: kod sačuvane stavke to su bajtovi originalne datoteke, dok su kod DEFLATE stavke to komprimovani bajtovi, za čije dobijanje može biti potrebno ponovno kreiranje potpuno istog izlaza kompresije.<sup>[[13]](#references)[[14]](#references)</sup> Pogledajte [Known plaintext ZIP attack](../../../generic-hacking/brute-force.md#known-plaintext-zip-attack) za praktičan postupak. Za osnovne informacije o kriptoanalizi pogledajte [the paper](https://math.ucr.edu/~mike/zipattacks.pdf) i [walk-through](https://www.hackthissite.org/articles/read/793).<sup>[[11]](#references)[[12]](#references)</sup> Ovaj ZipCrypto napad ne može da se primeni na AES-om šifrovane ZIP stavke.<sup>[[13]](#references)</sup>
 
 ---
 
-## Anti-reversing tricks u APKs korišćenjem izmenjenih ZIP headers
+## Trikovi za otežavanje reverznog inženjeringa u APK-ovima pomoću izmenjenih ZIP zaglavlja
 
-Moderni Android malware droppers koriste neispravne ZIP metadata podatke da bi onesposobili static tools (jadx/apktool/unzip), dok APK ostaje instalabilan na uređaju. Najčešće tricks su:<sup>[[2]](#references)</sup>
+Moderni Android malware dropperi koriste neispravne ZIP metapodatke kako bi omeli statičke alate (jadx/apktool/unzip), a da APK pritom ostane instalabilan na uređaju. Najčešći trikovi su:<sup>[[2]](#references)</sup>
 
-- Lažna encryption postavljanjem bita 0 ZIP General Purpose Bit Flag (GPBF)
-- Zloupotreba velikih/custom Extra fields radi zbunjivanja parsera
-- Kolizije imena file/directory objekata radi skrivanja stvarnih artifacts (npr. directory nazvan `classes.dex/` pored stvarnog `classes.dex`)
+- Lažno šifrovanje postavljanjem bita 0 u ZIP General Purpose Bit Flag (GPBF)
+- Zloupotreba velikih/prilagođenih Extra polja radi zbunjivanja parsera
+- Sukobi imena datoteka i direktorijuma radi skrivanja stvarnih artefakata (npr. direktorijum nazvan `classes.dex/` pored stvarnog `classes.dex`)
 
-### 1) Lažna encryption (postavljen GPBF bit 0) bez stvarne crypto
+### 1) Lažno šifrovanje (postavljen GPBF bit 0) bez stvarne kriptografije
 
 Simptomi:
-- `jadx-gui` ne uspeva uz greške poput:
+- `jadx-gui` ne uspeva i prikazuje greške kao što su:
+  
+  ```
+  java.util.zip.ZipException: invalid CEN header (encrypted entry)
+  ```
+- `unzip` traži lozinku za ključne APK datoteke, iako važeći APK ne može da sadrži šifrovane datoteke `classes*.dex`, `resources.arsc` ili `AndroidManifest.xml`:
+  
+  ```bash
+  unzip sample.apk
+  [sample.apk] classes3.dex password:
+    skipping: classes3.dex                          incorrect password
+    skipping: AndroidManifest.xml/res/vhpng-xhdpi/mxirm.png  incorrect password
+    skipping: resources.arsc/res/domeo/eqmvo.xml            incorrect password
+    skipping: classes2.dex                          incorrect password
+  ```
 
-```
-java.util.zip.ZipException: invalid CEN header (encrypted entry)
-```
-- `unzip` traži password za core APK files iako validan APK ne može imati encrypted `classes*.dex`, `resources.arsc` ili `AndroidManifest.xml`:
+Detekcija pomoću zipdetails:
 
-```bash
-unzip sample.apk
-[sample.apk] classes3.dex password:
-skipping: classes3.dex                          incorrect password
-skipping: AndroidManifest.xml/res/vhpng-xhdpi/mxirm.png  incorrect password
-skipping: resources.arsc/res/domeo/eqmvo.xml            incorrect password
-skipping: classes2.dex                          incorrect password
-```
-
-Detekcija pomoću zipdetails-a:
 ```bash
 zipdetails -v sample.apk | less
 ```
-Pogledajte General Purpose Bit Flag za lokalna i centralna zaglavlja. Karakteristična vrednost je postavljen bit 0 (Encryption), čak i za osnovne stavke:
+
+Pogledajte General Purpose Bit Flag u lokalnim i centralnim zaglavljima. Znak koji ukazuje na to je postavljen bit 0 (šifrovanje), čak i kod osnovnih stavki:
+
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
-[Bit 0]   1 'Encryption'
-[Bits 1-2] 1 'Maximum Compression'
-[Bit 3]   1 'Streamed'
-[Bit 11]  1 'Language Encoding'
+  [Bit 0]   1 'Encryption'
+  [Bits 1-2] 1 'Maximum Compression'
+  [Bit 3]   1 'Streamed'
+  [Bit 11]  1 'Language Encoding'
 ```
-Heuristika: Ako se APK instalira i pokreće na uređaju, ali alati prikazuju osnovne unose kao „encrypted“, GPBF je izmenjen.
 
-Popravite to brisanjem GPBF bita 0 u Local File Header (LFH) i Central Directory (CD) unosima. Minimalni patcher bajtova:
+Heuristika: Ako se APK instalira i pokreće na uređaju, ali alati prikazuju ključne unose kao „šifrovane“, GPBF je izmenjen.
+
+Popravite tako što ćete obrisati bit 0 GPBF-a u zaglavljima lokalnih datoteka (LFH) i unosima Centralnog direktorijuma (CD). Minimalni alat za izmenu bajtova:
 
 <details>
-<summary>Minimalni patcher za brisanje GPBF bita</summary>
+<summary>Minimalni alat za brisanje GPBF bita</summary>
+
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -70,62 +75,70 @@ SIG_LFH = b"\x50\x4b\x03\x04"  # Local File Header
 SIG_CDH = b"\x50\x4b\x01\x02"  # Central Directory Header
 
 def patch_flags(buf: bytes, sig: bytes, flag_off: int):
-out = bytearray(buf)
-i = 0
-patched = 0
-while True:
-i = out.find(sig, i)
-if i == -1:
-break
-flags, = struct.unpack_from('<H', out, i + flag_off)
-if flags & 1:  # encryption bit set
-struct.pack_into('<H', out, i + flag_off, flags & 0xFFFE)
-patched += 1
-i += 4  # move past signature to continue search
-return bytes(out), patched
+    out = bytearray(buf)
+    i = 0
+    patched = 0
+    while True:
+        i = out.find(sig, i)
+        if i == -1:
+            break
+        flags, = struct.unpack_from('<H', out, i + flag_off)
+        if flags & 1:  # encryption bit set
+            struct.pack_into('<H', out, i + flag_off, flags & 0xFFFE)
+            patched += 1
+        i += 4  # move past signature to continue search
+    return bytes(out), patched
 
 if __name__ == '__main__':
-inp, outp = sys.argv[1], sys.argv[2]
-data = open(inp, 'rb').read()
-data, p_lfh = patch_flags(data, SIG_LFH, 6)  # LFH flag at +6
-data, p_cdh = patch_flags(data, SIG_CDH, 8)  # CDH flag at +8
-open(outp, 'wb').write(data)
-print(f'Patched: LFH={p_lfh}, CDH={p_cdh}')
+    inp, outp = sys.argv[1], sys.argv[2]
+    data = open(inp, 'rb').read()
+    data, p_lfh = patch_flags(data, SIG_LFH, 6)  # LFH flag at +6
+    data, p_cdh = patch_flags(data, SIG_CDH, 8)  # CDH flag at +8
+    open(outp, 'wb').write(data)
+    print(f'Patched: LFH={p_lfh}, CDH={p_cdh}')
 ```
+
 </details>
 
 Upotreba:
+
 ```bash
 python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
-Sada bi trebalo da vidite `General Purpose Flag  0000` u osnovnim unosima, a alati će ponovo parsirati APK.
+
+Menja se samo bit 0: na primer, `0A09` postaje `0A08`, a ne `0000`. Ovaj minimalni patcher pretražuje sirove bajtove u potrazi za potpisima zaglavlja, pa bajtovi unutar podataka datoteke koji liče na potpise mogu da izazovu lažna poklapanja; radite na kopiji i proverite listu stavki i zaglavlja u rezultatu pre nego što ga upotrebite.<sup>[[4]](#references)</sup>
 
 ### 2) Velika/prilagođena Extra polja za ometanje parsera
 
-Napadači ubacuju prevelika Extra polja i neobične ID-jeve u zaglavlja kako bi izazvali probleme u decompiler-ima. U praksi možete naići na prilagođene oznake (npr. stringove poput `JADXBLOCK`) ugrađene u njih.
+Napadači ubacuju prevelika Extra polja i neobične ID-jeve u zaglavlja kako bi zbunili dekompilatore. U praksi možete naići na prilagođene oznake (npr. nizove poput `JADXBLOCK`) ugrađene u ta polja.
 
-Inspekcija:
+Pregled:
+
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-Primeri koji su uočeni: nepoznati ID-jevi poput `0xCAFE` ("Java Executable") ili `0x414A` ("JA:") koji sadrže velike payload-e.<sup>[[2]](#references)</sup>
+
+Primećeni primeri: nepoznati ID-jevi, poput `0xCAFE` („Java Executable“) ili `0x414A` („JA:“), sa velikim sadržajem.<sup>[[2]](#references)</sup>
 
 DFIR heuristike:
-- Upozoriti kada su Extra polja neuobičajeno velika u ključnim unosima (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
-- Nepoznate Extra ID-jeve u tim unosima tretirati kao sumnjive.
+- Upozorite kada su Extra polja neuobičajeno velika u ključnim stavkama (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
+- Tretirajte nepoznate Extra ID-jeve u tim stavkama kao sumnjive.
 
-Praktična mitigacija: ponovna izgradnja arhive (npr. ponovno zipovanje ekstrahovanih fajlova) uklanja zlonamerna Extra polja. Ako alati odbijaju ekstrakciju zbog lažne enkripcije, prvo obrišite GPBF bit 0 kao što je gore navedeno, a zatim ponovo upakujte:
+Praktična mera za ublažavanje: ponovno pravljenje arhive (npr. ponovno zipovanje ekstrahovanih datoteka) uklanja zlonamerna Extra polja. Ako alati odbijaju da ekstrahuju sadržaj zbog lažnog šifrovanja, prvo obrišite GPBF bit 0 kao što je opisano iznad, pa zatim ponovo zapakujte:
+
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
-### 3) Kolizije imena datoteka/direktorijuma (skrivanje stvarnih artefakata)
 
-ZIP može da sadrži i datoteku `X` i direktorijum `X/`. Neki extractors i decompilers se zbune i mogu da prekriju ili sakriju stvarnu datoteku unosom direktorijuma. Ovo je primećeno kod unosa koji se sudaraju sa osnovnim APK imenima kao što je `classes.dex`.
+### 3) Sukobi naziva datoteka/direktorijuma (skrivanje stvarnih artefakata)
+
+ZIP može da sadrži i datoteku `X` i direktorijum `X/`. Neki alati za raspakivanje i dekompilatori mogu da se zbune i da preklapaju stvarnu datoteku unosom direktorijuma ili je sakriju. Ovo je primećeno kod unosa koji se sukobljavaju sa osnovnim nazivima APK datoteka, kao što je `classes.dex`.
 
 Trijaža i bezbedno raspakivanje:
+
 ```bash
 # List potential collisions (names that differ only by trailing slash)
 zipinfo -1 sample.apk | awk '{n=$0; sub(/\/$/,"",n); print n}' | sort | uniq -d
@@ -136,44 +149,50 @@ unzip normalized.apk -d outdir
 # replace outdir/classes.dex? [y]es/[n]o/[A]ll/[N]one/[r]ename: r
 # new name: unk_classes.dex
 ```
-Programsko otkrivanje nakon ispravke:
+
+Programatska detekcija nakon ispravke:
+
 ```python
 from zipfile import ZipFile
 from collections import defaultdict
 
 with ZipFile('normalized.apk') as z:
-names = z.namelist()
+    names = z.namelist()
 
 collisions = defaultdict(list)
 for n in names:
-base = n[:-1] if n.endswith('/') else n
-collisions[base].append(n)
+    base = n[:-1] if n.endswith('/') else n
+    collisions[base].append(n)
 
 for base, variants in collisions.items():
-if len(variants) > 1:
-print('COLLISION', base, '->', variants)
+    if len(variants) > 1:
+        print('COLLISION', base, '->', variants)
 ```
-Blue-team ideje za detekciju:
-- Označiti APK-ove čija lokalna zaglavlja označavaju enkripciju (GPBF bit 0 = 1), a koji se ipak instaliraju/pokreću.
-- Označiti velike/nepoznate Extra fields u ključnim unosima (tražiti markere poput `JADXBLOCK`).
+
+Ideje za detekciju za blue-team:
+- Označiti APK-ove čija lokalna zaglavlja označavaju šifrovanje (GPBF bit 0 = 1), a koji se ipak instaliraju/pokreću.
+- Označiti velika/nepoznata Extra polja u ključnim stavkama (tražiti markere kao što je `JADXBLOCK`).
 - Označiti kolizije putanja (`X` i `X/`), posebno za `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
 
 ---
 
-## Ostale zlonamerne ZIP trikove (2024–2026)
+## Ostali zlonamerni ZIP trikovi (2024–2026)
 
-### Konkatenirani centralni direktorijumi (multi-EOCD evasion)
+### Konkatenisani centralni direktorijumi (izbegavanje pomoću više EOCD zapisa)
 
-U jednoj phishing kampanji iz 2024. godine, napadači su isporučili jedan blob koji su zapravo činila **dva konkatenirana ZIP fajla**. Svaki je imao sopstveni End of Central Directory (EOCD) zapis i centralni direktorijum. Različiti extractors su parsirali različite direktorijume (7-Zip je čitao prvi, dok je WinRAR čitao poslednji), što je napadačima omogućilo da sakriju payload-e koje su prikazivali samo neki alati; skeneri koji proveravaju samo jedan direktorijum mogu propustiti drugu arhivu.<sup>[[5]](#references)[[6]](#references)</sup>
+U phishing kampanji iz 2024. napadači su isporučili jedan blob koji je zapravo sadržao **dve konkatenisane ZIP datoteke**. Svaka je imala sopstveni zapis End of Central Directory (EOCD) i centralni direktorijum. Različiti alati za ekstrakciju analizirali su različite direktorijume (7-Zip je čitao prvi, dok je WinRAR čitao poslednji), što je napadačima omogućilo da sakriju payload-e koje su prikazivali samo neki alati; skeneri koji pregledaju samo jedan direktorijum mogu da previde drugu arhivu.<sup>[[5]](#references)[[6]](#references)</sup>
 
-**Triage komande**
+**Komande za trijažu**
+
 ```bash
 # Count EOCD signatures
 binwalk -R "PK\x05\x06" suspect.zip
 # Show EOCD records and their central-directory offsets
 zipdetails --scan -v suspect.zip | grep -ni -A2 "end central"
 ```
-Ako se pojavi više od jednog EOCD zapisa ili postoje upozorenja „data after payload“, podelite blob i pregledajte svaki deo:
+
+Ako se pojavi više EOCD-ova ili postoje upozorenja „data after payload“, podelite blob i pregledajte svaki deo:
+
 ```bash
 # Recover the second archive from its first local-file-header offset.
 binwalk -R "PK\x03\x04" suspect.zip
@@ -182,42 +201,46 @@ OFF=123456
 dd if=suspect.zip bs=1 skip="$OFF" of=tail.zip
 7z l tail.zip   # list hidden content
 ```
-### Quoted-overlap / overlapping-entry bombs (non-recursive)
 
-Quoted-overlap ZIP bombs konstruišu mali **kernel** (visoko kompresovani DEFLATE blok) i ponovo ga koriste kroz preklapajuće unose. Full-overlap varijante usmeravaju više unosa central-directory ka jednom local header-u, dok quoted-overlap varijante navode local header-e unutar DEFLATE stream-ova; objavljena konstrukcija postiže odnos veći od 28M:1 bez nested archives.<sup>[[7]](#references)</sup>
+### Quoted-overlap / bombe sa preklapajućim unosima (nerekurzivne)
 
-**Brza detekcija (duplikatni LFH offsets)**
+Quoted-overlap ZIP bombe formiraju mali **kernel** (visoko komprimovani DEFLATE blok) i ponovo ga koriste u preklapajućim unosima. Varijante sa potpunim preklapanjem usmeravaju više unosa centralnog direktorijuma na jedno lokalno zaglavlje, dok varijante Quoted-overlap citiraju lokalna zaglavlja unutar DEFLATE tokova; objavljena konstrukcija postiže odnos veći od 28M:1 bez ugnježdenih arhiva.<sup>[[7]](#references)</sup>
+
+**Brza detekcija (duplirani pomaci LFH-a)**
+
 ```python
 # detect full-overlap variants by identical relative offsets
 import struct, sys
 buf=open(sys.argv[1],'rb').read()
 off=0; seen=set()
 while True:
-i = buf.find(b'PK\x01\x02', off)
-if i<0: break
-rel = struct.unpack_from('<I', buf, i+42)[0]
-if rel in seen:
-print('OVERLAP at offset', rel)
-break
-seen.add(rel); off = i+4
+    i = buf.find(b'PK\x01\x02', off)
+    if i<0: break
+    rel = struct.unpack_from('<I', buf, i+42)[0]
+    if rel in seen:
+        print('OVERLAP at offset', rel)
+        break
+    seen.add(rel); off = i+4
 ```
+
 **Rukovanje**
-- Izvršite dry-run prolaz: `zipdetails -v file.zip | grep -n "Local Header Offset"` i uporedite navedene local-header offsete i opsege kompresovanih podataka; duplikatni offseti ukazuju na varijante sa potpunim preklapanjem.<sup>[[7]](#references)[[8]](#references)</sup>
-- Ograničite prihvatljivu ukupnu nekompresovanu veličinu i broj entries pre ekstrakcije pomoću parsera; `zipinfo -t file.zip` prikazuje ukupne vrednosti, ali ne nameće bezbednosno ograničenje.<sup>[[8]](#references)</sup>
-- Kada morate da izvršite ekstrakciju, uradite to unutar cgroup/VM okruženja sa ograničenjima CPU-a i diska (izbegavajte crash-eve usled neograničene dekompresije).<sup>[[8]](#references)</sup>
+- Obavite probni prolaz: `zipdetails -v file.zip | grep -n "Local Header Offset"` i uporedite navedene offsete lokalnih zaglavlja i opsege komprimiranih podataka; duplirani offseti ukazuju na varijante potpunog preklapanja.<sup>[[7]](#references)[[8]](#references)</sup>
+- Pomoću parsera ograničite prihvaćenu ukupnu nekomprimovanu veličinu i broj stavki pre izdvajanja; `zipinfo -t file.zip` prikazuje ukupne vrednosti, ali ne nameće bezbednosno ograničenje.<sup>[[8]](#references)</sup>
+- Ako morate da izdvojite sadržaj, uradite to unutar cgroup-a/VM-a sa ograničenjima CPU-a i diska (izbegavajte padove usled neograničene dekompresije).<sup>[[8]](#references)</sup>
 
 ---
 
-### Zabuna parsera između local-header-a i central-directory-ja
+### Zabuna parsera oko lokalnog zaglavlja i centralnog direktorijuma
 
-Nedavna istraživanja differential-parser tehnika pokazala su da je ZIP dvosmislenost i dalje iskoristiva u modernim toolchain-ovima. Osnovna ideja je jednostavna: neki software veruje **Local File Header-u (LFH)**, dok drugi veruje **Central Directory-ju (CD)**, pa jedna arhiva može različitim alatima prikazati različite filenames, paths, comments, offsets ili sets entries.<sup>[[9]](#references)</sup>
+Nedavna istraživanja diferencijalnih parsera pokazala su da se dvosmislenosti ZIP formata i dalje mogu iskoristiti u savremenim skupovima alata. Osnovna ideja je jednostavna: neki softver veruje **Local File Header (LFH)** strukturi, dok drugi veruje **Central Directory (CD)** strukturi, pa jedna arhiva različitim alatima može prikazati različite nazive datoteka, putanje, komentare, offsete ili skupove stavki.<sup>[[9]](#references)</sup>
 
-Praktične ofanzivne upotrebe:
-- Učinite da upload filter, AV pre-scan ili package validator u CD-u vidi benign fajl, dok extractor poštuje drugačije LFH ime/path.
-- Iskoristite duplicate names, entries koje postoje samo u jednoj strukturi ili dvosmislene Unicode path metadata podatke (na primer, Info-ZIP Unicode Path Extra Field `0x7075`), tako da različiti parseri rekonstruišu različita stabla.
-- Kombinujte ovo sa path traversal tehnikom da bezopasan prikaz arhive pretvorite u write-primitive tokom ekstrakcije. Za stranu koja obavlja ekstrakciju pogledajte [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
+Praktične ofanzivne primene:
+- Učinite da filter za otpremanje, AV pred-skeniranje ili validator paketa u CD-u vidi bezopasnu datoteku, dok alat za izdvajanje uzima drugačiji naziv/putanju iz LFH-a.
+- Iskoristite duplirane nazive, stavke prisutne samo u jednoj strukturi ili dvosmislene metapodatke Unicode putanje (na primer, Info-ZIP Unicode Path Extra Field `0x7075`) kako bi različiti parseri rekonstruisali različita stabla.
+- Kombinujte ovo sa path traversal-om kako biste „bezopasan“ prikaz arhive pretvorili u primitiv za upis tokom izdvajanja. Za stranu izdvajanja pogledajte [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
 
 DFIR trijaža:
+
 ```python
 # compare Central Directory names against the referenced Local File Header names
 import struct, sys
@@ -225,46 +248,54 @@ b = open(sys.argv[1], 'rb').read()
 lfh = {}
 i = 0
 while (i := b.find(b'PK\x03\x04', i)) != -1:
-n, e = struct.unpack_from('<HH', b, i + 26)
-lfh[i] = b[i + 30:i + 30 + n].decode('utf-8', 'replace')
-i += 4
+    n, e = struct.unpack_from('<HH', b, i + 26)
+    lfh[i] = b[i + 30:i + 30 + n].decode('utf-8', 'replace')
+    i += 4
 i = 0
 while (i := b.find(b'PK\x01\x02', i)) != -1:
-n = struct.unpack_from('<H', b, i + 28)[0]
-off = struct.unpack_from('<I', b, i + 42)[0]
-cd = b[i + 46:i + 46 + n].decode('utf-8', 'replace')
-if off in lfh and cd != lfh[off]:
-print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
-i += 4
+    n = struct.unpack_from('<H', b, i + 28)[0]
+    off = struct.unpack_from('<I', b, i + 42)[0]
+    cd = b[i + 46:i + 46 + n].decode('utf-8', 'replace')
+    if off in lfh and cd != lfh[off]:
+        print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
+    i += 4
 ```
-Dopunite ga sledećim:
+
+Dopunite to sledećim:
+
 ```bash
 zipdetails -v suspect.zip | less
 zipinfo -v suspect.zip | grep -E "file name|offset|comment"
 ```
-Heuristike:
-- Za ingestion osetljiv na bezbednost, odbijte ili izolujte arhive sa neusaglašenim LFH/CD imenima, dupliranim imenima fajlova, više EOCD zapisa ili bajtovima nakon poslednjeg EOCD-a.<sup>[[9]](#references)[[10]](#references)</sup>
-- ZIP-ove koji koriste neuobičajena dodatna polja Unicode putanja ili neusaglašene komentare tretirajte kao sumnjive ako se različiti alati ne slažu oko extracted stabla.<sup>[[4]](#references)[[9]](#references)</sup>
-- Ako je analiza važnija od očuvanja originalnih bajtova, ponovo zapakujte arhivu pomoću strogog parsera nakon extraction-a u sandbox-u i uporedite rezultujuću listu fajlova sa originalnim metapodacima.
 
-Ovo je važno i izvan package ekosistema: ista klasa dvosmislenosti može sakriti payloads od mail gateway-a, static scanner-a i custom ingestion pipeline-ova koji „zavire“ u ZIP sadržaj pre nego što drugi extractor obradi arhivu.<sup>[[9]](#references)</sup>
+Heuristike:
+- Za unos osetljiv na bezbednost, odbacite ili izolujte arhive sa neusklađenim LFH/CD nazivima, dupliranim nazivima datoteka, više EOCD zapisa ili bajtovima nakon završnog EOCD zapisa.<sup>[[9]](#references)[[10]](#references)</sup>
+- ZIP-ove koji koriste neuobičajena dodatna polja za Unicode putanje ili nedosledne komentare tretirajte kao sumnjive ako različiti alati daju različite rezultate za izdvojeno stablo datoteka.<sup>[[4]](#references)[[9]](#references)</sup>
+- Ako je analiza važnija od očuvanja originalnih bajtova, ponovo zapakujte arhivu pomoću strogog parsera nakon raspakivanja u sandbox-u i uporedite dobijenu listu datoteka sa originalnim metapodacima.
+
+Ovo je važno i izvan ekosistema paketa: ista klasa dvosmislenosti može da sakrije payload-e od mail gateway-a, statičkih skenera i prilagođenih pipeline-ova za unos koji „zavire” u sadržaj ZIP-a pre nego što drugi extractor obradi arhivu.<sup>[[9]](#references)</sup>
 
 ---
 
 
 
+
+
 ## References
 
-- [1] [CTF vodič za forenziku (Mike's Blog, CTF kategorija)](https://michael-myers.github.io/blog/categories/ctf/)
-- [2] [GodFather – Deo 1 – Višestepeni dropper (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
+- [1] [Vodič za CTF forenziku (Mike's Blog, CTF kategorija)](https://michael-myers.github.io/blog/categories/ctf/)
+- [2] [GodFather – 1. deo – Višestepeni dropper (APK ZIP zaštita od reverznog inženjeringa)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
 - [3] [zipdetails (IO::Compress skripta)](https://metacpan.org/dist/IO-Compress/view/bin/zipdetails)
-- [4] [Specifikacija ZIP formata fajla (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
-- [5] [Fleksibilna struktura ZIP arhiva iskorišćena za neotkriveno skrivanje malware-a (Perception Point)](https://perception-point.io/news/flexible-structure-of-zip-archives-exploited-to-hide-malware-undetected/)
-- [6] [Hakeri zakopavaju malware u novom ZIP napadu — ulančani ZIP centralni direktorijumi](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
-- [7] [Bolja zip bomba (David Fifield, USENIX WOOT 2019)](https://www.usenix.org/system/files/woot19-paper_fifield_0.pdf)
-- [8] [Razumevanje Zip bombi: konstrukcija preklapajućeg/„quoted-overlap“ kernela](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
-- [9] [Moj ZIP nije tvoj ZIP: Identifikovanje i iskorišćavanje semantičkih razlika između ZIP parsera (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
-- [10] [Sprečavanje napada konfuzijom ZIP parsera na Python package installere](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
+- [4] [Specifikacija formata ZIP datoteka (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
+- [5] [Fleksibilna struktura ZIP arhiva iskorišćena za neotkriveno sakrivanje malware-a (Perception Point)](https://perception-point.io/news/flexible-structure-of-zip-archives-exploited-to-hide-malware-undetected/)
+- [6] [Hakeri sakrivaju malware u novom napadu pomoću ZIP datoteka — ulančani centralni direktorijumi ZIP-a](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
+- [7] [Bolja ZIP bomba (David Fifield, USENIX WOOT 2019)](https://www.usenix.org/system/files/woot19-paper_fifield_0.pdf)
+- [8] [Razumevanje ZIP bombi: konstrukcija sa preklapanjem/citiranim preklapanjem](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
+- [9] [Moj ZIP nije tvoj ZIP: prepoznavanje i iskorišćavanje semantičkih razlika između ZIP parsera (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
+- [10] [Sprečavanje napada zbunjivanjem ZIP parsera na Python instalacionim programima paketa](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
 - [11] [ZIP napadi sa smanjenim poznatim otvorenim tekstom (Michael Stay, AccessData Corporation)](https://math.ucr.edu/~mike/zipattacks.pdf)
-- [12] [Hack This Site: Realistična web misija, nivo 15 (ZIP napad sa poznatim otvorenim tekstom)](https://www.hackthissite.org/articles/read/793)
+- [12] [Hack This Site: Realistična veb misija, nivo 15 (ZIP napad sa poznatim otvorenim tekstom)](https://www.hackthissite.org/articles/read/793)
+- [13] [Uputstvo za bkcrack](https://github.com/kimci86/bkcrack/blob/master/readme.md)
+- [14] [bkcrack vodič za napad sa poznatim otvorenim tekstom](https://github.com/kimci86/bkcrack/blob/master/example/tutorial.md)
+- [15] [fcrackzip repozitorijum](https://github.com/hyc/fcrackzip)
 {{#include ../../../banners/hacktricks-training.md}}
