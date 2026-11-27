@@ -1,67 +1,72 @@
-# ZIPs tricks
+# ZIPのテクニック
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**ZIP files** の管理に使用する **Command-line tools** は、ZIP files の診断、修復、cracking に不可欠です。主な utilities は次のとおりです。<sup>[[1]](#references)</sup>
+**コマンドラインツール**は、**zipファイル**の診断、修復、パスワード解析に不可欠です。主なユーティリティは次のとおりです。<sup>[[1]](#references)</sup>
 
-- **`unzip`**: ZIP file が decompress できない理由を明らかにします。
-- **`zipdetails -v`**: ZIP file format の fields を詳細に分析します。<sup>[[3]](#references)</sup>
-- **`zipinfo`**: ZIP file の contents を extract せずに一覧表示します。
-- **`zip -F input.zip --out output.zip`** および **`zip -FF input.zip --out output.zip`**: corrupted ZIP files の修復を試みます。
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: ZIP passwords の brute-force cracking 用 tool で、約 7 文字までの passwords に有効です。
+- **`unzip`**: zipファイルを展開できない理由を確認できます。
+- **`zipdetails -v`**: zipファイル形式のフィールドを詳細に分析できます。<sup>[[3]](#references)</sup>
+- **`zipinfo`**: 展開せずにzipファイルの内容を一覧表示します。
+- **`zip -F input.zip --out output.zip`** および **`zip -FF input.zip --out output.zip`**: 破損したzipファイルの修復を試みます。
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: ZIPパスワードへの辞書攻撃やブルートフォース攻撃に使うツールです。実行可能性はパスワードの探索空間によって異なります。<sup>[[15]](#references)</sup>
 
-[ZIP file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) には、ZIP files の structure と standards に関する包括的な詳細が記載されています。<sup>[[4]](#references)</sup>
+[Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)には、zipファイルの構造と標準に関する包括的な情報が記載されています。<sup>[[4]](#references)</sup>
 
-従来の password-protected ZIP files では、RAR や 7z がサポートする header-encryption modes とは異なり、通常は filenames と file sizes が visible のままである点に注意が必要です。さらに、古い ZipCrypto method で encrypted された ZIP files は、compressed file の unencrypted copy が利用可能な場合、**plaintext attack** に対して vulnerable です。<sup>[[1]](#references)</sup> この attack は既知の content を利用して ZIP の password を crack します。詳細は[この academic paper](https://math.ucr.edu/~mike/zipattacks.pdf)で説明され、[この Hack This Site walk-through](https://www.hackthissite.org/articles/read/793)で実演されています。<sup>[[11]](#references)[[12]](#references)</sup> ただし、ZipCrypto known-plaintext attack は **AES-256** encryption で保護された entries には適用されません。<sup>[[1]](#references)</sup>
+従来のパスワード保護されたZIPファイルでは、RARや7zがサポートするヘッダー暗号化モードとは異なり、通常、ファイル名とファイルサイズが見える状態です。ZipCryptoの既知平文攻撃で復元されるのは**内部暗号鍵**であり、必ずしも元のパスワードではありません。この鍵があれば、同じパスワードで暗号化されたエントリを復号できます。<sup>[[13]](#references)</sup> この攻撃には、**暗号化前**のストリームの既知バイトが必要です。格納形式のメンバーでは元のファイルのバイト列ですが、DEFLATE形式のメンバーでは圧縮後のバイト列となるため、圧縮出力を完全に再現する必要がある場合があります。<sup>[[13]](#references)[[14]](#references)</sup> 実践的な手順については、[Known plaintext ZIP attack](../../../generic-hacking/brute-force.md#known-plaintext-zip-attack)を参照してください。暗号解析の背景については、[論文](https://math.ucr.edu/~mike/zipattacks.pdf)と[解説](https://www.hackthissite.org/articles/read/793)を参照してください。<sup>[[11]](#references)[[12]](#references)</sup> このZipCrypto攻撃は、AESで暗号化されたZIPエントリには適用できません。<sup>[[13]](#references)</sup>
 
 ---
 
-## 改変された ZIP headers を使った APKs の Anti-reversing tricks
+## 操作されたZIPヘッダーを使ったAPKのアンチリバース手法
 
-Modern Android malware droppers は、malformed ZIP metadata を使用して static tools（jadx/apktool/unzip）を破壊しながら、device 上では APK を install 可能な状態に保ちます。最も一般的な tricks は次のとおりです。<sup>[[2]](#references)</sup>
+最新のAndroidマルウェアドロッパーは、不正なZIPメタデータを使って静的解析ツール（jadx/apktool/unzip）を妨害しつつ、端末へのAPKのインストールを可能にします。よく使われる手法は次のとおりです。<sup>[[2]](#references)</sup>
 
-- ZIP General Purpose Bit Flag (GPBF) の bit 0 を設定して Fake encryption を行う
-- 大きな/custom Extra fields を悪用して parsers を混乱させる
-- File/directory name collisions によって real artifacts を隠す（例: real `classes.dex` の隣に `classes.dex/` という名前の directory を置く）
+- ZIP General Purpose Bit Flag（GPBF）のbit 0を設定して、暗号化されているように見せかける
+- 大きな、または独自のExtraフィールドを悪用してパーサーを混乱させる
+- ファイル名とディレクトリ名を衝突させて実際の成果物を隠す（例: 実際の`classes.dex`の隣に`classes.dex/`という名前のディレクトリを置く）
 
-### 1) real crypto を使わない Fake encryption（GPBF bit 0 が設定されている場合）
+### 1) 実際の暗号化なしで暗号化を偽装する（GPBF bit 0を設定）
 
-Symptoms:
-- `jadx-gui` が次のような errors で失敗します。
+症状:
+- `jadx-gui`が次のようなエラーで失敗する:
+  
+  ```
+  java.util.zip.ZipException: invalid CEN header (encrypted entry)
+  ```
+- `unzip`は、有効なAPKでは暗号化されているはずのない`classes*.dex`、`resources.arsc`、または`AndroidManifest.xml`が含まれるコアAPKファイルに対して、パスワードを要求します。
+  
+  ```bash
+  unzip sample.apk
+  [sample.apk] classes3.dex password:
+    skipping: classes3.dex                          incorrect password
+    skipping: AndroidManifest.xml/res/vhpng-xhdpi/mxirm.png  incorrect password
+    skipping: resources.arsc/res/domeo/eqmvo.xml            incorrect password
+    skipping: classes2.dex                          incorrect password
+  ```
 
-```
-java.util.zip.ZipException: invalid CEN header (encrypted entry)
-```
-- `unzip` は、valid APK では `classes*.dex`、`resources.arsc`、または `AndroidManifest.xml` を encrypted にできないにもかかわらず、core APK files の password を要求します。
+zipdetails による検出:
 
-```bash
-unzip sample.apk
-[sample.apk] classes3.dex password:
-skipping: classes3.dex                          incorrect password
-skipping: AndroidManifest.xml/res/vhpng-xhdpi/mxirm.png  incorrect password
-skipping: resources.arsc/res/domeo/eqmvo.xml            incorrect password
-skipping: classes2.dex                          incorrect password
-```
-
-zipdetails による Detection:
 ```bash
 zipdetails -v sample.apk | less
 ```
-local および central headers の General Purpose Bit Flag を確認します。core entries であっても bit 0 が設定されている（Encryption）場合は、典型的な兆候です：
+
+ローカルヘッダーとセントラルヘッダーの General Purpose Bit Flag を確認してください。core entries であっても bit 0 がセット（Encryption）されているのが、手がかりとなる値です:
+
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
-[Bit 0]   1 'Encryption'
-[Bits 1-2] 1 'Maximum Compression'
-[Bit 3]   1 'Streamed'
-[Bit 11]  1 'Language Encoding'
+  [Bit 0]   1 'Encryption'
+  [Bits 1-2] 1 'Maximum Compression'
+  [Bit 3]   1 'Streamed'
+  [Bit 11]  1 'Language Encoding'
 ```
-ヒューリスティック: APKがデバイス上でインストールおよび実行できる一方で、主要なエントリがツール上で「encrypted」と表示される場合、GPBFが改変されています。
 
-LFH（Local File Header）とCD（Central Directory）の両方のエントリでGPBF bit 0をクリアして修正します。最小限のbyte-patcher:
+ヒューリスティック: APKを端末にインストールして実行できるのに、ツール上で主要なエントリが「暗号化」されているように見える場合、GPBFが改ざんされています。
+
+Local File Headers (LFH) と Central Directory (CD) の両方のエントリで、GPBF bit 0をクリアして修正します。最小限のバイトパッチャー:
 
 <details>
-<summary>最小限のGPBF bit-clear patcher</summary>
+<summary>GPBF bitをクリアする最小限のパッチャー</summary>
+
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -70,62 +75,70 @@ SIG_LFH = b"\x50\x4b\x03\x04"  # Local File Header
 SIG_CDH = b"\x50\x4b\x01\x02"  # Central Directory Header
 
 def patch_flags(buf: bytes, sig: bytes, flag_off: int):
-out = bytearray(buf)
-i = 0
-patched = 0
-while True:
-i = out.find(sig, i)
-if i == -1:
-break
-flags, = struct.unpack_from('<H', out, i + flag_off)
-if flags & 1:  # encryption bit set
-struct.pack_into('<H', out, i + flag_off, flags & 0xFFFE)
-patched += 1
-i += 4  # move past signature to continue search
-return bytes(out), patched
+    out = bytearray(buf)
+    i = 0
+    patched = 0
+    while True:
+        i = out.find(sig, i)
+        if i == -1:
+            break
+        flags, = struct.unpack_from('<H', out, i + flag_off)
+        if flags & 1:  # encryption bit set
+            struct.pack_into('<H', out, i + flag_off, flags & 0xFFFE)
+            patched += 1
+        i += 4  # move past signature to continue search
+    return bytes(out), patched
 
 if __name__ == '__main__':
-inp, outp = sys.argv[1], sys.argv[2]
-data = open(inp, 'rb').read()
-data, p_lfh = patch_flags(data, SIG_LFH, 6)  # LFH flag at +6
-data, p_cdh = patch_flags(data, SIG_CDH, 8)  # CDH flag at +8
-open(outp, 'wb').write(data)
-print(f'Patched: LFH={p_lfh}, CDH={p_cdh}')
+    inp, outp = sys.argv[1], sys.argv[2]
+    data = open(inp, 'rb').read()
+    data, p_lfh = patch_flags(data, SIG_LFH, 6)  # LFH flag at +6
+    data, p_cdh = patch_flags(data, SIG_CDH, 8)  # CDH flag at +8
+    open(outp, 'wb').write(data)
+    print(f'Patched: LFH={p_lfh}, CDH={p_cdh}')
 ```
+
 </details>
 
-使用方法:
+使用方法：
+
 ```bash
 python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
-`General Purpose Flag  0000` が core entries に表示され、tools で APK を再び parse できるようになります。
 
-### 2) Large/custom Extra fields で parsers を破壊する
+ビット 0 だけを変更します。たとえば、`0A09` は `0000` ではなく `0A08` になります。この最小限の patcher は raw bytes 内のヘッダーシグネチャをスキャンするため、ファイルデータ内にシグネチャに似たバイト列があると誤検出する可能性があります。出力を使用する前に、コピー上で作業し、エントリーの一覧とヘッダーを確認してください。<sup>[[4]](#references)</sup>
 
-Attackers は oversized な Extra fields と奇妙な IDs を headers に詰め込み、decompilers を誤動作させます。実際の環境では、そこに埋め込まれた custom markers（例: `JADXBLOCK` のような strings）が見つかることがあります。
+### 2) パーサーを破る大きな／カスタム Extra fields
 
-Inspection:
+攻撃者は、逆コンパイラーを誤作動させるために、サイズの大きすぎる Extra fields や奇妙な ID をヘッダーに詰め込みます。実際の環境では、カスタムマーカー（例：`JADXBLOCK` のような文字列）が埋め込まれていることがあります。
+
+確認方法：
+
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-観測された例: 大きな payload を格納した、`0xCAFE`（"Java Executable"）や `0x414A`（"JA:"）のような未知の ID。<sup>[[2]](#references)</sup>
 
-DFIR ヒューリスティック:
-- コアエントリ（`classes*.dex`、`AndroidManifest.xml`、`resources.arsc`）の Extra fields が通常より大きい場合に Alert する。
-- これらのエントリにある未知の Extra ID は suspicious とみなす。
+観測された例: `0xCAFE`（「Java Executable」）や `0x414A`（「JA:」）などの未知の ID が、大きなペイロードを持つケース。<sup>[[2]](#references)</sup>
 
-実用的な mitigation: archive を再構築する（例: 抽出した files を再度 zip 化する）と、悪意のある Extra fields が除去される。fake encryption が原因で tools が extract を拒否する場合は、まず上記のように GPBF bit 0 を clear してから、repackage する:
+DFIR のヒューリスティック:
+- コアエントリ（`classes*.dex`、`AndroidManifest.xml`、`resources.arsc`）の Extra fields が異常に大きい場合は警告する。
+- これらのエントリにある未知の Extra ID は疑わしいものとして扱う。
+
+実用的な緩和策: アーカイブを再構築する（例: 抽出したファイルを再圧縮する）と、悪意のある Extra fields が取り除かれます。偽の暗号化が原因でツールが抽出を拒否する場合は、まず上記のように GPBF bit 0 をクリアし、その後再パッケージします:
+
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
-### 3) File/Directory name collisions（実際の artifact の隠蔽）
 
-ZIP には、ファイル `X` とディレクトリ `X/` の両方を含めることができます。一部の extractor や decompiler は混乱し、ディレクトリエントリによって実際のファイルを上書きまたは隠蔽する場合があります。`classes.dex` のような中核 APK 名とエントリが衝突するケースが確認されています。
+### 3) ファイル/ディレクトリ名の衝突（実際のアーティファクトを隠す）
 
-Triage と安全な extraction:
+ZIPにはファイル `X` とディレクトリ `X/` の両方を含めることができます。一部の展開ツールや逆コンパイラは混乱し、ディレクトリエントリで実際のファイルを上書きしたり隠したりすることがあります。`classes.dex` のようなAPKの主要な名前と衝突するエントリで、これが確認されています。
+
+トリアージと安全な展開:
+
 ```bash
 # List potential collisions (names that differ only by trailing slash)
 zipinfo -1 sample.apk | awk '{n=$0; sub(/\/$/,"",n); print n}' | sort | uniq -d
@@ -136,44 +149,50 @@ unzip normalized.apk -d outdir
 # replace outdir/classes.dex? [y]es/[n]o/[A]ll/[N]one/[r]ename: r
 # new name: unk_classes.dex
 ```
-修正後のプログラムによる検出:
+
+Programmatic detection の修正後：
+
 ```python
 from zipfile import ZipFile
 from collections import defaultdict
 
 with ZipFile('normalized.apk') as z:
-names = z.namelist()
+    names = z.namelist()
 
 collisions = defaultdict(list)
 for n in names:
-base = n[:-1] if n.endswith('/') else n
-collisions[base].append(n)
+    base = n[:-1] if n.endswith('/') else n
+    collisions[base].append(n)
 
 for base, variants in collisions.items():
-if len(variants) > 1:
-print('COLLISION', base, '->', variants)
+    if len(variants) > 1:
+        print('COLLISION', base, '->', variants)
 ```
-Blue-teamによる検出アイデア:
-- ローカルヘッダーで暗号化（GPBF bit 0 = 1）とマークされているにもかかわらず、install/runできるAPKを検出する。
-- coreエントリにある大きい/未知のExtra fieldsを検出する（`JADXBLOCK`のようなmarkerを探す）。
-- `AndroidManifest.xml`、`resources.arsc`、`classes*.dex`について、path-collisions（`X`と`X/`）を特に検出する。
+
+Blue-team detection ideas:
+- ローカルヘッダーで暗号化がマークされている（GPBF bit 0 = 1）にもかかわらず、インストール／実行される APK を検出する。
+- コアエントリに大きな／未知の Extra fields がある場合に検出する（`JADXBLOCK` などのマーカーを探す）。
+- `AndroidManifest.xml`、`resources.arsc`、`classes*.dex` について、パスの衝突（`X` と `X/`）を検出する。
 
 ---
 
-## その他の悪意あるZIP tricks（2024–2026）
+## その他の悪意ある ZIP tricks（2024–2026）
 
-### 連結されたcentral directories（multi-EOCD evasion）
+### 連結された central directories（複数 EOCD による回避）
 
-2024年のphishing campaignでは、攻撃者が実際には**2つのZIP filesを連結した**単一のblobを配布した。それぞれに独自のEnd of Central Directory（EOCD）recordとcentral directoryが含まれていた。extractorごとに異なるdirectoryをparseし（7-Zipは最初のものを、WinRARは最後のものを読み取る）、攻撃者は一部のtoolでしか表示されないpayloadsを隠すことができた。1つのdirectoryだけをinspectするscannerでは、もう一方のarchiveを見落とす可能性がある。<sup>[[5]](#references)[[6]](#references)</sup>
+2024 年のフィッシングキャンペーンで、攻撃者は実際には **2 つの ZIP files を連結した**単一の blob を送りつけました。それぞれに独自の End of Central Directory（EOCD）レコードと central directory があり、展開ツールによって異なるディレクトリが解析されました（7-Zip は最初のものを、WinRAR は最後のものを読み込みました）。これにより、攻撃者は一部のツールにしか表示されない payloads を隠すことができ、1 つのディレクトリだけを検査する scanner はもう一方の archive を見逃す可能性があります。<sup>[[5]](#references)[[6]](#references)</sup>
 
-**Triage commands**
+**トリアージ用コマンド**
+
 ```bash
 # Count EOCD signatures
 binwalk -R "PK\x05\x06" suspect.zip
 # Show EOCD records and their central-directory offsets
 zipdetails --scan -v suspect.zip | grep -ni -A2 "end central"
 ```
-複数の EOCD が存在する場合、または「data after payload」警告が表示される場合は、blob を分割して各部分を調査します。
+
+複数のEOCDが見つかる場合、または「payloadの後にデータがある」という警告が表示される場合は、blobを分割して各部分を調べます：
+
 ```bash
 # Recover the second archive from its first local-file-header offset.
 binwalk -R "PK\x03\x04" suspect.zip
@@ -182,42 +201,46 @@ OFF=123456
 dd if=suspect.zip bs=1 skip="$OFF" of=tail.zip
 7z l tail.zip   # list hidden content
 ```
-### Quoted-overlap / overlapping-entry bombs（non-recursive）
 
-Quoted-overlap ZIP bombs は、小さな **kernel**（高度に圧縮された DEFLATE block）を構築し、overlapping entries 間で再利用します。Full-overlap variants は複数の central-directory entries を 1 つの local header に向け、quoted-overlap variants は DEFLATE streams 内で local headers を quote します。公開された construction では、nested archives を使用せずに 28M:1 を超える圧縮率を実現しています。<sup>[[7]](#references)</sup>
+### Quoted-overlap / overlapping-entry bombs（非再帰型）
 
-**Quick detection（duplicate LFH offsets）**
+Quoted-overlap ZIP bombs は、小さな **kernel**（高圧縮の DEFLATE block）を構築し、重複するエントリ間で再利用します。Full-overlap 型は複数の central-directory エントリを1つの local header に向ける一方、quoted-overlap 型は DEFLATE stream 内に local header を引用します。公開された構成では、nested archive を使わずに 28M:1 を超える圧縮率を実現しています。<sup>[[7]](#references)</sup>
+
+**簡易検出（LFH オフセットの重複）**
+
 ```python
 # detect full-overlap variants by identical relative offsets
 import struct, sys
 buf=open(sys.argv[1],'rb').read()
 off=0; seen=set()
 while True:
-i = buf.find(b'PK\x01\x02', off)
-if i<0: break
-rel = struct.unpack_from('<I', buf, i+42)[0]
-if rel in seen:
-print('OVERLAP at offset', rel)
-break
-seen.add(rel); off = i+4
+    i = buf.find(b'PK\x01\x02', off)
+    if i<0: break
+    rel = struct.unpack_from('<I', buf, i+42)[0]
+    if rel in seen:
+        print('OVERLAP at offset', rel)
+        break
+    seen.add(rel); off = i+4
 ```
-**Handling**
-- Perform a dry-run walk: `zipdetails -v file.zip | grep -n "Local Header Offset"` を実行し、参照されている local-header offsets と compressed-data ranges を比較する。重複する offsets は full-overlap variants を示す。<sup>[[7]](#references)[[8]](#references)</sup>
-- parser を使って、extraction 前に許可する total uncompressed size と entry count に上限を設定する。`zipinfo -t file.zip` は totals を報告するが、安全上の制限は強制しない。<sup>[[8]](#references)</sup>
-- extraction が必要な場合は、CPU と disk の制限を設定した cgroup/VM 内で実行する（unbounded inflation によるクラッシュを回避する）。<sup>[[8]](#references)</sup>
+
+**対処**
+- dry-runで走査します: `zipdetails -v file.zip | grep -n "Local Header Offset"` を実行し、参照されるローカルヘッダーオフセットと圧縮データ範囲を比較します。オフセットの重複は、完全に重複する亜種の兆候です。<sup>[[7]](#references)[[8]](#references)</sup>
+- 展開前に、パーサーで許容する展開後の合計サイズとエントリー数に上限を設けます。`zipinfo -t file.zip` は合計を報告しますが、安全上限は強制しません。<sup>[[8]](#references)</sup>
+- 展開が必要な場合は、CPUとディスクに制限を設けたcgroup/VM内で行います（無制限の展開によるクラッシュを避けます）。<sup>[[8]](#references)</sup>
 
 ---
 
-### Local-header と central-directory の parser confusion
+### ローカルヘッダーとセントラルディレクトリのパーサー間の解釈の違い
 
-Recent differential-parser research により、ZIP の ambiguity は modern toolchains でも依然として exploitable であることが示された。基本的な考え方は単純で、一部の software は **Local File Header (LFH)** を信頼し、他の software は **Central Directory (CD)** を信頼する。そのため、1 つの archive が、異なる tools に対して異なる filenames、paths、comments、offsets、または entry sets を提示できる。<sup>[[9]](#references)</sup>
+近年の差分パーサー研究により、ZIPの曖昧さは最新のツールチェーンでも依然として悪用可能であることが示されました。基本的な考え方は単純です。一部のソフトウェアは**Local File Header (LFH)**を信頼し、別のソフトウェアは**Central Directory (CD)**を信頼するため、同じアーカイブでも、ツールによって異なるファイル名、パス、コメント、オフセット、またはエントリーセットを提示できます。<sup>[[9]](#references)</sup>
 
-Practical offensive uses:
-- upload filter、AV pre-scan、または package validator には CD 内の benign file を認識させ、extractor には異なる LFH name/path を使用させる。
-- duplicate names、片方の structure にのみ存在する entries、または ambiguous Unicode path metadata（例: Info-ZIP Unicode Path Extra Field `0x7075`）を悪用し、異なる parsers に異なる trees を再構築させる。
-- これを path traversal と組み合わせ、"harmless" な archive view を extraction 中の write-primitive に変える。extraction 側については、[Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md) を参照。
+実践的な攻撃用途:
+- アップロードフィルター、AVの事前スキャン、またはパッケージ検証ツールにはCD内の無害なファイルを認識させ、展開ツールには異なるLFHの名前/パスを使用させます。
+- 重複する名前、一方の構造にのみ存在するエントリー、または曖昧なUnicodeパスメタデータ（たとえば、Info-ZIP Unicode Path Extra Field `0x7075`）を悪用し、異なるパーサーに異なるツリーを再構成させます。
+- これをパストラバーサルと組み合わせ、展開時に「無害な」アーカイブの表示をファイル書き込みプリミティブに変えます。展開側については、[Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md)を参照してください。
 
-DFIR triage:
+DFIRトリアージ:
+
 ```python
 # compare Central Directory names against the referenced Local File Header names
 import struct, sys
@@ -225,46 +248,54 @@ b = open(sys.argv[1], 'rb').read()
 lfh = {}
 i = 0
 while (i := b.find(b'PK\x03\x04', i)) != -1:
-n, e = struct.unpack_from('<HH', b, i + 26)
-lfh[i] = b[i + 30:i + 30 + n].decode('utf-8', 'replace')
-i += 4
+    n, e = struct.unpack_from('<HH', b, i + 26)
+    lfh[i] = b[i + 30:i + 30 + n].decode('utf-8', 'replace')
+    i += 4
 i = 0
 while (i := b.find(b'PK\x01\x02', i)) != -1:
-n = struct.unpack_from('<H', b, i + 28)[0]
-off = struct.unpack_from('<I', b, i + 42)[0]
-cd = b[i + 46:i + 46 + n].decode('utf-8', 'replace')
-if off in lfh and cd != lfh[off]:
-print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
-i += 4
+    n = struct.unpack_from('<H', b, i + 28)[0]
+    off = struct.unpack_from('<I', b, i + 42)[0]
+    cd = b[i + 46:i + 46 + n].decode('utf-8', 'replace')
+    if off in lfh and cd != lfh[off]:
+        print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
+    i += 4
 ```
-翻訳する英文を送ってください。
+
+次の内容で補完してください：
+
 ```bash
 zipdetails -v suspect.zip | less
 zipinfo -v suspect.zip | grep -E "file name|offset|comment"
 ```
-Heuristics:
-- Security-sensitive ingestion では、LFH/CD の名前が一致しない archive、重複するファイル名、複数の EOCD レコード、または最後の EOCD 後に trailing bytes がある archive を拒否または隔離します。<sup>[[9]](#references)[[10]](#references)</sup>
-- 通常とは異なる Unicode-path extra fields を使用している ZIP や、抽出された tree について異なる tools の結果が一致しない場合は、一貫性のない comments を持つ ZIP を suspicious として扱います。<sup>[[4]](#references)[[9]](#references)</sup>
-- 元の bytes の保持よりも analysis が重要な場合は、sandbox 内で抽出した後、strict parser を使用して archive を repack し、結果の file list を元の metadata と比較します。
 
-これは package ecosystems に限った問題ではありません。同じ ambiguity class により、mail gateways、static scanners、そして異なる extractor が archive を処理する前に ZIP contents を "peek" する custom ingestion pipelines から payloads が隠される可能性があります。<sup>[[9]](#references)</sup>
+ヒューリスティクス:
+- セキュリティ上重要な取り込み処理では、LFH/CD 名の不一致、重複ファイル名、複数の EOCD レコード、または最後の EOCD の後にバイト列が続くアーカイブを拒否するか、隔離します。<sup>[[9]](#references)[[10]](#references)</sup>
+- 異なるツールで展開後のツリーが一致しない場合、通常とは異なる Unicode パスの追加フィールドや、一貫性のないコメントを含む ZIP は疑わしいものとして扱います。<sup>[[4]](#references)[[9]](#references)</sup>
+- 元のバイト列の保持より分析を優先する場合は、サンドボックス内で展開した後、厳格なパーサーを使ってアーカイブを再パッケージし、生成されたファイル一覧と元のメタデータを比較します。
+
+これはパッケージのエコシステムに限った話ではありません。同じ曖昧さを利用して、メールゲートウェイ、静的スキャナー、カスタム取り込みパイプラインからペイロードを隠せる可能性があります。これらは ZIP の内容を先に「覗き見」し、その後、別の展開ツールでアーカイブを処理します。<sup>[[9]](#references)</sup>
 
 ---
 
 
 
+
+
 ## References
 
-- [1] [CTF Forensics Field Guide (Mike's Blog, CTF category)](https://michael-myers.github.io/blog/categories/ctf/)
-- [2] [GodFather – Part 1 – A multistage dropper (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
+- [1] [CTF フォレンジック・フィールドガイド (Mike's Blog, CTF category)](https://michael-myers.github.io/blog/categories/ctf/)
+- [2] [GodFather – Part 1 – 多段階ドロッパー (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
 - [3] [zipdetails (IO::Compress script)](https://metacpan.org/dist/IO-Compress/view/bin/zipdetails)
-- [4] [ZIP File Format Specification (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
-- [5] [Flexible Structure of Zip Archives Exploited to Hide Malware Undetected (Perception Point)](https://perception-point.io/news/flexible-structure-of-zip-archives-exploited-to-hide-malware-undetected/)
-- [6] [Hackers bury malware in new ZIP file attack — concatenated ZIP central directories](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
-- [7] [A better zip bomb (David Fifield, USENIX WOOT 2019)](https://www.usenix.org/system/files/woot19-paper_fifield_0.pdf)
-- [8] [Understanding Zip Bombs: overlapping/quoted-overlap kernel construction](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
-- [9] [My ZIP isn't your ZIP: Identifying and Exploiting Semantic Gaps Between ZIP Parsers (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
-- [10] [Preventing ZIP parser confusion attacks on Python package installers](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
-- [11] [ZIP Attacks with Reduced Known Plaintext (Michael Stay, AccessData Corporation)](https://math.ucr.edu/~mike/zipattacks.pdf)
-- [12] [Hack This Site: Realistic Web Mission, Level 15 (known-plaintext ZIP attack)](https://www.hackthissite.org/articles/read/793)
+- [4] [ZIP ファイル形式仕様 (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
+- [5] [ZIP アーカイブの柔軟な構造を悪用し、マルウェアを検知されないように隠す (Perception Point)](https://perception-point.io/news/flexible-structure-of-zip-archives-exploited-to-hide-malware-undetected/)
+- [6] [ハッカーが新たな ZIP ファイル攻撃でマルウェアを隠す — 連結された ZIP 中央ディレクトリ](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
+- [7] [より優れた zip bomb (David Fifield, USENIX WOOT 2019)](https://www.usenix.org/system/files/woot19-paper_fifield_0.pdf)
+- [8] [Zip Bomb の理解: 重複/引用重複カーネルの構築](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
+- [9] [私の ZIP はあなたの ZIP ではない: ZIP パーサー間の意味的なギャップの特定と悪用 (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
+- [10] [Python パッケージインストーラーに対する ZIP パーサー混乱攻撃の防止](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
+- [11] [既知平文を削減した ZIP 攻撃 (Michael Stay, AccessData Corporation)](https://math.ucr.edu/~mike/zipattacks.pdf)
+- [12] [Hack This Site: 現実的な Web ミッション、レベル 15 (既知平文 ZIP 攻撃)](https://www.hackthissite.org/articles/read/793)
+- [13] [bkcrack の使い方](https://github.com/kimci86/bkcrack/blob/master/readme.md)
+- [14] [bkcrack の既知平文チュートリアル](https://github.com/kimci86/bkcrack/blob/master/example/tutorial.md)
+- [15] [fcrackzip リポジトリ](https://github.com/hyc/fcrackzip)
 {{#include ../../../banners/hacktricks-training.md}}
