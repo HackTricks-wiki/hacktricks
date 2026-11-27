@@ -1060,7 +1060,7 @@
     "src/reversing/reversing-tools-basic-methods/satisfiability-modulo-theories-smt-z3.md": "0ce9fad606cc32bc6f4e6835f2cc05e71884379c",
     "src/reversing/reversing-tools-basic-methods/windbg-automation.md": "3c17b497162ae74aa67badcb6228628bd99c9d2a",
     "src/reversing/reversing-tools-basic-methods/windows-kernel-debugging-kernelflirt.md": "fd233ea1795c9862cb3105cd3dd96c955b437ab7",
-    "src/reversing/windows-exception-driven-control-flow.md": "7981c1fb719c9075b95af83d21357eb396aeeeb0",
+    "src/reversing/windows-exception-driven-control-flow.md": "365dae924fce0e75b7b95faf28ca0e7a0c603a3c",
     "src/reversing/word-macros.md": "4c068dadec24a1b2de454d9325252808d48ed327",
     "src/stego/README.md": "58ba472c69a17cc540a6b87430956e9b0587136e",
     "src/stego/audio/README.md": "22e15d27d8110b3aa6a35003bfb597367b17cd4f",
