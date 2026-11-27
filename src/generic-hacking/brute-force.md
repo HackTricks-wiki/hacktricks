@@ -608,19 +608,16 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 
 #### Known plaintext zip attack
 
-You need to know the **plaintext** (or part of the plaintext) **of a file contained inside** the encrypted zip. You can check **filenames and size of files contained inside** an encrypted zip running: **`7z l encrypted.zip`**\
-Download [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)from the releases page.
+Use [`bkcrack`](https://github.com/kimci86/bkcrack) against **ZipCrypto** entries when you know at least 12 bytes of the stream before encryption, including 8 contiguous bytes. A stored entry exposes the original file bytes as that stream. For a DEFLATE entry, merely knowing the original file is insufficient: the attack needs matching compressed bytes, which depend on the compressor and settings. `bkcrack` recovers internal keys; recovering the original password is optional.<sup>[[16]](#references)[[17]](#references)</sup> See [ZIP tricks](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md) for structural ZIP triage.
 
 ```bash
-# You need to create a zip file containing only the file that is inside the encrypted zip
-zip plaintext.zip plaintext.file
-
-./bkcrack -C <encrypted.zip> -c <plaintext.file> -P <plaintext.zip> -p <plaintext.file>
-# Now wait, this should print a key such as 7b549874 ebc25ec5 7e465e18
-# With that key you can create a new zip file with the content of encrypted.zip
-# but with a different pass that you set (so you can decrypt it)
-./bkcrack -C <encrypted.zip> -k 7b549874 ebc25ec5 7e465e18 -U unlocked.zip new_pwd
-unzip unlocked.zip #User new_pwd as password
+bkcrack -L encrypted.zip  # identify ZipCrypto and Store/Deflate entries
+# Stored member: known.txt contains the member's original bytes (or a known prefix).
+bkcrack -C encrypted.zip -c entry.txt -p known.txt
+# Deflated member: matching.zip must contain the same compressed stream.
+bkcrack -C encrypted.zip -c entry.txt -P matching.zip -p entry.txt
+# Replace KEY0..KEY2 with the three recovered keys; assumes entries share a password.
+bkcrack -C encrypted.zip -k KEY0 KEY1 KEY2 -D decrypted.zip
 ```
 
 ### 7z
@@ -1022,6 +1019,8 @@ Cracking Common Application Hashes
  1700 | SHA-512                                          | Raw Hash
 ```
 
+
+
 ## References
 
 - [1] [Inside GoBruteforcer: AI-generated server defaults, weak passwords, and crypto-focused campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
@@ -1039,5 +1038,6 @@ Cracking Common Application Hashes
 - [13] [hate_crack repository and attack documentation](https://github.com/trustedsec/hate_crack)
 - [14] [What's New in hate_crack Since 2.0](https://trustedsec.com/blog/whats-new-in-hate-crack-since-2-0)
 - [15] [hate_crack LLM destination policy](https://github.com/trustedsec/hate_crack/blob/main/hate_crack/llm.py)
-
+- [16] [bkcrack usage](https://github.com/kimci86/bkcrack/blob/master/readme.md)
+- [17] [bkcrack known-plaintext tutorial](https://github.com/kimci86/bkcrack/blob/master/example/tutorial.md)
 {{#include ../banners/hacktricks-training.md}}
