@@ -186,4 +186,5 @@ Siehe den Eintrag „HackTricks Values & FAQ“ im Abschnitt „References“ un
 - [14] [WebSec-Sponsoringvideo](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Cyber-Helmets-Kurse](https://cyberhelmets.com/courses/?ref=hacktricks)
 - [16] [HackTricks-Werte & FAQ](welcome/hacktricks-values-and-faq.md)
+
 {{#include banners/hacktricks-training.md}}
