@@ -149,4 +149,5 @@ Ova licenca ne daje nikakva prava na žigove ili brendiranje povezana sa sadrža
 - [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
 - [4] [Licenca za HackTricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/LICENSE.md)
 - [5] [Creative Commons CC BY-NC 4.0 — pravni tekst](https://creativecommons.org/licenses/by-nc/4.0/)
+
 {{#include ../banners/hacktricks-training.md}}

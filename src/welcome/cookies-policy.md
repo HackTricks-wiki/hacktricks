@@ -49,4 +49,5 @@ Ako imate pitanja ili nedoumice u vezi sa ovom Politikom kolačića, kontaktiraj
 ## References
 
 - [1] [GitBook — Autentifikacija posetilaca: kolačići](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}
