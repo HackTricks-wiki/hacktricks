@@ -13,4 +13,5 @@ HackTricks ayrıca araştırmacılara yeni bulguları paylaşabilecekleri bir al
 ## References
 
 - [1] [HackTricks-wiki/hacktricks — GitHub deposu](https://github.com/HackTricks-wiki/hacktricks)
+
 {{#include ../banners/hacktricks-training.md}}

@@ -49,4 +49,5 @@ Bu Çerez Politikası hakkında sorularınız veya endişeleriniz varsa lütfen 
 ## References
 
 - [1] [GitBook — Ziyaretçi Kimlik Doğrulaması: çerezler](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}

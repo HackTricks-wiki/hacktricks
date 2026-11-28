@@ -149,4 +149,5 @@ Bu lisans, içerikle ilgili herhangi bir ticari marka veya marka kullanma hakkı
 - [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
 - [4] [HackTricks lisansı](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/LICENSE.md)
 - [5] [Creative Commons CC BY-NC 4.0 metni](https://creativecommons.org/licenses/by-nc/4.0/)
+
 {{#include ../banners/hacktricks-training.md}}
