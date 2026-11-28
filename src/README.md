@@ -105,7 +105,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ### [NaxusAI – Autonomous Offensive Security](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI का लोगो"><figcaption></figcaption></figure>
 
 **Naxus** एक AI-powered offensive-security platform है, जो पूर्ण external attack-surface scans, mobile app audits, web black-box testing, और source-code reviews करता है। इसके agents exploitable findings को validate करते हैं और traceable evidence, proof-of-concept exploits, तथा कार्रवाई योग्य remediation देते हैं।<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ WebSec penetration testing, security subscriptions, staffing, और vulnerabili
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets का लोगो"><figcaption></figcaption></figure>
 
 
 **मैदान के लिए बना। आपके अनुसार तैयार किया गया।**\
@@ -142,7 +142,7 @@ WebSec penetration testing, security subscriptions, staffing, और vulnerabili
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower का लोगो"><figcaption></figcaption></figure>
 
 Last Tower Solutions **Education** और **FinTech** के लिए cybersecurity consulting पर ध्यान केंद्रित करता है। इसमें cloud assessments, internal और external penetration tests, vulnerability assessments, और compliance support शामिल हैं।<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Last Tower Solutions **Education** और **FinTech** के लिए cybersecu
 
 ### [Beaki — आपके लिए सही भोजन](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki का लोगो"><figcaption></figcaption></figure>
 
 **Beaki** एक personalized food scanner, calorie counter, और nutrition tracker है। Barcodes और supermarket shelves scan करें, meals और restaurant menus की तस्वीर लें या उनका वर्णन करें, और अपने लक्ष्यों, diet, allergies, तथा health profile के अनुसार समझने योग्य scores पाएँ। Beaki calories और macros भी track करता है और shopping lists के साथ personalized meal plans बनाता है।<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Android या iPhone पर [**Beaki मुफ़्त डाउनलोड �
 
 ## Github Stats
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks के GitHub आँकड़े](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
