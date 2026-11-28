@@ -1,126 +1,129 @@
-# Reconnaissance と Threat-Intelligence API
+# Reconnaissance and Threat-Intelligence APIs
 
 {{#include ../../banners/hacktricks-training.md}}
 
-これらのサービスは、Reconnaissance、レピュテーション、breach、enrichment のワークフローを支援します。API、利用上限、価格、許可される用途は頻繁に変更されるため、顧客の識別情報や機密データを送信する前に、ベンダーの最新ドキュメントとエンゲージメントの許可を確認してください。asset-discovery の手順については、[External Recon Methodology](README.md) を参照してください。
+これらのサービスは、reconnaissance、reputation、breach、enrichment の各種ワークフローを支援します。API、利用枠、料金、許可される利用方法は頻繁に変更されるため、顧客識別情報や機密データを送信する前に、最新のベンダー文書とエンゲージメントの許可内容を確認してください。asset-discovery の手順については、[External Recon Methodology](README.md) を参照してください。
 
 ## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-IP アドレスが不審または悪意のある活動に関連付けられているかどうかを照会します。利用にはアカウントまたは API key が必要な場合があります。
+IPアドレスが不審または悪意のある活動に関連付けられているかを照会します。利用にはアカウントまたはAPIキーが必要な場合があります。
 
 ## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-IP アドレス、ユーザー名、またはメールアドレスが、自動化されたアカウント登録やその他の報告済み bot 活動に関連付けられているかどうかを確認します。
+IPアドレス、ユーザー名、またはメールアドレスが、自動アカウント登録やその他の報告されたbot活動に関連付けられているかを確認します。
 
 ## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-ビジネス用メールアドレスと、ドメインに関連する連絡先のパターンを検索・検証します。リクエスト上限と許可される用途については、現在のプランを確認してください。
+業務用メールアドレスや、ドメインに関連する連絡先のパターンを検索・検証します。リクエスト上限と許可される利用方法は、現在のプランで確認してください。
 
 ## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-IP アドレスやドメインに関連する threat-intelligence indicators と活動を検索します。
+IPアドレスやドメインに関連する脅威インテリジェンスのindicatorと活動を検索します。
 
 ## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-メールアドレス、ドメイン、または企業に、利用可能なビジネス／プロフィールデータを付加します。データの範囲、アクセス、プライバシー上の制約は、現在の製品とプランによって異なります。
+メールアドレス、ドメイン、または企業の情報を、利用可能なビジネス／プロフィールデータで補完します。データの範囲、アクセス、プライバシーに関する制約は、現在の製品とプランによって異なります。
 
 ## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-Web サイトで確認されたテクノロジーを特定し、選択したプランで許可されている場合は、履歴データや関連データを取得します。
+Webサイト上で確認されたテクノロジーを特定し、選択したプランで許可される範囲で履歴データや関連データを取得します。
 
 ## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-IP アドレスが不審または悪意のある活動に関連付けられているかどうかを確認します。現在の API プランと上限を確認してください。
+IPアドレスが不審または悪意のある活動に関連付けられているかを確認します。現在のAPIプランと利用上限を確認してください。
 
 ## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-ドメイン、URL、または IP アドレスについて、FortiGuard のカテゴリ分類と threat intelligence を検索します。利用可能な機能はサービスによって異なります。
+ドメイン、URL、またはIPアドレスについて、FortiGuardのカテゴリ分類と脅威インテリジェンスを調べます。利用可否はサービスによって異なります。
 
 ## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-IP アドレスが、報告された spam 活動を理由にリストへ登録されているかどうかを確認します。
+IPアドレスが、報告されたスパム活動のリストに掲載されているかを確認します。
 
 ## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-サービスのコミュニティやその他のシグナルに基づく、ドメインのレピュテーションを取得します。
+サービスのコミュニティやその他のシグナルに基づくドメインのreputationを取得します。
 
 ## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-IP アドレスの geolocation、ASN、組織、および関連メタデータを取得します。利用上限については、現在のプランを確認してください。
+IPアドレスのgeolocation、ASN、組織情報などのメタデータを取得します。利用枠は現在のプランで確認してください。
 
 ## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-このプラットフォームは、過去の名前解決結果、IP や name server に関連付けられたドメイン、関連レコードなどの DNS・インフラ情報を提供します。過去の DNS 情報から以前の origin アドレスが判明する場合がありますが、CDN を確実に回避できるわけではないため、検証が必要です。
+このプラットフォームは、過去の名前解決情報、IPアドレスやネームサーバーに関連するドメイン、関連レコードなど、DNSおよびインフラストラクチャの情報を提供します。過去のDNS情報から以前のoriginアドレスが判明することがありますが、CDNを確実に迂回できるわけではないため、必ず検証してください。
 
 ## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-メールアドレス、ドメイン、または企業名に、利用可能なアイデンティティ情報やビジネス属性を付加します。個人データは、許可およびプライバシー要件に従って取り扱ってください。
+メールアドレス、ドメイン、または企業名を、利用可能なID情報やビジネス属性で補完します。個人データは、許可とプライバシー要件に従って取り扱ってください。
 
 ## RiskIQ / Microsoft Defender Threat Intelligence (legacy transition) <sup>[[14]](#references)</sup>
 
-RiskIQ の PassiveTotal 機能は、Microsoft Defender Threat Intelligence に移行しました。製品へのアクセス、API、引き継がれた機能は変更されているため、従来の PassiveTotal に関する前提ではなく、Microsoft の最新ドキュメントを参照してください。
+RiskIQのPassiveTotal機能はMicrosoft Defender Threat Intelligenceに移行しました。製品へのアクセス、API、維持されている機能は変更されているため、旧PassiveTotalの仕様を前提にせず、Microsoftの最新の文書を参照してください。
 
 ## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-サービスのアクセス制御に従い、ドメイン、IP アドレス、メールアドレス、およびインデックス化された過去のデータや leak されたデータを検索します。
+サービスのアクセス制御に従い、ドメイン、IPアドレス、メールアドレス、およびインデックス化された過去のデータやleakされたデータを検索します。
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-IP アドレスやその他の indicators について、threat-intelligence およびレピュテーションデータを検索します。
+IPアドレスやその他のindicatorについて、脅威インテリジェンスとreputationのデータを検索します。
 
 ## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-IP アドレスまたは範囲を検索し、インターネット上のスキャンや一般的なサービス活動の観測情報を確認します。現在のトライアルおよびコミュニティアクセスの条件を確認してください。
+IPアドレスまたは範囲について、インターネットスキャンや一般的なサービス活動の観測情報を検索します。現在のトライアルおよびコミュニティアクセスの条件を確認してください。
 
 ## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-IP アドレス、ホスト、または検索クエリについて、インターネットスキャンやサービスの情報を取得します。API の利用可否はアカウントのプランによって異なります。
+IPアドレス、ホスト、または検索クエリに関するインターネットスキャン情報やサービス情報を取得します。APIの利用可否はアカウントのプランによって異なります。
 
 ## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-ホスト、証明書、ドメイン、インターネットサービスのデータセットを検索します。データモデルと対象範囲は Shodan とは異なります。
+ホスト、証明書、ドメイン、インターネットサービスのデータセットを検索します。データモデルと対象範囲はShodanとは異なります。
 
 ## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-キーワードで検索し、プロバイダーが公開状態を確認したクラウドストレージのオブジェクトや bucket のインデックスを調べます。
+プロバイダーが公開情報から確認したクラウドストレージのオブジェクトやバケットのインデックスを、キーワードで検索します。
 
 ## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-インデックス化された breach データから、メールアドレス、ユーザー名、ドメイン、および関連レコードを検索します。許可を得た場合にのみ使用し、breach データを不必要に公開しないでください。
+インデックス化されたbreachデータを、メールアドレス、ユーザー名、ドメイン、関連レコードから検索します。許可を得た場合にのみ利用し、breachデータを不必要に公開しないでください。
 
 ## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-メールアドレスやその他の語句が、インデックス化された paste の内容に含まれているか検索します。統合する前に、サービスが引き続き利用可能か確認してください。
+インデックス化されたpasteの内容から、メールアドレスやその他の語句の出現を検索します。組み込む前に、サービスが現在も利用可能か確認してください。
 
 ## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-メールアドレスのレピュテーションとリスクに関するシグナルを取得します。
+メールアドレスのreputationとリスクシグナルを取得します。
 
 ## GhostProject (historical) <sup>[[24]](#references)</sup>
 
-過去には、leak されたメールアドレス／パスワードデータの検索を提供していました。第三者によるデータ取り扱いのリスクが高いサービスとみなし、使用前に利用可能性、合法性、許可を確認してください。
+過去に、leakされたメールアドレス／パスワードのデータを検索できるとうたっていました。第三者による取り扱いのリスクが高いサービスとして扱い、利用前に、現在の提供状況、合法性、許可を確認してください。
 
-## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
+## BinaryEdge (discontinued) <sup>[[25]](#references)</sup>
 
-IP アドレスや関連資産について、インターネットスキャン、露出状況、threat-intelligence のデータを取得します。
+IPアドレスや関連資産について、インターネットスキャン、露出状況、脅威インテリジェンスのデータを提供していました。現在、サイトはCoalitionへの移行に関する告知にリダイレクトされ、APIはリクエストを拒否するため、利用不可として扱ってください。
 
 ## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-メールアドレスまたは検証済みドメインが、既知の breach に含まれているか確認します。別サービスの Pwned Passwords は、prefix を使用してパスワードハッシュを確認します。平文のパスワードが明らかになることは**ありません**。
+メールアドレスまたは検証済みドメインが、既知のbreachに含まれているかを確認します。別サービスのPwned Passwordsでは、prefixを使ってパスワードハッシュを確認できますが、平文パスワードは明らかになりません。
 
 ### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-IP geolocation、データセンター、ASN、proxy/VPN、および関連する enrichment フィールドを取得します。利用上限は現在のプランによって異なります。
+IPのgeolocation、データセンター、ASN、proxy/VPNなどの関連情報を取得します。利用枠は現在のプランによって異なります。
 
 ### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
-選択したデータポイントを含む、IP geolocation および OSINT 向けの enrichment を提供します。商用利用については、現在の利用規約を確認してください。
+IPのgeolocationと、OSINTを目的とした特定の情報を取得します。商用利用に関する現在の規約を確認してください。
+
+### [NetAPI](https://netapi.com/) <sup>[[32]](#references)</sup>
+ドメイン（レジストラ、登録日と有効期限、ネームサーバー、ホスティングIPと国）またはIPアドレス（そのIPでホストされている他のドメイン）を調べ、ドメインまたはIPが無料の侵害済みリストに掲載されているか確認できます。このリストには、フィッシングやsinkhole化されたマルウェアのドメインと、過去48時間にhoneypotセンサーを攻撃したアドレスが含まれます。Web検索と侵害チェックAPIはアカウント不要ですが、検索結果へのAPIアクセスには有料プランが必要です。
 
 
-[DNSDumpster](https://dnsdumpster.com/) は DNS-reconnaissance の結果を提供します。<sup>[[29]](#references)</sup>
+[DNSDumpster](https://dnsdumpster.com/) はDNS reconnaissanceの結果を提供します。<sup>[[29]](#references)</sup>
 
-[Netcraft](https://www.netcraft.com/) はサイト、ホスティング、インターネットインフラに関する情報を提供します。<sup>[[30]](#references)</sup>
+[Netcraft](https://www.netcraft.com/) は、サイト、ホスティング、インターネットインフラストラクチャに関する情報を提供します。<sup>[[30]](#references)</sup>
 
-[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) はオンラインの subdomain-discovery インターフェースを提供します。<sup>[[31]](#references)</sup>
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) は、オンラインのサブドメイン検出インターフェースを提供します。<sup>[[31]](#references)</sup>
 
 ## References
 
@@ -147,7 +150,7 @@ IP geolocation、データセンター、ASN、proxy/VPN、および関連する
 - [21] [DeHashed](https://www.dehashed.com/)
 - [22] [psbdmp](https://psbdmp.ws/)
 - [23] [EmailRep](https://emailrep.io/)
-- [24] [コーネル大学の研究 — 侵害された認証情報を確認するためのプロトコル (GhostProject を含む)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [24] [コーネル大学の研究 — 侵害された認証情報を確認するプロトコル（GhostProjectを含む）](https://rist.tech.cornell.edu/papers/c3.pdf)
 - [25] [BinaryEdge](https://www.binaryedge.io/)
 - [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
 - [27] [IP2Location.io](https://www.ip2location.io/)
@@ -155,4 +158,5 @@ IP geolocation、データセンター、ASN、proxy/VPN、および関連する
 - [29] [DNSDumpster](https://dnsdumpster.com/)
 - [30] [Netcraft](https://www.netcraft.com/)
 - [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
+- [32] [NetAPI API documentation](https://netapi.com/help/api/)
 {{#include ../../banners/hacktricks-training.md}}
