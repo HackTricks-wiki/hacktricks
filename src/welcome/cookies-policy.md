@@ -49,4 +49,5 @@ Per domande o dubbi sulla presente Informativa sui cookie, contattaci all'indiri
 ## References
 
 - [1] [GitBook — Autenticazione dei visitatori: cookie](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}
