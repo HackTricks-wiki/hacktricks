@@ -106,7 +106,7 @@ Tuttavia, se vuoi comunque che i contenuti del tuo blog vengano rimossi da HackT
 
 Diamo sempre **credito agli autori originali**. Se trovi una pagina con contenuti copiati e incollati senza riferimenti alla fonte originale, faccelo sapere e provvederemo a **rimuoverli**, **aggiungere il link prima del testo** oppure **riscriverli aggiungendo il link**.
 
-## LICENSE
+## <span class="translation-source-anchor" id="license"></span>Licenza
 
 Copyright © Tutti i diritti riservati, salvo diversa indicazione.
 
@@ -129,7 +129,7 @@ Questa licenza non concede diritti su marchi o branding relativi ai contenuti. T
 
 **Accedendo o utilizzando HackTricks, accetti di rispettare i termini di questa licenza. Se non li accetti, ti preghiamo di non accedere a questo sito web.**
 
-## **Disclaimer**
+## <span class="translation-source-anchor" id="disclaimer"></span>**Esclusione di responsabilità**
 
 > [!CAUTION]
 > Questo libro, 'HackTricks', è destinato esclusivamente a scopi didattici e informativi. I contenuti di questo libro sono forniti "così come sono" e gli autori e gli editori non rilasciano dichiarazioni né garanzie di alcun tipo, espresse o implicite, riguardo alla completezza, accuratezza, affidabilità, idoneità o disponibilità delle informazioni, dei prodotti, dei servizi o degli elementi grafici correlati contenuti nel libro. Pertanto, qualsiasi affidamento su tali informazioni è strettamente a tuo rischio.
