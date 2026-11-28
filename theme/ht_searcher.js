@@ -606,25 +606,25 @@
     return;
   }
 
-  icon.textContent = '🔍';
-  icon.setAttribute('aria-label','Open search (S)');
-  icon.removeAttribute('title');
-
+  const searchLabels = icon.dataset || {};
   const setIconState = state => {
     if(state === 'ready'){
       icon.textContent = '🔍';
-      icon.setAttribute('aria-label','Open search (S)');
+      icon.setAttribute('aria-label', searchLabels.searchLabel || 'Open search (S)');
       icon.removeAttribute('title');
     } else if(state === 'error'){
       icon.textContent = '❌';
-      icon.setAttribute('aria-label','Search unavailable');
-      icon.setAttribute('title','Search is unavailable');
+      const message = searchLabels.searchUnavailable || 'Search unavailable';
+      icon.setAttribute('aria-label', message);
+      icon.setAttribute('title', message);
     } else {
       icon.textContent = '⏳';
-      icon.setAttribute('aria-label','Loading search …');
-      icon.setAttribute('title','Search is loading, please wait...');
+      const message = searchLabels.searchLoading || 'Loading search…';
+      icon.setAttribute('aria-label', message);
+      icon.setAttribute('title', message);
     }
   };
+  setIconState('ready');
 
   const HOT=83, ESC=27, DOWN=40, UP=38, ENTER=13;
   let worker=null, workerStarted=false;

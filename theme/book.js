@@ -618,6 +618,50 @@ function playground_text(playground, hidden = true) {
 })();
 
 
+(function localizeNavigation() {
+    const keys = ["search", "searchBook", "languages", "contents", "onThisPage", "previous", "next", "pageNavigation", "loadingSearch", "searchUnavailable"];
+    const labels = {
+        af: ["Soek","Soek in hierdie boek…","Tale","Inhoudsopgawe","Op hierdie bladsy","Vorige hoofstuk","Volgende hoofstuk","Bladsynavigasie","Soekfunksie laai…","Soekfunksie nie beskikbaar nie"],
+        de: ["Suchen","Dieses Buch durchsuchen…","Sprachen","Inhaltsverzeichnis","Auf dieser Seite","Vorheriges Kapitel","Nächstes Kapitel","Seitennavigation","Suche wird geladen…","Suche nicht verfügbar"],
+        el: ["Αναζήτηση","Αναζήτηση σε αυτό το βιβλίο…","Γλώσσες","Πίνακας περιεχομένων","Σε αυτή τη σελίδα","Προηγούμενο κεφάλαιο","Επόμενο κεφάλαιο","Πλοήγηση σελίδας","Φόρτωση αναζήτησης…","Η αναζήτηση δεν είναι διαθέσιμη"],
+        en: ["Search","Search this book…","Languages","Table of contents","On this page","Previous chapter","Next chapter","Page navigation","Loading search…","Search unavailable"],
+        es: ["Buscar","Buscar en este libro…","Idiomas","Índice","En esta página","Capítulo anterior","Capítulo siguiente","Navegación de la página","Cargando la búsqueda…","Búsqueda no disponible"],
+        fr: ["Rechercher","Rechercher dans ce livre…","Langues","Table des matières","Sur cette page","Chapitre précédent","Chapitre suivant","Navigation de la page","Chargement de la recherche…","Recherche indisponible"],
+        hi: ["खोजें","इस पुस्तक में खोजें…","भाषाएँ","विषय-सूची","इस पृष्ठ पर","पिछला अध्याय","अगला अध्याय","पृष्ठ नेविगेशन","खोज लोड हो रही है…","खोज उपलब्ध नहीं है"],
+        it: ["Cerca","Cerca in questo libro…","Lingue","Indice","In questa pagina","Capitolo precedente","Capitolo successivo","Navigazione della pagina","Caricamento della ricerca…","Ricerca non disponibile"],
+        ja: ["検索","この本を検索…","言語","目次","このページの内容","前の章","次の章","ページのナビゲーション","検索を読み込み中…","検索は利用できません"],
+        ko: ["검색","이 책에서 검색…","언어","목차","이 페이지의 내용","이전 장","다음 장","페이지 탐색","검색을 불러오는 중…","검색을 사용할 수 없습니다"],
+        pl: ["Szukaj","Szukaj w tej książce…","Języki","Spis treści","Na tej stronie","Poprzedni rozdział","Następny rozdział","Nawigacja strony","Wczytywanie wyszukiwarki…","Wyszukiwanie jest niedostępne"],
+        pt: ["Pesquisar","Pesquisar neste livro…","Idiomas","Sumário","Nesta página","Capítulo anterior","Próximo capítulo","Navegação da página","Carregando a pesquisa…","Pesquisa indisponível"],
+        sr: ["Претрага","Претражи ову књигу…","Језици","Садржај","На овој страници","Претходно поглавље","Следеће поглавље","Навигација по страници","Учитавање претраге…","Претрага није доступна"],
+        sw: ["Tafuta","Tafuta katika kitabu hiki…","Lugha","Jedwali la yaliyomo","Kwenye ukurasa huu","Sura iliyotangulia","Sura inayofuata","Urambazaji wa ukurasa","Inapakia utafutaji…","Utafutaji haupatikani"],
+        tr: ["Ara","Bu kitapta ara…","Diller","İçindekiler","Bu sayfada","Önceki bölüm","Sonraki bölüm","Sayfa gezinmesi","Arama yükleniyor…","Arama kullanılamıyor"],
+        uk: ["Пошук","Пошук у цій книзі…","Мови","Зміст","На цій сторінці","Попередній розділ","Наступний розділ","Навігація сторінкою","Завантаження пошуку…","Пошук недоступний"],
+        vi: ["Tìm kiếm","Tìm kiếm trong sách này…","Ngôn ngữ","Mục lục","Trên trang này","Chương trước","Chương tiếp theo","Điều hướng trang","Đang tải tính năng tìm kiếm…","Tính năng tìm kiếm không khả dụng"],
+        zh: ["搜索","搜索本书…","语言","目录","本页内容","上一章","下一章","页面导航","正在加载搜索…","搜索不可用"],
+    };
+    const locale = document.documentElement.lang.toLowerCase().split("-")[0];
+    const translation = Object.hasOwn(labels, locale) ? labels[locale] : labels.en;
+    const messages = Object.fromEntries(keys.map((key, index) => [key, translation[index]]));
+
+    for (const control of document.querySelectorAll("[data-nav-label]")) {
+        const message = messages[control.dataset.navLabel];
+        if (!message) { continue; }
+        if (control.hasAttribute("aria-label")) { control.setAttribute("aria-label", message); }
+        if (control.hasAttribute("title")) {
+            const shortcut = control.getAttribute("aria-keyshortcuts");
+            control.setAttribute("title", control.id === "search-toggle" && shortcut ? `${message} (${shortcut})` : message);
+        }
+        if (control.id === "search-toggle") {
+            control.dataset.searchLabel = message;
+            control.dataset.searchLoading = messages.loadingSearch;
+            control.dataset.searchUnavailable = messages.searchUnavailable;
+        }
+        if (control.hasAttribute("placeholder")) { control.setAttribute("placeholder", message); }
+        if (control.tagName === "SPAN") { control.textContent = message; }
+    }
+})();
+
 (function menubarLanguage() {
     var menubarLanguageToggleButton = document.getElementById('menubar-languages-toggle');
     var menubarLanguagePopup = document.getElementById('menubar-languages-popup');

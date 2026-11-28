@@ -123,7 +123,7 @@
                 <div id="search-modal">
                     <form id="searchbar-outer" class="searchbar-outer">
                         <span class="fa fa-search"></span>
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <input type="search" id="searchbar" data-nav-label="searchBook" name="searchbar" placeholder="Search this book…" aria-label="Search this book" aria-controls="searchresults-outer" aria-describedby="searchresults-header">
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -140,7 +140,7 @@
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="menu-bar-container">
                         <div class="left-buttons">
-                            <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <label id="sidebar-toggle" data-nav-label="contents" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                                 <i class="fa fa-bars"></i>
                             </label>
                             <a href="/">
@@ -178,12 +178,12 @@
                                         <a href="https://tools.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">HT Tools</a>
                                         <a href="https://friends.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">HT Friends</a>
                                         <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-translations="true">
-                                            <span>Translations</span> ▾
+                                            <span data-nav-label="languages">Languages</span> ▾
                                         </button>
                                         {{#if search_enabled}}
                                         <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-search="true">
                                             <span class="menu-icon" aria-hidden="true">🔍</span>
-                                            <span>Search</span>
+                                            <span data-nav-label="search">Search</span>
                                         </button>
                                         {{/if}}
                                         <div class="menu-theme-toggle" role="group" aria-label="Theme toggle">
@@ -197,12 +197,12 @@
                                     </div>
                                 </div>
 
-                                <div id="menubar-languages-toggle" class="icon-button" type="button" title="Translations" aria-label="Translations" aria-expanded="false" aria-controls="menubar-languages-popup">
+                                <div id="menubar-languages-toggle" data-nav-label="languages" class="icon-button" type="button" title="Languages" aria-label="Languages" aria-expanded="false" aria-controls="menubar-languages-popup">
                                     <i class="fa fa-globe"></i>
-                                    <span class="menu-bar-link">Translations</span>
+                                    <span class="menu-bar-link" data-nav-label="languages">Languages</span>
                                     <span class="translations-caret" aria-hidden="true">▾</span>
                                     
-                                    <div id="menubar-languages-popup" class="menubar-languages-popup" aria-label="Language menu" role="menu">
+                                    <div id="menubar-languages-popup" data-nav-label="languages" class="menubar-languages-popup" aria-label="Language menu" role="menu">
                                         <a id="af" href="/af/" hreflang="af" lang="af" role="menuitem" class="menu-bar-link"><span aria-hidden="true">🇿🇦</span> Afrikaans</a>
                                         <a id="zh" href="/zh/" hreflang="zh-Hans" lang="zh-Hans" role="menuitem" class="menu-bar-link"><span aria-hidden="true">🇨🇳</span> 简体中文</a>
                                         <a id="en" href="/en/" hreflang="en" lang="en" role="menuitem" class="menu-bar-link"><span aria-hidden="true">🇬🇧</span> English</a>
@@ -225,12 +225,12 @@
                                 </div>
 
                                 {{#if search_enabled}}
-                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <button id="search-toggle" data-nav-label="search" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
                                     <i class="fa fa-search"></i>
                                 </button>
                                 {{/if}}
 
-                                <label id="mobile-toc-toggle" class="icon-button mobile-toc-toggle" for="sidebar-toggle-anchor" title="Open Table of Contents" aria-label="Open Table of Contents">
+                                <label id="mobile-toc-toggle" data-nav-label="contents" class="icon-button mobile-toc-toggle" for="sidebar-toggle-anchor" title="Open Table of Contents" aria-label="Open Table of Contents">
                                     <span class="mobile-toc-icon" aria-hidden="true">📚</span>
                                 </label>
 
@@ -269,10 +269,10 @@
                     </div>
                 </div>
                 <div id="container" class="container">
-                    <label id="sidebar-float-toggle" class="sidebar-float-toggle" for="sidebar-toggle-anchor" title="Toggle book table of contents" aria-label="Toggle book table of contents">
+                    <label id="sidebar-float-toggle" data-nav-label="contents" class="sidebar-float-toggle" for="sidebar-toggle-anchor" title="Toggle book table of contents" aria-label="Toggle book table of contents">
                         <span class="toggle-chevron" aria-hidden="true">&lt;&lt;</span>
                     </label>
-                    <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+                    <nav id="sidebar" data-nav-label="contents" class="sidebar" aria-label="Table of contents">
                         <!-- populated by js -->
                         <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
                         <noscript>
@@ -361,36 +361,36 @@
                             </div>
                         </main>
 
-                        <nav class="nav-wrapper" aria-label="Page navigation">
+                        <nav class="nav-wrapper" aria-label="Page navigation" data-nav-label="pageNavigation">
                             <!-- Mobile navigation buttons -->
-                                <a rel="prev" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left" hidden>
+                                <a rel="prev" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" data-nav-label="previous" aria-keyshortcuts="Left" hidden>
                                     <i class="fa fa-angle-left"></i>
                                 </a>
 
-                                <a rel="next prefetch" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right" hidden>
+                                <a rel="next prefetch" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" data-nav-label="next" aria-keyshortcuts="Right" hidden>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
 
                             <div style="clear: both"></div>
                         </nav>
 
-                        <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                <a rel="prev" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left" hidden>
+                        <nav class="nav-wide-wrapper" aria-label="Page navigation" data-nav-label="pageNavigation">
+                                <a rel="prev" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" data-nav-label="previous" aria-keyshortcuts="Left" hidden>
                                     <i class="fa fa-angle-left"></i><span class="chapter-nav-label" style="font-size: medium; align-self: center; margin-left: 10px;"></span>
                                 </a>
 
-                                <a rel="next prefetch" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right" hidden>
+                                <a rel="next prefetch" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" data-nav-label="next" aria-keyshortcuts="Right" hidden>
                                     <span class="chapter-nav-label" style="font-size: medium; align-self: center; margin-right: 10px;"></span><i class="fa fa-angle-right"></i>
                                 </a>
                         </nav>
                     </div>
 
                     <div class="sidetoc">
-                        <button id="sidetoc-toggle" class="sidetoc-toggle" type="button" title="Toggle page table of contents" aria-label="Toggle page table of contents" aria-pressed="false">
+                        <button id="sidetoc-toggle" data-nav-label="onThisPage" class="sidetoc-toggle" type="button" title="Toggle page table of contents" aria-label="Toggle page table of contents" aria-pressed="false">
                             <span class="toggle-chevron" aria-hidden="true">&gt;&gt;</span>
                         </button>
                         <div id="sidetoc-wrapper" class="sidetoc-wrapper">
-                            <nav class="pagetoc"></nav>
+                            <nav class="pagetoc" data-nav-label="onThisPage" aria-label="On this page"></nav>
                             <a class="sidesponsor ht-sponsor-card ht-sponsor-card--vertical" href="" target="_blank" rel="noopener noreferrer">
                                 <span class="ht-sponsor-grid" aria-hidden="true"></span>
                                 <span class="ht-sponsor-scan" aria-hidden="true"></span>
