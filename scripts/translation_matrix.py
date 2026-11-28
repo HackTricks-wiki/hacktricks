@@ -4,6 +4,9 @@ import argparse
 import json
 
 
+TRANSLATION_LOCALES = {"pt": "Brazilian Portuguese", "zh": "Simplified Chinese"}
+
+
 LANGUAGES = (
     ("Afrikaans", "af"),
     ("German", "de"),
@@ -33,7 +36,7 @@ def main():
     if not matches:
         parser.error(f"unknown language branch: {args.only}")
     print("matrix=" + json.dumps({"include": [
-        {"name": name, "language": name, "branch": code} for name, code in matches
+        {"name": name, "language": TRANSLATION_LOCALES.get(code, name), "branch": code} for name, code in matches
     ]}, separators=(",", ":")))
 
 
