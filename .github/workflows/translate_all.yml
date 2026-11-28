@@ -81,7 +81,7 @@ permissions:
 
 env:
   # Keep the shared validator and deployment tools on the same immutable revision.
-  SHARED_TRANSLATOR_REF: 90c80f8c2947166925b2ed0b578521230fec513e
+  SHARED_TRANSLATOR_REF: 4f5878457800102d0af04b2632474d5953d72110
 
 jobs:
   validate:
@@ -412,6 +412,7 @@ jobs:
       - name: Build mdBook
         run: |
           git checkout "$BRANCH"
+          python /tmp/translation_backlog.py verify-navigation --language "$BRANCH" --source-ref "$SOURCE_REF"
           if [ "$NAVIGATION_ONLY" = true ]; then
             export MDBOOK_OUTPUT__HTML__SEARCH__ENABLE=false
           else
