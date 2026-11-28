@@ -49,4 +49,5 @@ W razie pytań lub wątpliwości dotyczących niniejszych zasad dotyczących pli
 ## References
 
 - [1] [GitBook — Uwierzytelnianie odwiedzających: pliki cookie](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}
