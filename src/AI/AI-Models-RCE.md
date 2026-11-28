@@ -416,7 +416,7 @@ Kwa mwongozo maalumu kuhusu mambo ya ndani ya .keras, RCE kupitia Lambda-layer, 
 
 
 {{#ref}}
-../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
 ## References
