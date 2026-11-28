@@ -281,7 +281,7 @@ jobs:
     # Run N languages in parallel (tune max-parallel if needed)
     strategy:
       fail-fast: false
-      max-parallel: ${{ inputs.navigation_only && 8 || 17 }}
+      max-parallel: ${{ inputs.navigation_only && !inputs.landing_only && 8 || 17 }}
       matrix: ${{ fromJSON(needs.select-languages.outputs.matrix) }}
 
     # Ensure only one job per branch runs at a time (even across workflow runs)
