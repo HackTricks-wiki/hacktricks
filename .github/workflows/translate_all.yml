@@ -174,9 +174,9 @@ jobs:
           for asset in "${assets[@]}"; do
             source="theme/${asset##*/}"
             baseline="$workdir/${asset##*/}.baseline"
-            git show "refs/remotes/origin/master:$source" > "$baseline"
-            for locale in "" "${locales[@]}"; do
-              path="${locale:+$locale/}$asset"
+            git -c safe.directory="$GITHUB_WORKSPACE" show "refs/remotes/origin/master:$source" > "$baseline"
+            for locale in "${locales[@]}"; do
+              path="$locale/$asset"
               aws s3 cp "s3://hacktricks-wiki/$path" "$workdir/current" --only-show-errors
               if ! cmp -s "$baseline" "$workdir/current" && ! cmp -s "$source" "$workdir/current"; then
                 echo "Unexpected version at /$path. No scripts were uploaded."
@@ -189,7 +189,7 @@ jobs:
           for index in "${!paths[@]}"; do
             aws s3 cp "${files[$index]}" "s3://hacktricks-wiki${paths[$index]}" --content-type "application/javascript; charset=utf-8" --no-progress
           done
-          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "${paths[@]}"
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "${paths[@]}" /book.js /theme/ht_searcher.js
 
   select-languages:
     if: ${{ github.event_name != 'pull_request' && !inputs.validate_only && !inputs.error_pages_only && !inputs.ui_assets_only }}
