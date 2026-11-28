@@ -164,7 +164,7 @@ Android या iPhone पर [**Beaki मुफ़्त डाउनलोड �
 
 नीचे References में HackTricks Values & FAQ प्रविष्टि देखें।
 
-## Github Stats
+## <span class="translation-source-anchor" id="github-stats"></span>GitHub के आँकड़े
 
 ![HackTricks के GitHub आँकड़े](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
