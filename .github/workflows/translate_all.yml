@@ -105,7 +105,7 @@ jobs:
           cp .github/build_compact_search_index.py /tmp/build_compact_search_index.py
           cp theme/ht_searcher.js /tmp/ht_searcher.js
           # Pin the shared implementation so a run uses matching tools and tests.
-          shared_ref=d3e696472f05d5ed3632187b9b98f94e547f86ee
+          shared_ref=6d18268ae72535dae12ea165507f1728940c10dd
           shared_url="https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/$shared_ref/scripts"
           for script in translator translation_backlog translation_quality get_and_save_refs compare_and_fix_refs \
               test_translator_directives test_translator_batch test_translator_code_blocks test_translator_tokenizers \
