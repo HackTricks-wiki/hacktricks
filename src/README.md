@@ -105,7 +105,7 @@ Pogledajte [katalog kurseva 8kSec Academy](https://academy.8ksec.io/).
 
 ### [NaxusAI – Autonomna ofanzivna bezbednost](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="Логотип бренда NaxusAI"><figcaption></figcaption></figure>
 
 **Naxus** je platforma za ofanzivnu bezbednost pokretana AI-jem, namenjena sveobuhvatnom skeniranju spoljne površine napada, revizijama mobilnih aplikacija, black-box testiranju veb-aplikacija i pregledima izvornog koda. Njeni agenti proveravaju nalaze koji se mogu iskoristiti i pružaju dokaze koji se mogu pratiti, proof-of-concept exploite i konkretne preporuke za otklanjanje problema.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ Pored navedenog, WebSec je i **posvećeni podržavalac HackTricks-a.**
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="Логотип бренда cyberhelmets"><figcaption></figcaption></figure>
 
 
 **Napravljeno za rad na terenu. Prilagođeno vama.**\
@@ -142,7 +142,7 @@ Pored navedenog, WebSec je i **posvećeni podržavalac HackTricks-a.**
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="Логотип бренда lasttower"><figcaption></figcaption></figure>
 
 Last Tower Solutions se bavi savetovanjem u oblasti sajber bezbednosti za **obrazovanje** i **FinTech**, uključujući procene cloud okruženja, interna i eksterna testiranja penetracije, procene ranjivosti i podršku za usklađenost.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Budite informisani o najnovijim dešavanjima u sajber bezbednosti tako što ćet
 
 ### [Beaki — Hrana po tvojoj meri](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Логотип бренда Beaki"><figcaption></figcaption></figure>
 
 **Beaki** je personalizovani skener hrane, brojač kalorija i alat za praćenje ishrane. Skenirajte bar-kodove i police u prodavnicama, fotografišite ili opišite obroke i jelovnike restorana i dobijte objašnjive ocene prilagođene vašim ciljevima, načinu ishrane, alergijama i zdravstvenom profilu. Beaki prati i kalorije i makronutrijente, kao i pravi personalizovane planove obroka sa spiskovima za kupovinu.<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Pogledajte stavku HackTricks Values & FAQ u odeljku References ispod.
 
 ## GitHub statistika
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![Статистика пројекта HackTricks на GitHub-у](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
