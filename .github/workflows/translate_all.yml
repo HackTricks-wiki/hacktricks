@@ -18,6 +18,7 @@ on:
     paths:
       - '.github/workflows/translate_all.yml'
       - 'scripts/translation*.py'
+      - 'scripts/seo_postprocess.py'
       - 'scripts/translator.py'
       - 'scripts/test_translat*.py'
       - 'theme/index.hbs'
@@ -94,6 +95,7 @@ jobs:
             wget -O "$workdir/$script.py" "$shared_url/$script.py"
           done
           python -m unittest discover -s "$workdir" -p 'test_translat*.py'
+          python -m unittest discover -s scripts -p 'test_translation_metadata.py'
           python scripts/translation_matrix.py --check-menu theme/index.hbs
           node --test scripts/test_navigation_l10n.js scripts/test_search.js
 
