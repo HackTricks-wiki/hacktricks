@@ -81,7 +81,7 @@ permissions:
 
 env:
   # Keep the shared validator and deployment tools on the same immutable revision.
-  SHARED_TRANSLATOR_REF: 4f5878457800102d0af04b2632474d5953d72110
+  SHARED_TRANSLATOR_REF: 12486727db49acf00feaa53f210418bf558b3520
 
 jobs:
   validate:
@@ -111,6 +111,7 @@ jobs:
               test_translation_backlog audit_translation_editions test_translation_editions; do
             wget -O "$workdir/$script.py" "$shared_url/$script.py"
           done
+          wget -O "$workdir/push_branch_with_retry.sh" "$shared_url/push_branch_with_retry.sh"
           cp scripts/translation_matrix.py "$workdir/"
           python -m unittest discover -s "$workdir" -p 'test_translat*.py'
           python -m unittest discover -s scripts -p 'test_translation_*.py'
@@ -309,6 +310,7 @@ jobs:
           for script in translator translation_backlog translation_quality get_and_save_refs compare_and_fix_refs; do
             wget -O "/tmp/$script.py" "$shared_url/$script.py"
           done
+          wget -O /tmp/push_branch_with_retry.sh "$shared_url/push_branch_with_retry.sh"
           cp scripts/mark_unchanged_s3_files.py /tmp/mark_unchanged_s3_files.py
           cp scripts/upload_immutable_images.sh /tmp/upload_immutable_images.sh
           mkdir -p /tmp/immutable-images
@@ -352,7 +354,7 @@ jobs:
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "Fix unmatched refs"
-            git push origin "$BRANCH"
+            bash /tmp/push_branch_with_retry.sh "$BRANCH"
           fi
 
       - name: Translate and verify pending pages
