@@ -656,21 +656,19 @@ function playground_text(playground, hidden = true) {
         }
     });
     
-    languageButtons.forEach((btn) => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const regex = /(?:(?:\/)+(?<lang>[a-z]{2}(?=\/|$)))?(?<path>(?:\/)*.*)?/g
-            var match = regex.exec(window.location.pathname)
-          
-            var path = match.groups.path
-            console.log(`Path: ${path} ${typeof path}`)
-          
-            const lang = match.groups.lang
-            console.log(`Lang: ${lang}`)
-            
-            window.location = `/${e.currentTarget.id}${path}${window.location.hash}`
-        });
-    })
+    const localeCodes = new Set(Array.from(languageButtons, button => button.id));
+
+    function updateLanguageLinks() {
+        const { pathname, search, hash } = window.location;
+        const locale = pathname.split("/")[1];
+        const chapter = localeCodes.has(locale) ? pathname.slice(locale.length + 1) : pathname;
+        for (const button of languageButtons) {
+            button.href = `/${button.id}${chapter || "/"}${search}${hash}`;
+        }
+    }
+
+    updateLanguageLinks();
+    window.addEventListener("hashchange", updateLanguageLinks);
 })();
 
 (function chapterNavigation() {

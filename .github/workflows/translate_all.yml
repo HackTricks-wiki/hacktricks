@@ -20,6 +20,8 @@ on:
       - 'scripts/translation*.py'
       - 'scripts/translator.py'
       - 'scripts/test_translat*.py'
+      - 'theme/index.hbs'
+      - 'theme/book.js'
   workflow_dispatch:
     inputs:
       validate_only:
@@ -86,6 +88,7 @@ jobs:
             wget -O "$workdir/$script.py" "$shared_url/$script.py"
           done
           python -m unittest discover -s "$workdir" -p 'test_translat*.py'
+          python scripts/translation_matrix.py --check-menu theme/index.hbs
 
   select-languages:
     if: ${{ github.event_name != 'pull_request' && !inputs.validate_only }}
