@@ -105,7 +105,7 @@ Daha fazla bilgi için [**bloglarına**](https://serpapi.com/blog/) göz atın, 
 
 ### [NaxusAI – Autonomous Offensive Security](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logosu"><figcaption></figcaption></figure>
 
 **Naxus**, dış saldırı yüzeyinin tamamını taramak, mobil uygulamaları denetlemek, web uygulamalarında black-box testleri yapmak ve kaynak kodunu incelemek için AI destekli bir offensive security platformudur. Agent'ları istismar edilebilir bulguları doğrular ve izlenebilir kanıtlar, proof-of-concept exploit'ler ve uygulanabilir iyileştirme önerileri sunar.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ Yukarıdakilere ek olarak WebSec, **HackTricks'in de kararlı bir destekçisidir
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logosu"><figcaption></figcaption></figure>
 
 
 **Saha için tasarlandı. Size göre şekillendirildi.**\
@@ -142,7 +142,7 @@ Yukarıdakilere ek olarak WebSec, **HackTricks'in de kararlı bir destekçisidir
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logosu"><figcaption></figcaption></figure>
 
 Last Tower Solutions, **Eğitim** ve **FinTech** alanlarında siber güvenlik danışmanlığına odaklanır. Hizmetleri arasında bulut değerlendirmeleri, iç ve dış sızma testleri, güvenlik açığı değerlendirmeleri ve uyumluluk desteği bulunur.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Siber güvenlik alanındaki en son gelişmelerden haberdar olmak için [**blogum
 
 ### [Beaki — Food that fits you](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logosu"><figcaption></figcaption></figure>
 
 **Beaki**, kişiselleştirilmiş bir gıda tarayıcısı, kalori sayacı ve beslenme takipçisidir. Barkodları ve market raflarını tarayın, yemeklerin ve restoran menülerinin fotoğrafını çekin veya açıklamasını yazın; hedeflerinize, beslenme düzeninize, alerjilerinize ve sağlık profilinize göre şekillendirilmiş, açıklanabilir puanlar alın. Beaki ayrıca kalorileri ve makroları takip eder, alışveriş listeleriyle kişiselleştirilmiş yemek planları oluşturur.<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Aşağıdaki References bölümündeki HackTricks Değerleri ve SSS başlığın
 
 ## Github İstatistikleri
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks GitHub istatistikleri](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
