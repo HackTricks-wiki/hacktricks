@@ -186,4 +186,5 @@ Tazama kipengee cha HackTricks Values & FAQ kwenye References hapa chini.
 - [14] [Video ya udhamini wa WebSec](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Kozi za Cyber Helmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 - [16] [Maadili na Maswali Yanayoulizwa Mara kwa Mara ya HackTricks](welcome/hacktricks-values-and-faq.md)
+
 {{#include banners/hacktricks-training.md}}
