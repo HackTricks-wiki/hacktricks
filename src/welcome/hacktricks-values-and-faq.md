@@ -149,4 +149,5 @@ Cette licence ne confère aucun droit sur les marques ou l’image de marque ass
 - [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
 - [4] [Licence HackTricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/LICENSE.md)
 - [5] [Texte de la licence Creative Commons CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
+
 {{#include ../banners/hacktricks-training.md}}

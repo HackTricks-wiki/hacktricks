@@ -49,4 +49,5 @@ Si vous avez des questions ou des préoccupations concernant cette politique rel
 ## References
 
 - [1] [GitBook — Authentification des visiteurs : cookies](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}
