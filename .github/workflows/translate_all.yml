@@ -57,6 +57,10 @@ on:
         description: "Publish existing landing pages, with existing sidebars if navigation_only is also enabled"
         type: boolean
         default: false
+      faq_only:
+        description: "Rebuild and publish only the existing Values and FAQ page for the selected languages"
+        type: boolean
+        default: false
       files:
         description: "Optional comma-separated src/*.md paths to retry in addition to the language backlog"
         required: false
@@ -258,10 +262,10 @@ jobs:
       - id: select
         env:
           ONLY_LANGUAGE: ${{ inputs.only_language }}
-          LANDING_ONLY: ${{ inputs.landing_only }}
+          STATIC_ONLY: ${{ inputs.landing_only || inputs.faq_only }}
         run: |
-          if [[ "$LANDING_ONLY" == true && -z "$ONLY_LANGUAGE" ]]; then
-            echo "Landing-page publishing requires an explicit language selection." >&2
+          if [[ "$STATIC_ONLY" == true && -z "$ONLY_LANGUAGE" ]]; then
+            echo "Scoped page publishing requires an explicit language selection." >&2
             exit 1
           fi
           python3 scripts/translation_matrix.py --only "$ONLY_LANGUAGE" >> "$GITHUB_OUTPUT"
@@ -280,7 +284,7 @@ jobs:
     # Run N languages in parallel (tune max-parallel if needed)
     strategy:
       fail-fast: false
-      max-parallel: ${{ inputs.navigation_only && !inputs.landing_only && 8 || 17 }}
+      max-parallel: ${{ inputs.navigation_only && !inputs.landing_only && !inputs.faq_only && 8 || 17 }}
       matrix: ${{ fromJSON(needs.select-languages.outputs.matrix) }}
 
     # Ensure only one job per branch runs at a time (even across workflow runs)
@@ -293,6 +297,7 @@ jobs:
 
     env:
       LANDING_ONLY: ${{ inputs.landing_only }}
+      STATIC_ONLY: ${{ inputs.landing_only || inputs.faq_only }}
       NAVIGATION_ONLY: ${{ inputs.navigation_only }}
       LANGUAGE: ${{ matrix.language }}
       BRANCH:   ${{ matrix.branch }}
@@ -345,7 +350,7 @@ jobs:
           cp scripts/seo_postprocess.py /tmp/seo_postprocess.py
 
       - name: Save reference data
-        if: ${{ !inputs.navigation_only && !inputs.landing_only }}
+        if: ${{ !inputs.navigation_only && !inputs.landing_only && !inputs.faq_only }}
         run: python /tmp/get_and_save_refs.py
 
       - name: Download language branch and update refs
@@ -356,7 +361,7 @@ jobs:
           git config --global user.email 'github-actions@github.com'
           git checkout "$BRANCH"
           git pull --ff-only origin "$BRANCH"
-          if [[ "$NAVIGATION_ONLY" == true || "$LANDING_ONLY" == true ]]; then
+          if [[ "$NAVIGATION_ONLY" == true || "$STATIC_ONLY" == true ]]; then
             exit 0
           fi
           python /tmp/compare_and_fix_refs.py --files-unmatched-paths /tmp/ref-mismatches.txt
@@ -369,7 +374,7 @@ jobs:
           fi
 
       - name: Translate and verify pending pages
-        if: ${{ !inputs.landing_only }}
+        if: ${{ !inputs.landing_only && !inputs.faq_only }}
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -432,7 +437,7 @@ jobs:
             navigation_options+=(--landing)
           fi
           python /tmp/translation_backlog.py verify-navigation --language "$BRANCH" --source-ref "$SOURCE_REF" "${navigation_options[@]}"
-          if [ "$NAVIGATION_ONLY" = true ] && [ "$LANDING_ONLY" != true ]; then
+          if [ "$NAVIGATION_ONLY" = true ] && [ "$STATIC_ONLY" != true ]; then
             export MDBOOK_OUTPUT__HTML__SEARCH__ENABLE=false
           else
             python /tmp/translation_backlog.py restore-anchors --language "$BRANCH" --source-ref "$SOURCE_REF"
@@ -440,10 +445,10 @@ jobs:
           fi
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
           python /tmp/translation_backlog.py verify-render --language "$BRANCH" --toc book/toc.html --toc-script book/toc.js
-          if [ "$NAVIGATION_ONLY" != true ] && [ "$LANDING_ONLY" != true ]; then
+          if [ "$NAVIGATION_ONLY" != true ] && [ "$STATIC_ONLY" != true ]; then
             python /tmp/render_localized_error.py --language "$BRANCH" --rendered
           fi
-          if [ "$NAVIGATION_ONLY" = true ] || [ "$LANDING_ONLY" = true ]; then
+          if [ "$NAVIGATION_ONLY" = true ] || [ "$STATIC_ONLY" = true ]; then
             exit 0
           fi
           cp /tmp/immutable-images/* ./book/images/
@@ -455,7 +460,7 @@ jobs:
           cp /tmp/ht_searcher.js ./book/theme/ht_searcher.js
       
       - name: Push search index to hacktricks-searchindex repo
-        if: ${{ !inputs.navigation_only && !inputs.landing_only }}
+        if: ${{ !inputs.navigation_only && !inputs.landing_only && !inputs.faq_only }}
         shell: bash
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -597,7 +602,7 @@ jobs:
             --paths "/$BRANCH/toc.html" "/$BRANCH/toc.js"
 
       - name: Post-process SEO artifacts
-        if: ${{ !inputs.navigation_only || inputs.landing_only }}
+        if: ${{ !inputs.navigation_only || inputs.landing_only || inputs.faq_only }}
         run: |
           python3 /tmp/seo_postprocess.py pages \
             --book-dir ./book \
@@ -619,9 +624,22 @@ jobs:
           aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
             --paths "/$BRANCH/" "/$BRANCH/index.html"
 
+      - name: Publish only the localized Values and FAQ page
+        if: ${{ inputs.faq_only }}
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          page=welcome/hacktricks-values-and-faq.html
+          test -s "book/$page"
+          test "$(git rev-parse HEAD)" = "$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)"
+          aws s3 cp "book/$page" "s3://hacktricks-wiki/$BRANCH/$page" --content-type "text/html; charset=utf-8" --no-progress
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/$BRANCH/$page"
+
       # Sync the build to S3
       - name: Sync to S3
-        if: ${{ !inputs.navigation_only && !inputs.landing_only }}
+        if: ${{ !inputs.navigation_only && !inputs.landing_only && !inputs.faq_only }}
         run: |
           echo "Current branch:"
           git rev-parse --abbrev-ref HEAD
@@ -645,7 +663,7 @@ jobs:
   finalize-deployment:
     name: Finalize translated deployment
     needs: translate
-    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.audit_only && !inputs.error_pages_only && !inputs.ui_assets_only && !inputs.navigation_only && !inputs.landing_only && needs.translate.result != 'skipped' }}
+    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.audit_only && !inputs.error_pages_only && !inputs.ui_assets_only && !inputs.navigation_only && !inputs.landing_only && !inputs.faq_only && needs.translate.result != 'skipped' }}
     permissions:
       packages: write
       id-token: write
