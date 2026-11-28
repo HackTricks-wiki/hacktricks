@@ -105,7 +105,7 @@ Sieh dir den [Kurskatalog von 8kSec Academy](https://academy.8ksec.io/) an.
 
 ### [NaxusAI – Autonome offensive Security](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI-Logo"><figcaption></figcaption></figure>
 
 **Naxus** ist eine KI-gestützte Plattform für offensive Security, die vollständige Scans externer Angriffsflächen, Audits mobiler Apps, Black-Box-Tests von Webanwendungen und Reviews von Quellcode durchführt. Die Agents validieren ausnutzbare Findings und liefern nachvollziehbare Nachweise, Proof-of-Concept-Exploits und umsetzbare Empfehlungen zur Behebung.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ Zusätzlich zu den oben genannten Angeboten ist WebSec ein **engagierter Unterst
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets-Logo"><figcaption></figcaption></figure>
 
 
 **Für den Einsatz entwickelt. Auf dich zugeschnitten.**\
@@ -142,7 +142,7 @@ Zusätzlich zu den oben genannten Angeboten ist WebSec ein **engagierter Unterst
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower-Logo"><figcaption></figcaption></figure>
 
 Last Tower Solutions konzentriert sich auf Cybersecurity-Beratung für **Bildung** und **FinTech**, darunter Cloud-Assessments, interne und externe Penetrationstests, Schwachstellenanalysen und Unterstützung bei Compliance.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Bleib über die neuesten Entwicklungen in der Cybersecurity informiert und auf d
 
 ### [Beaki — Essen, das zu dir passt](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki-Logo"><figcaption></figcaption></figure>
 
 **Beaki** ist ein personalisierter Lebensmittelscanner, Kalorienzähler und Ernährungstracker. Scanne Barcodes und Supermarktregale, fotografiere oder beschreibe Mahlzeiten und Restaurantmenüs und erhalte nachvollziehbare Bewertungen, die auf deine Ziele, Ernährung, Allergien und dein Gesundheitsprofil abgestimmt sind. Beaki erfasst außerdem Kalorien und Makronährstoffe und erstellt personalisierte Essenspläne mit Einkaufslisten.<sup>[[11]](#references)</sup>
 
