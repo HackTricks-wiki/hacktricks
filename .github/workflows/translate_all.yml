@@ -10,8 +10,61 @@ on:
       - '.github/**'
       - 'scripts/merge_approved_prs.py'
       - 'scripts/test_merge_approved_prs.py'
+      # Tool-only releases can be reviewed and dispatched without scheduling a book backfill.
+      - 'scripts/translation_backlog.py'
+      - 'scripts/audit_translation_editions.py'
+      - 'scripts/test_translation_editions.py'
+      - 'scripts/translation_matrix.py'
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/translate_all.yml'
+      - 'scripts/translation*.py'
+      - 'scripts/audit_translation_editions.py'
+      - 'scripts/seo_postprocess.py'
+      - 'scripts/render_localized_error.py'
+      - '.github/workflows/build_master.yml'
+      - 'scripts/translator.py'
+      - 'scripts/test_translat*.py'
+      - 'theme/index.hbs'
+      - 'theme/book.js'
+      - 'theme/ht_searcher.js'
+      - 'scripts/test_navigation_l10n.js'
+      - 'scripts/test_search.js'
   workflow_dispatch:
     inputs:
+      validate_only:
+        description: "Run translator checks without publishing"
+        type: boolean
+        default: false
+      audit_only:
+        description: "Audit every published language branch and save a report without deploying"
+        type: boolean
+        default: false
+      error_pages_only:
+        description: "Build and publish localized 404 pages only"
+        type: boolean
+        default: false
+      ui_assets_only:
+        description: "Publish localized navigation and search JavaScript only"
+        type: boolean
+        default: false
+      navigation_only:
+        description: "Translate and publish sidebar labels only"
+        type: boolean
+        default: false
+      landing_only:
+        description: "Publish existing landing pages, with existing sidebars if navigation_only is also enabled"
+        type: boolean
+        default: false
+      faq_only:
+        description: "Rebuild and publish only the existing Values and FAQ page for the selected languages"
+        type: boolean
+        default: false
+      files:
+        description: "Optional comma-separated src/*.md paths to retry in addition to the language backlog"
+        required: false
+        default: ''
       translation_base_sha:
         description: "Optional base commit for a catch-up translation range"
         required: false
@@ -25,21 +78,185 @@ on:
         required: false
         default: ''
       batch_size:
-        description: "Pages per Vietnamese translation batch"
+        description: "Pages per translation batch"
         type: choice
         options: ['20', '40', '80']
         required: false
         default: '80'
 
 permissions:
-  packages: write
-  id-token: write
-  contents: write
-  actions: read
-  pull-requests: read
+  contents: read
+
+env:
+  # Keep the shared validator and deployment tools on the same immutable revision.
+  SHARED_TRANSLATOR_REF: 493197eb3af604259998243ffea154c9596dd92a
+  # Seed older branches from the English snapshot before the reported gap.
+  INITIAL_SOURCE_REF: 8481cea2a23b5c7f8eaec13775164aee08e2db00
 
 jobs:
+  validate:
+    name: Validate translation tools
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check py3langid==0.4.0 markdown-it-py==4.3.0
+          shared_url="https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/$SHARED_TRANSLATOR_REF/scripts"
+          workdir=$(mktemp -d)
+          for script in translator translation_backlog translation_quality \
+              test_translator_directives test_translator_batch test_translator_code_blocks test_translator_tokenizers \
+              test_translation_backlog audit_translation_editions test_translation_editions; do
+            wget -O "$workdir/$script.py" "$shared_url/$script.py"
+          done
+          wget -O "$workdir/push_branch_with_retry.sh" "$shared_url/push_branch_with_retry.sh"
+          cp scripts/translation_matrix.py "$workdir/"
+          python -m unittest discover -s "$workdir" -p 'test_translat*.py'
+          python -m unittest discover -s scripts -p 'test_translation_*.py'
+          python scripts/translation_matrix.py --check-menu theme/index.hbs
+          node --test scripts/test_navigation_l10n.js scripts/test_search.js
+
+  review-language-editions:
+    name: Audit every translation edition
+    needs: validate
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.audit_only && !inputs.validate_only }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Compare published Git revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          python -m pip install --disable-pip-version-check py3langid==0.4.0 markdown-it-py==4.3.0
+          shared_url="https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/$SHARED_TRANSLATOR_REF/scripts"
+          workdir=$(mktemp -d)
+          for script in translation_backlog translation_quality audit_translation_editions; do
+            wget -nv -O "$workdir/$script.py" "$shared_url/$script.py"
+          done
+          cp scripts/translation_matrix.py "$workdir/"
+          python "$workdir/audit_translation_editions.py" \
+            --initial-source-ref "$INITIAL_SOURCE_REF" --output "$RUNNER_TEMP/translation-audit.json"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: translation-audit
+          path: ${{ runner.temp }}/translation-audit.json
+          if-no-files-found: error
+
+  publish-error-pages:
+    name: Publish localized site files
+    needs: validate
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.error_pages_only || inputs.ui_assets_only) && !inputs.validate_only && !inputs.audit_only }}
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+    concurrency:
+      group: localized-error-pages
+      cancel-in-progress: false
+    container:
+      image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Render missing pages in an isolated book
+        if: ${{ inputs.error_pages_only }}
+        run: python3 scripts/render_localized_error.py --publish-dir "$RUNNER_TEMP/localized-errors"
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Publish only the localized error pages
+        if: ${{ inputs.error_pages_only }}
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          directory="$RUNNER_TEMP/localized-errors"
+          paths=()
+          for file in "$directory"/[a-z][a-z]/404.html "$directory"/404.html; do
+            test -s "$file"
+            path="${file#"$directory"/}"
+            aws s3 cp "$file" "s3://hacktricks-wiki/$path" --content-type "text/html; charset=utf-8" --no-progress
+            paths+=("/$path")
+          done
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "${paths[@]}"
+
+      - name: Publish only localized navigation and search scripts
+        if: ${{ inputs.ui_assets_only }}
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          UI_ASSET_BASELINE: 6166b0c61528274710d07a54f38440c12714b946
+        run: |
+          set -euo pipefail
+          workdir=$(mktemp -d)
+          PYTHONPATH=scripts python3 -c 'from translation_matrix import MENU_LABELS; print(*sorted(MENU_LABELS), sep=chr(10))' > "$workdir/locales"
+          locales=()
+          while IFS= read -r locale; do
+            locales+=("$locale")
+          done < "$workdir/locales"
+          assets=(book.js theme/ht_searcher.js)
+          paths=()
+          files=()
+          # Compare every object before uploading any replacement.
+          for asset in "${assets[@]}"; do
+            source="theme/${asset##*/}"
+            baseline="$workdir/${asset##*/}.baseline"
+            git -c safe.directory="$GITHUB_WORKSPACE" show "refs/remotes/origin/master:$source" > "$baseline"
+            released="$workdir/${asset##*/}.released"
+            git -c safe.directory="$GITHUB_WORKSPACE" show "$UI_ASSET_BASELINE:$source" > "$released"
+            for locale in "${locales[@]}"; do
+              path="$locale/$asset"
+              aws s3 cp "s3://hacktricks-wiki/$path" "$workdir/current" --only-show-errors
+              if cmp -s "$source" "$workdir/current"; then
+                continue
+              fi
+              if ! cmp -s "$baseline" "$workdir/current" && ! cmp -s "$released" "$workdir/current"; then
+                echo "Unexpected version at /$path. No scripts were uploaded."
+                exit 1
+              fi
+              paths+=("/$path")
+              files+=("$source")
+            done
+          done
+          if [ -z "${paths[*]-}" ]; then
+            echo "The current assets already match this revision."
+            exit 0
+          fi
+          for index in "${!paths[@]}"; do
+            aws s3 cp "${files[$index]}" "s3://hacktricks-wiki${paths[$index]}" --content-type "application/javascript; charset=utf-8" --no-progress
+          done
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "${paths[@]}" /book.js /theme/ht_searcher.js
+
   select-languages:
+    if: ${{ github.event_name != 'pull_request' && !inputs.validate_only && !inputs.audit_only && !inputs.error_pages_only && !inputs.ui_assets_only }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
@@ -48,17 +265,29 @@ jobs:
       - id: select
         env:
           ONLY_LANGUAGE: ${{ inputs.only_language }}
-        run: python3 scripts/translation_matrix.py --only "$ONLY_LANGUAGE" >> "$GITHUB_OUTPUT"
+          STATIC_ONLY: ${{ inputs.landing_only || inputs.faq_only }}
+        run: |
+          if [[ "$STATIC_ONLY" == true && -z "$ONLY_LANGUAGE" ]]; then
+            echo "Scoped page publishing requires an explicit language selection." >&2
+            exit 1
+          fi
+          python3 scripts/translation_matrix.py --only "$ONLY_LANGUAGE" >> "$GITHUB_OUTPUT"
 
   translate:
     name: Translate → ${{ matrix.name }} (${{ matrix.branch }})
-    needs: select-languages
+    needs: [validate, select-languages]
+    permissions:
+      packages: write
+      id-token: write
+      contents: write
+      actions: read
+      pull-requests: read
     runs-on: ubuntu-latest
 
     # Run N languages in parallel (tune max-parallel if needed)
     strategy:
       fail-fast: false
-      # max-parallel: 3 #Nothing to run all in parallel
+      max-parallel: ${{ inputs.navigation_only && !inputs.landing_only && !inputs.faq_only && 8 || 17 }}
       matrix: ${{ fromJSON(needs.select-languages.outputs.matrix) }}
 
     # Ensure only one job per branch runs at a time (even across workflow runs)
@@ -70,6 +299,9 @@ jobs:
       image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
 
     env:
+      LANDING_ONLY: ${{ inputs.landing_only }}
+      STATIC_ONLY: ${{ inputs.landing_only || inputs.faq_only }}
+      NAVIGATION_ONLY: ${{ inputs.navigation_only }}
       LANGUAGE: ${{ matrix.language }}
       BRANCH:   ${{ matrix.branch }}
 
@@ -79,27 +311,25 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Verify image tools and download scripts
+      - name: Pin source and download shared translation scripts
+        shell: bash
         run: |
-          gh --version
-          wget --version | head -n 1
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          source_ref=$(git rev-parse refs/remotes/origin/master)
+          echo "SOURCE_REF=$source_ref" >> "$GITHUB_ENV"
+          cp scripts/render_localized_error.py scripts/translation_matrix.py /tmp/
+          git checkout --detach "$source_ref"
+          python -m pip install --disable-pip-version-check py3langid==0.4.0 markdown-it-py==4.3.0
           cp .github/build_compact_search_index.py /tmp/build_compact_search_index.py
           cp theme/ht_searcher.js /tmp/ht_searcher.js
-          mkdir -p scripts
-          cd scripts
-          wget -O get_and_save_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/get_and_save_refs.py
-          wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
-          wget -O translator.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/translator.py
-          # Validate the shared translator used by this run, including tokenizer
-          # initialization, before any paid translation requests are made.
-          for suite in directives batch code_blocks tokenizers; do
-            wget -O "test_translator_${suite}.py" "https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/test_translator_${suite}.py"
-            python "test_translator_${suite}.py" -v
+          shared_url="https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/$SHARED_TRANSLATOR_REF/scripts"
+          for script in translator translation_backlog translation_quality get_and_save_refs compare_and_fix_refs; do
+            wget -O "/tmp/$script.py" "$shared_url/$script.py"
           done
-          cp translation_backlog.py /tmp/translation_backlog.py
-          cp mark_unchanged_s3_files.py /tmp/mark_unchanged_s3_files.py
-          cp upload_immutable_images.sh /tmp/upload_immutable_images.sh
-          cd ..
+          wget -O /tmp/push_branch_with_retry.sh "$shared_url/push_branch_with_retry.sh"
+          cp scripts/mark_unchanged_s3_files.py /tmp/mark_unchanged_s3_files.py
+          cp scripts/upload_immutable_images.sh /tmp/upload_immutable_images.sh
           mkdir -p /tmp/immutable-images
           cp \
             src/images/hacktricks-summer-discount-2026-v1.webp \
@@ -118,121 +348,110 @@ jobs:
             /tmp/immutable-images/
           cp theme/discount.js /tmp/discount.js
           cp theme/discount.css /tmp/discount.css
-          cp theme/index.hbs /tmp/index.hbs
           cp scripts/seo_postprocess.py /tmp/seo_postprocess.py
 
-      - name: Run get_and_save_refs.py
-        run: |
-          python scripts/get_and_save_refs.py
+      - name: Save reference data
+        if: ${{ !inputs.navigation_only && !inputs.landing_only && !inputs.faq_only }}
+        run: python /tmp/get_and_save_refs.py
 
-      - name: Download language branch & update refs
+      - name: Download language branch and update refs
+        shell: bash
         run: |
-          git config --global --add safe.directory /__w/hacktricks/hacktricks
+          set -euo pipefail
           git config --global user.name 'Translator'
           git config --global user.email 'github-actions@github.com'
-          git config pull.rebase false
-          git checkout $BRANCH
-          git pull
-          python scripts/compare_and_fix_refs.py --files-unmatched-paths /tmp/file_paths.txt
-          git add .
-          git commit -m "Fix unmatched refs" || echo "No changes to commit"
-          git push || echo "No changes to push"
-      
-      - name: Run translation script on changed files
-        env:
-          TRANSLATION_BASE_SHA: ${{ inputs.translation_base_sha }}
-          TRANSLATION_HEAD_SHA: ${{ inputs.translation_head_sha }}
-          BATCH_SIZE: ${{ inputs.batch_size || '80' }}
-        run: |
-          git checkout master
-          if [ "$BRANCH" = vi ]; then
-            python /tmp/translation_backlog.py plan \
-              --language "$BRANCH" \
-              --output /tmp/pending-pages.txt \
-              --extras /tmp/file_paths.txt
-            echo "$(wc -l < /tmp/pending-pages.txt) pages pending for $BRANCH"
-            if [ -s /tmp/pending-pages.txt ]; then
-              case "$BATCH_SIZE" in 20|40|80) ;; *) echo "Invalid batch size: $BATCH_SIZE" >&2; exit 1 ;; esac
-              split -l "$BATCH_SIZE" -d -a 3 /tmp/pending-pages.txt /tmp/translation-batch-
-              for batch in /tmp/translation-batch-*; do
-                git checkout master
-                python scripts/translator.py \
-                  --language "$LANGUAGE" \
-                  --branch "$BRANCH" \
-                  --api-key "${{ secrets.OPENAI_API_KEY }}" \
-                  --file-list "$batch" \
-                  --threads 3
-                python /tmp/translation_backlog.py mark \
-                  --language "$BRANCH" \
-                  --file-list "$batch"
-                git add .translation-source-blobs.json
-                if ! git diff --cached --quiet; then
-                  git commit -m "Record translated English source blobs for $BRANCH"
-                  git push origin "$BRANCH"
-                fi
-              done
-            fi
-            git checkout master
-            python /tmp/translation_backlog.py verify --language "$BRANCH"
+          git checkout "$BRANCH"
+          git pull --ff-only origin "$BRANCH"
+          if [[ "$NAVIGATION_ONLY" == true || "$STATIC_ONLY" == true ]]; then
             exit 0
           fi
-          export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          HEAD_SHA="${TRANSLATION_HEAD_SHA:-$GITHUB_SHA}"
-          BASE_SHA="${TRANSLATION_BASE_SHA:-${HEAD_SHA}^}"
-          git rev-parse --verify "${BASE_SHA}^{commit}" >/dev/null
-          git rev-parse --verify "${HEAD_SHA}^{commit}" >/dev/null
-          echo "Collecting changed files from ${BASE_SHA} to ${HEAD_SHA}"
-          git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -v "SUMMARY.md" | while read -r file; do
-            if echo "$file" | grep -qE '\.md$'; then
-              echo -n ",$file" >> /tmp/file_paths.txt
-            fi
-          done
-
-          # Ref comparison can include paths that exist only on a language branch.
-          # The translator requires every source path to exist on master.
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path_file = Path('/tmp/file_paths.txt')
-          paths = path_file.read_text().split(',') if path_file.exists() else []
-          valid = []
-          for path in paths:
-              path = path.strip()
-              if path.startswith('src/') and path.endswith('.md') and Path(path).is_file():
-                  valid.append(path)
-              elif path:
-                  print(f'Skipping missing or invalid translation source: {path}')
-          path_file.write_text(','.join(dict.fromkeys(valid)))
-          PY
-
-          echo "Files to translate:"
-          cat /tmp/file_paths.txt
-          echo ""
-
-          if [ -s /tmp/file_paths.txt ]; then
-            python scripts/translator.py \
-              --language "$LANGUAGE" \
-              --branch "$BRANCH" \
-              --api-key "$OPENAI_API_KEY" \
-              -f "$(cat /tmp/file_paths.txt)" \
-              -t 3
-          else
-            echo "No markdown files changed, skipping translation."
+          python /tmp/compare_and_fix_refs.py --files-unmatched-paths /tmp/ref-mismatches.txt
+          # Separate the CSV emitted by the refs helper from any manual paths.
+          printf '\n' >> /tmp/ref-mismatches.txt
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Fix unmatched refs"
+            bash /tmp/push_branch_with_retry.sh "$BRANCH"
           fi
+
+      - name: Translate and verify pending pages
+        if: ${{ !inputs.landing_only && !inputs.faq_only }}
+        shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          INPUT_FILES: ${{ inputs.files }}
+          BATCH_SIZE: ${{ inputs.batch_size || '80' }}
+          TRANSLATION_BASE_SHA: ${{ inputs.translation_base_sha }}
+          TRANSLATION_HEAD_SHA: ${{ inputs.translation_head_sha }}
+        run: |
+          set -euo pipefail
+          git checkout --detach "$SOURCE_REF"
+          if [[ "$NAVIGATION_ONLY" == true ]]; then
+            python /tmp/translator.py \
+              --language "$LANGUAGE" --branch "$BRANCH" --api-key "$OPENAI_API_KEY" \
+              --source-ref "$SOURCE_REF" --initial-source-ref "$INITIAL_SOURCE_REF" \
+              --record-source --file-paths src/SUMMARY.md --navigation-only
+            exit 0
+          fi
+          if [[ -n "$TRANSLATION_BASE_SHA" || -n "$TRANSLATION_HEAD_SHA" ]]; then
+            head_sha=$(git rev-parse --verify "${TRANSLATION_HEAD_SHA:-$SOURCE_REF}^{commit}")
+            base_sha=$(git rev-parse --verify "${TRANSLATION_BASE_SHA:-${head_sha}^}^{commit}")
+            git -c core.quotePath=false diff --name-only "$base_sha" "$head_sha" -- src >> /tmp/ref-mismatches.txt
+          fi
+          if [[ ! "$BATCH_SIZE" =~ ^(20|40|80)$ ]]; then
+            echo "Invalid batch size: $BATCH_SIZE" >&2
+            exit 1
+          fi
+
+          backlog=(python /tmp/translation_backlog.py)
+          scope=(--language "$BRANCH" --source-ref "$SOURCE_REF" --initial-source-ref "$INITIAL_SOURCE_REF")
+          "${backlog[@]}" plan "${scope[@]}" \
+            --output /tmp/pending-pages.txt --extras /tmp/ref-mismatches.txt --extra-env INPUT_FILES
+
+          if [ -s /tmp/pending-pages.txt ]; then
+            split -l "$BATCH_SIZE" -d -a 3 /tmp/pending-pages.txt /tmp/translation-batch-
+          else
+            # Keep shared book configuration and assets in sync without translating any pages.
+            cp /tmp/pending-pages.txt /tmp/translation-batch-000
+          fi
+          batches=(/tmp/translation-batch-*)
+          last_batch="${batches[${#batches[@]}-1]}"
+          for batch in "${batches[@]}"; do
+            options=()
+            if [[ "$batch" != "$last_batch" ]]; then
+              options+=(--keep-removed)
+            fi
+            git checkout --detach "$SOURCE_REF"
+            python /tmp/translator.py \
+              --language "$LANGUAGE" --branch "$BRANCH" --api-key "$OPENAI_API_KEY" \
+              --source-ref "$SOURCE_REF" --initial-source-ref "$INITIAL_SOURCE_REF" \
+              --record-source --file-list "$batch" --threads 3 "${options[@]}"
+          done
+          "${backlog[@]}" verify "${scope[@]}"
 
       - name: Build mdBook
+        shell: bash
         run: |
           git checkout "$BRANCH"
-          git pull
-          if [ "$BRANCH" = vi ]; then
-            cp /tmp/index.hbs theme/index.hbs
-            git add theme/index.hbs
-            if ! git diff --cached --quiet; then
-              git commit -m "Sync Vietnamese language menu"
-              git push origin "$BRANCH"
-            fi
+          navigation_options=()
+          if [ "$LANDING_ONLY" = true ]; then
+            navigation_options+=(--landing)
+          fi
+          python /tmp/translation_backlog.py verify-navigation --language "$BRANCH" --source-ref "$SOURCE_REF" "${navigation_options[@]}"
+          if [ "$NAVIGATION_ONLY" = true ] && [ "$STATIC_ONLY" != true ]; then
+            export MDBOOK_OUTPUT__HTML__SEARCH__ENABLE=false
+          else
+            python /tmp/translation_backlog.py restore-anchors --language "$BRANCH" --source-ref "$SOURCE_REF"
+            python /tmp/render_localized_error.py --language "$BRANCH"
           fi
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
+          python /tmp/translation_backlog.py verify-render --language "$BRANCH" --toc book/toc.html --toc-script book/toc.js
+          if [ "$NAVIGATION_ONLY" != true ] && [ "$STATIC_ONLY" != true ]; then
+            python /tmp/render_localized_error.py --language "$BRANCH" --rendered
+          fi
+          if [ "$NAVIGATION_ONLY" = true ] || [ "$STATIC_ONLY" = true ]; then
+            exit 0
+          fi
           cp /tmp/immutable-images/* ./book/images/
           cp /tmp/discount.js ./book/discount.js
           mkdir -p ./book/theme
@@ -242,6 +461,7 @@ jobs:
           cp /tmp/ht_searcher.js ./book/theme/ht_searcher.js
       
       - name: Push search index to hacktricks-searchindex repo
+        if: ${{ !inputs.navigation_only && !inputs.landing_only && !inputs.faq_only }}
         shell: bash
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -266,7 +486,7 @@ jobs:
           fi
 
           # Clone the searchindex repo
-          git clone --depth 1 https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git /tmp/searchindex-repo
+          git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git" /tmp/searchindex-repo
           
           # Compress the searchindex file
           python3 /tmp/build_compact_search_index.py "$ASSET" "$COMPACT_ASSET"
@@ -335,7 +555,7 @@ jobs:
                       echo "Detected history rewrite, re-cloning repository..."
                       cd /tmp
                       rm -rf searchindex-repo
-                      git clone --depth 1 https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git searchindex-repo
+                      git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git" searchindex-repo
                       cd searchindex-repo
                       git config user.name "GitHub Actions"
                       git config user.email "github-actions@github.com"
@@ -368,7 +588,22 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
+      - name: Publish translated sidebar
+        if: ${{ inputs.navigation_only }}
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          test -s book/toc.html
+          test -s book/toc.js
+          aws s3 cp book/toc.html "s3://hacktricks-wiki/$BRANCH/toc.html"
+          aws s3 cp book/toc.js "s3://hacktricks-wiki/$BRANCH/toc.js"
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/$BRANCH/toc.html" "/$BRANCH/toc.js"
+
       - name: Post-process SEO artifacts
+        if: ${{ !inputs.navigation_only || inputs.landing_only || inputs.faq_only }}
         run: |
           python3 /tmp/seo_postprocess.py pages \
             --book-dir ./book \
@@ -377,8 +612,35 @@ jobs:
             --default-lang en \
             --site-name "HackTricks"
       
+      - name: Publish only the localized landing page
+        if: ${{ inputs.landing_only }}
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          test -s book/index.html
+          test "$(git rev-parse HEAD)" = "$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)"
+          aws s3 cp book/index.html "s3://hacktricks-wiki/$BRANCH/index.html" --content-type "text/html; charset=utf-8" --no-progress
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/$BRANCH/" "/$BRANCH/index.html"
+
+      - name: Publish only the localized Values and FAQ page
+        if: ${{ inputs.faq_only }}
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          page=welcome/hacktricks-values-and-faq.html
+          test -s "book/$page"
+          test "$(git rev-parse HEAD)" = "$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)"
+          aws s3 cp "book/$page" "s3://hacktricks-wiki/$BRANCH/$page" --content-type "text/html; charset=utf-8" --no-progress
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/$BRANCH/$page"
+
       # Sync the build to S3
       - name: Sync to S3
+        if: ${{ !inputs.navigation_only && !inputs.landing_only && !inputs.faq_only }}
         run: |
           echo "Current branch:"
           git rev-parse --abbrev-ref HEAD
@@ -393,7 +655,7 @@ jobs:
             --source ./book \
             --manifest /tmp/s3-branch-manifest.json \
             --remote-prefix "$BRANCH/"
-          aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
+          aws s3 sync ./book "s3://hacktricks-wiki/$BRANCH" --delete
           bash /tmp/upload_immutable_images.sh hacktricks-wiki "$BRANCH"
           echo "Sync completed"
           echo "Cat 3 files from the book"
@@ -402,7 +664,13 @@ jobs:
   finalize-deployment:
     name: Finalize translated deployment
     needs: translate
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.audit_only && !inputs.error_pages_only && !inputs.ui_assets_only && !inputs.navigation_only && !inputs.landing_only && !inputs.faq_only && needs.translate.result != 'skipped' }}
+    permissions:
+      packages: write
+      id-token: write
+      contents: write
+      actions: read
+      pull-requests: read
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: prod

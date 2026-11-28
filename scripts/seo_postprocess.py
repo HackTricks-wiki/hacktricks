@@ -49,6 +49,7 @@ SITE_SAME_AS = {
         "https://twitter.com/hacktricks_live",
     ],
 }
+LANGUAGE_TAGS = {"pt": "pt-BR", "zh": "zh-Hans"}
 LANGUAGE_LOCALES = {
     "af": "af_ZA",
     "de": "de_DE",
@@ -61,7 +62,7 @@ LANGUAGE_LOCALES = {
     "ja": "ja_JP",
     "ko": "ko_KR",
     "pl": "pl_PL",
-    "pt": "pt_PT",
+    "pt": "pt_BR",
     "sr": "sr_RS",
     "sw": "sw_KE",
     "tr": "tr_TR",
@@ -77,8 +78,13 @@ DESCRIPTION_SKIP_PATTERNS = (
     "full hacktricks training catalog",
 )
 LANGUAGE_MENU_LINK_RE = re.compile(
-    r'(?P<prefix><a\s+id="(?P<lang>[a-z]{2})"\s+href=")/[a-z]{2}/[^"]*(?P<suffix>"\s+hreflang="(?P=lang)")',
+    r'(?P<prefix><a\s+id="(?P<lang>[a-z]{2})"\s+href=")/[a-z]{2}/[^"]*'
+    r'(?P<suffix>"\s+hreflang="(?P=lang)(?:-[a-z]{2,8})?")',
     flags=re.I,
+)
+COMPANION_BOOK_LINK_RE = re.compile(
+    r'(<a\s+data-companion-book\s+href="https://(?:hacktricks|cloud\.hacktricks)\.wiki)/'
+    r'(?:[a-z]{2}/)?(")'
 )
 
 
@@ -266,7 +272,7 @@ def build_structured_data(site_url, lang, rel_path, title, description, site_nam
                     "name": site_name,
                     "alternateName": SITE_ALTERNATE_NAMES.get(site_name, []),
                     "description": homepage_description(site_name),
-                    "inLanguage": languages,
+                    "inLanguage": [LANGUAGE_TAGS.get(code, code) for code in languages],
                     "publisher": {"@id": f"{site_root}/#organization"},
                 },
             ]
@@ -281,7 +287,7 @@ def build_structured_data(site_url, lang, rel_path, title, description, site_nam
             "url": current_url,
             "name": title,
             "description": description,
-            "inLanguage": lang,
+            "inLanguage": LANGUAGE_TAGS.get(lang, lang),
             "dateModified": lastmod,
             "isPartOf": {"@id": f"{site_root}/#website"},
             "about": {"@id": f"{site_root}/#organization"},
@@ -318,8 +324,9 @@ def build_seo_block(site_url, lang, rel_path, languages, default_lang, title, de
 
     for alt_lang in languages:
         alt_url = canonical_url(site_url, alt_lang, rel_path)
+        alt_tag = LANGUAGE_TAGS.get(alt_lang, alt_lang)
         lines.append(
-            f'<link rel="alternate" hreflang="{alt_lang}" href="{html.escape(alt_url, quote=True)}">'
+            f'<link rel="alternate" hreflang="{alt_tag}" href="{html.escape(alt_url, quote=True)}">'
         )
 
     default_url = canonical_url(site_url, default_lang, rel_path)
@@ -399,6 +406,11 @@ def update_document(document, site_url, lang, rel_path, languages, default_lang,
         flags=re.I,
     )
     document = update_language_menu_links(document, rel_path, languages)
+    tag = LANGUAGE_TAGS.get(lang, lang)
+    if tag != lang:
+        document = re.sub(r'(<html\b[^>]*?\s+lang=")[^"]*(")', rf'\g<1>{tag}\2', document, count=1, flags=re.I)
+    if lang in DEFAULT_LANGUAGES:
+        document = COMPANION_BOOK_LINK_RE.sub(rf'\g<1>/{lang}/\2', document)
     return document
 
 
@@ -455,7 +467,7 @@ def generate_language_sitemap(book_dir, site_url, lang, languages, default_lang)
                 "{http://www.w3.org/1999/xhtml}link",
                 {
                     "rel": "alternate",
-                    "hreflang": alt_lang,
+                    "hreflang": LANGUAGE_TAGS.get(alt_lang, alt_lang),
                     "href": canonical_url(site_url, alt_lang, rel_path),
                 },
             )

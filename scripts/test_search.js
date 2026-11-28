@@ -362,7 +362,7 @@ test('private translated initialization falls back locally and never fetches ano
   assert.equal(messages[1].docs[0]?.title, 'SQL Injection');
 });
 
-function uiHarness(){
+function uiHarness(searchLabels = {}){
   const elements = new Map(), documentEvents = new Map(), workers = [], timers = new Map();
   let timerId = 0;
   const context = {elasticlunr, console:quietConsole, path_to_root:'../',
@@ -381,6 +381,7 @@ function uiHarness(){
     return node;
   }
   for(const id of ['search-wrapper','searchbar','searchresults','searchresults-outer','searchresults-header','search-toggle']) elements.set(id, element(id === 'searchbar' ? 'INPUT' : 'DIV'));
+  elements.get('search-toggle').dataset = searchLabels;
   context.document = {documentElement:{lang:'en'}, getElementById:id => elements.get(id),
     createElement:element, addEventListener:(type, fn) => documentEvents.set(type, fn)};
   context.Worker = class {
@@ -402,6 +403,35 @@ test('normal navigation and empty input do not start a worker or download an ind
   ui.open(); assert.equal(ui.workers.length, 1);
   assert.equal(ui.workers[0].messages[0].type, 'init');
   ui.open(); ui.open(); assert.equal(ui.workers.length, 1);
+});
+
+test('a localized search shows zero matches and clears the status with the input', () => {
+  const ui = uiHarness({
+    searchLocale: 'es',
+    searchMatches: 'Resultados para «{query}»: {count}',
+    searchNoMatches: 'No hay resultados para «{query}».',
+    searchPreview: 'Vista previa',
+    searchBookLabel: 'Libro',
+  });
+  const results = ui.elements.get('searchresults-outer');
+  const status = ui.elements.get('searchresults-header');
+  const query = '<b>catalog</b>';
+  ui.input(query);
+  ui.flush();
+  const worker = ui.workers[0];
+  worker.onmessage({data:{ready:true}});
+  const {id} = worker.messages.at(-1);
+  worker.onmessage({data:{id, query, docs:[]}});
+  assert.equal(status.textContent, `No hay resultados para «${query}».`);
+  assert(!results.classList.contains('hidden'));
+  worker.onmessage({data:{id, query, docs:[{title:'Catalog', url:'catalog.html'}]}});
+  assert.equal(status.textContent, `Resultados para «${query}»: 1`);
+  const result = ui.elements.get('searchresults').children[0].innerHTML;
+  assert(result.includes('[Libro]'));
+  assert(result.includes('aria-label="Vista previa"'));
+  ui.input('');
+  assert.equal(status.textContent, '');
+  assert(results.classList.contains('hidden'));
 });
 
 test('debouncing, pending initialization, stale responses and clearing input', () => {

@@ -44,7 +44,36 @@ function playground_text(playground, hidden = true) {
     });
 })();
 
+function codeInterfaceMessages(language) {
+    const translations = {
+        af: ["Wys versteekte reëls", "Versteek reëls", "Kopieer na die knipbord", "Loop hierdie kode", "Ontdoen veranderinge", "Gekopieer!", "Kon nie kopieer nie", "Besig om te loop…", "Geen uitvoer nie", "Kon nie met die speelgrond verbind nie"],
+        de: ["Ausgeblendete Zeilen anzeigen", "Zeilen ausblenden", "In die Zwischenablage kopieren", "Diesen Code ausführen", "Änderungen rückgängig machen", "Kopiert!", "Kopieren fehlgeschlagen", "Wird ausgeführt…", "Keine Ausgabe", "Fehler bei der Verbindung zur Testumgebung"],
+        el: ["Εμφάνιση κρυφών γραμμών", "Απόκρυψη γραμμών", "Αντιγραφή στο πρόχειρο", "Εκτέλεση αυτού του κώδικα", "Αναίρεση αλλαγών", "Αντιγράφηκε!", "Η αντιγραφή απέτυχε", "Εκτελείται…", "Χωρίς έξοδο", "Σφάλμα σύνδεσης με το δοκιμαστικό περιβάλλον"],
+        en: ["Show hidden lines", "Hide lines", "Copy to clipboard", "Run this code", "Undo changes", "Copied!", "Clipboard error!", "Running…", "No output", "Playground connection error"],
+        es: ["Mostrar líneas ocultas", "Ocultar líneas", "Copiar al portapapeles", "Ejecutar este código", "Deshacer cambios", "¡Copiado!", "No se pudo copiar", "Ejecutando…", "Sin salida", "Error de conexión con el entorno de pruebas"],
+        fr: ["Afficher les lignes masquées", "Masquer les lignes", "Copier dans le presse-papiers", "Exécuter ce code", "Annuler les modifications", "Copié !", "Impossible de copier", "Exécution en cours…", "Aucune sortie", "Erreur de connexion à l’environnement de test"],
+        hi: ["छिपी हुई पंक्तियाँ दिखाएँ", "पंक्तियाँ छिपाएँ", "क्लिपबोर्ड में कॉपी करें", "यह कोड चलाएँ", "बदलाव वापस लें", "कॉपी हो गया!", "कॉपी नहीं हो सका", "चल रहा है…", "कोई आउटपुट नहीं", "परीक्षण परिवेश से कनेक्ट नहीं हो सका"],
+        it: ["Mostra le righe nascoste", "Nascondi le righe", "Copia negli appunti", "Esegui questo codice", "Annulla le modifiche", "Copiato!", "Impossibile copiare", "Esecuzione in corso…", "Nessun risultato", "Errore di connessione all’ambiente di prova"],
+        ja: ["非表示の行を表示", "行を非表示にする", "クリップボードにコピー", "このコードを実行", "変更を元に戻す", "コピーしました！", "コピーできませんでした", "実行中…", "出力なし", "実行環境への接続に失敗しました"],
+        ko: ["숨겨진 줄 표시", "줄 숨기기", "클립보드에 복사", "이 코드 실행", "변경 사항 되돌리기", "복사했습니다!", "복사하지 못했습니다", "실행 중…", "출력 없음", "실행 환경에 연결하지 못했습니다"],
+        pl: ["Pokaż ukryte wiersze", "Ukryj wiersze", "Skopiuj do schowka", "Uruchom ten kod", "Cofnij zmiany", "Skopiowano!", "Nie udało się skopiować", "Uruchamianie…", "Brak danych wyjściowych", "Błąd połączenia ze środowiskiem testowym"],
+        pt: ["Mostrar linhas ocultas", "Ocultar linhas", "Copiar para a área de transferência", "Executar este código", "Desfazer alterações", "Copiado!", "Não foi possível copiar", "Executando…", "Sem saída", "Erro de conexão com o ambiente de testes"],
+        sr: ["Прикажи скривене редове", "Сакриј редове", "Копирај у међуспремник", "Покрени овај код", "Опозови измене", "Копирано!", "Копирање није успело", "Извршавање…", "Нема излаза", "Грешка при повезивању са пробним окружењем"],
+        sw: ["Onyesha mistari iliyofichwa", "Ficha mistari", "Nakili kwenye ubao wa kunakili", "Endesha msimbo huu", "Tendua mabadiliko", "Imenakiliwa!", "Imeshindwa kunakili", "Inaendeshwa…", "Hakuna tokeo", "Imeshindwa kuunganisha na mazingira ya majaribio"],
+        tr: ["Gizli satırları göster", "Satırları gizle", "Panoya kopyala", "Bu kodu çalıştır", "Değişiklikleri geri al", "Kopyalandı!", "Kopyalanamadı", "Çalışıyor…", "Çıktı yok", "Deneme ortamına bağlanılamadı"],
+        uk: ["Показати приховані рядки", "Приховати рядки", "Скопіювати до буфера обміну", "Запустити цей код", "Скасувати зміни", "Скопійовано!", "Не вдалося скопіювати", "Виконується…", "Немає виводу", "Не вдалося під’єднатися до середовища виконання"],
+        vi: ["Hiện các dòng bị ẩn", "Ẩn dòng", "Sao chép vào bảng tạm", "Chạy đoạn mã này", "Hoàn tác thay đổi", "Đã sao chép!", "Không thể sao chép", "Đang chạy…", "Không có đầu ra", "Không thể kết nối với môi trường chạy thử"],
+        zh: ["显示隐藏行", "隐藏行", "复制到剪贴板", "运行此代码", "撤销更改", "已复制！", "无法复制", "正在运行…", "无输出", "无法连接到代码运行环境"],
+    };
+    const codes = ["showLines", "hideLines", "copy", "run", "undo", "copied", "copyError", "running", "noOutput", "connectionError"];
+    const locale = (language || "en").toLowerCase().split("-")[0];
+    const values = Object.hasOwn(translations, locale) ? translations[locale] : translations.en;
+    return Object.fromEntries(codes.map((code, index) => [code, values[index]]));
+}
+
 (function codeSnippets() {
+    const messages = codeInterfaceMessages(document.documentElement.lang);
+
     function fetch_with_timeout(url, options, timeout = 6000) {
         return Promise.race([
             fetch(url, options),
@@ -154,7 +183,7 @@ function playground_text(playground, hidden = true) {
             params.version = "nightly";
         }
 
-        result_block.innerText = "Running...";
+        result_block.innerText = messages.running;
 
         fetch_with_timeout("https://play.rust-lang.org/evaluate.json", {
             headers: {
@@ -167,14 +196,14 @@ function playground_text(playground, hidden = true) {
         .then(response => response.json())
         .then(response => {
             if (response.result.trim() === '') {
-                result_block.innerText = "No output";
+                result_block.innerText = messages.noOutput;
                 result_block.classList.add("result-no-output");
             } else {
                 result_block.innerText = response.result;
                 result_block.classList.remove("result-no-output");
             }
         })
-        .catch(error => result_block.innerText = "Playground Communication: " + error.message);
+        .catch(error => result_block.innerText = messages.connectionError + ": " + error.message);
     }
 
     // Syntax highlighting Configuration
@@ -215,7 +244,11 @@ function playground_text(playground, hidden = true) {
 
         var buttons = document.createElement('div');
         buttons.className = 'buttons';
-        buttons.innerHTML = "<button class=\"fa fa-eye\" title=\"Show hidden lines\" aria-label=\"Show hidden lines\"></button>";
+        const reveal = document.createElement("button");
+        reveal.className = "fa fa-eye";
+        reveal.title = messages.showLines;
+        reveal.setAttribute("aria-label", reveal.title);
+        buttons.appendChild(reveal);
 
         // add expand button
         var pre_block = block.parentNode;
@@ -225,14 +258,14 @@ function playground_text(playground, hidden = true) {
             if (e.target.classList.contains('fa-eye')) {
                 e.target.classList.remove('fa-eye');
                 e.target.classList.add('fa-eye-slash');
-                e.target.title = 'Hide lines';
+                e.target.title = messages.hideLines;
                 e.target.setAttribute('aria-label', e.target.title);
 
                 block.classList.remove('hide-boring');
             } else if (e.target.classList.contains('fa-eye-slash')) {
                 e.target.classList.remove('fa-eye-slash');
                 e.target.classList.add('fa-eye');
-                e.target.title = 'Show hidden lines';
+                e.target.title = messages.showLines;
                 e.target.setAttribute('aria-label', e.target.title);
 
                 block.classList.add('hide-boring');
@@ -253,7 +286,7 @@ function playground_text(playground, hidden = true) {
 
                 var clipButton = document.createElement('button');
                 clipButton.className = 'clip-button';
-                clipButton.title = 'Copy to clipboard';
+                clipButton.title = messages.copy;
                 clipButton.setAttribute('aria-label', clipButton.title);
                 clipButton.innerHTML = '<i class=\"tooltiptext\"></i>';
 
@@ -275,7 +308,7 @@ function playground_text(playground, hidden = true) {
         var runCodeButton = document.createElement('button');
         runCodeButton.className = 'fa fa-play play-button';
         runCodeButton.hidden = true;
-        runCodeButton.title = 'Run this code';
+        runCodeButton.title = messages.run;
         runCodeButton.setAttribute('aria-label', runCodeButton.title);
 
         buttons.insertBefore(runCodeButton, buttons.firstChild);
@@ -287,7 +320,7 @@ function playground_text(playground, hidden = true) {
             var copyCodeClipboardButton = document.createElement('button');
             copyCodeClipboardButton.className = 'clip-button';
             copyCodeClipboardButton.innerHTML = '<i class="tooltiptext"></i>';
-            copyCodeClipboardButton.title = 'Copy to clipboard';
+            copyCodeClipboardButton.title = messages.copy;
             copyCodeClipboardButton.setAttribute('aria-label', copyCodeClipboardButton.title);
 
             buttons.insertBefore(copyCodeClipboardButton, buttons.firstChild);
@@ -297,7 +330,7 @@ function playground_text(playground, hidden = true) {
         if (window.ace && code_block.classList.contains("editable")) {
             var undoChangesButton = document.createElement('button');
             undoChangesButton.className = 'fa fa-history reset-button';
-            undoChangesButton.title = 'Undo changes';
+            undoChangesButton.title = messages.undo;
             undoChangesButton.setAttribute('aria-label', undoChangesButton.title);
 
             buttons.insertBefore(undoChangesButton, buttons.firstChild);
@@ -618,6 +651,164 @@ function playground_text(playground, hidden = true) {
 })();
 
 
+(function localizeNavigation() {
+    const keys = ["search", "searchBook", "languages", "contents", "onThisPage", "previous", "next", "pageNavigation", "loadingSearch", "searchUnavailable"];
+    const labels = {
+        af: ["Soek","Soek in hierdie boek…","Tale","Inhoudsopgawe","Op hierdie bladsy","Vorige hoofstuk","Volgende hoofstuk","Bladsynavigasie","Soekfunksie laai…","Soekfunksie nie beskikbaar nie"],
+        de: ["Suchen","Dieses Buch durchsuchen…","Sprachen","Inhaltsverzeichnis","Auf dieser Seite","Vorheriges Kapitel","Nächstes Kapitel","Seitennavigation","Suche wird geladen…","Suche nicht verfügbar"],
+        el: ["Αναζήτηση","Αναζήτηση σε αυτό το βιβλίο…","Γλώσσες","Πίνακας περιεχομένων","Σε αυτή τη σελίδα","Προηγούμενο κεφάλαιο","Επόμενο κεφάλαιο","Πλοήγηση σελίδας","Φόρτωση αναζήτησης…","Η αναζήτηση δεν είναι διαθέσιμη"],
+        en: ["Search","Search this book…","Languages","Table of contents","On this page","Previous chapter","Next chapter","Page navigation","Loading search…","Search unavailable"],
+        es: ["Buscar","Buscar en este libro…","Idiomas","Índice","En esta página","Capítulo anterior","Capítulo siguiente","Navegación de la página","Cargando la búsqueda…","Búsqueda no disponible"],
+        fr: ["Rechercher","Rechercher dans ce livre…","Langues","Table des matières","Sur cette page","Chapitre précédent","Chapitre suivant","Navigation de la page","Chargement de la recherche…","Recherche indisponible"],
+        hi: ["खोजें","इस पुस्तक में खोजें…","भाषाएँ","विषय-सूची","इस पृष्ठ पर","पिछला अध्याय","अगला अध्याय","पृष्ठ नेविगेशन","खोज लोड हो रही है…","खोज उपलब्ध नहीं है"],
+        it: ["Cerca","Cerca in questo libro…","Lingue","Indice","In questa pagina","Capitolo precedente","Capitolo successivo","Navigazione della pagina","Caricamento della ricerca…","Ricerca non disponibile"],
+        ja: ["検索","この本を検索…","言語","目次","このページの内容","前の章","次の章","ページのナビゲーション","検索を読み込み中…","検索は利用できません"],
+        ko: ["검색","이 책에서 검색…","언어","목차","이 페이지의 내용","이전 장","다음 장","페이지 탐색","검색을 불러오는 중…","검색을 사용할 수 없습니다"],
+        pl: ["Szukaj","Szukaj w tej książce…","Języki","Spis treści","Na tej stronie","Poprzedni rozdział","Następny rozdział","Nawigacja strony","Wczytywanie wyszukiwarki…","Wyszukiwanie jest niedostępne"],
+        pt: ["Pesquisar","Pesquisar neste livro…","Idiomas","Sumário","Nesta página","Capítulo anterior","Próximo capítulo","Navegação da página","Carregando a pesquisa…","Pesquisa indisponível"],
+        sr: ["Претрага","Претражи ову књигу…","Језици","Садржај","На овој страници","Претходно поглавље","Следеће поглавље","Навигација по страници","Учитавање претраге…","Претрага није доступна"],
+        sw: ["Tafuta","Tafuta katika kitabu hiki…","Lugha","Jedwali la yaliyomo","Kwenye ukurasa huu","Sura iliyotangulia","Sura inayofuata","Urambazaji wa ukurasa","Inapakia utafutaji…","Utafutaji haupatikani"],
+        tr: ["Ara","Bu kitapta ara…","Diller","İçindekiler","Bu sayfada","Önceki bölüm","Sonraki bölüm","Sayfa gezinmesi","Arama yükleniyor…","Arama kullanılamıyor"],
+        uk: ["Пошук","Пошук у цій книзі…","Мови","Зміст","На цій сторінці","Попередній розділ","Наступний розділ","Навігація сторінкою","Завантаження пошуку…","Пошук недоступний"],
+        vi: ["Tìm kiếm","Tìm kiếm trong sách này…","Ngôn ngữ","Mục lục","Trên trang này","Chương trước","Chương tiếp theo","Điều hướng trang","Đang tải tính năng tìm kiếm…","Tính năng tìm kiếm không khả dụng"],
+        zh: ["搜索","搜索本书…","语言","目录","本页内容","上一章","下一章","页面导航","正在加载搜索…","搜索不可用"],
+    };
+    const searchResults = {
+        af: ["Resultate vir “{query}”: {count}", "Geen resultate vir “{query}” nie.", "Voorskou van soekresultaat", "Boek"],
+        de: ["Ergebnisse für „{query}“: {count}", "Keine Ergebnisse für „{query}“.", "Vorschau des Suchergebnisses", "Buch"],
+        el: ["Αποτελέσματα για «{query}»: {count}", "Δεν βρέθηκαν αποτελέσματα για «{query}».", "Προεπισκόπηση αποτελέσματος αναζήτησης", "Βιβλίο"],
+        en: ["Results for “{query}”: {count}", "No results for “{query}”.", "Search result preview", "Book"],
+        es: ["Resultados para «{query}»: {count}", "No hay resultados para «{query}».", "Vista previa del resultado de búsqueda", "Libro"],
+        fr: ["Résultats pour « {query} » : {count}", "Aucun résultat pour « {query} ».", "Aperçu du résultat de recherche", "Livre"],
+        hi: ["“{query}” के लिए नतीजे: {count}", "“{query}” के लिए कोई नतीजा नहीं मिला।", "खोज नतीजे की झलक", "पुस्तक"],
+        it: ["Risultati per «{query}»: {count}", "Nessun risultato per «{query}».", "Anteprima del risultato di ricerca", "Libro"],
+        ja: ["「{query}」の検索結果：{count}件", "「{query}」に一致する結果はありません。", "検索結果のプレビュー", "書籍"],
+        ko: ["‘{query}’ 검색 결과: {count}건", "‘{query}’에 대한 검색 결과가 없습니다.", "검색 결과 미리보기", "책"],
+        pl: ["Wyniki dla „{query}”: {count}", "Brak wyników dla „{query}”.", "Podgląd wyniku wyszukiwania", "Książka"],
+        pt: ["Resultados para “{query}”: {count}", "Nenhum resultado para “{query}”.", "Prévia do resultado da pesquisa", "Livro"],
+        sr: ["Резултати за „{query}”: {count}", "Нема резултата за „{query}”.", "Преглед резултата претраге", "Књига"],
+        sw: ["Matokeo ya “{query}”: {count}", "Hakuna matokeo ya “{query}”.", "Onyesho la awali la tokeo la utafutaji", "Kitabu"],
+        tr: ["“{query}” için sonuç sayısı: {count}", "“{query}” için sonuç bulunamadı.", "Arama sonucu önizlemesi", "Kitap"],
+        uk: ["Результати для «{query}»: {count}", "Для «{query}» нічого не знайдено.", "Попередній перегляд результату пошуку", "Книга"],
+        vi: ["Kết quả cho “{query}”: {count}", "Không có kết quả cho “{query}”.", "Bản xem trước kết quả tìm kiếm", "Sách"],
+        zh: ["“{query}”的搜索结果：{count} 条", "未找到与“{query}”相关的结果。", "搜索结果预览", "手册"],
+    };
+    const calloutLabels = {
+        af: ["Nota", "Wenk", "Belangrik", "Waarskuwing", "Let op"],
+        de: ["Hinweis", "Tipp", "Wichtig", "Warnung", "Vorsicht"],
+        el: ["Σημείωση", "Συμβουλή", "Σημαντικό", "Προειδοποίηση", "Προσοχή"],
+        en: ["Note", "Tip", "Important", "Warning", "Caution"],
+        es: ["Nota", "Consejo", "Importante", "Advertencia", "Precaución"],
+        fr: ["Remarque", "Conseil", "Important", "Avertissement", "Attention"],
+        hi: ["नोट", "सुझाव", "महत्वपूर्ण", "चेतावनी", "सावधानी"],
+        it: ["Nota", "Suggerimento", "Importante", "Avvertenza", "Attenzione"],
+        ja: ["注記", "ヒント", "重要", "警告", "注意"],
+        ko: ["참고", "팁", "중요", "경고", "주의"],
+        pl: ["Uwaga", "Wskazówka", "Ważne", "Ostrzeżenie", "Przestroga"],
+        pt: ["Observação", "Dica", "Importante", "Aviso", "Cuidado"],
+        sr: ["Напомена", "Савет", "Важно", "Упозорење", "Опрез"],
+        sw: ["Dokezo", "Kidokezo", "Muhimu", "Onyo", "Tahadhari"],
+        tr: ["Not", "İpucu", "Önemli", "Uyarı", "Dikkat"],
+        uk: ["Примітка", "Порада", "Важливо", "Попередження", "Застереження"],
+        vi: ["Ghi chú", "Mẹo", "Quan trọng", "Cảnh báo", "Thận trọng"],
+        zh: ["说明", "提示", "重要", "警告", "注意"],
+    };
+    const locale = document.documentElement.lang.toLowerCase().split("-")[0];
+    const supportedLocale = Object.hasOwn(labels, locale) ? locale : "en";
+    const translation = labels[supportedLocale];
+    const messages = Object.fromEntries(keys.map((key, index) => [key, translation[index]]));
+
+    // Older rendered pages identify the same controls by their stable navigation selectors.
+    const legacyControls = {
+        "#searchbar": "searchBook",
+        "#search-toggle, [data-toggle-search] > span:last-child": "search",
+        "#menubar-languages-toggle, #menubar-languages-popup, #menubar-languages-toggle > .menu-bar-link, [data-toggle-translations] > span": "languages",
+        "#sidebar-toggle, #mobile-toc-toggle, #sidebar-float-toggle, #sidebar": "contents",
+        "#sidetoc-toggle, nav.pagetoc": "onThisPage",
+        "a.nav-chapters.previous, a.mobile-nav-chapters.previous": "previous",
+        "a.nav-chapters.next, a.mobile-nav-chapters.next": "next",
+        "nav.nav-wrapper, nav.nav-wide-wrapper": "pageNavigation",
+    };
+    for (const [selector, key] of Object.entries(legacyControls)) {
+        for (const control of document.querySelectorAll(selector)) {
+            control.dataset.navLabel ||= key;
+        }
+    }
+    for (const control of document.querySelectorAll("[data-nav-label]")) {
+        const message = messages[control.dataset.navLabel];
+        if (!message) { continue; }
+        if (control.hasAttribute("aria-label") || control.id === "searchbar" || control.tagName === "NAV") {
+            control.setAttribute("aria-label", message);
+        }
+        if (control.hasAttribute("title")) {
+            const shortcut = control.getAttribute("aria-keyshortcuts");
+            control.setAttribute("title", control.id === "search-toggle" && shortcut ? `${message} (${shortcut})` : message);
+        }
+        if (control.id === "search-toggle") {
+            control.dataset.searchLabel = message;
+            control.dataset.searchLoading = messages.loadingSearch;
+            control.dataset.searchUnavailable = messages.searchUnavailable;
+            const [matches, noMatches, preview, book] = searchResults[supportedLocale];
+            Object.assign(control.dataset, {
+                searchLocale: supportedLocale,
+                searchMatches: matches,
+                searchNoMatches: noMatches,
+                searchPreview: preview,
+                searchBookLabel: book,
+            });
+        }
+        if (control.hasAttribute("placeholder")) { control.setAttribute("placeholder", message); }
+        if (control.tagName === "SPAN") { control.textContent = message; }
+    }
+
+    const editionNames = {
+        af: "Afrikaans", de: "Deutsch", el: "Ελληνικά", en: "English", es: "Español", fr: "Français",
+        hi: "हिन्दी", it: "Italiano", ja: "日本語", ko: "한국어", pl: "Polski", pt: "Português (Brasil)",
+        sr: "Српски", sw: "Kiswahili", tr: "Türkçe", uk: "Українська", vi: "Tiếng Việt", zh: "简体中文",
+    };
+    const editionTags = { pt: "pt-BR", zh: "zh-Hans" };
+    for (const link of document.querySelectorAll("#menubar-languages-popup a[hreflang]")) {
+        if (!Object.hasOwn(editionNames, link.id)) { continue; }
+        const name = editionNames[link.id];
+        const tag = editionTags[link.id] || link.id;
+        link.setAttribute("aria-label", name);
+        link.setAttribute("lang", tag);
+        link.setAttribute("hreflang", tag);
+        if (!link.childElementCount) {
+            let flag = link.textContent.match(/^\p{Regional_Indicator}{2}/u)?.[0];
+            if (link.id === "pt" && flag) { flag = "🇧🇷"; }
+            link.textContent = flag ? `${flag} ${name}` : name;
+        }
+    }
+
+    const companionHomes = ["https://hacktricks.wiki/", "https://cloud.hacktricks.wiki/"];
+    for (const link of document.querySelectorAll("#menubar-collapse a[href], #menubar-collapse-popup a[href]")) {
+        if (companionHomes.includes(link.href)) { link.href += `${supportedLocale}/`; }
+    }
+
+    const referenceLabels = {
+        af: "Verwysings", de: "Quellen", el: "Πηγές", en: "References", es: "Referencias", fr: "Références",
+        hi: "संदर्भ", it: "Riferimenti", ja: "参考資料", ko: "참고 자료", pl: "Źródła", pt: "Referências",
+        sr: "Литература", sw: "Marejeleo", tr: "Kaynaklar", uk: "Джерела", vi: "Tài liệu tham khảo", zh: "参考资料",
+    };
+    // Citations and external links use #references. Localize only the standard heading text.
+    for (const link of document.querySelectorAll('main h2#references > a.header[href="#references"]')) {
+        if (link.childNodes.length === 1 && link.firstChild.nodeType === 3 && link.textContent.trim() === "References") {
+            link.textContent = referenceLabels[supportedLocale];
+        }
+    }
+
+    const calloutTypes = ["note", "tip", "important", "warning", "caution"];
+    for (const title of document.querySelectorAll(".blockquote-tag > .blockquote-tag-title")) {
+        const index = calloutTypes.findIndex(type => title.parentElement.classList.contains(`blockquote-tag-${type}`));
+        // mdBook places the icon first and the label in the last text node.
+        if (index >= 0 && title.lastChild?.nodeType === 3) {
+            title.lastChild.textContent = calloutLabels[supportedLocale][index];
+        }
+    }
+
+})();
+
 (function menubarLanguage() {
     var menubarLanguageToggleButton = document.getElementById('menubar-languages-toggle');
     var menubarLanguagePopup = document.getElementById('menubar-languages-popup');
@@ -656,21 +847,19 @@ function playground_text(playground, hidden = true) {
         }
     });
     
-    languageButtons.forEach((btn) => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const regex = /(?:(?:\/)+(?<lang>[a-z]{2}(?=\/|$)))?(?<path>(?:\/)*.*)?/g
-            var match = regex.exec(window.location.pathname)
-          
-            var path = match.groups.path
-            console.log(`Path: ${path} ${typeof path}`)
-          
-            const lang = match.groups.lang
-            console.log(`Lang: ${lang}`)
-            
-            window.location = `/${e.currentTarget.id}${path}${window.location.hash}`
-        });
-    })
+    const localeCodes = new Set(Array.from(languageButtons, button => button.id));
+
+    function updateLanguageLinks() {
+        const { pathname, search, hash } = window.location;
+        const locale = pathname.split("/")[1];
+        const chapter = localeCodes.has(locale) ? pathname.slice(locale.length + 1) : pathname;
+        for (const button of languageButtons) {
+            button.href = `/${button.id}${chapter || "/"}${search}${hash}`;
+        }
+    }
+
+    updateLanguageLinks();
+    window.addEventListener("hashchange", updateLanguageLinks);
 })();
 
 (function chapterNavigation() {
@@ -713,6 +902,7 @@ function playground_text(playground, hidden = true) {
 })();
 
 (function clipboard() {
+    const messages = codeInterfaceMessages(document.documentElement.lang);
     var clipButtons = document.querySelectorAll('.clip-button');
 
     function hideTooltip(elem) {
@@ -741,11 +931,11 @@ function playground_text(playground, hidden = true) {
 
     clipboardSnippets.on('success', function (e) {
         e.clearSelection();
-        showTooltip(e.trigger, "Copied!");
+        showTooltip(e.trigger, messages.copied);
     });
 
     clipboardSnippets.on('error', function (e) {
-        showTooltip(e.trigger, "Clipboard error!");
+        showTooltip(e.trigger, messages.copyError);
     });
 })();
 

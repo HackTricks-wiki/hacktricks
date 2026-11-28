@@ -606,32 +606,38 @@
     return;
   }
 
-  icon.textContent = '🔍';
-  icon.setAttribute('aria-label','Open search (S)');
-  icon.removeAttribute('title');
-
+  const searchLabels = icon.dataset || {};
   const setIconState = state => {
     if(state === 'ready'){
       icon.textContent = '🔍';
-      icon.setAttribute('aria-label','Open search (S)');
+      icon.setAttribute('aria-label', searchLabels.searchLabel || 'Open search (S)');
       icon.removeAttribute('title');
     } else if(state === 'error'){
       icon.textContent = '❌';
-      icon.setAttribute('aria-label','Search unavailable');
-      icon.setAttribute('title','Search is unavailable');
+      const message = searchLabels.searchUnavailable || 'Search unavailable';
+      icon.setAttribute('aria-label', message);
+      icon.setAttribute('title', message);
     } else {
       icon.textContent = '⏳';
-      icon.setAttribute('aria-label','Loading search …');
-      icon.setAttribute('title','Search is loading, please wait...');
+      const message = searchLabels.searchLoading || 'Loading search…';
+      icon.setAttribute('aria-label', message);
+      icon.setAttribute('title', message);
     }
   };
+  setIconState('ready');
 
   const HOT=83, ESC=27, DOWN=40, UP=38, ENTER=13;
   let worker=null, workerStarted=false;
   let debounce, teaserCount=0, ready=false, pendingQuery='', requestId=0;
   const escapeHTML = (()=>{const M={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&#34;',"'":'&#39;'};return s=>s.replace(/[&<>'"]/g,c=>M[c]);})();
   const URL_MARK='highlight';
-  function metric(c,t){return c?`${c} search result${c>1?'s':''} for '${t}':`:`No search results for '${t}'.`;}
+  const resultNumber = new Intl.NumberFormat(searchLabels.searchLocale || 'en');
+  function resultMessage(count, query){
+    if(!query) return '';
+    const template = count ? (searchLabels.searchMatches || 'Results for “{query}”: {count}')
+      : (searchLabels.searchNoMatches || 'No results for “{query}”.');
+    return template.replace(/\{(query|count)\}/g, (_, key) => key === 'query' ? query : resultNumber.format(count));
+  }
 
   function makeTeaser(body, terms){
     const fold = text => text.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
@@ -669,16 +675,17 @@
     const abs=d.url.startsWith('http');
     const href=`${abs?'':path_to_root}${parts[0]}?${URL_MARK}=${enc}#${parts[1]}`;
     const style=d.cloud?' style="color:#1e88e5"':'';
-    const source=d.cloud?' [Cloud]':' [Book]';
-    return `<a href="${escapeHTML(href)}" aria-details="teaser_${teaserCount}"${style}>${escapeHTML(d.breadcrumbs || d.title || '')}${source}<span class="teaser" id="teaser_${teaserCount}" aria-label="Search Result Teaser">${teaser}</span></a>`;
+    const source=d.cloud?' [Cloud]':` [${escapeHTML(searchLabels.searchBookLabel || 'Book')}]`;
+    const preview=escapeHTML(searchLabels.searchPreview || 'Search result preview');
+    return `<a href="${escapeHTML(href)}" aria-details="teaser_${teaserCount}"${style}>${escapeHTML(d.breadcrumbs || d.title || '')}${source}<span class="teaser" id="teaser_${teaserCount}" aria-label="${preview}">${teaser}</span></a>`;
   }
 
   function render(docs,query){
     const terms=query.split(/\s+/).filter(Boolean);
-    header.textContent=metric(docs.length,query);
+    header.textContent=resultMessage(docs.length,query);
     clear(list);
     docs.forEach(d=>{const li=document.createElement('li');li.innerHTML=format(d,terms);list.appendChild(li);});
-    listOut.classList.toggle('hidden',!docs.length);
+    listOut.classList.toggle('hidden',!query);
   }
 
   function sendQuery(query){
