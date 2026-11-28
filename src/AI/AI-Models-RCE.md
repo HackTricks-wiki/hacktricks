@@ -415,7 +415,7 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 Eine gezielte Anleitung zu den Interna von .keras, RCE über Lambda-Layer, dem Problem des beliebigen Imports in ≤ 3.8 und der Gadget-Suche innerhalb der Allowlist nach dem Fix findest du hier:
 
 {{#ref}}
-../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
 ## References
