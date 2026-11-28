@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Estos servicios respaldan flujos de trabajo de reconocimiento, reputación, filtraciones o enriquecimiento de datos. Sus APIs, cuotas, precios y usos permitidos cambian con frecuencia; confirma la documentación actual del proveedor y la autorización del engagement antes de enviar identificadores de clientes o datos confidenciales. Para la secuencia de descubrimiento de activos, consulta la [External Recon Methodology](README.md).
+Estos servicios admiten flujos de trabajo de reconocimiento, reputación, filtraciones o enriquecimiento. Sus API, cuotas, precios y usos permitidos cambian con frecuencia; confirma la documentación actual del proveedor y la autorización del engagement antes de enviar identificadores de clientes o datos sensibles. Para la secuencia de descubrimiento de activos, consulta la [Metodología de reconocimiento externo](README.md).
 
 ## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-Consulta si una dirección IP se ha asociado con actividad sospechosa o maliciosa. El acceso puede requerir una cuenta o una API key.
+Consulta si una dirección IP se ha asociado con actividad sospechosa o maliciosa. El acceso puede requerir una cuenta o una clave de API.
 
 ## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
@@ -14,15 +14,15 @@ Comprueba si una dirección IP, un nombre de usuario o una dirección de correo 
 
 ## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-Encuentra y verifica direcciones de correo electrónico profesionales y patrones de contacto asociados a dominios. Consulta el plan actual para conocer los límites de solicitudes y los usos permitidos.
+Encuentra y verifica direcciones de correo electrónico profesionales y patrones de contacto relacionados con dominios. Consulta el plan actual para conocer los límites de solicitudes y los usos permitidos.
 
 ## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-Busca indicadores de inteligencia de amenazas y actividad asociados a direcciones IP y dominios.
+Busca indicadores de inteligencia de amenazas y actividad asociados con direcciones IP y dominios.
 
 ## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-Enriquece una dirección de correo electrónico, un dominio o una empresa con los datos empresariales o de perfil disponibles. La cobertura, el acceso y las restricciones de privacidad dependen del producto y el plan actuales.
+Enriquece una dirección de correo electrónico, un dominio o una empresa con los datos empresariales y de perfil disponibles. La cobertura, el acceso y las restricciones de privacidad dependen del producto y el plan actuales.
 
 ## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
@@ -34,11 +34,11 @@ Comprueba si una dirección IP está asociada con actividad sospechosa o malicio
 
 ## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-Consulta la categorización y la inteligencia de amenazas de FortiGuard para dominios, URLs o direcciones IP. La disponibilidad varía según el servicio.
+Consulta la categorización y la inteligencia de amenazas de FortiGuard para dominios, URL o direcciones IP. La disponibilidad varía según el servicio.
 
 ## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-Comprueba si una dirección IP está incluida en listas por actividad de spam denunciada.
+Comprueba si una dirección IP aparece en listas por actividad de spam denunciada.
 
 ## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
@@ -50,19 +50,19 @@ Obtiene geolocalización, ASN, organización y metadatos relacionados de una dir
 
 ## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-Esta plataforma proporciona inteligencia de DNS e infraestructura, como resoluciones históricas, dominios asociados a IPs o servidores de nombres y registros relacionados. El DNS histórico puede revelar una dirección de origen anterior, pero no permite eludir una CDN de forma fiable y debe validarse.
+Esta plataforma proporciona inteligencia de DNS e infraestructura, como resoluciones históricas, dominios asociados con IP o servidores de nombres y registros relacionados. El DNS histórico puede revelar una dirección de origen anterior, pero no elude de forma fiable una CDN y debe validarse.
 
 ## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-Enriquece una dirección de correo electrónico, un dominio o el nombre de una empresa con los atributos de identidad y empresariales disponibles. Trata los datos personales de acuerdo con los requisitos de autorización y privacidad.
+Enriquece una dirección de correo electrónico, un dominio o el nombre de una empresa con los atributos de identidad y empresariales disponibles. Gestiona los datos personales de acuerdo con los requisitos de autorización y privacidad.
 
 ## RiskIQ / Microsoft Defender Threat Intelligence (transición heredada) <sup>[[14]](#references)</sup>
 
-Las funcionalidades de PassiveTotal de RiskIQ se integraron en Microsoft Defender Threat Intelligence. El acceso al producto, las APIs y las funcionalidades conservadas han cambiado, así que consulta la documentación actual de Microsoft en lugar de basarte en suposiciones sobre el PassiveTotal heredado.
+Las capacidades PassiveTotal de RiskIQ se integraron en Microsoft Defender Threat Intelligence. El acceso al producto, las API y las funcionalidades disponibles han cambiado; por ello, consulta la documentación actual de Microsoft en lugar de basarte en las suposiciones sobre PassiveTotal heredado.
 
 ## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-Busca dominios, direcciones IP, direcciones de correo electrónico y datos históricos indexados o filtrados, sujeto a los controles de acceso del servicio.
+Busca dominios, direcciones IP, direcciones de correo electrónico y datos históricos o filtrados indexados, sujeto a los controles de acceso del servicio.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
@@ -70,7 +70,7 @@ Busca direcciones IP y otros indicadores para obtener datos de inteligencia de a
 
 ## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-Busca direcciones IP o rangos para consultar observaciones de escaneos de Internet y actividad habitual de servicios. Consulta las condiciones actuales de las pruebas y del acceso comunitario.
+Busca direcciones IP o rangos para consultar observaciones de escaneo de Internet y actividad habitual de servicios. Consulta las condiciones actuales de las pruebas y del acceso comunitario.
 
 ## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
@@ -80,47 +80,50 @@ Obtiene información de escaneos de Internet y servicios para una dirección IP,
 
 Busca en conjuntos de datos de hosts, certificados, dominios y servicios de Internet; su modelo de datos y cobertura difieren de los de Shodan.
 
-## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
+## [Búsqueda de buckets de GrayHatWarfare](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-Busca por palabra clave en el índice del proveedor de objetos y buckets de almacenamiento cloud observados públicamente.
+Busca por palabra clave en el índice del proveedor de objetos y buckets de almacenamiento en la nube observados públicamente.
 
 ## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-Busca en datos indexados de filtraciones direcciones de correo electrónico, nombres de usuario, dominios y registros relacionados. Úsalo solo con autorización y evita la exposición innecesaria de datos filtrados.
+Busca en datos de filtraciones indexados direcciones de correo electrónico, nombres de usuario, dominios y registros relacionados. Utilízalo solo con autorización y evita la exposición innecesaria de datos filtrados.
 
 ## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-Busca menciones de una dirección de correo electrónico u otro término en contenido de paste indexado. Verifica que el servicio siga disponible antes de integrarlo.
+Busca en contenido de paste indexado coincidencias de una dirección de correo electrónico u otro término. Verifica que el servicio siga disponible antes de integrarlo.
 
 ## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-Obtiene señales de reputación y riesgo para una dirección de correo electrónico.
+Obtiene señales de reputación y riesgo de una dirección de correo electrónico.
 
 ## GhostProject (histórico) <sup>[[24]](#references)</sup>
 
-Históricamente ofrecía búsquedas en datos filtrados de correos electrónicos y contraseñas. Considera el servicio un tercero de alto riesgo para el tratamiento de datos y verifica su disponibilidad, legalidad y autorización antes de usarlo.
+Históricamente ofrecía búsquedas de datos filtrados de correo electrónico y contraseñas. Trata el servicio como una opción de alto riesgo para el manejo de datos por parte de terceros y verifica su disponibilidad, legalidad y autorización antes de usarlo.
 
-## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
+## BinaryEdge (descontinuado) <sup>[[25]](#references)</sup>
 
-Obtiene datos de escaneos de Internet, exposición e inteligencia de amenazas para direcciones IP y activos relacionados.
+Ofrecía datos de escaneo de Internet, exposición e inteligencia de amenazas para direcciones IP y activos relacionados. Su sitio ahora redirige a un aviso de transición de Coalition y la API rechaza las solicitudes, por lo que debe considerarse no disponible.
 
 ## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-Comprueba si una dirección de correo electrónico o un dominio verificado aparece en filtraciones conocidas. El servicio independiente Pwned Passwords comprueba hashes de contraseñas por prefijo; **no** revela contraseñas en texto plano.
+Comprueba si una dirección de correo electrónico o un dominio verificado aparece en filtraciones conocidas. El servicio independiente Pwned Passwords comprueba hashes de contraseñas mediante un prefijo; **no** revela contraseñas en texto plano.
 
 ### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-Obtiene geolocalización IP, centro de datos, ASN, proxy/VPN y otros campos de enriquecimiento relacionados. Las cuotas dependen del plan actual.
+Obtiene geolocalización de IP, centro de datos, ASN, proxy/VPN y campos de enriquecimiento relacionados. Las cuotas dependen del plan actual.
 
 ### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
-Enriquecimiento de geolocalización IP y orientado a OSINT con puntos de datos seleccionados. Consulta las condiciones actuales para el uso comercial.
+Geolocalización de IP y enriquecimiento orientado a OSINT con puntos de datos seleccionados. Consulta las condiciones actuales para el uso comercial.
+
+### [NetAPI](https://netapi.com/) <sup>[[32]](#references)</sup>
+Busca un dominio (registrador, fechas de registro y vencimiento, servidores de nombres, IP y país del alojamiento) o una dirección IP (los otros dominios alojados en ella), y comprueba si un dominio o una IP aparecen en sus listas gratuitas de sistemas comprometidos: dominios de phishing y malware dirigidos a sinkhole, y direcciones que atacaron sus sensores honeypot en las últimas 48 horas. Las consultas web y la API de comprobación de sistemas comprometidos no requieren cuenta; el acceso a la API para las consultas requiere un plan de pago.
 
 
 [DNSDumpster](https://dnsdumpster.com/) proporciona resultados de reconocimiento de DNS.<sup>[[29]](#references)</sup>
 
-[Netcraft](https://www.netcraft.com/) proporciona inteligencia sobre sitios, hosting e infraestructura de Internet.<sup>[[30]](#references)</sup>
+[Netcraft](https://www.netcraft.com/) proporciona inteligencia sobre sitios, alojamiento e infraestructura de Internet.<sup>[[30]](#references)</sup>
 
-[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) proporciona una interfaz online para descubrir subdominios.<sup>[[31]](#references)</sup>
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) proporciona una interfaz en línea para descubrir subdominios.<sup>[[31]](#references)</sup>
 
 ## References
 
@@ -155,4 +158,5 @@ Enriquecimiento de geolocalización IP y orientado a OSINT con puntos de datos s
 - [29] [DNSDumpster](https://dnsdumpster.com/)
 - [30] [Netcraft](https://www.netcraft.com/)
 - [31] [Buscador de subdominios de NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/)
+- [32] [Documentación de la API de NetAPI](https://netapi.com/help/api/)
 {{#include ../../banners/hacktricks-training.md}}
