@@ -12,7 +12,7 @@ Web sitelerinin çerez kullanımı için [Çerez Politikası](cookies-policy.md)
 > - **EĞİTİM AMAÇLI hacking** kaynaklarına **TÜM** İnternet kullanıcılarının **ÜCRETSİZ** erişimini sağlamak.
 >  - Hacking öğrenmekle ilgilidir ve öğrenme olabildiğince ücretsiz olmalıdır.
 >  - Bu kitabın amacı, kapsamlı bir **eğitim kaynağı** olarak hizmet etmektir.
-> - Topluluğun yayımladığı harika **hacking** tekniklerini, **ORİJİNAL YAZARLARA** tüm **krediyi vererek** **SAKLAMAK**.
+> - Topluluğun yayımladığı harika **hacking** tekniklerini, **ORİJİNAL YAZARLARA** tüm **krediyi** vererek **SAKLAMAK**.
 >  - **Başkalarının kredisini almak istemiyoruz**; yalnızca harika teknikleri herkes için saklamak istiyoruz.
 >  - HackTricks'te **kendi araştırmalarımızı** da yazıyoruz.
 >  - Bazı durumlarda, tekniğin önemli kısımlarını HackTricks'te **özetleyecek** ve daha fazla ayrıntı için **okuyucuyu orijinal gönderiyi ziyaret etmeye teşvik edeceğiz**.
@@ -35,7 +35,7 @@ Ve GitHub projelerine **yıldız vermeyi** unutmayın.<sup>[[1]](#references)[[2
 >
 > - **Projeye nasıl katkıda bulunabilirim?**
 
-Toplulukla yeni ipuçları ve püf noktaları paylaşabilir veya kitaplarda bulduğunuz hataları düzeltebilirsiniz. Bunun için ilgili GitHub depolarına bir **pull request** gönderin.<sup>[[1]](#references)[[2]](#references)</sup>
+**Toplulukla yeni ipuçları ve püf noktaları paylaşabilir veya kitaplarda bulduğunuz hataları düzeltebilirsiniz**. Bunun için ilgili GitHub depolarına bir **pull request** gönderin.<sup>[[1]](#references)[[2]](#references)</sup>
 
 - [HackTricks deposu](https://github.com/HackTricks-wiki/hacktricks)
 - [HackTricks Cloud deposu](https://github.com/HackTricks-wiki/hacktricks-cloud)
@@ -78,7 +78,7 @@ BibTeX gerekiyorsa aşağıdakine benzer bir şey kullanabilirsiniz:
 
 HackTricks kitaplarının **ticari amaçlarla** hazırlandığını düşünüyorsanız **KESİNLİKLE YANILIYORSUNUZ**.
 
-Tüm içerik ÜCRETSİZ olsa da, isteyen topluluk üyelerine çalışmalarımızı takdir etme fırsatı sunmak istediğimiz için sponsorlarımız var. İsteyenler **GitHub Sponsors** aracılığıyla HackTricks'e bağışta bulunabilir.<sup>[[3]](#references)</sup> **İlgili siber güvenlik şirketleri** de HackTricks'e sponsor olabilir ve öğrenme sürecini aksatmadan görünür olacak şekilde kitapta reklam verebilir.
+Tüm içerik ÜCRETSİZ olsa da, **isteyen topluluk üyelerine çalışmalarımızı takdir etme fırsatı sunmak** istediğimiz için sponsorlarımız var. İsteyenler **GitHub Sponsors** aracılığıyla HackTricks'e bağışta bulunabilir.<sup>[[3]](#references)</sup> **İlgili siber güvenlik şirketleri** de HackTricks'e sponsor olabilir ve öğrenme sürecini aksatmadan görünür olacak şekilde kitapta reklam verebilir.
 
 HackTricks'in içeriğinden çok daha az içeriğe sahip diğer bloglardaki gibi, HackTricks'i rahatsız edici reklamlarla dolu bulamazsınız; çünkü HackTricks ticari amaçlarla hazırlanmıyor.
 
