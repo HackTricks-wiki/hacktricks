@@ -49,4 +49,5 @@
 ## References
 
 - [1] [GitBook — Автентифікація відвідувачів: cookies](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}

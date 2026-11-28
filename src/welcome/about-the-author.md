@@ -13,4 +13,5 @@ HackTricks також надає дослідникам місце для пош
 ## References
 
 - [1] [Репозиторій GitHub HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks)
+
 {{#include ../banners/hacktricks-training.md}}
