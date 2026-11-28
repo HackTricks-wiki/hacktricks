@@ -416,7 +416,7 @@ Para una guía centrada en los aspectos internos de .keras, RCE mediante capas L
 
 
 {{#ref}}
-../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
 ## References
