@@ -660,6 +660,26 @@ function playground_text(playground, hidden = true) {
         vi: ["Kết quả cho “{query}”: {count}", "Không có kết quả cho “{query}”.", "Bản xem trước kết quả tìm kiếm", "Sách"],
         zh: ["“{query}”的搜索结果：{count} 条", "未找到与“{query}”相关的结果。", "搜索结果预览", "手册"],
     };
+    const calloutLabels = {
+        af: ["Nota", "Wenk", "Belangrik", "Waarskuwing", "Let op"],
+        de: ["Hinweis", "Tipp", "Wichtig", "Warnung", "Vorsicht"],
+        el: ["Σημείωση", "Συμβουλή", "Σημαντικό", "Προειδοποίηση", "Προσοχή"],
+        en: ["Note", "Tip", "Important", "Warning", "Caution"],
+        es: ["Nota", "Consejo", "Importante", "Advertencia", "Precaución"],
+        fr: ["Remarque", "Conseil", "Important", "Avertissement", "Attention"],
+        hi: ["नोट", "सुझाव", "महत्वपूर्ण", "चेतावनी", "सावधानी"],
+        it: ["Nota", "Suggerimento", "Importante", "Avvertenza", "Attenzione"],
+        ja: ["注記", "ヒント", "重要", "警告", "注意"],
+        ko: ["참고", "팁", "중요", "경고", "주의"],
+        pl: ["Uwaga", "Wskazówka", "Ważne", "Ostrzeżenie", "Przestroga"],
+        pt: ["Observação", "Dica", "Importante", "Aviso", "Cuidado"],
+        sr: ["Напомена", "Савет", "Важно", "Упозорење", "Опрез"],
+        sw: ["Dokezo", "Kidokezo", "Muhimu", "Onyo", "Tahadhari"],
+        tr: ["Not", "İpucu", "Önemli", "Uyarı", "Dikkat"],
+        uk: ["Примітка", "Порада", "Важливо", "Попередження", "Застереження"],
+        vi: ["Ghi chú", "Mẹo", "Quan trọng", "Cảnh báo", "Thận trọng"],
+        zh: ["说明", "提示", "重要", "警告", "注意"],
+    };
     const locale = document.documentElement.lang.toLowerCase().split("-")[0];
     const supportedLocale = Object.hasOwn(labels, locale) ? locale : "en";
     const translation = labels[supportedLocale];
@@ -689,6 +709,15 @@ function playground_text(playground, hidden = true) {
         if (control.hasAttribute("placeholder")) { control.setAttribute("placeholder", message); }
         if (control.tagName === "SPAN") { control.textContent = message; }
     }
+    const calloutTypes = ["note", "tip", "important", "warning", "caution"];
+    for (const title of document.querySelectorAll(".blockquote-tag > .blockquote-tag-title")) {
+        const index = calloutTypes.findIndex(type => title.parentElement.classList.contains(`blockquote-tag-${type}`));
+        // mdBook places the icon first and the label in the last text node.
+        if (index >= 0 && title.lastChild?.nodeType === 3) {
+            title.lastChild.textContent = calloutLabels[supportedLocale][index];
+        }
+    }
+
 })();
 
 (function menubarLanguage() {

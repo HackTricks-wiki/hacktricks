@@ -42,9 +42,22 @@ function translate(language) {
             setAttribute: (name, value) => attributes.set(name, value),
         };
     });
+    const kinds = ["note", "tip", "important", "warning", "caution"];
+    const callouts = kinds.map(kind => {
+        const icon = { nodeType: 1 };
+        const text = { nodeType: 3, textContent: "Original callout title" };
+        return {
+            firstChild: icon,
+            lastChild: text,
+            parentElement: { classList: { contains: name => name === `blockquote-tag-${kind}` } },
+        };
+    });
     const document = {
         documentElement: { lang: language },
-        querySelectorAll: selector => selector === "[data-nav-label]" ? nodes : [],
+        querySelectorAll(selector) {
+            if (selector === "[data-nav-label]") { return nodes; }
+            return selector === ".blockquote-tag > .blockquote-tag-title" ? callouts : [];
+        },
     };
     localize.runInNewContext({ document });
     const labels = Object.fromEntries(nodes.map(node => {
@@ -82,6 +95,11 @@ function translate(language) {
     labels.preview = icon.dataset.searchPreview;
     labels.book = icon.dataset.searchBookLabel;
     assert(labels.preview && labels.book);
+    labels.callouts = callouts.map(title => {
+        assert.equal(title.firstChild.nodeType, 1);
+        assert.notEqual(title.lastChild.textContent, "Original callout title");
+        return title.lastChild.textContent;
+    });
     return labels;
 }
 
@@ -90,9 +108,10 @@ test("the template labels are localized for every published language", () => {
     const english = translate("en");
     for (const locale of locales) {
         const localized = translate(locale);
-        for (const key of Object.keys(english)) {
+        for (const key of Object.keys(english).filter(key => key !== "callouts")) {
             assert.notEqual(localized[key], english[key], `English label in ${locale}: ${key}`);
         }
+        assert.notDeepEqual(localized.callouts, english.callouts, `English callouts in ${locale}`);
     }
 });
 
@@ -101,4 +120,5 @@ test("regional tags select a translation and unknown tags use English", () => {
     assert.deepEqual(translate("zh-Hans"), translate("zh"));
     assert.deepEqual(translate("toString"), translate("en"));
     assert.deepEqual(translate("zz"), translate("en"));
+    assert.deepEqual(translate("pt").callouts, ["Observação", "Dica", "Importante", "Aviso", "Cuidado"]);
 });
