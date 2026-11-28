@@ -105,7 +105,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ### [NaxusAI – Автономна наступальна безпека](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="Логотип NaxusAI"><figcaption></figcaption></figure>
 
 **Naxus** — це платформа наступальної безпеки на базі AI для повного сканування зовнішньої поверхні атаки, аудиту мобільних застосунків, black-box тестування вебзастосунків і перевірки вихідного коду. Її агенти перевіряють, чи можна використати знайдені проблеми, і надають відстежувані докази, експлойти proof-of-concept і практичні рекомендації з усунення.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ WebSec надає послуги з тестування на проникнен
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="Логотип cyberhelmets"><figcaption></figcaption></figure>
 
 
 **Створено для практичної роботи. З урахуванням ваших потреб.**\
@@ -142,7 +142,7 @@ WebSec надає послуги з тестування на проникнен
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="Логотип lasttower"><figcaption></figcaption></figure>
 
 Last Tower Solutions спеціалізується на консалтингу з кібербезпеки для **освітньої галузі** та **FinTech**. Послуги охоплюють оцінювання хмарної безпеки, внутрішнє й зовнішнє тестування на проникнення, оцінювання вразливостей і підтримку відповідності вимогам.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Last Tower Solutions спеціалізується на консалтингу 
 
 ### [Beaki — їжа, що пасує саме вам](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Логотип Beaki"><figcaption></figcaption></figure>
 
 **Beaki** — це персоналізований сканер продуктів, лічильник калорій і трекер харчування. Скануйте штрихкоди й полиці супермаркетів, фотографуйте або описуйте страви та меню ресторанів і отримуйте зрозумілі оцінки з урахуванням ваших цілей, раціону, алергій і стану здоров’я. Beaki також відстежує калорії та макронутрієнти й створює персоналізовані плани харчування зі списками покупок.<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Last Tower Solutions спеціалізується на консалтингу 
 
 ## Статистика GitHub
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![Статистика проєкту HackTricks на GitHub](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
