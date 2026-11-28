@@ -49,4 +49,5 @@ Si tienes preguntas o inquietudes sobre esta Política de cookies, ponte en cont
 ## References
 
 - [1] [GitBook — Autenticación de visitantes: cookies](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}
