@@ -105,7 +105,7 @@ Blaai deur die [8kSec Academy-kursuskatalogus](https://academy.8ksec.io/).
 
 ### [NaxusAI – Outonome offensiewe sekuriteit](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI-logo"><figcaption></figcaption></figure>
 
 **Naxus** is ’n KI-aangedrewe offensiewe-sekuriteitsplatform vir volledige eksterne aanvaloppervlakte-skanderings, oudits van mobiele toepassings, black-box-toetsing van webtoepassings en bronkode-oorsigte. Sy agente bevestig uitbuitbare bevindings en lewer naspeurbare bewyse, proof-of-concept-exploits en uitvoerbare remediëring.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ Benewens bogenoemde is WebSec ook ’n **toegewyde ondersteuner van HackTricks.*
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets-logo"><figcaption></figcaption></figure>
 
 
 **Gebou vir die veld. Gebou rondom jou.**\
@@ -142,7 +142,7 @@ Benewens bogenoemde is WebSec ook ’n **toegewyde ondersteuner van HackTricks.*
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower-logo"><figcaption></figcaption></figure>
 
 Last Tower Solutions fokus op kuberveiligheidskonsultasie vir **Onderwys** en **FinTech**, insluitend wolkassesserings, interne en eksterne penetrasietoetse, kwesbaarheidsbepalings en ondersteuning met nakoming.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Bly ingelig en op hoogte van die jongste nuus oor kuberveiligheid deur ons [**bl
 
 ### [Beaki — Kos wat by jou pas](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki-logo"><figcaption></figcaption></figure>
 
 **Beaki** is ’n gepersonaliseerde voedselskandeerder, kalorie-teller en voedingsnaspoorder. Skandeer strepieskodes en supermarkrakke, neem foto’s van of beskryf maaltye en restaurantspyskaarte, en kry verklaarbare tellings wat deur jou doelwitte, dieet, allergieë en gesondheidsprofiel bepaal word. Beaki hou ook kalorieë en makrovoedingstowwe dop en skep gepersonaliseerde maaltydplanne met inkopielyste.<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Sien die HackTricks-waarde- en FAQ-inskrywing in Verwysings hieronder.
 
 ## Github-statistieke
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks se GitHub-statistieke](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
