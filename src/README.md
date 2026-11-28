@@ -186,4 +186,5 @@ Last Tower Solutions спеціалізується на консалтингу 
 - [14] [Відео про спонсорство WebSec](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Курси Cyber Helmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 - [16] [Цінності та поширені запитання HackTricks](welcome/hacktricks-values-and-faq.md)
+
 {{#include banners/hacktricks-training.md}}
