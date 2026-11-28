@@ -105,7 +105,7 @@ Vinjari [orodha ya kozi za 8kSec Academy](https://academy.8ksec.io/).
 
 ### [NaxusAI – Autonomous Offensive Security](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="Nembo ya NaxusAI"><figcaption></figcaption></figure>
 
 **Naxus** ni mfumo wa offensive security unaotumia AI kwa ukaguzi kamili wa attack surface ya nje, ukaguzi wa programu za mobile, majaribio ya black-box ya wavuti, na ukaguzi wa source code. Mawakala wake huthibitisha matokeo yanayoweza kutumiwa vibaya na kutoa ushahidi unaoweza kufuatiliwa, exploits za proof-of-concept, na mapendekezo ya kurekebisha yanayoweza kutekelezwa.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ Mbali na yaliyo hapo juu, WebSec pia ni **mfuasi thabiti wa HackTricks.**
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="Nembo ya cyberhelmets"><figcaption></figcaption></figure>
 
 
 **Imeundwa kwa ajili ya kazi halisi. Imejengwa kukuzingatia.**\
@@ -142,7 +142,7 @@ Mbali na yaliyo hapo juu, WebSec pia ni **mfuasi thabiti wa HackTricks.**
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="Nembo ya lasttower"><figcaption></figcaption></figure>
 
 Last Tower Solutions huzingatia ushauri wa cybersecurity kwa sekta za **Elimu** na **FinTech**, ikijumuisha tathmini za cloud, pentesting za ndani na nje, tathmini za udhaifu, na usaidizi wa uzingatiaji.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Pata habari za hivi punde kuhusu cybersecurity kwa kutembelea [**blogu**](https:
 
 ### [Beaki — Food that fits you](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Nembo ya Beaki"><figcaption></figcaption></figure>
 
 **Beaki** ni kichanganuzi cha vyakula kinachobinafsishwa, kihesabu kalori, na kifuatilia lishe. Changanua misimbo pau na rafu za maduka makubwa, piga picha au eleza milo na menyu za migahawa, kisha upate alama zinazoelezeka na zinazozingatia malengo yako, lishe, mzio, na wasifu wa afya. Beaki pia hufuatilia kalori na macros na kuunda mipango ya milo iliyobinafsishwa pamoja na orodha za ununuzi.<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Tazama kipengee cha HackTricks Values & FAQ kwenye References hapa chini.
 
 ## Takwimu za Github
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![Takwimu za HackTricks kwenye GitHub](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
