@@ -37,6 +37,7 @@
     "src/AI/keras-model-deserialization-rce-and-gadget-hunting.md": "468b2daafbd877d8ce11f53c9ceb97205b5cc2a3",
     "src/LICENSE.md": "6cedbaa3ba17a944132870c0d6e9996edcf8f729",
     "src/README.md": "4090c875667ada2a3fadcc9e644e3bf0cbec6e49",
+    "src/SUMMARY.md": "de3b1df6f0900517a8e35e594188488e71f22451",
     "src/banners/hacktricks-training.md": "7f4e86b0656ffc5dfee1a244ac3654f4908f233e",
     "src/binary-exploitation/arbitrary-write-2-exec/README.md": "70754b3ed8e5249300a39527f863534cad8713d7",
     "src/binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md": "8ccbde8102aacca2294bb36e8712ea45ae54d57e",
