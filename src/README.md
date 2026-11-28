@@ -186,4 +186,5 @@ Android または iPhone で[**Beaki を無料でダウンロード**](https://w
 - [14] [WebSec スポンサー動画](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Cyber Helmets コース](https://cyberhelmets.com/courses/?ref=hacktricks)
 - [16] [HackTricks の価値観と FAQ](welcome/hacktricks-values-and-faq.md)
+
 {{#include banners/hacktricks-training.md}}
