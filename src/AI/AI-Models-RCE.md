@@ -416,7 +416,7 @@ Para um guia focado nos detalhes internos de .keras, RCE em camadas Lambda, o pr
 
 
 {{#ref}}
-../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
 ## References
