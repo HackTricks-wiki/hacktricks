@@ -149,4 +149,5 @@ HackTricksにあなたのページへのリンクがあると、次のような�
 - [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
 - [4] [HackTricksライセンス](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/LICENSE.md)
 - [5] [Creative Commons CC BY-NC 4.0の利用許諾](https://creativecommons.org/licenses/by-nc/4.0/)
+
 {{#include ../banners/hacktricks-training.md}}

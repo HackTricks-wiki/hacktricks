@@ -13,4 +13,5 @@ HackTricksは、研究者が新しい発見を共有する場も提供し、読�
 ## References
 
 - [1] [HackTricks-wiki/hacktricks — GitHub repository](https://github.com/HackTricks-wiki/hacktricks)
+
 {{#include ../banners/hacktricks-training.md}}

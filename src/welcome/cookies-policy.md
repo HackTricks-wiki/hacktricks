@@ -49,4 +49,5 @@ Cookieの管理
 ## References
 
 - [1] [GitBook — 訪問者認証: Cookie](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}
