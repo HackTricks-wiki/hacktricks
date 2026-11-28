@@ -74,7 +74,7 @@ Si vous craignez qu’il disparaisse, vous pouvez simplement le forker sur GitHu
 >
 > - **Pourquoi avez-vous des sponsors ? Les livres HackTricks ont-ils un but commercial ?**
 
-La première **valeur** de **HackTricks** est d’offrir des ressources éducatives gratuites sur le hacking au monde entier. L’équipe HackTricks a **consacré des milliers d’heures** à la création de ce contenu, encore une fois, **gratuitement**.
+La première **valeur** de **HackTricks** est d’offrir des ressources éducatives **gratuites** sur le hacking au **monde entier**. L’équipe HackTricks a **consacré des milliers d’heures** à la création de ce contenu, encore une fois, **gratuitement**.
 
 Si vous pensez que les livres HackTricks ont un **but commercial**, vous vous **TROMPEZ COMPLÈTEMENT**.
 
