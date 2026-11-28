@@ -13,7 +13,7 @@ This chapter covers blockchain concepts and on-chain security. For an exposed Bi
 - **DeFi** stands for Decentralized Finance, offering financial services without central authorities.
 - **DEX** and **DAOs** refer to Decentralized Exchange Platforms and Decentralized Autonomous Organizations, respectively.
 
-For spot orders, futures, leverage, and options terminology used in crypto markets, see [Investment Terms](investment-terms.md).
+For spot orders, futures, leverage, and options terminology used in crypto markets, see [Investment Terms](investment-terms.md). For funding-rate abuse in perpetual protocols, see [Perpetual Funding-Rate Exploitation](perpetual-funding-rate-exploitation.md).
 
 ## Consensus Mechanisms
 
