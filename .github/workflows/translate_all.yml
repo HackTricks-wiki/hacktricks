@@ -425,6 +425,7 @@ jobs:
           "${backlog[@]}" verify "${scope[@]}"
 
       - name: Build mdBook
+        shell: bash
         run: |
           git checkout "$BRANCH"
           navigation_options=()
