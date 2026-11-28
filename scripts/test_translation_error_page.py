@@ -7,7 +7,9 @@ import subprocess
 import tempfile
 import unittest
 
-from render_localized_error import ERROR_TEXT, localize_rendered_error_page, localized_error_markdown
+from render_localized_error import (
+    ERROR_TEXT, localize_rendered_error_page, localized_error_markdown, render_error_assets,
+)
 from translation_matrix import LANGUAGES, MENU_LABELS, MENU_LANGUAGE_TAGS
 
 
@@ -34,6 +36,23 @@ class ErrorPageTests(unittest.TestCase):
                 self.assertIn(f"[{label}](/{branch}/)", page)
                 if branch != "en":
                     self.assertNotIn(ERROR_TEXT["en"][0], page)
+
+    @unittest.skipUnless(shutil.which("mdbook"), "mdBook is required to verify the error-page release files")
+    def test_error_only_release_contains_only_the_expected_html_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            destination = Path(folder)
+            render_error_assets(destination)
+            files = {path.relative_to(destination).as_posix() for path in destination.rglob("*") if path.is_file()}
+            self.assertEqual(files, {"404.html", *(f"{branch}/404.html" for branch in ERROR_TEXT)})
+            self.assertEqual((destination / "404.html").read_bytes(), (destination / "en/404.html").read_bytes())
+            for branch, (heading, description, return_label) in ERROR_TEXT.items():
+                with self.subTest(branch=branch):
+                    page = (destination / branch / "404.html").read_text(encoding="utf-8")
+                    self.assertIn(f'<base href="/{branch}/">', page)
+                    self.assertIn(f"<title>{heading} - ", page)
+                    self.assertIn(f"<p>{description}</p>", page)
+                    self.assertIn(f'<a href="/{branch}/">{return_label}</a>', page)
+                    self.assertIn('name="robots" content="noindex, follow"', page)
 
     @unittest.skipUnless(shutil.which("mdbook"), "mdBook is required to verify the rendered error page")
     def test_mdbook_renders_fallback_language_links_and_localized_content(self):

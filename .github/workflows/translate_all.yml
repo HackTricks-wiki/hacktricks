@@ -34,6 +34,10 @@ on:
         description: "Run translator checks without publishing"
         type: boolean
         default: false
+      error_pages_only:
+        description: "Build and publish localized 404 pages only"
+        type: boolean
+        default: false
       navigation_only:
         description: "Translate and publish sidebar labels only"
         type: boolean
@@ -101,8 +105,50 @@ jobs:
           python scripts/translation_matrix.py --check-menu theme/index.hbs
           node --test scripts/test_navigation_l10n.js scripts/test_search.js
 
+  publish-error-pages:
+    name: Publish localized 404 pages
+    needs: validate
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.error_pages_only && !inputs.validate_only }}
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+    concurrency:
+      group: localized-error-pages
+      cancel-in-progress: false
+    container:
+      image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Render missing pages in an isolated book
+        run: python3 scripts/render_localized_error.py --publish-dir "$RUNNER_TEMP/localized-errors"
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Publish only the localized error pages
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          directory="$RUNNER_TEMP/localized-errors"
+          paths=()
+          for file in "$directory"/[a-z][a-z]/404.html "$directory"/404.html; do
+            test -s "$file"
+            path="${file#"$directory"/}"
+            aws s3 cp "$file" "s3://hacktricks-wiki/$path" --content-type "text/html; charset=utf-8" --no-progress
+            paths+=("/$path")
+          done
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "${paths[@]}"
+
   select-languages:
-    if: ${{ github.event_name != 'pull_request' && !inputs.validate_only }}
+    if: ${{ github.event_name != 'pull_request' && !inputs.validate_only && !inputs.error_pages_only }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
@@ -470,7 +516,7 @@ jobs:
   finalize-deployment:
     name: Finalize translated deployment
     needs: translate
-    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.navigation_only && needs.translate.result != 'skipped' }}
+    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.error_pages_only && !inputs.navigation_only && needs.translate.result != 'skipped' }}
     permissions:
       packages: write
       id-token: write
