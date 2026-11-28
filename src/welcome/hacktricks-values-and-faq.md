@@ -78,7 +78,7 @@ Der wichtigste **Wert** von **HackTricks** ist es, der **gesamten** Welt **KOSTE
 
 Wenn du denkst, dass die HackTricks-Bücher **kommerziellen Zwecken** dienen, liegst du **VÖLLIG FALSCH**.
 
-Wir haben Sponsoren, weil wir der Community die Möglichkeit geben möchten, unsere Arbeit wertzuschätzen, auch wenn alle Inhalte kostenlos sind. Wer möchte, kann HackTricks über **GitHub Sponsors** unterstützen.<sup>[[3]](#references)</sup> **Relevante Cybersicherheitsunternehmen** können HackTricks ebenfalls sponsern und Anzeigen im Buch platzieren, die stets so positioniert sind, dass sie sichtbar sind, ohne den Lernprozess zu stören.
+Wir haben Sponsoren, weil wir **der Community die Möglichkeit geben möchten, unsere Arbeit wertzuschätzen**, auch wenn alle Inhalte kostenlos sind. Wer möchte, kann HackTricks über **GitHub Sponsors** unterstützen.<sup>[[3]](#references)</sup> **Relevante Cybersicherheitsunternehmen** können HackTricks ebenfalls sponsern und Anzeigen im Buch platzieren, die stets so positioniert sind, dass sie sichtbar sind, ohne den Lernprozess zu stören.
 
 HackTricks ist nicht mit nervigen Anzeigen gefüllt wie andere Blogs mit deutlich weniger Inhalten, denn HackTricks dient keinen kommerziellen Zwecken.
 
