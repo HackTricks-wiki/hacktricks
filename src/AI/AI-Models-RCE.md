@@ -416,7 +416,7 @@ Pour un guide ciblé sur les mécanismes internes de .keras, le RCE via une couc
 
 
 {{#ref}}
-../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
 ## References
