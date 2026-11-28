@@ -416,7 +416,7 @@ Za fokusirani vodič kroz interne mehanizme .keras, RCE preko Lambda-layer-a, pr
 
 
 {{#ref}}
-../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
 ## References
