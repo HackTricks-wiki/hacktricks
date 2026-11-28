@@ -4,7 +4,7 @@
 
 ## Κύριοι αλγόριθμοι Machine Learning
 
-Το καλύτερο σημείο εκκίνησης για να μάθετε για το AI είναι να κατανοήσετε πώς λειτουργούν οι κύριοι αλγόριθμοι machine learning. Αυτό θα σας βοηθήσει να κατανοήσετε πώς λειτουργεί το AI, πώς να το χρησιμοποιείτε και πώς να του επιτίθεστε:
+Το καλύτερο σημείο για να ξεκινήσετε να μαθαίνετε για το AI είναι να κατανοήσετε πώς λειτουργούν οι κύριοι αλγόριθμοι machine learning. Αυτό θα σας βοηθήσει να κατανοήσετε πώς λειτουργεί το AI, πώς να το χρησιμοποιείτε και πώς να του επιτίθεστε:
 
 
 {{#ref}}
@@ -28,11 +28,11 @@
 
 ### Προετοιμασία και αξιολόγηση δεδομένων μοντέλων
 
-Για διαχωρισμούς dataset, κλασικές μετρικές και επιθέσεις στην πλευρά των απαντήσεων κατά της βαθμολόγησης με βάση LLM, δείτε την [προετοιμασία και αξιολόγηση δεδομένων μοντέλων](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
+Για διαχωρισμούς συνόλων δεδομένων, κλασικές μετρικές και επιθέσεις στην πλευρά των απαντήσεων σε αξιολόγηση βασισμένη σε LLM, δείτε την [προετοιμασία και αξιολόγηση δεδομένων μοντέλων](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
 
 ### Αρχιτεκτονική LLM
 
-Στην παρακάτω σελίδα θα βρείτε τα βασικά στοιχεία κάθε συστατικού για τη δημιουργία ενός βασικού LLM με χρήση transformers:
+Στην ακόλουθη σελίδα θα βρείτε τα βασικά στοιχεία κάθε συστατικού για την κατασκευή ενός βασικού LLM με χρήση transformers:
 
 
 {{#ref}}
@@ -41,7 +41,7 @@ AI-llm-architecture/README.md
 
 ## Εργαλεία και πλατφόρμες μοντέλων
 
-Για εκτέλεση, fine-tuning, παροχή ή δοκιμή μοντέλων, χρησιμοποιήστε τον [οδηγό εργαλείων και πλατφορμών μοντέλων AI](AI-Model-Tools-and-Platforms.md).
+Για την εκτέλεση, το fine-tuning, τη διάθεση ή τη δοκιμή μοντέλων, χρησιμοποιήστε τον [οδηγό εργαλείων και πλατφορμών μοντέλων AI](AI-Model-Tools-and-Platforms.md).
 
 ## Ασφάλεια AI
 
@@ -59,16 +59,16 @@ AI-LLM-Gateway-Security.md
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### Πλαίσια κινδύνου AI
+### Πλαίσια κινδύνων AI
 
-Δύο χρήσιμα πλαίσια για την αξιολόγηση του κινδύνου συστημάτων AI είναι το OWASP Machine Learning Security Top 10 και το Secure AI Framework (SAIF) της Google. Είναι συμπληρωματικά και δεν αποτελούν εξαντλητική λίστα πλαισίων κινδύνου AI.<sup>[[1]](#references)[[2]](#references)</sup>
+Δύο χρήσιμα πλαίσια για την αρχική αξιολόγηση κινδύνων συστημάτων AI είναι το OWASP Machine Learning Security Top 10 και το Secure AI Framework (SAIF) της Google. Είναι συμπληρωματικά και δεν αποτελούν εξαντλητικό κατάλογο πλαισίων κινδύνων AI.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Adversarial επιθέσεις με καθοδήγηση από mechanistic interpretability
+### Επιθέσεις adversarial με καθοδήγηση από mechanistic interpretability
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
@@ -76,38 +76,40 @@ AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 
 ### Όρια εμπιστοσύνης ενσωματωμένων browser στο AI
 
-Για browser bridges desktop assistants, πλαστογράφηση διευθύνσεων καρτελών και αναγνώσεις τοπικών αρχείων από worker context, δείτε τα [όρια εμπιστοσύνης ενσωματωμένων browser του AI assistant](AI-Embedded-Browser-Trust-Boundaries.md).
+Για γέφυρες browser σε desktop assistants, πλαστογράφηση διευθύνσεων καρτελών και αναγνώσεις τοπικών αρχείων από worker context, δείτε τα [όρια εμπιστοσύνης ενσωματωμένων browser σε AI assistants](AI-Embedded-Browser-Trust-Boundaries.md).
 
-### Ασφάλεια prompts AI
+### Ασφάλεια AI Prompts
 
-Τα LLM έχουν οδηγήσει σε εκρηκτική αύξηση της χρήσης AI τα τελευταία χρόνια, αλλά δεν είναι τέλεια και μπορούν να παραπλανηθούν από adversarial prompts. Αυτό είναι ένα πολύ σημαντικό θέμα για να κατανοήσετε πώς να χρησιμοποιείτε το AI με ασφάλεια και πώς να του επιτίθεστε:
+Τα LLM έχουν οδηγήσει σε εκρηκτική αύξηση της χρήσης του AI τα τελευταία χρόνια, αλλά δεν είναι τέλεια και μπορούν να εξαπατηθούν με adversarial prompts. Είναι πολύ σημαντικό να κατανοήσετε αυτό το θέμα, ώστε να χρησιμοποιείτε το AI με ασφάλεια και να του επιτίθεστε:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE σε AI Models
+### RCE σε μοντέλα AI
 
-Είναι πολύ συνηθισμένο για developers και εταιρείες να εκτελούν μοντέλα που έχουν κατεβάσει από το Internet. Ωστόσο, η απλή φόρτωση ενός μοντέλου μπορεί να αρκεί για την εκτέλεση αυθαίρετου κώδικα στο σύστημα. Αυτό είναι ένα πολύ σημαντικό θέμα για να κατανοήσετε πώς να χρησιμοποιείτε το AI με ασφάλεια και πώς να του επιτίθεστε:
+Είναι πολύ συνηθισμένο οι προγραμματιστές και οι εταιρείες να εκτελούν μοντέλα που έχουν κατεβάσει από το Internet. Ωστόσο, η απλή φόρτωση ενός μοντέλου μπορεί να αρκεί για την εκτέλεση αυθαίρετου κώδικα στο σύστημα. Είναι πολύ σημαντικό να κατανοήσετε αυτό το θέμα, ώστε να χρησιμοποιείτε το AI με ασφάλεια και να του επιτίθεστε:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Παράκαμψη KYC με υποβοήθηση AI
+Για κινδύνους φόρτωσης μοντέλων Keras `.keras`/HDF5, επίπεδα Lambda και ανάλυση gadget μετά από διορθώσεις, δείτε την [αποσειριοποίηση μοντέλων Keras και αναζήτηση gadget](keras-model-deserialization-rce-and-gadget-hunting.md).
 
-Η παραγωγή video μπορεί να συνδυαστεί με έγχυση virtual camera και χειρισμό camera API για την παράκαμψη αδύναμων διαδικασιών KYC, επαλήθευσης ηλικίας και βιομετρικού ελέγχου ζωντανής παρουσίας:
+### Παράκαμψη KYC με τη βοήθεια AI
+
+Το generative video μπορεί να συνδυαστεί με έγχυση virtual camera και χειρισμό του camera API για την παράκαμψη ανεπαρκώς προστατευμένων διαδικασιών KYC, επαλήθευσης ηλικίας και βιομετρικού ελέγχου ζωντανής παρουσίας:
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### AI Model Context Protocol
+### Model Context Protocol του AI
 
-Το MCP (Model Context Protocol) είναι ένα ανοιχτό πρωτόκολλο για τη σύνδεση εφαρμογών AI με εργαλεία και πηγές δεδομένων. Επειδή οι MCP servers μπορούν να εκθέτουν δεδομένα και ενέργειες, οι αξιολογήσεις πρέπει να περιλαμβάνουν εξουσιοδότηση, συγκατάθεση, επικύρωση εισόδων εργαλείων και ανασκόπηση ορίων εμπιστοσύνης.<sup>[[3]](#references)</sup>
+Το MCP (Model Context Protocol) είναι ένα ανοιχτό πρωτόκολλο για τη σύνδεση εφαρμογών AI με εργαλεία και πηγές δεδομένων. Επειδή οι MCP servers μπορούν να εκθέτουν δεδομένα και ενέργειες, οι αξιολογήσεις πρέπει να περιλαμβάνουν έλεγχο εξουσιοδότησης, συναίνεσης, επικύρωσης εισόδων εργαλείων και ορίων εμπιστοσύνης.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
@@ -116,7 +118,7 @@ AI-MCP-Servers.md
 
 ### Πρωτόκολλο AI Agent-to-Agent (A2A)
 
-Το A2A επιτρέπει στους agents να ανακαλύπτουν ο ένας τον άλλον μέσω μιας agent card και να ανταλλάσσουν εργασίες μέσω HTTP. Δοκιμάστε τις agent cards, την εξουσιοδότηση εργασιών, τα push-notification webhooks και τις extended cards:
+Το A2A επιτρέπει σε agents να εντοπίζουν ο ένας τον άλλον μέσω μιας agent card και να ανταλλάσσουν εργασίες μέσω HTTP. Ελέγξτε τις agent cards, την εξουσιοδότηση εργασιών, τα webhooks ειδοποιήσεων push και τις extended cards:
 
 {{#ref}}
 AI-A2A-Protocol.md
@@ -124,34 +126,34 @@ AI-A2A-Protocol.md
 
 ### Εκτεθειμένες self-hosted υπηρεσίες AI
 
-Fingerprinting και δοκιμή εκτεθειμένων model runners, agent builders, ML demo UI, compute clusters και vector databases που λειτουργούν χωρίς authentication:
+Αποτυπώστε και ελέγξτε εκτεθειμένους model runners, agent builders, ML demo UIs, compute clusters και vector databases που λειτουργούν χωρίς έλεγχο ταυτότητας:
 
 {{#ref}}
 AI-Exposed-Self-Hosted-AI-Services.md
 {{#endref}}
 
-### Fuzzing με υποβοήθηση AI και αυτοματοποιημένη ανακάλυψη ευπαθειών
+### Fuzzing με τη βοήθεια AI και αυτοματοποιημένος εντοπισμός ευπαθειών
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Ανασκόπηση πηγαίου κώδικα και επικύρωση ευπαθειών με υποβοήθηση AI
+### Έλεγχος κώδικα και επικύρωση ευπαθειών με τη βοήθεια AI
 
-Για ανασκόπηση source/sink, mobile entry-point taskflows, ελέγχους μοτίβων kernel και επικύρωση με βάση τεκμήρια:
+Για έλεγχο source/sink, taskflows σημείων εισόδου σε mobile, ελέγχους μοτίβων kernel και επικύρωση βάσει τεκμηρίων:
 
 {{#ref}}
 AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 {{#endref}}
 
-### Reverse engineering με υποβοήθηση AI
+### Reverse Engineering με τη βοήθεια AI
 
-[Partial lifting, ανίχνευση invariant MBA, αποκωδικοποίηση δεσμευμένη σε περιβάλλον και επικύρωση automated extractor](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Μερική ανύψωση κώδικα, ανίχνευση invariant MBA, αποκωδικοποίηση δεσμευμένη σε περιβάλλον και επικύρωση αυτοματοποιημένων extractors](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Web Black-Box AI Pentester Bots
+### Bots AI Pentester για black-box δοκιμές Web
 
-Οι agents με LLM μπορούν να αυτοματοποιήσουν μακρόχρονες ροές εργασιών black-box web pentesting όταν υποστηρίζονται από observability, orchestration, χειρισμό authenticated sessions και adversarial validation:
+Οι agents με LLM μπορούν να αυτοματοποιήσουν μακρόχρονες ροές εργασιών black-box web pentesting, όταν υποστηρίζονται από observability, orchestration, διαχείριση authenticated sessions και adversarial validation:
 
 
 {{#ref}}
@@ -162,7 +164,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP — Οι 10 κορυφαίες απειλές ασφάλειας Machine Learning](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Ασφαλές AI Framework (SAIF)](https://saif.google/)
+- [1] [OWASP Top 10 για την ασφάλεια Machine Learning](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — Πλαίσιο Secure AI (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Εισαγωγή](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
