@@ -89,7 +89,9 @@ permissions:
 
 env:
   # Keep the shared validator and deployment tools on the same immutable revision.
-  SHARED_TRANSLATOR_REF: 6f08b2724b6ebe318d37d438abd06d67ba32515c
+  SHARED_TRANSLATOR_REF: 685995fd139c474e2e7a8573909e4ef8f8c573a5
+  # Seed older branches from the English snapshot before the reported gap.
+  INITIAL_SOURCE_REF: 8481cea2a23b5c7f8eaec13775164aee08e2db00
 
 jobs:
   validate:
@@ -153,7 +155,8 @@ jobs:
             wget -nv -O "$workdir/$script.py" "$shared_url/$script.py"
           done
           cp scripts/translation_matrix.py "$workdir/"
-          python "$workdir/audit_translation_editions.py" --output "$RUNNER_TEMP/translation-audit.json"
+          python "$workdir/audit_translation_editions.py" \
+            --initial-source-ref "$INITIAL_SOURCE_REF" --output "$RUNNER_TEMP/translation-audit.json"
       - uses: actions/upload-artifact@v7
         with:
           name: translation-audit
@@ -301,8 +304,6 @@ jobs:
       NAVIGATION_ONLY: ${{ inputs.navigation_only }}
       LANGUAGE: ${{ matrix.language }}
       BRANCH:   ${{ matrix.branch }}
-      # Seed older branches from the English snapshot before the reported gap.
-      INITIAL_SOURCE_REF: 8481cea2a23b5c7f8eaec13775164aee08e2db00
 
     steps:
       - name: Checkout code
