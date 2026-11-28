@@ -259,7 +259,6 @@ jobs:
         env:
           ONLY_LANGUAGE: ${{ inputs.only_language }}
           LANDING_ONLY: ${{ inputs.landing_only }}
-          NAVIGATION_ONLY: ${{ inputs.navigation_only }}
         run: |
           if [[ "$LANDING_ONLY" == true && -z "$ONLY_LANGUAGE" ]]; then
             echo "Landing-page publishing requires an explicit language selection." >&2
@@ -294,6 +293,7 @@ jobs:
 
     env:
       LANDING_ONLY: ${{ inputs.landing_only }}
+      NAVIGATION_ONLY: ${{ inputs.navigation_only }}
       LANGUAGE: ${{ matrix.language }}
       BRANCH:   ${{ matrix.branch }}
       # Seed older branches from the English snapshot before the reported gap.
