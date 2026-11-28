@@ -49,4 +49,5 @@ Wenn Sie Fragen oder Bedenken zu dieser Cookie-Richtlinie haben, kontaktieren Si
 ## References
 
 - [1] [GitBook — Besucherauthentifizierung: cookies](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}
