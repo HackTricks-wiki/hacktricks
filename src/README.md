@@ -186,4 +186,5 @@ Sien die HackTricks-waarde- en FAQ-inskrywing in Verwysings hieronder.
 - [14] [WebSec-borgskapvideo](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Cyber Helmets-kursusse](https://cyberhelmets.com/courses/?ref=hacktricks)
 - [16] [HackTricks-waardes en FAQ](welcome/hacktricks-values-and-faq.md)
+
 {{#include banners/hacktricks-training.md}}
