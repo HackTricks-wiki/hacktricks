@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-这些服务支持侦察、信誉查询、泄露数据查询或信息补全工作流。这些服务的 API、配额、定价和允许用途经常变化；在发送客户标识符或敏感数据前，请确认供应商的最新文档和参与授权。资产发现流程请参阅 [External Recon Methodology](README.md)。
+这些服务可用于侦察、信誉查询、数据泄露查询或信息丰富工作流。其 API、配额、定价和允许用途经常变动；在发送客户标识符或敏感数据前，请确认供应商的最新文档和项目授权。有关资产发现流程，请参阅 [External Recon Methodology](README.md)。
 
 ## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
@@ -10,11 +10,11 @@
 
 ## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-检查某个 IP 地址、用户名或电子邮件地址是否曾与自动化账户注册或其他已报告的机器人活动相关联。
+检查某个 IP 地址、用户名或电子邮件地址是否曾与自动化账户注册或其他已报告的 bot 活动相关联。
 
 ## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-查找并验证专业电子邮件地址及与域名相关的联系人模式。请查看当前套餐的请求限制和允许用途。
+查找并验证专业电子邮件地址以及与域名相关的联系模式。请查看当前套餐的请求限制和允许用途。
 
 ## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
@@ -22,11 +22,11 @@
 
 ## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-使用可用的业务/个人资料数据补充电子邮件地址、域名或公司信息。数据覆盖范围、访问权限和隐私限制取决于当前产品和套餐。
+利用可用的业务或个人资料数据丰富电子邮件地址、域名或公司信息。数据覆盖范围、访问权限和隐私限制取决于当前产品和套餐。
 
 ## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-识别网站上发现的技术，并在所选套餐允许的情况下获取历史数据或关联数据。
+识别网站上观察到的技术，并在所选套餐允许的情况下获取历史数据或关联数据。
 
 ## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
@@ -34,7 +34,7 @@
 
 ## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-查询 FortiGuard 对域名、URL 或 IP 地址的分类和威胁情报。不同服务的可用性有所不同。
+查询 FortiGuard 对域名、URL 或 IP 地址的分类和威胁情报。不同服务的可用性有所差异。
 
 ## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
@@ -46,19 +46,19 @@
 
 ## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-获取 IP 地址的地理位置、ASN、所属组织及相关元数据。请查看当前套餐的配额。
+获取 IP 地址的地理位置、ASN、组织及相关元数据。请查看当前套餐的配额。
 
 ## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-该平台提供 DNS 和基础设施情报，例如历史解析记录、与 IP 或名称服务器相关联的域名，以及相关记录。历史 DNS 可能会揭示先前的源站地址，但无法可靠地绕过 CDN，且必须进行验证。
+该平台提供 DNS 和基础设施情报，例如历史解析记录、与 IP 或名称服务器关联的域名，以及相关记录。历史 DNS 可能会揭示较早的源站地址，但不能可靠地绕过 CDN，且必须经过验证。
 
 ## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-使用可用的身份和业务属性补充电子邮件地址、域名或公司名称信息。请根据授权和隐私要求处理个人数据。
+利用可用的身份和业务属性丰富电子邮件地址、域名或公司名称信息。处理个人数据时，应遵循授权和隐私要求。
 
 ## RiskIQ / Microsoft Defender Threat Intelligence（旧版迁移） <sup>[[14]](#references)</sup>
 
-RiskIQ 的 PassiveTotal 功能已迁移至 Microsoft Defender Threat Intelligence。产品访问权限、API 和保留的功能均已发生变化，因此请以 Microsoft 的当前文档为准，不要依赖旧版 PassiveTotal 的假设。
+RiskIQ 的 PassiveTotal 功能已迁移至 Microsoft Defender Threat Intelligence。产品访问权限、API 和保留的功能均已变更，因此请参考 Microsoft 的最新文档，而不要依赖旧版 PassiveTotal 的假设。
 
 ## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
@@ -70,11 +70,11 @@ RiskIQ 的 PassiveTotal 功能已迁移至 Microsoft Defender Threat Intelligenc
 
 ## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-搜索 IP 地址或地址范围，查看互联网扫描和常见服务活动的观测记录。请查看当前试用和社区访问条款。
+搜索 IP 地址或网段，查看互联网扫描和常见服务活动的观测记录。请查看当前试用和社区访问条款。
 
 ## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-根据 IP 地址、主机或搜索查询获取互联网扫描和服务信息。API 访问权限取决于账户套餐。
+根据 IP 地址、主机或搜索查询，获取互联网扫描和服务信息。API 访问权限取决于账户套餐。
 
 ## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
@@ -82,7 +82,7 @@ RiskIQ 的 PassiveTotal 功能已迁移至 Microsoft Defender Threat Intelligenc
 
 ## [GrayHatWarfare bucket 搜索](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-按关键词搜索该提供商索引的公开云存储对象和 bucket。
+按关键词搜索该供应商索引的、公开观测到的云存储对象和 bucket。
 
 ## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
@@ -90,7 +90,7 @@ RiskIQ 的 PassiveTotal 功能已迁移至 Microsoft Defender Threat Intelligenc
 
 ## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-搜索已索引的 paste 内容，查找某个电子邮件地址或其他词条。将其集成前，请确认该服务仍可使用。
+搜索已索引的 paste 内容，查找某个电子邮件地址或其他词条。集成前请确认该服务仍可用。
 
 ## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
@@ -98,22 +98,25 @@ RiskIQ 的 PassiveTotal 功能已迁移至 Microsoft Defender Threat Intelligenc
 
 ## GhostProject（历史服务） <sup>[[24]](#references)</sup>
 
-该服务过去曾宣称可搜索泄露的电子邮件/密码数据。请将其视为高风险的第三方数据处理服务，并在使用前确认其可用性、合法性和授权情况。
+该服务过去曾宣称可搜索泄露的电子邮件/密码数据。应将其视为高风险的第三方数据处理服务，并在使用前确认其可用性、合法性和授权情况。
 
-## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
+## BinaryEdge（已停止服务） <sup>[[25]](#references)</sup>
 
-获取 IP 地址及相关资产的互联网扫描、暴露面和威胁情报数据。
+该服务曾提供 IP 地址及相关资产的互联网扫描、暴露情况和威胁情报数据。其网站目前会重定向至 Coalition 的迁移通知，API 也会拒绝请求，因此应视为不可用。
 
 ## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-检查某个电子邮件地址或已验证域名是否出现在已知泄露事件中。独立的 Pwned Passwords 服务通过前缀检查密码哈希；它**不会**泄露明文密码。
+检查某个电子邮件地址或已验证域名是否出现在已知数据泄露事件中。单独的 Pwned Passwords 服务通过前缀检查密码哈希；它**不会**泄露明文密码。
 
 ### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-获取 IP 地理位置、数据中心、ASN、代理/VPN 及相关信息补全字段。配额取决于当前套餐。
+获取 IP 地理位置、数据中心、ASN、代理/VPN 及相关信息字段。配额取决于当前套餐。
 
 ### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
-提供 IP 地理位置和面向 OSINT 的信息补全，包括部分数据点。请查看当前条款，确认是否允许商业用途。
+提供 IP 地理位置和面向 OSINT 的信息丰富服务，包含所选数据点。商业用途请查看当前条款。
+
+### [NetAPI](https://netapi.com/) <sup>[[32]](#references)</sup>
+查询域名（注册商、注册和到期日期、名称服务器、托管 IP 和国家/地区）或 IP 地址（托管在该 IP 上的其他域名），并检查域名或 IP 是否出现在其免费受感染列表中：钓鱼和 sinkhole 恶意软件域名，以及过去 48 小时内攻击过其 honeypot 传感器的地址。网页查询和受感染状态检查 API 无需账户；通过 API 访问查询功能则需要付费套餐。
 
 
 [DNSDumpster](https://dnsdumpster.com/) 提供 DNS 侦察结果。<sup>[[29]](#references)</sup>
@@ -155,5 +158,6 @@ RiskIQ 的 PassiveTotal 功能已迁移至 Microsoft Defender Threat Intelligenc
 - [29] [DNSDumpster](https://dnsdumpster.com/)
 - [30] [Netcraft](https://www.netcraft.com/)
 - [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
+- [32] [NetAPI API documentation](https://netapi.com/help/api/)
 
 {{#include ../../banners/hacktricks-training.md}}
