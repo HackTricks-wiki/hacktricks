@@ -13,4 +13,5 @@
 ## References
 
 - [1] [HackTricks-wiki/hacktricks — Repository του GitHub](https://github.com/HackTricks-wiki/hacktricks)
+
 {{#include ../banners/hacktricks-training.md}}
