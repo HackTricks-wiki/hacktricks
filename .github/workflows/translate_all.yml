@@ -53,6 +53,10 @@ on:
         description: "Translate and publish sidebar labels only"
         type: boolean
         default: false
+      landing_only:
+        description: "Rebuild and publish only the existing landing page for one language"
+        type: boolean
+        default: false
       files:
         description: "Optional comma-separated src/*.md paths to retry in addition to the language backlog"
         required: false
@@ -81,7 +85,7 @@ permissions:
 
 env:
   # Keep the shared validator and deployment tools on the same immutable revision.
-  SHARED_TRANSLATOR_REF: 12486727db49acf00feaa53f210418bf558b3520
+  SHARED_TRANSLATOR_REF: 98c3c4b341d86903ce0022ec0df9163bdc73afa9
 
 jobs:
   validate:
@@ -254,7 +258,14 @@ jobs:
       - id: select
         env:
           ONLY_LANGUAGE: ${{ inputs.only_language }}
-        run: python3 scripts/translation_matrix.py --only "$ONLY_LANGUAGE" >> "$GITHUB_OUTPUT"
+          LANDING_ONLY: ${{ inputs.landing_only }}
+          NAVIGATION_ONLY: ${{ inputs.navigation_only }}
+        run: |
+          if [[ "$LANDING_ONLY" == true && ( -z "$ONLY_LANGUAGE" || "$NAVIGATION_ONLY" == true ) ]]; then
+            echo "Landing-page publishing requires exactly one language and its own mode." >&2
+            exit 1
+          fi
+          python3 scripts/translation_matrix.py --only "$ONLY_LANGUAGE" >> "$GITHUB_OUTPUT"
 
   translate:
     name: Translate → ${{ matrix.name }} (${{ matrix.branch }})
@@ -283,6 +294,7 @@ jobs:
 
     env:
       NAVIGATION_ONLY: ${{ inputs.navigation_only }}
+      LANDING_ONLY: ${{ inputs.landing_only }}
       LANGUAGE: ${{ matrix.language }}
       BRANCH:   ${{ matrix.branch }}
       # Seed older branches from the English snapshot before the reported gap.
@@ -334,7 +346,7 @@ jobs:
           cp scripts/seo_postprocess.py /tmp/seo_postprocess.py
 
       - name: Save reference data
-        if: ${{ !inputs.navigation_only }}
+        if: ${{ !inputs.navigation_only && !inputs.landing_only }}
         run: python /tmp/get_and_save_refs.py
 
       - name: Download language branch and update refs
@@ -345,7 +357,7 @@ jobs:
           git config --global user.email 'github-actions@github.com'
           git checkout "$BRANCH"
           git pull --ff-only origin "$BRANCH"
-          if [[ "$NAVIGATION_ONLY" == true ]]; then
+          if [[ "$NAVIGATION_ONLY" == true || "$LANDING_ONLY" == true ]]; then
             exit 0
           fi
           python /tmp/compare_and_fix_refs.py --files-unmatched-paths /tmp/ref-mismatches.txt
@@ -358,6 +370,7 @@ jobs:
           fi
 
       - name: Translate and verify pending pages
+        if: ${{ !inputs.landing_only }}
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -414,7 +427,11 @@ jobs:
       - name: Build mdBook
         run: |
           git checkout "$BRANCH"
-          python /tmp/translation_backlog.py verify-navigation --language "$BRANCH" --source-ref "$SOURCE_REF"
+          navigation_options=()
+          if [ "$LANDING_ONLY" = true ]; then
+            navigation_options+=(--landing)
+          fi
+          python /tmp/translation_backlog.py verify-navigation --language "$BRANCH" --source-ref "$SOURCE_REF" "${navigation_options[@]}"
           if [ "$NAVIGATION_ONLY" = true ]; then
             export MDBOOK_OUTPUT__HTML__SEARCH__ENABLE=false
           else
@@ -423,10 +440,10 @@ jobs:
           fi
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
           python /tmp/translation_backlog.py verify-render --language "$BRANCH" --toc book/toc.html --toc-script book/toc.js
-          if [ "$NAVIGATION_ONLY" != true ]; then
+          if [ "$NAVIGATION_ONLY" != true ] && [ "$LANDING_ONLY" != true ]; then
             python /tmp/render_localized_error.py --language "$BRANCH" --rendered
           fi
-          if [ "$NAVIGATION_ONLY" = true ]; then
+          if [ "$NAVIGATION_ONLY" = true ] || [ "$LANDING_ONLY" = true ]; then
             exit 0
           fi
           cp /tmp/immutable-images/* ./book/images/
@@ -438,7 +455,7 @@ jobs:
           cp /tmp/ht_searcher.js ./book/theme/ht_searcher.js
       
       - name: Push search index to hacktricks-searchindex repo
-        if: ${{ !inputs.navigation_only }}
+        if: ${{ !inputs.navigation_only && !inputs.landing_only }}
         shell: bash
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -589,9 +606,22 @@ jobs:
             --default-lang en \
             --site-name "HackTricks"
       
+      - name: Publish only the localized landing page
+        if: ${{ inputs.landing_only }}
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          test -s book/index.html
+          test "$(git rev-parse HEAD)" = "$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)"
+          aws s3 cp book/index.html "s3://hacktricks-wiki/$BRANCH/index.html" --content-type "text/html; charset=utf-8" --no-progress
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/$BRANCH/" "/$BRANCH/index.html"
+
       # Sync the build to S3
       - name: Sync to S3
-        if: ${{ !inputs.navigation_only }}
+        if: ${{ !inputs.navigation_only && !inputs.landing_only }}
         run: |
           echo "Current branch:"
           git rev-parse --abbrev-ref HEAD
@@ -615,7 +645,7 @@ jobs:
   finalize-deployment:
     name: Finalize translated deployment
     needs: translate
-    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.audit_only && !inputs.error_pages_only && !inputs.ui_assets_only && !inputs.navigation_only && needs.translate.result != 'skipped' }}
+    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.audit_only && !inputs.error_pages_only && !inputs.ui_assets_only && !inputs.navigation_only && !inputs.landing_only && needs.translate.result != 'skipped' }}
     permissions:
       packages: write
       id-token: write
