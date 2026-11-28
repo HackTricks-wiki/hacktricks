@@ -49,4 +49,5 @@
 ## References
 
 - [1] [GitBook — विज़िटर प्रमाणीकरण: कुकीज़](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}

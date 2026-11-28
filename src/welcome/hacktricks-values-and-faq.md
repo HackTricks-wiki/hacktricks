@@ -149,4 +149,5 @@ HackTricks के मूल पाठ का [CC BY-NC 4.0](../LICENSE.md) क�
 - [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
 - [4] [HackTricks लाइसेंस](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/LICENSE.md)
 - [5] [Creative Commons CC BY-NC 4.0 अनुज्ञप्ति](https://creativecommons.org/licenses/by-nc/4.0/)
+
 {{#include ../banners/hacktricks-training.md}}
