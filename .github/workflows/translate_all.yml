@@ -89,7 +89,7 @@ permissions:
 
 env:
   # Keep the shared validator and deployment tools on the same immutable revision.
-  SHARED_TRANSLATOR_REF: 685995fd139c474e2e7a8573909e4ef8f8c573a5
+  SHARED_TRANSLATOR_REF: 493197eb3af604259998243ffea154c9596dd92a
   # Seed older branches from the English snapshot before the reported gap.
   INITIAL_SOURCE_REF: 8481cea2a23b5c7f8eaec13775164aee08e2db00
 
