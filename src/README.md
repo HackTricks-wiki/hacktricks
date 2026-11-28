@@ -186,4 +186,5 @@ Xem mục HackTricks Values & FAQ trong phần References bên dưới.
 - [14] [Video tài trợ của WebSec](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Các khóa học Cyber Helmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 - [16] [Giá trị và Câu hỏi thường gặp về HackTricks](welcome/hacktricks-values-and-faq.md)
+
 {{#include banners/hacktricks-training.md}}
