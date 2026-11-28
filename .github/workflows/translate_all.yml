@@ -74,7 +74,7 @@ permissions:
 
 env:
   # Keep the shared validator and deployment tools on the same immutable revision.
-  SHARED_TRANSLATOR_REF: 421deb607bea2fa798d051144b5a39a9f7fdde44
+  SHARED_TRANSLATOR_REF: 7571a7a03692a247634e62a6b07e92d1d04fadc6
 
 jobs:
   validate:
