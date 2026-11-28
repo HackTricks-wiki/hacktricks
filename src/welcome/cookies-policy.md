@@ -49,4 +49,5 @@ Nếu có câu hỏi hoặc thắc mắc về Chính sách Cookie này, vui lòn
 ## References
 
 - [1] [GitBook — Xác thực khách truy cập: cookie](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}

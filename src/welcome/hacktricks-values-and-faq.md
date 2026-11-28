@@ -149,4 +149,5 @@ Giấy phép này không cấp bất kỳ quyền nào đối với nhãn hiệu
 - [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
 - [4] [Giấy phép HackTricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/LICENSE.md)
 - [5] [Văn bản CC BY-NC 4.0 của Creative Commons](https://creativecommons.org/licenses/by-nc/4.0/)
+
 {{#include ../banners/hacktricks-training.md}}

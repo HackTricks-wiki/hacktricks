@@ -13,4 +13,5 @@ HackTricks cũng tạo nơi để các nhà nghiên cứu chia sẻ phát hiện
 ## References
 
 - [1] [HackTricks-wiki/hacktricks — kho lưu trữ GitHub](https://github.com/HackTricks-wiki/hacktricks)
+
 {{#include ../banners/hacktricks-training.md}}
