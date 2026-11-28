@@ -122,3 +122,37 @@ test("regional tags select a translation and unknown tags use English", () => {
     assert.deepEqual(translate("zz"), translate("en"));
     assert.deepEqual(translate("pt").callouts, ["Observação", "Dica", "Importante", "Aviso", "Cuidado"]);
 });
+
+test("already published templates localize using their legacy selectors", () => {
+    function element(properties, initialAttributes = {}) {
+        const attributes = new Map(Object.entries(initialAttributes));
+        return {
+            dataset: {},
+            ...properties,
+            hasAttribute: name => attributes.has(name),
+            getAttribute: name => attributes.get(name),
+            setAttribute: (name, value) => attributes.set(name, value),
+        };
+    }
+    const search = element({ id: "searchbar", tagName: "INPUT" }, { placeholder: "Search this book ..." });
+    const locale = element({ id: "pt", childElementCount: 0, textContent: "🇵🇹 Portuguese" });
+    const companion = { href: "https://cloud.hacktricks.wiki/" };
+    const document = {
+        documentElement: { lang: "pt" },
+        querySelectorAll(selector) {
+            switch (selector) {
+                case "#searchbar": return [search];
+                case "[data-nav-label]": return search.dataset.navLabel ? [search] : [];
+                case "#menubar-languages-popup a[hreflang]": return [locale];
+                case "#menubar-collapse a[href], #menubar-collapse-popup a[href]": return [companion];
+                default: return [];
+            }
+        },
+    };
+    localize.runInNewContext({ document });
+    assert.equal(search.getAttribute("placeholder"), "Pesquisar neste livro…");
+    assert.equal(search.getAttribute("aria-label"), "Pesquisar neste livro…");
+    assert.equal(locale.textContent, "🇧🇷 Português (Brasil)");
+    assert.equal(locale.getAttribute("hreflang"), "pt-BR");
+    assert.equal(companion.href, "https://cloud.hacktricks.wiki/pt/");
+});

@@ -685,10 +685,28 @@ function playground_text(playground, hidden = true) {
     const translation = labels[supportedLocale];
     const messages = Object.fromEntries(keys.map((key, index) => [key, translation[index]]));
 
+    // Older rendered pages identify the same controls by their stable navigation selectors.
+    const legacyControls = {
+        "#searchbar": "searchBook",
+        "#search-toggle, [data-toggle-search] > span:last-child": "search",
+        "#menubar-languages-toggle, #menubar-languages-popup, #menubar-languages-toggle > .menu-bar-link, [data-toggle-translations] > span": "languages",
+        "#sidebar-toggle, #mobile-toc-toggle, #sidebar-float-toggle, #sidebar": "contents",
+        "#sidetoc-toggle, nav.pagetoc": "onThisPage",
+        "a.nav-chapters.previous, a.mobile-nav-chapters.previous": "previous",
+        "a.nav-chapters.next, a.mobile-nav-chapters.next": "next",
+        "nav.nav-wrapper, nav.nav-wide-wrapper": "pageNavigation",
+    };
+    for (const [selector, key] of Object.entries(legacyControls)) {
+        for (const control of document.querySelectorAll(selector)) {
+            control.dataset.navLabel ||= key;
+        }
+    }
     for (const control of document.querySelectorAll("[data-nav-label]")) {
         const message = messages[control.dataset.navLabel];
         if (!message) { continue; }
-        if (control.hasAttribute("aria-label")) { control.setAttribute("aria-label", message); }
+        if (control.hasAttribute("aria-label") || control.id === "searchbar" || control.tagName === "NAV") {
+            control.setAttribute("aria-label", message);
+        }
         if (control.hasAttribute("title")) {
             const shortcut = control.getAttribute("aria-keyshortcuts");
             control.setAttribute("title", control.id === "search-toggle" && shortcut ? `${message} (${shortcut})` : message);
@@ -709,6 +727,32 @@ function playground_text(playground, hidden = true) {
         if (control.hasAttribute("placeholder")) { control.setAttribute("placeholder", message); }
         if (control.tagName === "SPAN") { control.textContent = message; }
     }
+
+    const editionNames = {
+        af: "Afrikaans", de: "Deutsch", el: "Ελληνικά", en: "English", es: "Español", fr: "Français",
+        hi: "हिन्दी", it: "Italiano", ja: "日本語", ko: "한국어", pl: "Polski", pt: "Português (Brasil)",
+        sr: "Српски", sw: "Kiswahili", tr: "Türkçe", uk: "Українська", vi: "Tiếng Việt", zh: "简体中文",
+    };
+    const editionTags = { pt: "pt-BR", zh: "zh-Hans" };
+    for (const link of document.querySelectorAll("#menubar-languages-popup a[hreflang]")) {
+        if (!Object.hasOwn(editionNames, link.id)) { continue; }
+        const name = editionNames[link.id];
+        const tag = editionTags[link.id] || link.id;
+        link.setAttribute("aria-label", name);
+        link.setAttribute("lang", tag);
+        link.setAttribute("hreflang", tag);
+        if (!link.childElementCount) {
+            let flag = link.textContent.match(/^\p{Regional_Indicator}{2}/u)?.[0];
+            if (link.id === "pt" && flag) { flag = "🇧🇷"; }
+            link.textContent = flag ? `${flag} ${name}` : name;
+        }
+    }
+
+    const companionHomes = ["https://hacktricks.wiki/", "https://cloud.hacktricks.wiki/"];
+    for (const link of document.querySelectorAll("#menubar-collapse a[href], #menubar-collapse-popup a[href]")) {
+        if (companionHomes.includes(link.href)) { link.href += `${supportedLocale}/`; }
+    }
+
     const calloutTypes = ["note", "tip", "important", "warning", "caution"];
     for (const title of document.querySelectorAll(".blockquote-tag > .blockquote-tag-title")) {
         const index = calloutTypes.findIndex(type => title.parentElement.classList.contains(`blockquote-tag-${type}`));

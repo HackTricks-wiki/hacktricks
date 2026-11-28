@@ -38,6 +38,10 @@ on:
         description: "Build and publish localized 404 pages only"
         type: boolean
         default: false
+      ui_assets_only:
+        description: "Publish localized navigation and search JavaScript only"
+        type: boolean
+        default: false
       navigation_only:
         description: "Translate and publish sidebar labels only"
         type: boolean
@@ -106,9 +110,9 @@ jobs:
           node --test scripts/test_navigation_l10n.js scripts/test_search.js
 
   publish-error-pages:
-    name: Publish localized 404 pages
+    name: Publish localized site files
     needs: validate
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.error_pages_only && !inputs.validate_only }}
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.error_pages_only || inputs.ui_assets_only) && !inputs.validate_only }}
     runs-on: ubuntu-latest
     environment: prod
     permissions:
@@ -124,7 +128,9 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Render missing pages in an isolated book
+        if: ${{ inputs.error_pages_only }}
         run: python3 scripts/render_localized_error.py --publish-dir "$RUNNER_TEMP/localized-errors"
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v6
@@ -132,6 +138,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
       - name: Publish only the localized error pages
+        if: ${{ inputs.error_pages_only }}
         shell: bash
         env:
           DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
@@ -147,8 +154,45 @@ jobs:
           done
           aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "${paths[@]}"
 
+      - name: Publish only localized navigation and search scripts
+        if: ${{ inputs.ui_assets_only }}
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          workdir=$(mktemp -d)
+          PYTHONPATH=scripts python3 -c 'from translation_matrix import MENU_LABELS; print(*sorted(MENU_LABELS), sep=chr(10))' > "$workdir/locales"
+          locales=()
+          while IFS= read -r locale; do
+            locales+=("$locale")
+          done < "$workdir/locales"
+          assets=(book.js theme/ht_searcher.js)
+          paths=()
+          files=()
+          # Compare every object before uploading any replacement.
+          for asset in "${assets[@]}"; do
+            source="theme/${asset##*/}"
+            baseline="$workdir/${asset##*/}.baseline"
+            git show "refs/remotes/origin/master:$source" > "$baseline"
+            for locale in "" "${locales[@]}"; do
+              path="${locale:+$locale/}$asset"
+              aws s3 cp "s3://hacktricks-wiki/$path" "$workdir/current" --only-show-errors
+              if ! cmp -s "$baseline" "$workdir/current" && ! cmp -s "$source" "$workdir/current"; then
+                echo "Unexpected version at /$path. No scripts were uploaded."
+                exit 1
+              fi
+              paths+=("/$path")
+              files+=("$source")
+            done
+          done
+          for index in "${!paths[@]}"; do
+            aws s3 cp "${files[$index]}" "s3://hacktricks-wiki${paths[$index]}" --content-type "application/javascript; charset=utf-8" --no-progress
+          done
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "${paths[@]}"
+
   select-languages:
-    if: ${{ github.event_name != 'pull_request' && !inputs.validate_only && !inputs.error_pages_only }}
+    if: ${{ github.event_name != 'pull_request' && !inputs.validate_only && !inputs.error_pages_only && !inputs.ui_assets_only }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
@@ -516,7 +560,7 @@ jobs:
   finalize-deployment:
     name: Finalize translated deployment
     needs: translate
-    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.error_pages_only && !inputs.navigation_only && needs.translate.result != 'skipped' }}
+    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.error_pages_only && !inputs.ui_assets_only && !inputs.navigation_only && needs.translate.result != 'skipped' }}
     permissions:
       packages: write
       id-token: write
