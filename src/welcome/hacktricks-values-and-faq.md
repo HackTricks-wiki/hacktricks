@@ -35,7 +35,7 @@ HackTricksチームがこれらのリソースをまとめたことへの感謝�
 >
 > - **プロジェクトに貢献するにはどうすればよいですか？**
 
-新しいヒントやテクニックをコミュニティと共有したり、書籍で見つけたバグを修正したりするには、該当するGitHubリポジトリに**pull request**を送ってください。<sup>[[1]](#references)[[2]](#references)</sup>
+**新しいヒントやテクニックをコミュニティと共有したり、書籍で見つけたバグを修正したり**するには、該当するGitHubリポジトリに**pull request**を送ってください。<sup>[[1]](#references)[[2]](#references)</sup>
 
 - [HackTricksリポジトリ](https://github.com/HackTricks-wiki/hacktricks)
 - [HackTricks Cloudリポジトリ](https://github.com/HackTricks-wiki/hacktricks-cloud)
