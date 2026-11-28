@@ -100,9 +100,9 @@ Retrieve reputation and risk signals for an email address.
 
 Historically advertised searches of leaked email/password data. Treat the service as high-risk third-party handling and verify its availability, legality, and authorization before use.
 
-## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
+## BinaryEdge (discontinued) <sup>[[25]](#references)</sup>
 
-Obtain internet-scan, exposure, and threat-intelligence data for IP addresses and related assets.
+Offered internet-scan, exposure, and threat-intelligence data for IP addresses and related assets. Its site now redirects to a Coalition transition notice and the API refuses requests, so treat it as unavailable.
 
 ## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
@@ -114,6 +114,9 @@ Retrieve IP geolocation, data-center, ASN, proxy/VPN, and related enrichment fie
 
 ### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
 IP geolocation and OSINT-oriented enrichment with selected data points. Check current terms for commercial use.
+
+### [NetAPI](https://netapi.com/) <sup>[[32]](#references)</sup>
+Look up a domain (registrar, registration and expiry dates, name servers, hosting IP and country) or an IP address (the other domains hosted on it), and check whether a domain or IP is on its free compromised lists: phishing and sinkholed malware domains, and addresses that attacked its honeypot sensors in the last 48 hours. The web lookups and the compromised-check API need no account, API access to the lookups requires a paid plan.
 
 
 [DNSDumpster](https://dnsdumpster.com/) provides DNS-reconnaissance results.<sup>[[29]](#references)</sup>
@@ -155,5 +158,6 @@ IP geolocation and OSINT-oriented enrichment with selected data points. Check cu
 - [29] [DNSDumpster](https://dnsdumpster.com/)
 - [30] [Netcraft](https://www.netcraft.com/)
 - [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
+- [32] [NetAPI API documentation](https://netapi.com/help/api/)
 
 {{#include ../../banners/hacktricks-training.md}}

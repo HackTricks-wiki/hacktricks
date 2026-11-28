@@ -600,7 +600,7 @@ Using services such as the following, you can also find **previous IPs used by d
 
 - [**SecurityTrails**](https://securitytrails.com/) (historical DNS/IP data requires a paid plan)
 
-You can also check for domains pointing a specific IP address using the tool [**hakip2host**](https://github.com/hakluke/hakip2host)
+You can also check for domains pointing a specific IP address using the tool [**hakip2host**](https://github.com/hakluke/hakip2host) or an online reverse IP lookup such as [**NetAPI**](https://netapi.com/lookup-ip/)
 
 ### **Looking for vulnerabilities**
 
