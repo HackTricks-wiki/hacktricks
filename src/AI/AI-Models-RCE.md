@@ -416,7 +416,7 @@ Vir ’n gefokusde gids oor .keras-internals, Lambda-layer RCE, die arbitrêre i
 
 
 {{#ref}}
-../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
 ## References
