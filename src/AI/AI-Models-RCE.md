@@ -416,7 +416,7 @@ Per una guida mirata sugli interni di .keras, RCE tramite layer Lambda, il probl
 
 
 {{#ref}}
-../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
 ## References
