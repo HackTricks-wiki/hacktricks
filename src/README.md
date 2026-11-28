@@ -34,7 +34,7 @@ export HT_LANG="master" # Leave master for English
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 
-로컬 HackTricks 복사본은 5분 이내에 **[http://localhost:3337](http://localhost:3337)**에서 사용할 수 있습니다 (책을 빌드해야 하므로 기다려 주세요).
+로컬 HackTricks 복사본은 5분 이내에 [**http://localhost:3337**](http://localhost:3337)에서 사용할 수 있습니다 (책을 빌드해야 하므로 기다려 주세요).
 
 또는 Docker Compose가 있다면 저장소 루트에서 다음을 실행하면 됩니다:
 
