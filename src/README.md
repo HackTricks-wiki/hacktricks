@@ -105,7 +105,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ### [NaxusAI – Αυτόνομη Επιθετική Ασφάλεια](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="Λογότυπο NaxusAI"><figcaption></figcaption></figure>
 
 Η **Naxus** είναι μια πλατφόρμα επιθετικής ασφάλειας με τεχνητή νοημοσύνη, για πλήρεις σαρώσεις εξωτερικής επιφάνειας επίθεσης, ελέγχους εφαρμογών για κινητά, black-box testing ιστού και ελέγχους πηγαίου κώδικα. Οι agents της επαληθεύουν ευρήματα που μπορούν να αξιοποιηθούν και παρέχουν ανιχνεύσιμα αποδεικτικά στοιχεία, exploits proof-of-concept και εφαρμόσιμες προτάσεις αποκατάστασης.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="Λογότυπο cyberhelmets"><figcaption></figcaption></figure>
 
 
 **Φτιαγμένο για το πεδίο. Φτιαγμένο για εσάς.**\
@@ -142,7 +142,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="Λογότυπο lasttower"><figcaption></figcaption></figure>
 
 Η Last Tower Solutions εστιάζει στις συμβουλευτικές υπηρεσίες κυβερνοασφάλειας για τους τομείς της **Εκπαίδευσης** και του **FinTech**, συμπεριλαμβανομένων αξιολογήσεων cloud, εσωτερικών και εξωτερικών penetration tests, αξιολογήσεων ευπαθειών και υποστήριξης συμμόρφωσης.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ### [Beaki — Φαγητό που σας ταιριάζει](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Λογότυπο Beaki"><figcaption></figcaption></figure>
 
 Το **Beaki** είναι ένας εξατομικευμένος σαρωτής τροφίμων, μετρητής θερμίδων και καταγραφέας διατροφής. Σαρώστε γραμμωτούς κώδικες και ράφια σούπερ μάρκετ, φωτογραφίστε ή περιγράψτε γεύματα και μενού εστιατορίων και λάβετε επεξηγήσιμες βαθμολογίες με βάση τους στόχους, τη διατροφή, τις αλλεργίες και το προφίλ υγείας σας. Το Beaki καταγράφει επίσης θερμίδες και μακροθρεπτικά συστατικά και δημιουργεί εξατομικευμένα προγράμματα γευμάτων με λίστες αγορών.<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ## Στατιστικά GitHub
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![Στατιστικά του HackTricks στο GitHub](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
