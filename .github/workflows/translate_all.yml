@@ -13,8 +13,19 @@ on:
       # Tool-only releases can be reviewed and dispatched without scheduling a book backfill.
       - 'scripts/translation_backlog.py'
       - 'scripts/translation_matrix.py'
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/translate_all.yml'
+      - 'scripts/translation*.py'
+      - 'scripts/translator.py'
+      - 'scripts/test_translat*.py'
   workflow_dispatch:
     inputs:
+      validate_only:
+        description: "Run translator checks without publishing"
+        type: boolean
+        default: false
       navigation_only:
         description: "Translate and publish sidebar labels only"
         type: boolean
@@ -43,14 +54,41 @@ on:
         default: '80'
 
 permissions:
-  packages: write
-  id-token: write
-  contents: write
-  actions: read
-  pull-requests: read
+  contents: read
+
+env:
+  # Keep the shared validator and deployment tools on the same immutable revision.
+  SHARED_TRANSLATOR_REF: e678a4ba3fb01a5c002f51f65c286759bc6ab5dc
 
 jobs:
+  validate:
+    name: Validate translation tools
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Run regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check py3langid==0.4.0 markdown-it-py==4.3.0
+          shared_url="https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/$SHARED_TRANSLATOR_REF/scripts"
+          workdir=$(mktemp -d)
+          for script in translator translation_backlog translation_quality \
+              test_translator_directives test_translator_batch test_translator_code_blocks test_translator_tokenizers \
+              test_translation_backlog; do
+            wget -O "$workdir/$script.py" "$shared_url/$script.py"
+          done
+          python -m unittest discover -s "$workdir" -p 'test_translat*.py'
+
   select-languages:
+    if: ${{ github.event_name != 'pull_request' && !inputs.validate_only }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
@@ -63,7 +101,13 @@ jobs:
 
   translate:
     name: Translate → ${{ matrix.name }} (${{ matrix.branch }})
-    needs: select-languages
+    needs: [validate, select-languages]
+    permissions:
+      packages: write
+      id-token: write
+      contents: write
+      actions: read
+      pull-requests: read
     runs-on: ubuntu-latest
 
     # Run N languages in parallel (tune max-parallel if needed)
@@ -104,18 +148,10 @@ jobs:
           python -m pip install --disable-pip-version-check py3langid==0.4.0 markdown-it-py==4.3.0
           cp .github/build_compact_search_index.py /tmp/build_compact_search_index.py
           cp theme/ht_searcher.js /tmp/ht_searcher.js
-          # Pin the shared implementation so a run uses matching tools and tests.
-          shared_ref=6d18268ae72535dae12ea165507f1728940c10dd
-          shared_url="https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/$shared_ref/scripts"
-          for script in translator translation_backlog translation_quality get_and_save_refs compare_and_fix_refs \
-              test_translator_directives test_translator_batch test_translator_code_blocks test_translator_tokenizers \
-              test_translation_backlog; do
+          shared_url="https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/$SHARED_TRANSLATOR_REF/scripts"
+          for script in translator translation_backlog translation_quality get_and_save_refs compare_and_fix_refs; do
             wget -O "/tmp/$script.py" "$shared_url/$script.py"
           done
-          for suite in directives batch code_blocks tokenizers; do
-            python "/tmp/test_translator_$suite.py" -v
-          done
-          python /tmp/test_translation_backlog.py -v
           cp scripts/mark_unchanged_s3_files.py /tmp/mark_unchanged_s3_files.py
           cp scripts/upload_immutable_images.sh /tmp/upload_immutable_images.sh
           mkdir -p /tmp/immutable-images
@@ -415,7 +451,13 @@ jobs:
   finalize-deployment:
     name: Finalize translated deployment
     needs: translate
-    if: ${{ always() && !cancelled() && !inputs.navigation_only }}
+    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.navigation_only && needs.translate.result != 'skipped' }}
+    permissions:
+      packages: write
+      id-token: write
+      contents: write
+      actions: read
+      pull-requests: read
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: prod
