@@ -105,7 +105,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ### [NaxusAI – 자율형 공격 보안](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI 로고"><figcaption></figcaption></figure>
 
 **Naxus**는 외부 공격 표면 전체 스캔, 모바일 앱 감사, 웹 블랙박스 테스트, 소스 코드 검토를 위한 AI 기반 공격 보안 플랫폼입니다. 에이전트가 악용 가능한 발견 사항을 검증하고 추적 가능한 증거, proof-of-concept exploit, 실행 가능한 수정 방안을 제공합니다.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ WebSec은 침투 테스트, 보안 구독, 인력 지원, 취약점 평가 서�
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets 로고"><figcaption></figcaption></figure>
 
 
 **현장을 위해 만들고, 여러분을 중심으로 설계합니다.**\
@@ -142,7 +142,7 @@ WebSec은 침투 테스트, 보안 구독, 인력 지원, 취약점 평가 서�
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower 로고"><figcaption></figcaption></figure>
 
 Last Tower Solutions는 **교육** 및 **FinTech** 분야의 사이버 보안 컨설팅에 주력하며, 클라우드 평가, 내부 및 외부 침투 테스트, 취약점 평가, 컴플라이언스 지원 등을 제공합니다.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Last Tower Solutions는 **교육** 및 **FinTech** 분야의 사이버 보안 �
 
 ### [Beaki — 나에게 맞는 음식](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki 로고"><figcaption></figcaption></figure>
 
 **Beaki**는 개인 맞춤형 식품 스캐너이자 칼로리 계산기, 영양 추적 앱입니다. 바코드와 슈퍼마켓 진열대를 스캔하고, 식사와 레스토랑 메뉴를 촬영하거나 설명하면 목표, 식단, 알레르기, 건강 프로필에 맞춘 설명 가능한 점수를 확인할 수 있습니다. Beaki는 칼로리와 매크로 영양소를 추적하고 쇼핑 목록이 포함된 개인 맞춤형 식단도 만듭니다.<sup>[[11]](#references)</sup>
 
