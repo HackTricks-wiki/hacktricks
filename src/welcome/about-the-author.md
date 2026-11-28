@@ -13,4 +13,5 @@ HackTricks pia huwapa researchers mahali pa kushiriki findings mpya, na kuwasaid
 ## References
 
 - [1] [HackTricks-wiki/hacktricks — Repository ya GitHub](https://github.com/HackTricks-wiki/hacktricks)
+
 {{#include ../banners/hacktricks-training.md}}

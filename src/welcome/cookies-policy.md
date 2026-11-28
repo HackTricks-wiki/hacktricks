@@ -49,4 +49,5 @@ Ikiwa una maswali au wasiwasi wowote kuhusu Sera hii ya Vidakuzi, tafadhali wasi
 ## References
 
 - [1] [GitBook — Uthibitishaji wa Wageni: vidakuzi](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}

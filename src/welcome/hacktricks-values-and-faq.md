@@ -149,4 +149,5 @@ Leseni hii haitoi haki zozote za alama ya biashara au chapa kuhusiana na maudhui
 - [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
 - [4] [Leseni ya HackTricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/LICENSE.md)
 - [5] [Hati ya Creative Commons CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
+
 {{#include ../banners/hacktricks-training.md}}
