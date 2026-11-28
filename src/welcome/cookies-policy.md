@@ -49,4 +49,5 @@ As jy enige vrae of bekommernisse oor hierdie Koekiebeleid het, kontak ons asseb
 ## References
 
 - [1] [GitBook — Besoekersverifikasie: koekies](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}

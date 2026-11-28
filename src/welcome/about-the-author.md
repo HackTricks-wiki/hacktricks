@@ -13,4 +13,5 @@ HackTricks bied navorsers ook 'n plek om nuwe bevindings te deel, wat lesers hel
 ## References
 
 - [1] [HackTricks-wiki/hacktricks — GitHub-bewaarplek](https://github.com/HackTricks-wiki/hacktricks)
+
 {{#include ../banners/hacktricks-training.md}}
