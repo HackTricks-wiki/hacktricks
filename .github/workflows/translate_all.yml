@@ -19,6 +19,8 @@ on:
       - '.github/workflows/translate_all.yml'
       - 'scripts/translation*.py'
       - 'scripts/seo_postprocess.py'
+      - 'scripts/render_localized_error.py'
+      - '.github/workflows/build_master.yml'
       - 'scripts/translator.py'
       - 'scripts/test_translat*.py'
       - 'theme/index.hbs'
@@ -95,7 +97,7 @@ jobs:
             wget -O "$workdir/$script.py" "$shared_url/$script.py"
           done
           python -m unittest discover -s "$workdir" -p 'test_translat*.py'
-          python -m unittest discover -s scripts -p 'test_translation_metadata.py'
+          python -m unittest discover -s scripts -p 'test_translation_*.py'
           python scripts/translation_matrix.py --check-menu theme/index.hbs
           node --test scripts/test_navigation_l10n.js scripts/test_search.js
 
@@ -156,6 +158,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           source_ref=$(git rev-parse refs/remotes/origin/master)
           echo "SOURCE_REF=$source_ref" >> "$GITHUB_ENV"
+          cp scripts/render_localized_error.py scripts/translation_matrix.py /tmp/
           git checkout --detach "$source_ref"
           python -m pip install --disable-pip-version-check py3langid==0.4.0 markdown-it-py==4.3.0
           cp .github/build_compact_search_index.py /tmp/build_compact_search_index.py
@@ -271,9 +274,13 @@ jobs:
             export MDBOOK_OUTPUT__HTML__SEARCH__ENABLE=false
           else
             python /tmp/translation_backlog.py restore-anchors --language "$BRANCH" --source-ref "$SOURCE_REF"
+            python /tmp/render_localized_error.py --language "$BRANCH"
           fi
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
           python /tmp/translation_backlog.py verify-render --language "$BRANCH" --toc book/toc.html --toc-script book/toc.js
+          if [ "$NAVIGATION_ONLY" != true ]; then
+            python /tmp/render_localized_error.py --language "$BRANCH" --rendered
+          fi
           if [ "$NAVIGATION_ONLY" = true ]; then
             exit 0
           fi

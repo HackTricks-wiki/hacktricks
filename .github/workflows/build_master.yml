@@ -38,8 +38,14 @@ jobs:
           fetch-depth: 1 # Only fetch the latest commit for faster cloning
       
       # Build the mdBook
+      - name: Prepare missing-page copy
+        run: python3 scripts/render_localized_error.py --language en
+
       - name: Build mdBook
         run: MDBOOK_BOOK__LANGUAGE=en mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
+
+      - name: Localize the rendered error page
+        run: python3 scripts/render_localized_error.py --language en --rendered
 
       - name: Post-process SEO artifacts
         run: |
