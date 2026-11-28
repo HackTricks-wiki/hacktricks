@@ -186,4 +186,5 @@ https://www.modernsecurity.io/courses/ai-security-certification
 - [14] [Βίντεο χορηγίας της WebSec](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Μαθήματα Cyber Helmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 - [16] [Αξίες & FAQ του HackTricks](welcome/hacktricks-values-and-faq.md)
+
 {{#include banners/hacktricks-training.md}}
