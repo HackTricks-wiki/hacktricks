@@ -317,7 +317,9 @@ It's also possible to abuse ruby env variables (**`RUBYOPT`**, **`RUBYLIB`**) to
 
 ### Python Injection
 
-The **`PYTHONWARNINGS`** and **`BROWSER`** standard-library chain can execute a command during warning-filter parsing. A file-backed alternative places `sitecustomize.py` on **`PYTHONPATH`** so normal `site` initialization imports it before the target script. **`PYTHONBREAKPOINT`** runs a chosen callable/module when the code reaches `breakpoint()`. Interactive-only variables such as **`PYTHONSTARTUP`** have narrower applicability.
+The **`PYTHONWARNINGS`** and **`BROWSER`** standard-library chain can execute a command during warning-filter parsing. A file-backed alternative places `sitecustomize.py` on **`PYTHONPATH`** so normal `site` initialization imports it before the target script. **`PYTHONBREAKPOINT`** runs a chosen callable/module when the code reaches `breakpoint()`.
+
+On CPython 3.13+, **`PYTHONINSPECT`** can also run a **`PYTHONSTARTUP`** file after a script when its PyREPL starts on a terminal.<sup>[[6]](#references)</sup>
 
 Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
 
@@ -353,7 +355,7 @@ In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detec
 
 Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 ## References
 
@@ -362,3 +364,5 @@ Note that to call that function you need to be **the same uid** as the one runni
 - [3] [Metnew - Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
 - [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
 - [5] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
+- [6] [Python command-line and environment — `PYTHONINSPECT`](https://docs.python.org/3/using/cmdline.html#envvar-PYTHONINSPECT)
+{{#include ../../../banners/hacktricks-training.md}}
