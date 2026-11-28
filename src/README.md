@@ -186,4 +186,5 @@ Aşağıdaki References bölümündeki HackTricks Değerleri ve SSS başlığın
 - [14] [WebSec sponsorluk videosu](https://www.youtube.com/watch?v=Zq2JycGDCPM)
 - [15] [Cyber Helmets kursları](https://cyberhelmets.com/courses/?ref=hacktricks)
 - [16] [HackTricks Değerleri ve SSS](welcome/hacktricks-values-and-faq.md)
+
 {{#include banners/hacktricks-training.md}}
