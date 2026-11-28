@@ -1,8 +1,8 @@
-# API do rozpoznania i threat intelligence
+# Rozpoznanie i API wywiadu o zagrożeniach
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Usługi te wspierają procesy rozpoznania, oceny reputacji, sprawdzania wycieków lub wzbogacania danych. Ich API, limity, ceny i dozwolone zastosowania często się zmieniają; przed przesłaniem identyfikatorów klientów lub wrażliwych danych sprawdź aktualną dokumentację dostawcy oraz autoryzację do przeprowadzenia działań. Sekwencję wykrywania zasobów opisuje [External Recon Methodology](README.md).
+Usługi te wspierają procesy rozpoznania, oceny reputacji, wyszukiwania naruszeń danych lub wzbogacania informacji. Ich API, limity, ceny i dozwolone zastosowania często się zmieniają; przed przesłaniem identyfikatorów klientów lub poufnych danych sprawdź aktualną dokumentację dostawcy i upewnij się, że masz zgodę na działania w ramach zlecenia. Sekwencję wykrywania zasobów opisano w [metodyce zewnętrznego rozpoznania](README.md).
 
 ## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
@@ -10,35 +10,35 @@ Sprawdź, czy adres IP był powiązany z podejrzaną lub złośliwą aktywności
 
 ## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-Sprawdź, czy adres IP, nazwa użytkownika lub adres e-mail były powiązane z automatyczną rejestracją kont lub inną zgłoszoną aktywnością botów.
+Sprawdź, czy adres IP, nazwa użytkownika lub adres e-mail były powiązane z automatycznym rejestrowaniem kont lub inną zgłoszoną aktywnością botów.
 
 ## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-Znajdź i zweryfikuj służbowe adresy e-mail oraz wzorce kontaktów powiązane z domeną. Sprawdź aktualny plan, aby poznać limity zapytań i dozwolone zastosowania.
+Znajduj i weryfikuj służbowe adresy e-mail oraz wzorce kontaktowe powiązane z domenami. Sprawdź aktualny plan pod kątem limitów żądań i dozwolonych zastosowań.
 
 ## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-Wyszukuj wskaźniki threat intelligence oraz aktywność powiązaną z adresami IP i domenami.
+Wyszukuj wskaźniki wywiadu o zagrożeniach i aktywność powiązaną z adresami IP oraz domenami.
 
 ## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-Wzbogać adres e-mail, domenę lub nazwę firmy o dostępne dane biznesowe/profilowe. Zakres danych, dostęp i ograniczenia dotyczące prywatności zależą od aktualnego produktu i planu.
+Wzbogać adres e-mail, domenę lub nazwę firmy o dostępne dane biznesowe i profilowe. Zakres danych, dostęp i ograniczenia dotyczące prywatności zależą od aktualnego produktu i planu.
 
 ## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-Ustal technologie wykryte na stronach internetowych i uzyskaj dane historyczne lub informacje o powiązaniach, jeśli wybrany plan na to pozwala.
+Identyfikuj technologie zaobserwowane na stronach internetowych i uzyskuj dane historyczne lub informacje o powiązaniach, jeśli pozwala na to wybrany plan.
 
 ## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-Sprawdź, czy adres IP jest powiązany z podejrzaną lub złośliwą aktywnością. Zweryfikuj aktualne plany API i limity.
+Sprawdź, czy adres IP jest powiązany z podejrzaną lub złośliwą aktywnością. Potwierdź aktualne plany API i limity.
 
 ## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-Sprawdź kategoryzację FortiGuard i dane threat intelligence dotyczące domen, adresów URL lub adresów IP. Dostępność zależy od usługi.
+Sprawdź kategoryzację FortiGuard i informacje o zagrożeniach dla domen, URL-i lub adresów IP. Dostępność zależy od usługi.
 
 ## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-Sprawdź, czy adres IP znajduje się na liście adresów zgłoszonych w związku ze spamem.
+Sprawdź, czy adres IP znajduje się na liście adresów zgłoszonych jako źródła spamu.
 
 ## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
@@ -46,74 +46,77 @@ Pobierz ocenę reputacji domeny na podstawie społeczności usługi i innych syg
 
 ## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-Uzyskaj geolokalizację, ASN, nazwę organizacji i powiązane metadane adresu IP. Sprawdź aktualny plan, aby poznać limity.
+Uzyskaj geolokalizację, ASN, informacje o organizacji i powiązane metadane dla adresu IP. Sprawdź aktualny plan pod kątem limitów.
 
 ## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-Platforma udostępnia dane DNS i informacje o infrastrukturze, takie jak historyczne rozpoznania, domeny powiązane z adresami IP lub serwerami nazw oraz pokrewne rekordy. Historyczne dane DNS mogą ujawnić wcześniejszy adres origin, ale nie pozwalają niezawodnie ominąć CDN i wymagają weryfikacji.
+Platforma dostarcza informacje o DNS i infrastrukturze, takie jak historyczne rozpoznania, domeny powiązane z adresami IP lub serwerami nazw oraz powiązane rekordy. Historyczne dane DNS mogą ujawnić wcześniejszy adres źródłowy, ale nie pozwalają niezawodnie ominąć CDN i wymagają weryfikacji.
 
 ## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-Wzbogać adres e-mail, domenę lub nazwę firmy o dostępne atrybuty dotyczące tożsamości i działalności. Przetwarzaj dane osobowe zgodnie z wymogami autoryzacji i ochrony prywatności.
+Wzbogać adres e-mail, domenę lub nazwę firmy o dostępne atrybuty tożsamości i informacje biznesowe. Przetwarzaj dane osobowe zgodnie z wymogami dotyczącymi upoważnienia i prywatności.
 
 ## RiskIQ / Microsoft Defender Threat Intelligence (przejście ze starszej usługi) <sup>[[14]](#references)</sup>
 
-Możliwości RiskIQ PassiveTotal zostały przeniesione do Microsoft Defender Threat Intelligence. Dostęp do produktu, API i zakres zachowanych funkcji uległy zmianie, dlatego korzystaj z aktualnej dokumentacji Microsoftu, a nie ze starszych założeń dotyczących PassiveTotal.
+Funkcje RiskIQ PassiveTotal zostały przeniesione do Microsoft Defender Threat Intelligence. Dostęp do produktu, API i zachowane funkcje uległy zmianie, dlatego korzystaj z aktualnej dokumentacji Microsoftu, a nie z założeń dotyczących starszej usługi PassiveTotal.
 
 ## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-Przeszukuj domeny, adresy IP, adresy e-mail oraz zindeksowane dane historyczne lub leaked, zgodnie z ograniczeniami dostępu usługi.
+Wyszukuj domeny, adresy IP, adresy e-mail oraz zindeksowane dane historyczne lub leaked — z uwzględnieniem mechanizmów kontroli dostępu usługi.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-Wyszukuj adresy IP i inne wskaźniki, aby uzyskać dane threat intelligence i informacje o reputacji.
+Wyszukuj adresy IP i inne wskaźniki, aby uzyskać informacje o wywiadzie o zagrożeniach i reputacji.
 
 ## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-Wyszukuj adresy IP lub zakresy, aby sprawdzić obserwacje skanowania internetu i typowej aktywności usług. Sprawdź aktualne warunki wersji próbnej i dostępu społecznościowego.
+Wyszukuj adresy IP lub zakresy, aby sprawdzić obserwacje skanowania Internetu i typowej aktywności usług. Sprawdź aktualne warunki wersji próbnej i dostępu społecznościowego.
 
 ## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-Pobierz informacje o skanach internetu i usługach dla adresu IP, hosta lub zapytania wyszukiwania. Dostęp do API zależy od planu konta.
+Pobieraj informacje o skanach Internetu i usługach dla adresu IP, hosta lub zapytania wyszukiwania. Dostęp do API zależy od planu konta.
 
 ## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-Przeszukuj zbiory danych dotyczące hostów, certyfikatów, domen i usług internetowych; model danych i zakres Censys różnią się od Shodan.
+Przeszukuj zbiory danych hostów, certyfikatów, domen i usług internetowych; model danych i zakres różnią się od tych w Shodan.
 
-## [Wyszukiwarka bucketów GrayHatWarfare](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
+## [Wyszukiwanie bucketów GrayHatWarfare](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-Przeszukuj indeks dostawcy zawierający publicznie zaobserwowane obiekty i buckety w chmurze według słów kluczowych.
+Wyszukuj według słów kluczowych w indeksie dostawcy obejmującym publicznie zaobserwowane obiekty i buckety w chmurze.
 
 ## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-Przeszukuj zindeksowane dane z wycieków pod kątem adresów e-mail, nazw użytkowników, domen i powiązanych rekordów. Korzystaj z usługi wyłącznie za zgodą i unikaj niepotrzebnego ujawniania danych z wycieków.
+Przeszukuj zindeksowane dane z naruszeń pod kątem adresów e-mail, nazw użytkowników, domen i powiązanych rekordów. Korzystaj z usługi wyłącznie za zgodą i unikaj niepotrzebnego ujawniania danych z naruszeń.
 
 ## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-Przeszukuj zindeksowaną treść paste pod kątem wystąpień adresu e-mail lub innego terminu. Przed integracją sprawdź, czy usługa nadal działa.
+Przeszukuj zindeksowaną zawartość serwisów paste pod kątem wystąpień adresu e-mail lub innego terminu. Przed integracją sprawdź, czy usługa jest nadal dostępna.
 
 ## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-Pobierz sygnały reputacji i ryzyka dotyczące adresu e-mail.
+Pobierz sygnały reputacji i ryzyka dla adresu e-mail.
 
-## GhostProject (historyczna usługa) <sup>[[24]](#references)</sup>
+## GhostProject (usługa historyczna) <sup>[[24]](#references)</sup>
 
-Usługa historycznie reklamowała wyszukiwanie w danych leaked zawierających adresy e-mail i hasła. Traktuj ją jako usługę zewnętrzną wysokiego ryzyka i przed użyciem sprawdź jej dostępność, legalność oraz posiadaną autoryzację.
+Historycznie oferował wyszukiwanie w danych leaked zawierających adresy e-mail i hasła. Traktuj tę usługę jako wiążącą się z wysokim ryzykiem obsługi danych przez podmiot zewnętrzny i przed użyciem sprawdź jej dostępność, legalność oraz wymagane upoważnienie.
 
-## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
+## BinaryEdge (usługa wycofana) <sup>[[25]](#references)</sup>
 
-Uzyskaj dane ze skanów internetu, informacje o ekspozycji i dane threat intelligence dotyczące adresów IP oraz powiązanych zasobów.
+Oferował dane o skanach Internetu, ekspozycji i wywiadzie o zagrożeniach dla adresów IP oraz powiązanych zasobów. Jego strona przekierowuje obecnie do komunikatu Coalition o przejściu na inną usługę, a API odrzuca żądania, dlatego należy uznać go za niedostępny.
 
 ## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-Sprawdź, czy adres e-mail lub zweryfikowana domena występują w znanych wyciekach. Osobna usługa Pwned Passwords sprawdza hashe haseł na podstawie prefiksu; **nie** ujawnia haseł w postaci jawnego tekstu.
+Sprawdź, czy adres e-mail lub zweryfikowana domena pojawiają się w znanych naruszeniach. Oddzielna usługa Pwned Passwords sprawdza skróty haseł na podstawie prefiksu; **nie** ujawnia haseł w postaci jawnej.
 
 ### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-Pobierz geolokalizację IP, informacje o centrum danych, ASN, proxy/VPN i inne powiązane pola wzbogacające. Limity zależą od aktualnego planu.
+Pobierz geolokalizację IP, informacje o centrum danych, ASN, proxy/VPN i powiązane pola wzbogacające. Limity zależą od aktualnego planu.
 
 ### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
-Geolokalizacja IP i wzbogacanie danych zorientowane na OSINT, obejmujące wybrane punkty danych. Sprawdź aktualne warunki dotyczące użytku komercyjnego.
+Geolokalizacja IP i wzbogacanie informacji zorientowane na OSINT, obejmujące wybrane punkty danych. Sprawdź aktualne warunki dotyczące zastosowań komercyjnych.
+
+### [NetAPI](https://netapi.com/) <sup>[[32]](#references)</sup>
+Sprawdź domenę (rejestratora, daty rejestracji i wygaśnięcia, serwery nazw, hostingowy adres IP i kraj) lub adres IP (inne hostowane na nim domeny), a także zweryfikuj, czy domena lub adres IP znajdują się na bezpłatnych listach zasobów naruszonych NetAPI: domen phishingowych i domen malware skierowanych do sinkhole oraz adresów, które zaatakowały czujniki honeypot w ciągu ostatnich 48 godzin. Wyszukiwanie w witrynie i API do sprawdzania zasobów naruszonych nie wymagają konta; dostęp do API wyszukiwania wymaga płatnego planu.
 
 
 [DNSDumpster](https://dnsdumpster.com/) udostępnia wyniki rozpoznania DNS.<sup>[[29]](#references)</sup>
@@ -125,9 +128,9 @@ Geolokalizacja IP i wzbogacanie danych zorientowane na OSINT, obejmujące wybran
 ## References
 
 - [1] [Project Honey Pot](https://www.projecthoneypot.org/)
-- [2] [API BotScout](https://botscout.com/api.htm)
-- [3] [API Hunter](https://hunter.io/api-documentation)
-- [4] [API AlienVault OTX](https://otx.alienvault.com/api)
+- [2] [BotScout API](https://botscout.com/api.htm)
+- [3] [Hunter API](https://hunter.io/api-documentation)
+- [4] [AlienVault OTX API](https://otx.alienvault.com/api)
 - [5] [Clearbit](https://dashboard.clearbit.com/)
 - [6] [BuiltWith](https://builtwith.com/)
 - [7] [FraudGuard](https://fraudguard.io/)
@@ -147,12 +150,13 @@ Geolokalizacja IP i wzbogacanie danych zorientowane na OSINT, obejmujące wybran
 - [21] [DeHashed](https://www.dehashed.com/)
 - [22] [psbdmp](https://psbdmp.ws/)
 - [23] [EmailRep](https://emailrep.io/)
-- [24] [Badania Cornell — Protokoły sprawdzania ujawnionych danych uwierzytelniających (w tym GhostProject)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [24] [Badania Cornell — protokoły sprawdzania naruszonych danych uwierzytelniających (w tym GhostProject)](https://rist.tech.cornell.edu/papers/c3.pdf)
 - [25] [BinaryEdge](https://www.binaryedge.io/)
-- [26] [API Have I Been Pwned](https://haveibeenpwned.com/API/v3)
+- [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
 - [27] [IP2Location.io](https://www.ip2location.io/)
 - [28] [IPQuery](https://www.ipquery.io/)
 - [29] [DNSDumpster](https://dnsdumpster.com/)
 - [30] [Netcraft](https://www.netcraft.com/)
 - [31] [Wyszukiwarka subdomen NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/)
+- [32] [Dokumentacja API NetAPI](https://netapi.com/help/api/)
 {{#include ../../banners/hacktricks-training.md}}
