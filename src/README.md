@@ -105,7 +105,7 @@ Zapoznaj się z [katalogiem kursów 8kSec Academy](https://academy.8ksec.io/).
 
 ### [NaxusAI – autonomiczne bezpieczeństwo ofensywne](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="Logo NaxusAI"><figcaption></figcaption></figure>
 
 **Naxus** to oparta na AI platforma bezpieczeństwa ofensywnego, służąca do kompleksowego skanowania zewnętrznej powierzchni ataku, audytów aplikacji mobilnych, testów webowych black-box i przeglądów kodu źródłowego. Jej agenci weryfikują możliwe do wykorzystania podatności i przedstawiają możliwe do prześledzenia dowody, exploity proof-of-concept oraz konkretne zalecenia naprawcze.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ Oprócz powyższych działań WebSec jest również **zaangażowanym sponsorem H
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="Logo cyberhelmets"><figcaption></figcaption></figure>
 
 
 **Stworzone z myślą o pracy w terenie. Stworzone dla Ciebie.**\
@@ -142,7 +142,7 @@ Oprócz powyższych działań WebSec jest również **zaangażowanym sponsorem H
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="Logo lasttower"><figcaption></figcaption></figure>
 
 Last Tower Solutions koncentruje się na doradztwie w zakresie cyberbezpieczeństwa dla **edukacji** i **FinTech**, obejmującym ocenę bezpieczeństwa chmury, wewnętrzne i zewnętrzne testy penetracyjne, ocenę podatności oraz wsparcie w zakresie zgodności.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Bądź na bieżąco z najnowszymi informacjami o cyberbezpieczeństwie, odwiedza
 
 ### [Beaki — jedzenie dopasowane do Ciebie](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Logo Beaki"><figcaption></figcaption></figure>
 
 **Beaki** to spersonalizowany skaner żywności, licznik kalorii i narzędzie do śledzenia wartości odżywczych. Skanuj kody kreskowe i półki w supermarketach, fotografuj lub opisuj posiłki i menu restauracyjne, a następnie otrzymuj zrozumiałe oceny dostosowane do Twoich celów, diety, alergii i profilu zdrowotnego. Beaki śledzi również kalorie i makroskładniki oraz tworzy spersonalizowane plany posiłków z listami zakupów.<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Zobacz wpis HackTricks Values & FAQ w sekcji References poniżej.
 
 ## Statystyki GitHub
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![Statystyki HackTricks w serwisie GitHub](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
