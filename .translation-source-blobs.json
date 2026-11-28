@@ -1013,7 +1013,7 @@
     "src/pentesting-web/xss-cross-site-scripting/debugging-client-side-js.md": "8d1ee7d051c43817f18da6a37e5d6b942702b8d2",
     "src/pentesting-web/xss-cross-site-scripting/dom-clobbering.md": "4669b26533ead121d3d823f83d01b2e31f05bcab",
     "src/pentesting-web/xss-cross-site-scripting/dom-invader.md": "9d24ceab4442d380787ce8763023a3b0b1a0145f",
-    "src/pentesting-web/xss-cross-site-scripting/dom-xss.md": "d71bd6407132a077ea863730b33167ca96a4f6d4",
+    "src/pentesting-web/xss-cross-site-scripting/dom-xss.md": "63f8d7456ed52991b7552d6f3bac40b59f492502",
     "src/pentesting-web/xss-cross-site-scripting/iframes-in-xss-and-csp.md": "e4244649e0a7238ba87348abf23e97b12df2638d",
     "src/pentesting-web/xss-cross-site-scripting/integer-overflow.md": "2a3b7da0da7d5788f5fee914d1af3d9f8b320822",
     "src/pentesting-web/xss-cross-site-scripting/js-hoisting.md": "4fa4479e715e6c331b7c324f083105e248b10f1d",
