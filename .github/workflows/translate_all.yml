@@ -12,12 +12,15 @@ on:
       - 'scripts/test_merge_approved_prs.py'
       # Tool-only releases can be reviewed and dispatched without scheduling a book backfill.
       - 'scripts/translation_backlog.py'
+      - 'scripts/audit_translation_editions.py'
+      - 'scripts/test_translation_editions.py'
       - 'scripts/translation_matrix.py'
   pull_request:
     branches: [master]
     paths:
       - '.github/workflows/translate_all.yml'
       - 'scripts/translation*.py'
+      - 'scripts/audit_translation_editions.py'
       - 'scripts/seo_postprocess.py'
       - 'scripts/render_localized_error.py'
       - '.github/workflows/build_master.yml'
@@ -32,6 +35,10 @@ on:
     inputs:
       validate_only:
         description: "Run translator checks without publishing"
+        type: boolean
+        default: false
+      audit_only:
+        description: "Audit every published language branch and save a report without deploying"
         type: boolean
         default: false
       error_pages_only:
@@ -74,7 +81,7 @@ permissions:
 
 env:
   # Keep the shared validator and deployment tools on the same immutable revision.
-  SHARED_TRANSLATOR_REF: 626d0d7faeab1a2bb261ff0b6226794dccc2e834
+  SHARED_TRANSLATOR_REF: fbf3eb2478c18afbeb992afc926f56c972a37ea6
 
 jobs:
   validate:
@@ -101,18 +108,53 @@ jobs:
           workdir=$(mktemp -d)
           for script in translator translation_backlog translation_quality \
               test_translator_directives test_translator_batch test_translator_code_blocks test_translator_tokenizers \
-              test_translation_backlog; do
+              test_translation_backlog audit_translation_editions test_translation_editions; do
             wget -O "$workdir/$script.py" "$shared_url/$script.py"
           done
+          cp scripts/translation_matrix.py "$workdir/"
           python -m unittest discover -s "$workdir" -p 'test_translat*.py'
           python -m unittest discover -s scripts -p 'test_translation_*.py'
           python scripts/translation_matrix.py --check-menu theme/index.hbs
           node --test scripts/test_navigation_l10n.js scripts/test_search.js
 
+  review-language-editions:
+    name: Audit every translation edition
+    needs: validate
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.audit_only && !inputs.validate_only }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Compare published Git revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          python -m pip install --disable-pip-version-check py3langid==0.4.0 markdown-it-py==4.3.0
+          shared_url="https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/$SHARED_TRANSLATOR_REF/scripts"
+          workdir=$(mktemp -d)
+          for script in translation_backlog translation_quality audit_translation_editions; do
+            wget -nv -O "$workdir/$script.py" "$shared_url/$script.py"
+          done
+          cp scripts/translation_matrix.py "$workdir/"
+          python "$workdir/audit_translation_editions.py" --output "$RUNNER_TEMP/translation-audit.json"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: translation-audit
+          path: ${{ runner.temp }}/translation-audit.json
+          if-no-files-found: error
+
   publish-error-pages:
     name: Publish localized site files
     needs: validate
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.error_pages_only || inputs.ui_assets_only) && !inputs.validate_only }}
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.error_pages_only || inputs.ui_assets_only) && !inputs.validate_only && !inputs.audit_only }}
     runs-on: ubuntu-latest
     environment: prod
     permissions:
@@ -202,7 +244,7 @@ jobs:
           aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "${paths[@]}" /book.js /theme/ht_searcher.js
 
   select-languages:
-    if: ${{ github.event_name != 'pull_request' && !inputs.validate_only && !inputs.error_pages_only && !inputs.ui_assets_only }}
+    if: ${{ github.event_name != 'pull_request' && !inputs.validate_only && !inputs.audit_only && !inputs.error_pages_only && !inputs.ui_assets_only }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
@@ -570,7 +612,7 @@ jobs:
   finalize-deployment:
     name: Finalize translated deployment
     needs: translate
-    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.error_pages_only && !inputs.ui_assets_only && !inputs.navigation_only && needs.translate.result != 'skipped' }}
+    if: ${{ always() && !cancelled() && github.event_name != 'pull_request' && !inputs.validate_only && !inputs.audit_only && !inputs.error_pages_only && !inputs.ui_assets_only && !inputs.navigation_only && needs.translate.result != 'skipped' }}
     permissions:
       packages: write
       id-token: write
