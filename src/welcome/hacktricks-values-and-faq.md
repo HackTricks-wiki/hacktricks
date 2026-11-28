@@ -12,7 +12,7 @@ Kwa maelezo kuhusu matumizi ya vidakuzi kwenye tovuti, tazama [Sera ya Vidakuzi]
 > - Toa ufikiaji **BILA MALIPO** wa nyenzo za **elimu kuhusu hacking** kwa watumiaji **WOTE** wa Intaneti.
 >  - Hacking inahusu kujifunza, na kujifunza kunapaswa kuwa bila malipo kadiri iwezekanavyo.
 >  - Kusudi la kitabu hiki ni kuwa **nyenzo pana ya elimu**.
-> - **HIFADHI** mbinu nzuri za **hacking** zinazochapishwa na jumuiya huku ukiwapa **WAANDISHI WA ASILI** sifa zote.
+> - **HIFADHI** mbinu nzuri za **hacking** zinazochapishwa na jumuiya huku ukitoa **sifa zote** kwa **WAANDISHI WA ASILI**.
 >  - **Hatutaki sifa za watu wengine**, tunataka tu kuhifadhi mbinu nzuri kwa ajili ya kila mtu.
 >  - Pia tunaandika **tafiti zetu wenyewe** katika HackTricks.
 >  - Katika visa kadhaa tutaandika tu **muhtasari wa sehemu muhimu za mbinu katika HackTricks** na **kuhimiza wasomaji kutembelea chapisho la asili** ili kupata maelezo zaidi.
