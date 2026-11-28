@@ -10,6 +10,9 @@ on:
       - '.github/**'
       - 'scripts/merge_approved_prs.py'
       - 'scripts/test_merge_approved_prs.py'
+      # Tool-only releases can be reviewed and dispatched without scheduling a book backfill.
+      - 'scripts/translation_backlog.py'
+      - 'scripts/translation_matrix.py'
   workflow_dispatch:
     inputs:
       navigation_only:
@@ -102,7 +105,7 @@ jobs:
           cp .github/build_compact_search_index.py /tmp/build_compact_search_index.py
           cp theme/ht_searcher.js /tmp/ht_searcher.js
           # Pin the shared implementation so a run uses matching tools and tests.
-          shared_ref=6d7c6dfa176d5876dafc22f76952b76f7ffa49a3
+          shared_ref=8ff40e52b8b968772656f78e55ca3aba1fa3b743
           shared_url="https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/$shared_ref/scripts"
           for script in translator translation_backlog translation_quality get_and_save_refs compare_and_fix_refs \
               test_translator_directives test_translator_batch test_translator_code_blocks test_translator_tokenizers \
@@ -222,7 +225,7 @@ jobs:
             python /tmp/translation_backlog.py restore-anchors --language "$BRANCH" --source-ref "$SOURCE_REF"
           fi
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
-          python /tmp/translation_backlog.py verify-render --language "$BRANCH" --toc book/toc.html
+          python /tmp/translation_backlog.py verify-render --language "$BRANCH" --toc book/toc.html --toc-script book/toc.js
           if [ "$NAVIGATION_ONLY" = true ]; then
             exit 0
           fi
