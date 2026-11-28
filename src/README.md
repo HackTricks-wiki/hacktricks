@@ -105,7 +105,7 @@ Parcourez le [catalogue de formations de 8kSec Academy](https://academy.8ksec.io
 
 ### [NaxusAI – Sécurité offensive autonome](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="Logo de NaxusAI"><figcaption></figcaption></figure>
 
 **Naxus** est une plateforme de sécurité offensive basée sur l’IA qui réalise des analyses complètes de la surface d’attaque externe, des audits d’applications mobiles, des tests web en boîte noire et des revues de code source. Ses agents valident les vulnérabilités exploitables et fournissent des preuves traçables, des exploits de preuve de concept et des mesures correctives concrètes.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ En plus de ce qui précède, WebSec est également un **soutien engagé de HackT
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="Logo de cyberhelmets"><figcaption></figcaption></figure>
 
 
 **Conçue pour le terrain. Conçue autour de vous.**\
@@ -142,7 +142,7 @@ En plus de ce qui précède, WebSec est également un **soutien engagé de HackT
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="Logo de lasttower"><figcaption></figcaption></figure>
 
 Last Tower Solutions se spécialise dans le conseil en cybersécurité pour les secteurs de l’**éducation** et de la **FinTech**, notamment les évaluations cloud, les tests d’intrusion internes et externes, les évaluations de vulnérabilité et l’accompagnement en matière de conformité.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Restez informé des dernières actualités en cybersécurité en consultant notr
 
 ### [Beaki — Une alimentation adaptée à vos besoins](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Logo de Beaki"><figcaption></figcaption></figure>
 
 **Beaki** est une application personnalisée de scan alimentaire, de comptage des calories et de suivi nutritionnel. Scannez les codes-barres et les rayons des supermarchés, photographiez ou décrivez des repas et des menus de restaurant, et obtenez des scores explicables adaptés à vos objectifs, à votre régime alimentaire, à vos allergies et à votre profil de santé. Beaki suit également les calories et les macronutriments et crée des menus personnalisés avec des listes de courses.<sup>[[11]](#references)</sup>
 
