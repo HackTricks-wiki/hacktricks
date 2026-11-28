@@ -786,6 +786,18 @@ function codeInterfaceMessages(language) {
         if (companionHomes.includes(link.href)) { link.href += `${supportedLocale}/`; }
     }
 
+    const referenceLabels = {
+        af: "Verwysings", de: "Quellen", el: "Πηγές", en: "References", es: "Referencias", fr: "Références",
+        hi: "संदर्भ", it: "Riferimenti", ja: "参考資料", ko: "참고 자료", pl: "Źródła", pt: "Referências",
+        sr: "Литература", sw: "Marejeleo", tr: "Kaynaklar", uk: "Джерела", vi: "Tài liệu tham khảo", zh: "参考资料",
+    };
+    // Citations and external links use #references. Localize only the standard heading text.
+    for (const link of document.querySelectorAll('main h2#references > a.header[href="#references"]')) {
+        if (link.childNodes.length === 1 && link.firstChild.nodeType === 3 && link.textContent.trim() === "References") {
+            link.textContent = referenceLabels[supportedLocale];
+        }
+    }
+
     const calloutTypes = ["note", "tip", "important", "warning", "caution"];
     for (const title of document.querySelectorAll(".blockquote-tag > .blockquote-tag-title")) {
         const index = calloutTypes.findIndex(type => title.parentElement.classList.contains(`blockquote-tag-${type}`));

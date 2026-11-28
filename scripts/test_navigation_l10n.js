@@ -56,10 +56,16 @@ function translate(language) {
             parentElement: { classList: { contains: name => name === `blockquote-tag-${kind}` } },
         };
     });
+    const references = { childNodes: [{}], firstChild: { nodeType: 3 }, textContent: "References", hash: "#references" };
+    const alreadyLocalized = { ...references, textContent: "Custom source list" };
+    const richHeading = { ...references, firstChild: { nodeType: 1 } };
     const document = {
         documentElement: { lang: language },
         querySelectorAll(selector) {
             if (selector === "[data-nav-label]") { return nodes; }
+            if (selector === 'main h2#references > a.header[href="#references"]') {
+                return [references, alreadyLocalized, richHeading];
+            }
             return selector === ".blockquote-tag > .blockquote-tag-title" ? callouts : [];
         },
     };
@@ -99,6 +105,10 @@ function translate(language) {
     labels.preview = icon.dataset.searchPreview;
     labels.book = icon.dataset.searchBookLabel;
     assert(labels.preview && labels.book);
+    assert.equal(references.hash, "#references");
+    assert.equal(alreadyLocalized.textContent, "Custom source list");
+    assert.equal(richHeading.textContent, "References");
+    labels.references = references.textContent;
     labels.callouts = callouts.map(title => {
         assert.equal(title.firstChild.nodeType, 1);
         assert.notEqual(title.lastChild.textContent, "Original callout title");
@@ -125,6 +135,8 @@ test("regional tags select a translation and unknown tags use English", () => {
     assert.deepEqual(translate("toString"), translate("en"));
     assert.deepEqual(translate("zz"), translate("en"));
     assert.deepEqual(translate("pt").callouts, ["Observação", "Dica", "Importante", "Aviso", "Cuidado"]);
+    assert.equal(translate("pt").references, "Referências");
+    assert.equal(translate("ja").references, "参考資料");
 });
 
 test("already published templates localize using their legacy selectors", () => {

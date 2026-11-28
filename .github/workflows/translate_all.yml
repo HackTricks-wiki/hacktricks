@@ -201,7 +201,7 @@ jobs:
         shell: bash
         env:
           DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
-          UI_ASSET_BASELINE: 256eed9bce15fd2be7b476fdbcd4499b103c5222
+          UI_ASSET_BASELINE: 6166b0c61528274710d07a54f38440c12714b946
         run: |
           set -euo pipefail
           workdir=$(mktemp -d)
