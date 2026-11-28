@@ -4,15 +4,15 @@
 
 **Pagine interessanti da consultare:**
 
-- [**Trucchi di hacking per Pyscript**](pyscript.md)
+- [**Trucchi di hacking di Pyscript**](pyscript.md)
 - [**Deserializzazioni Python**](../../pentesting-web/deserialization/README.md)
-- [**RCE tramite deserializzazione di modelli Keras e ricerca di gadget**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Trucchi per bypassare le sandbox Python**](bypass-python-sandboxes/README.md)
-- [**Probe per la valutazione di espressioni Python**](bypass-python-sandboxes/README.md#python-expression-evaluation-probe)
-- [**Sintassi di base per le richieste web Python**](web-requests.md)
+- [**RCE tramite deserializzazione di modelli Keras e ricerca di gadget**](../../AI/keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Trucchi per aggirare le sandbox Python**](bypass-python-sandboxes/README.md)
+- [**Probe di valutazione delle espressioni Python**](bypass-python-sandboxes/README.md#python-expression-evaluation-probe)
+- [**Sintassi di base delle richieste web Python**](web-requests.md)
 - [**Sintassi e librerie Python di base**](basic-python.md)
-- [**Ambienti virtuali Python (`venv`) e build dei wheel**](basic-python.md#virtual-environments-and-wheel-builds-venv)
-- [**Ricerca di suffissi MD5 per input scelti e di hash a zero numerico**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
+- [**Ambienti virtuali Python (`venv`) e build di wheel**](basic-python.md#virtual-environments-and-wheel-builds-venv)
+- [**Ricerca di suffissi MD5 con input scelto e hash numerici pari a zero**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 

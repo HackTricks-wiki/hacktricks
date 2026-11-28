@@ -4,7 +4,7 @@
 
 ## Principali algoritmi di machine learning
 
-Il modo migliore per iniziare a imparare l’AI è capire come funzionano i principali algoritmi di machine learning. Questo ti aiuterà a capire come funziona l’AI, come usarla e come attaccarla:
+Il modo migliore per iniziare a imparare l'AI è capire come funzionano i principali algoritmi di machine learning. Questo ti aiuterà a capire come funziona l'AI, come usarla e come attaccarla:
 
 
 {{#ref}}
@@ -26,24 +26,24 @@ Il modo migliore per iniziare a imparare l’AI è capire come funzionano i prin
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Preparazione e valutazione dei dati del modello
+### Preparazione e valutazione dei dati dei modelli
 
-Per la suddivisione dei dataset, le metriche classiche e gli attacchi sul lato delle risposte alla valutazione basata su LLM, consulta [preparazione e valutazione dei dati del modello](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
+Per le suddivisioni dei dataset, le metriche classiche e gli attacchi lato risposta alla valutazione basata su LLM, consulta la guida alla [preparazione e valutazione dei dati dei modelli](AI-Model-Data-Preparation-and-Evaluation.md#attacking-llm-based-evaluation-with-answer-side-injection).
 
 ### Architettura degli LLM
 
-Nella pagina seguente troverai le nozioni di base su ogni componente necessario per costruire un LLM di base usando i transformer:
+Nella pagina seguente troverai le nozioni di base su ogni componente necessario per creare un LLM di base con i transformer:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Strumenti e piattaforme per modelli
+## Strumenti e piattaforme per i modelli
 
-Per eseguire, fare fine-tuning, distribuire o provare modelli, consulta la [guida agli strumenti e alle piattaforme per modelli AI](AI-Model-Tools-and-Platforms.md).
+Per eseguire, fare fine-tuning, distribuire o provare i modelli, consulta la [guida agli strumenti e alle piattaforme per i modelli AI](AI-Model-Tools-and-Platforms.md).
 
-## Sicurezza dell’AI
+## Sicurezza dell'AI
 
 ### Confini di fiducia dei gateway LLM
 
@@ -53,22 +53,22 @@ Per la sicurezza dei gateway, consulta:
 AI-LLM-Gateway-Security.md
 {{#endref}}
 
-### Metodologia di sicurezza degli agenti AI
+### Metodologia per la sicurezza degli agenti AI
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### Framework di rischio per l’AI
+### Framework di rischio per l'AI
 
-Due utili framework di riferimento per valutare i rischi dei sistemi AI sono OWASP Machine Learning Security Top 10 e Secure AI Framework (SAIF) di Google. Sono complementari e non costituiscono un elenco esaustivo dei framework di rischio per l’AI.<sup>[[1]](#references)[[2]](#references)</sup>
+Due framework utili da cui partire per valutare i rischi dei sistemi AI sono OWASP Machine Learning Security Top 10 e Secure AI Framework (SAIF) di Google. Sono complementari e non costituiscono un elenco esaustivo dei framework di rischio per l'AI.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Attacchi avversari guidati dall’interpretabilità meccanicistica
+### Attacchi adversarial guidati dall'interpretabilità meccanicistica
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
@@ -76,11 +76,11 @@ AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 
 ### Confini di fiducia dei browser integrati
 
-Per i bridge del browser degli assistenti desktop, lo spoofing dell’indirizzo della scheda e la lettura di file locali dal contesto del worker, consulta [confini di fiducia dei browser integrati degli assistenti AI](AI-Embedded-Browser-Trust-Boundaries.md).
+Per i bridge dei browser degli assistenti desktop, lo spoofing degli indirizzi delle schede e la lettura di file locali dal contesto worker, consulta [Confini di fiducia dei browser integrati negli assistenti AI](AI-Embedded-Browser-Trust-Boundaries.md).
 
 ### Sicurezza dei prompt AI
 
-Negli ultimi anni gli LLM hanno portato a una diffusione esponenziale dell’AI, ma non sono perfetti e possono essere ingannati con prompt avversari. È un argomento molto importante per capire come usare l’AI in sicurezza e come attaccarla:
+Negli ultimi anni gli LLM hanno fatto esplodere l'uso dell'AI, ma non sono perfetti e possono essere ingannati con prompt adversarial. È un argomento molto importante per capire come usare l'AI in sicurezza e come attaccarla:
 
 
 {{#ref}}
@@ -89,25 +89,27 @@ AI-Prompts.md
 
 ### RCE nei modelli AI
 
-È molto comune che sviluppatori e aziende eseguano modelli scaricati da Internet; tuttavia, il semplice caricamento di un modello può bastare a eseguire codice arbitrario sul sistema. È un argomento molto importante per capire come usare l’AI in sicurezza e come attaccarla:
+È molto comune che sviluppatori e aziende eseguano modelli scaricati da Internet; tuttavia, il semplice caricamento di un modello potrebbe bastare per eseguire codice arbitrario sul sistema. È un argomento molto importante per capire come usare l'AI in sicurezza e come attaccarla:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Bypass KYC assistito dall’AI
+Per i rischi di caricamento dei modelli Keras `.keras`/HDF5, i layer Lambda e l'analisi dei gadget dopo la correzione, consulta [Deserializzazione dei modelli Keras e ricerca di gadget](keras-model-deserialization-rce-and-gadget-hunting.md).
 
-I video generativi possono essere combinati con l’iniezione di videocamere virtuali e la manipolazione delle API della videocamera per aggirare procedure deboli di KYC, verifica dell’età e controllo biometrico della vitalità:
+### Bypass KYC assistito dall'AI
+
+I video generativi possono essere combinati con l'iniezione di videocamere virtuali e la manipolazione delle API della fotocamera per aggirare flussi KYC, di verifica dell'età e di verifica biometrica della vitalità poco robusti:
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### Model Context Protocol per l’AI
+### Model Context Protocol per l'AI
 
-MCP (Model Context Protocol) è un protocollo aperto per connettere applicazioni AI a strumenti e fonti di dati. Poiché i server MCP possono esporre dati e azioni, le valutazioni devono includere autorizzazione, consenso, convalida degli input degli strumenti e revisione dei confini di fiducia.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) è un protocollo aperto per collegare le applicazioni AI a strumenti e fonti di dati. Poiché i server MCP possono esporre dati e azioni, le valutazioni devono includere autorizzazione, consenso, convalida degli input degli strumenti e revisione dei confini di fiducia.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
@@ -116,7 +118,7 @@ AI-MCP-Servers.md
 
 ### Protocollo AI Agent-to-Agent (A2A)
 
-A2A consente agli agenti di scoprirsi a vicenda tramite una scheda agente e di inviarsi task tramite HTTP. Verifica le schede agente, l’autorizzazione dei task, i webhook per le notifiche push e le schede estese:
+A2A consente agli agenti di scoprirsi reciprocamente tramite una scheda agente e di inviarsi attività tramite HTTP. Verifica le schede agente, l'autorizzazione delle attività, i webhook per le notifiche push e le schede estese:
 
 {{#ref}}
 AI-A2A-Protocol.md
@@ -124,34 +126,34 @@ AI-A2A-Protocol.md
 
 ### Servizi AI self-hosted esposti
 
-Fingerprinting e test di model runner, agent builder, interfacce demo ML, cluster di calcolo e database vettoriali esposti e privi di autenticazione:
+Identificazione e test di runner di modelli, strumenti per creare agenti, interfacce demo ML, cluster di calcolo e database vettoriali esposti e privi di autenticazione:
 
 {{#ref}}
 AI-Exposed-Self-Hosted-AI-Services.md
 {{#endref}}
 
-### Fuzzing assistito dall’AI e individuazione automatizzata delle vulnerabilità
+### Fuzzing assistito dall'AI e individuazione automatizzata delle vulnerabilità
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Revisione del codice sorgente e convalida delle vulnerabilità assistite dall’AI
+### Analisi del codice sorgente e convalida delle vulnerabilità assistite dall'AI
 
-Per la revisione di sorgenti e sink, i taskflow dei punti d’ingresso mobile, gli audit dei pattern del kernel e la convalida basata su evidenze:
+Per la revisione di sorgenti e sink, i flussi di attività dei punti di ingresso mobile, gli audit di pattern del kernel e la convalida basata su evidenze:
 
 {{#ref}}
 AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 {{#endref}}
 
-### Reverse engineering assistito dall’AI
+### Reverse engineering assistito dall'AI
 
-[Sollevamento parziale, rilevamento di MBA invarianti, decodifica vincolata all’ambiente e convalida degli estrattori automatizzati](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Sollevamento parziale, rilevamento di MBA invarianti, decodifica vincolata all'ambiente e convalida di estrattori automatizzati](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Bot di pentesting web black-box basati sull’AI
+### Bot pentester AI web black-box
 
-Gli agenti basati su LLM possono automatizzare workflow di pentesting web black-box di lunga durata, se supportati da osservabilità, orchestrazione, gestione di sessioni autenticate e convalida avversaria:
+Gli agenti basati su LLM possono automatizzare flussi di lavoro prolungati di web pentesting black-box, se supportati da osservabilità, orchestrazione, gestione di sessioni autenticate e convalida adversarial:
 
 
 {{#ref}}
@@ -162,7 +164,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
+- [1] [OWASP — I 10 principali rischi di sicurezza del machine learning](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — Framework di sicurezza per l'AI (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Introduzione](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
