@@ -3,8 +3,8 @@
 ## Principles
 
 - One home per mechanism; link from prerequisite-specific entry points; split by task, not size.
-- Main owns general techniques; Cloud owns provider/IAM; use public URLs.
-- Removed chapters need whole-page redirects and content/link preservation.
+- Main owns general techniques; Cloud owns provider/IAM; link by public URL.
+- Removed chapters require content/link preservation and whole-page redirects.
 
 ## Canonical locations and boundaries
 
@@ -18,12 +18,12 @@
 - Android acquisition/imaging/LiME → `src/generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md`; Mobile owns app testing; malware separate.
 - Firmware acquisition/decryption/updates/boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay.
 - Referer leakage and Referrer-Policy → `src/pentesting-web/referer-header-and-referrer-policy.md`; OAuth links there. Exfiltration overview maps other routes.
-- UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
+- UTF-16 script/ICO sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI/headers/exfiltration link there; old URL redirects; citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
 - Blockchain → top-level Blockchain; Bitcoin P2P stays in Network, DApp tests in Web, cryptocurrency privacy in Privacy.
 - Electron renderer/IPC → `src/desktop-application-security/electron-desktop-apps/README.md` and siblings; updater and local ASAR/snapshot have separate siblings. OS-local injection stays in OS chapters; 80/443 is a client pivot.
 - VM guest surfaces → `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md`, linking QEMU/KVM, VirtualBox and VMware chapters. Slirp allocator stays in `libc-heap/` but appears with guest-to-host cases in SUMMARY.
-- SOAP/REST API methodology → `src/pentesting-web/web-api-pentesting.md`; GraphQL endpoint/security testing → `src/pentesting-web/graphql.md` beneath it in SUMMARY. 80/443 links to both; Cloud keeps provider APIs.
+- SOAP/REST → `src/pentesting-web/web-api-pentesting.md`; GraphQL → `src/pentesting-web/graphql.md` beneath it in SUMMARY; 80/443 links both. Cloud owns provider APIs.
 - Firebase RTDB rules/REST → `src/pentesting-web/firebase-realtime-database.md` under Web APIs; buckets stay Cloud; legacy URLs redirect.
 - Go `net/http` `ServeMux` `CONNECT` path canonicalization → `src/pentesting-web/403-and-401-bypasses.md#go-nethttp-servemux-connect-path-canonicalization`; 80/443 and TiDB link there. This is a method/path authorization mismatch, not a Go product guide.
 - RDPexec → `src/network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session`; Windows Lateral Movement links directly there, avoiding a procedure-free stub.
@@ -32,6 +32,7 @@
 - PHP temp-upload LFI race/crash variant → `src/pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md#segmentation-fault-variant-on-php-70-and-72`; phpinfo, session progress and filters stay distinct.
 - Chosen-input MD5 suffix/`0e` search → `src/crypto/hashes/README.md#chosen-input-md5-hash-searches`; PHP type-juggling/version caveats → `network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling`. Distinct, cross-linked.
 - AI fuzzing/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source/mobile/kernel review → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`.
+- Keras `.keras`/HDF5 model deserialization, Lambda and gadgets, plus ML pickle allowlisting → `src/AI/keras-model-deserialization-rce-and-gadget-hunting.md`; AI Models RCE is the overview; Python and Linux sudo link to the deep dive. Keep it separate from the long mixed-format overview.
 - WSGI/uWSGI, Zabbix, CCTV → Network 80/443; Web/SSRF links to WSGI.
 - Python expression-evaluation probe → `src/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md#python-expression-evaluation-probe`; web entry links directly there.
 - Remote MCP testing → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`.
@@ -61,10 +62,9 @@
 
 - Cookie-bomb → Cookies; `onerror` oracle → XS-Leaks.
 - Same-site leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`, not XS-Leaks; old URL redirects.
-- `nosniff`/ICO width → XS-Leaks; cross-origin script inclusion → XSSI; in-origin script injection → XSS.
 
 ## Deferred
 
 - Audit mixed `network-services-pentesting/pentesting-web/` only with clear task homes.
 - Blockchain/Privacy cryptocurrency need a union audit.
-- Windows Security Controls duplicates across `authentication-credentials-uac-and-efs.md` and its `README.md`; unique AppLocker/EFS/gMSA/LAPS/CLM require full section/citation union first.
+- Windows Security Controls duplicate pages need AppLocker/EFS/gMSA/LAPS/CLM section/citation union audit before merging.

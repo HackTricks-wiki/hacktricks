@@ -96,6 +96,8 @@ It's very common to developers and companies to run models downloaded from the I
 AI-Models-RCE.md
 {{#endref}}
 
+For Keras `.keras`/HDF5 model-loading risks, Lambda layers, and post-fix gadget analysis, see [Keras model deserialization and gadget hunting](keras-model-deserialization-rce-and-gadget-hunting.md).
+
 ### AI-Assisted KYC Bypass
 
 Generative video can be combined with virtual-camera injection and camera API manipulation to bypass weak KYC, age-verification, and biometric liveness workflows:

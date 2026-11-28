@@ -1,6 +1,6 @@
 # Keras Model Deserialization RCE and Gadget Hunting
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 This page summarizes practical exploitation techniques against the Keras model deserialization pipeline, explains the native .keras format internals and attack surface, and provides a researcher toolkit for finding Model File Vulnerabilities (MFVs) and post-fix gadgets.
 
@@ -318,4 +318,4 @@ Repeat tests across codebases and formats (.keras vs legacy HDF5) to uncover reg
 - [18] [Keras Python utilities source (v3.10.0)](https://github.com/keras-team/keras/blob/v3.10.0/keras/src/utils/python_utils.py)
 - [19] [Keras `get_file` API](https://keras.io/api/utils/python_utils/#get_file-function)
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
