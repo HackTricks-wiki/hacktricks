@@ -86,7 +86,7 @@ def check_menu(html):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     action = parser.add_mutually_exclusive_group()
-    action.add_argument("--only", default="", help="Resume only this language branch")
+    action.add_argument("--only", default="", help="Limit the matrix to comma-separated language branches")
     action.add_argument("--check-menu", type=Path, help="Verify the theme's native-language menu")
     args = parser.parse_args()
     if args.check_menu:
@@ -95,9 +95,10 @@ def main():
         except ValueError as exc:
             parser.error(str(exc))
         return
-    matches = [(name, code) for name, code in LANGUAGES if not args.only or code == args.only]
-    if not matches:
-        parser.error(f"unknown language branch: {args.only}")
+    requested = {code.strip() for code in args.only.split(",")} if args.only else set()
+    if requested - {code for _, code in LANGUAGES}:
+        parser.error(f"unknown language branch in: {args.only}")
+    matches = [(name, code) for name, code in LANGUAGES if not requested or code in requested]
     print("matrix=" + json.dumps({"include": [
         {"name": name, "language": TRANSLATION_LOCALES.get(code, name), "branch": code} for name, code in matches
     ]}, separators=(",", ":")))

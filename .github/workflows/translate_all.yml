@@ -54,7 +54,7 @@ on:
         type: boolean
         default: false
       landing_only:
-        description: "Rebuild and publish only the existing landing page for one language"
+        description: "Rebuild and publish only the existing landing pages for the selected languages"
         type: boolean
         default: false
       files:
@@ -85,7 +85,7 @@ permissions:
 
 env:
   # Keep the shared validator and deployment tools on the same immutable revision.
-  SHARED_TRANSLATOR_REF: 98c3c4b341d86903ce0022ec0df9163bdc73afa9
+  SHARED_TRANSLATOR_REF: 98bfbf83571251b3daf9c9311f050c35c42d6d56
 
 jobs:
   validate:
@@ -262,7 +262,7 @@ jobs:
           NAVIGATION_ONLY: ${{ inputs.navigation_only }}
         run: |
           if [[ "$LANDING_ONLY" == true && ( -z "$ONLY_LANGUAGE" || "$NAVIGATION_ONLY" == true ) ]]; then
-            echo "Landing-page publishing requires exactly one language and its own mode." >&2
+            echo "Landing-page publishing requires an explicit language selection and its own mode." >&2
             exit 1
           fi
           python3 scripts/translation_matrix.py --only "$ONLY_LANGUAGE" >> "$GITHUB_OUTPUT"
