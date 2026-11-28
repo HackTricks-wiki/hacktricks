@@ -957,6 +957,7 @@
 
 - [Blockchain Concepts and Web3 Security](blockchain/blockchain-and-crypto-currencies/README.md)
   - [Investment Terms](blockchain/blockchain-and-crypto-currencies/investment-terms.md)
+  - [Perpetual Funding-Rate Exploitation](blockchain/blockchain-and-crypto-currencies/perpetual-funding-rate-exploitation.md)
   - [DeFi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
   - [DeFi AMM Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
   - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)

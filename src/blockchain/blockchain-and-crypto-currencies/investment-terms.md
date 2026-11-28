@@ -29,6 +29,8 @@ If the hedged market falls, the short futures position may gain while the holdin
 
 Perpetual contracts are derivatives without a fixed expiration date. Crypto venues commonly use periodic funding payments to help keep their price near the underlying spot price; terms differ by venue.<sup>[[3]](#references)</sup>
 
+For funding-rate abuse tests on on-chain perpetual protocols, see [Perpetual Funding-Rate Exploitation](perpetual-funding-rate-exploitation.md).
+
 Profit and loss changes as the mark price moves. A 1% price move produces approximately a 1% move on the position's notional value before fees and funding, but leverage can make that a much larger percentage of posted collateral.
 
 ### Futures with Leverage
