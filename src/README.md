@@ -44,11 +44,11 @@ docker compose up
 
 これは同梱の `docker-compose.yml` を使い、ホスト上で現在チェックアウトされているブランチを [http://localhost:3337](http://localhost:3337) でライブリロード付きで配信します。Compose を使って言語を変更するには、サービスを起動する前に目的の言語のブランチをチェックアウトしてください。
 
-## HackTricks Partners
+## <span class="translation-source-anchor" id="hacktricks-partners"></span>HackTricks のパートナー
 
 ---
 
-## HackTricks Friends
+## <span class="translation-source-anchor" id="hacktricks-friends"></span>HackTricks の協力者
 
 ### [STM Cyber](https://www.stmcyber.com)
 
@@ -160,11 +160,11 @@ Android または iPhone で[**Beaki を無料でダウンロード**](https://w
 
 ---
 
-## License & Disclaimer
+## <span class="translation-source-anchor" id="license--disclaimer"></span>ライセンスと免責事項
 
 以下の References にある HackTricks Values & FAQ をご覧ください。
 
-## Github Stats
+## <span class="translation-source-anchor" id="github-stats"></span>GitHub の統計
 
 ![HackTricksのGitHub統計](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
