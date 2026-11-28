@@ -149,4 +149,5 @@ Copyright © 별도로 명시하지 않는 한 모든 권리 보유.
 - [3] [GitHub Sponsors — Carlos Polop](https://github.com/sponsors/carlospolop)
 - [4] [HackTricks 라이선스](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/LICENSE.md)
 - [5] [Creative Commons CC BY-NC 4.0 법적 전문](https://creativecommons.org/licenses/by-nc/4.0/)
+
 {{#include ../banners/hacktricks-training.md}}

@@ -49,4 +49,5 @@
 ## References
 
 - [1] [GitBook — 방문자 인증: 쿠키](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
+
 {{#include ../banners/hacktricks-training.md}}
