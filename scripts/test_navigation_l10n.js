@@ -24,6 +24,10 @@ const template = fs.readFileSync("theme/index.hbs", "utf8");
 const keys = Array.from(new Set(Array.from(template.matchAll(/data-nav-label="([^"]+)"/g), match => match[1])));
 const matrix = execFileSync("python3", ["scripts/translation_matrix.py"], { encoding: "utf8" });
 const locales = JSON.parse(matrix.slice("matrix=".length)).include.map(entry => entry.branch);
+const codeStart = source.indexOf("function codeInterfaceMessages(");
+const codeEnd = source.indexOf("(function codeSnippets() {", codeStart);
+assert(codeStart >= 0 && codeEnd > codeStart);
+const codeLabelsSource = source.slice(codeStart, codeEnd);
 
 function translate(language) {
     const nodes = keys.map(key => {
@@ -155,4 +159,33 @@ test("already published templates localize using their legacy selectors", () => 
     assert.equal(locale.textContent, "🇧🇷 Português (Brasil)");
     assert.equal(locale.getAttribute("hreflang"), "pt-BR");
     assert.equal(companion.href, "https://cloud.hacktricks.wiki/pt/");
+});
+
+test("code controls and clipboard feedback use the edition language", () => {
+    const labels = new vm.Script(codeLabelsSource + "\ncodeInterfaceMessages;").runInNewContext();
+    const english = labels("en");
+    for (const locale of locales) {
+        const localized = labels(locale);
+        for (const key of Object.keys(english)) {
+            assert(localized[key], `Missing code control label for ${locale}: ${key}`);
+            assert.notEqual(localized[key], english[key]);
+        }
+    }
+    assert.deepEqual(labels("pt-BR"), labels("pt"));
+    assert.deepEqual(labels("zz"), english);
+    const clipboardStart = source.indexOf("(function clipboard() {");
+    const clipboardEnd = source.indexOf("\n})();", clipboardStart);
+    const handlers = new Map();
+    const document = { documentElement: { lang: "pt" }, querySelectorAll: () => [] };
+    class ClipboardJS {
+        on(event, handler) { handlers.set(event, handler); }
+    }
+    vm.runInNewContext(codeLabelsSource + source.slice(clipboardStart, clipboardEnd + "\n})();".length), {
+        document, ClipboardJS,
+    });
+    const trigger = { firstChild: {}, className: "clip-button" };
+    handlers.get("success")({ trigger, clearSelection() {} });
+    assert.equal(trigger.firstChild.innerText, "Copiado!");
+    handlers.get("error")({ trigger });
+    assert.equal(trigger.firstChild.innerText, "Não foi possível copiar");
 });

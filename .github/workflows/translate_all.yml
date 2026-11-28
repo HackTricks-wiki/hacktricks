@@ -159,6 +159,7 @@ jobs:
         shell: bash
         env:
           DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          UI_ASSET_BASELINE: 256eed9bce15fd2be7b476fdbcd4499b103c5222
         run: |
           set -euo pipefail
           workdir=$(mktemp -d)
@@ -175,10 +176,15 @@ jobs:
             source="theme/${asset##*/}"
             baseline="$workdir/${asset##*/}.baseline"
             git -c safe.directory="$GITHUB_WORKSPACE" show "refs/remotes/origin/master:$source" > "$baseline"
+            released="$workdir/${asset##*/}.released"
+            git -c safe.directory="$GITHUB_WORKSPACE" show "$UI_ASSET_BASELINE:$source" > "$released"
             for locale in "${locales[@]}"; do
               path="$locale/$asset"
               aws s3 cp "s3://hacktricks-wiki/$path" "$workdir/current" --only-show-errors
-              if ! cmp -s "$baseline" "$workdir/current" && ! cmp -s "$source" "$workdir/current"; then
+              if cmp -s "$source" "$workdir/current"; then
+                continue
+              fi
+              if ! cmp -s "$baseline" "$workdir/current" && ! cmp -s "$released" "$workdir/current"; then
                 echo "Unexpected version at /$path. No scripts were uploaded."
                 exit 1
               fi
@@ -186,6 +192,10 @@ jobs:
               files+=("$source")
             done
           done
+          if [ -z "${paths[*]-}" ]; then
+            echo "The current assets already match this revision."
+            exit 0
+          fi
           for index in "${!paths[@]}"; do
             aws s3 cp "${files[$index]}" "s3://hacktricks-wiki${paths[$index]}" --content-type "application/javascript; charset=utf-8" --no-progress
           done

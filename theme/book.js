@@ -44,7 +44,36 @@ function playground_text(playground, hidden = true) {
     });
 })();
 
+function codeInterfaceMessages(language) {
+    const translations = {
+        af: ["Wys versteekte reëls", "Versteek reëls", "Kopieer na die knipbord", "Loop hierdie kode", "Ontdoen veranderinge", "Gekopieer!", "Kon nie kopieer nie", "Besig om te loop…", "Geen uitvoer nie", "Kon nie met die speelgrond verbind nie"],
+        de: ["Ausgeblendete Zeilen anzeigen", "Zeilen ausblenden", "In die Zwischenablage kopieren", "Diesen Code ausführen", "Änderungen rückgängig machen", "Kopiert!", "Kopieren fehlgeschlagen", "Wird ausgeführt…", "Keine Ausgabe", "Fehler bei der Verbindung zur Testumgebung"],
+        el: ["Εμφάνιση κρυφών γραμμών", "Απόκρυψη γραμμών", "Αντιγραφή στο πρόχειρο", "Εκτέλεση αυτού του κώδικα", "Αναίρεση αλλαγών", "Αντιγράφηκε!", "Η αντιγραφή απέτυχε", "Εκτελείται…", "Χωρίς έξοδο", "Σφάλμα σύνδεσης με το δοκιμαστικό περιβάλλον"],
+        en: ["Show hidden lines", "Hide lines", "Copy to clipboard", "Run this code", "Undo changes", "Copied!", "Clipboard error!", "Running…", "No output", "Playground connection error"],
+        es: ["Mostrar líneas ocultas", "Ocultar líneas", "Copiar al portapapeles", "Ejecutar este código", "Deshacer cambios", "¡Copiado!", "No se pudo copiar", "Ejecutando…", "Sin salida", "Error de conexión con el entorno de pruebas"],
+        fr: ["Afficher les lignes masquées", "Masquer les lignes", "Copier dans le presse-papiers", "Exécuter ce code", "Annuler les modifications", "Copié !", "Impossible de copier", "Exécution en cours…", "Aucune sortie", "Erreur de connexion à l’environnement de test"],
+        hi: ["छिपी हुई पंक्तियाँ दिखाएँ", "पंक्तियाँ छिपाएँ", "क्लिपबोर्ड में कॉपी करें", "यह कोड चलाएँ", "बदलाव वापस लें", "कॉपी हो गया!", "कॉपी नहीं हो सका", "चल रहा है…", "कोई आउटपुट नहीं", "परीक्षण परिवेश से कनेक्ट नहीं हो सका"],
+        it: ["Mostra le righe nascoste", "Nascondi le righe", "Copia negli appunti", "Esegui questo codice", "Annulla le modifiche", "Copiato!", "Impossibile copiare", "Esecuzione in corso…", "Nessun risultato", "Errore di connessione all’ambiente di prova"],
+        ja: ["非表示の行を表示", "行を非表示にする", "クリップボードにコピー", "このコードを実行", "変更を元に戻す", "コピーしました！", "コピーできませんでした", "実行中…", "出力なし", "実行環境への接続に失敗しました"],
+        ko: ["숨겨진 줄 표시", "줄 숨기기", "클립보드에 복사", "이 코드 실행", "변경 사항 되돌리기", "복사했습니다!", "복사하지 못했습니다", "실행 중…", "출력 없음", "실행 환경에 연결하지 못했습니다"],
+        pl: ["Pokaż ukryte wiersze", "Ukryj wiersze", "Skopiuj do schowka", "Uruchom ten kod", "Cofnij zmiany", "Skopiowano!", "Nie udało się skopiować", "Uruchamianie…", "Brak danych wyjściowych", "Błąd połączenia ze środowiskiem testowym"],
+        pt: ["Mostrar linhas ocultas", "Ocultar linhas", "Copiar para a área de transferência", "Executar este código", "Desfazer alterações", "Copiado!", "Não foi possível copiar", "Executando…", "Sem saída", "Erro de conexão com o ambiente de testes"],
+        sr: ["Прикажи скривене редове", "Сакриј редове", "Копирај у међуспремник", "Покрени овај код", "Опозови измене", "Копирано!", "Копирање није успело", "Извршавање…", "Нема излаза", "Грешка при повезивању са пробним окружењем"],
+        sw: ["Onyesha mistari iliyofichwa", "Ficha mistari", "Nakili kwenye ubao wa kunakili", "Endesha msimbo huu", "Tendua mabadiliko", "Imenakiliwa!", "Imeshindwa kunakili", "Inaendeshwa…", "Hakuna tokeo", "Imeshindwa kuunganisha na mazingira ya majaribio"],
+        tr: ["Gizli satırları göster", "Satırları gizle", "Panoya kopyala", "Bu kodu çalıştır", "Değişiklikleri geri al", "Kopyalandı!", "Kopyalanamadı", "Çalışıyor…", "Çıktı yok", "Deneme ortamına bağlanılamadı"],
+        uk: ["Показати приховані рядки", "Приховати рядки", "Скопіювати до буфера обміну", "Запустити цей код", "Скасувати зміни", "Скопійовано!", "Не вдалося скопіювати", "Виконується…", "Немає виводу", "Не вдалося під’єднатися до середовища виконання"],
+        vi: ["Hiện các dòng bị ẩn", "Ẩn dòng", "Sao chép vào bảng tạm", "Chạy đoạn mã này", "Hoàn tác thay đổi", "Đã sao chép!", "Không thể sao chép", "Đang chạy…", "Không có đầu ra", "Không thể kết nối với môi trường chạy thử"],
+        zh: ["显示隐藏行", "隐藏行", "复制到剪贴板", "运行此代码", "撤销更改", "已复制！", "无法复制", "正在运行…", "无输出", "无法连接到代码运行环境"],
+    };
+    const codes = ["showLines", "hideLines", "copy", "run", "undo", "copied", "copyError", "running", "noOutput", "connectionError"];
+    const locale = (language || "en").toLowerCase().split("-")[0];
+    const values = Object.hasOwn(translations, locale) ? translations[locale] : translations.en;
+    return Object.fromEntries(codes.map((code, index) => [code, values[index]]));
+}
+
 (function codeSnippets() {
+    const messages = codeInterfaceMessages(document.documentElement.lang);
+
     function fetch_with_timeout(url, options, timeout = 6000) {
         return Promise.race([
             fetch(url, options),
@@ -154,7 +183,7 @@ function playground_text(playground, hidden = true) {
             params.version = "nightly";
         }
 
-        result_block.innerText = "Running...";
+        result_block.innerText = messages.running;
 
         fetch_with_timeout("https://play.rust-lang.org/evaluate.json", {
             headers: {
@@ -167,14 +196,14 @@ function playground_text(playground, hidden = true) {
         .then(response => response.json())
         .then(response => {
             if (response.result.trim() === '') {
-                result_block.innerText = "No output";
+                result_block.innerText = messages.noOutput;
                 result_block.classList.add("result-no-output");
             } else {
                 result_block.innerText = response.result;
                 result_block.classList.remove("result-no-output");
             }
         })
-        .catch(error => result_block.innerText = "Playground Communication: " + error.message);
+        .catch(error => result_block.innerText = messages.connectionError + ": " + error.message);
     }
 
     // Syntax highlighting Configuration
@@ -215,7 +244,11 @@ function playground_text(playground, hidden = true) {
 
         var buttons = document.createElement('div');
         buttons.className = 'buttons';
-        buttons.innerHTML = "<button class=\"fa fa-eye\" title=\"Show hidden lines\" aria-label=\"Show hidden lines\"></button>";
+        const reveal = document.createElement("button");
+        reveal.className = "fa fa-eye";
+        reveal.title = messages.showLines;
+        reveal.setAttribute("aria-label", reveal.title);
+        buttons.appendChild(reveal);
 
         // add expand button
         var pre_block = block.parentNode;
@@ -225,14 +258,14 @@ function playground_text(playground, hidden = true) {
             if (e.target.classList.contains('fa-eye')) {
                 e.target.classList.remove('fa-eye');
                 e.target.classList.add('fa-eye-slash');
-                e.target.title = 'Hide lines';
+                e.target.title = messages.hideLines;
                 e.target.setAttribute('aria-label', e.target.title);
 
                 block.classList.remove('hide-boring');
             } else if (e.target.classList.contains('fa-eye-slash')) {
                 e.target.classList.remove('fa-eye-slash');
                 e.target.classList.add('fa-eye');
-                e.target.title = 'Show hidden lines';
+                e.target.title = messages.showLines;
                 e.target.setAttribute('aria-label', e.target.title);
 
                 block.classList.add('hide-boring');
@@ -253,7 +286,7 @@ function playground_text(playground, hidden = true) {
 
                 var clipButton = document.createElement('button');
                 clipButton.className = 'clip-button';
-                clipButton.title = 'Copy to clipboard';
+                clipButton.title = messages.copy;
                 clipButton.setAttribute('aria-label', clipButton.title);
                 clipButton.innerHTML = '<i class=\"tooltiptext\"></i>';
 
@@ -275,7 +308,7 @@ function playground_text(playground, hidden = true) {
         var runCodeButton = document.createElement('button');
         runCodeButton.className = 'fa fa-play play-button';
         runCodeButton.hidden = true;
-        runCodeButton.title = 'Run this code';
+        runCodeButton.title = messages.run;
         runCodeButton.setAttribute('aria-label', runCodeButton.title);
 
         buttons.insertBefore(runCodeButton, buttons.firstChild);
@@ -287,7 +320,7 @@ function playground_text(playground, hidden = true) {
             var copyCodeClipboardButton = document.createElement('button');
             copyCodeClipboardButton.className = 'clip-button';
             copyCodeClipboardButton.innerHTML = '<i class="tooltiptext"></i>';
-            copyCodeClipboardButton.title = 'Copy to clipboard';
+            copyCodeClipboardButton.title = messages.copy;
             copyCodeClipboardButton.setAttribute('aria-label', copyCodeClipboardButton.title);
 
             buttons.insertBefore(copyCodeClipboardButton, buttons.firstChild);
@@ -297,7 +330,7 @@ function playground_text(playground, hidden = true) {
         if (window.ace && code_block.classList.contains("editable")) {
             var undoChangesButton = document.createElement('button');
             undoChangesButton.className = 'fa fa-history reset-button';
-            undoChangesButton.title = 'Undo changes';
+            undoChangesButton.title = messages.undo;
             undoChangesButton.setAttribute('aria-label', undoChangesButton.title);
 
             buttons.insertBefore(undoChangesButton, buttons.firstChild);
@@ -857,6 +890,7 @@ function playground_text(playground, hidden = true) {
 })();
 
 (function clipboard() {
+    const messages = codeInterfaceMessages(document.documentElement.lang);
     var clipButtons = document.querySelectorAll('.clip-button');
 
     function hideTooltip(elem) {
@@ -885,11 +919,11 @@ function playground_text(playground, hidden = true) {
 
     clipboardSnippets.on('success', function (e) {
         e.clearSelection();
-        showTooltip(e.trigger, "Copied!");
+        showTooltip(e.trigger, messages.copied);
     });
 
     clipboardSnippets.on('error', function (e) {
-        showTooltip(e.trigger, "Clipboard error!");
+        showTooltip(e.trigger, messages.copyError);
     });
 })();
 
