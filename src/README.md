@@ -105,7 +105,7 @@ Xem [danh mục khóa học của 8kSec Academy](https://academy.8ksec.io/).
 
 ### [NaxusAI – Bảo mật tấn công tự động](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="Biểu trưng của NaxusAI"><figcaption></figcaption></figure>
 
 **Naxus** là nền tảng bảo mật tấn công sử dụng AI, hỗ trợ quét toàn diện bề mặt tấn công bên ngoài, kiểm toán ứng dụng di động, kiểm thử black-box ứng dụng web và đánh giá mã nguồn. Các agent xác thực những phát hiện có thể khai thác và cung cấp bằng chứng có thể truy vết, exploit proof-of-concept và hướng khắc phục khả thi.<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ Ngoài những điều trên, WebSec còn là **đơn vị ủng hộ HackTricks
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="Biểu trưng của cyberhelmets"><figcaption></figcaption></figure>
 
 
 **Được xây dựng cho thực tế. Được thiết kế xoay quanh bạn.**\
@@ -142,7 +142,7 @@ Ngoài những điều trên, WebSec còn là **đơn vị ủng hộ HackTricks
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="Biểu trưng của lasttower"><figcaption></figcaption></figure>
 
 Last Tower Solutions tập trung vào tư vấn an ninh mạng cho lĩnh vực **Giáo dục** và **FinTech**, bao gồm đánh giá cloud, kiểm thử xâm nhập nội bộ và bên ngoài, đánh giá lỗ hổng và hỗ trợ tuân thủ.<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Theo dõi tin tức và cập nhật những thông tin mới nhất về an nin
 
 ### [Beaki — Thực phẩm phù hợp với bạn](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Biểu trưng của Beaki"><figcaption></figcaption></figure>
 
 **Beaki** là ứng dụng quét thực phẩm cá nhân hóa, đếm calo và theo dõi dinh dưỡng. Quét mã vạch và kệ hàng siêu thị, chụp ảnh hoặc mô tả món ăn và thực đơn nhà hàng để nhận điểm số dễ hiểu, được cá nhân hóa theo mục tiêu, chế độ ăn, dị ứng và hồ sơ sức khỏe của bạn. Beaki cũng theo dõi calo và các chất đa lượng, đồng thời tạo kế hoạch bữa ăn cá nhân hóa kèm danh sách mua sắm.<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Xem mục HackTricks Values & FAQ trong phần References bên dưới.
 
 ## Thống kê Github
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![Thống kê của HackTricks trên GitHub](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
