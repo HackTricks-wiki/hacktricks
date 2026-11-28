@@ -105,7 +105,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ### [NaxusAI – Autonomous Offensive Security](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI 标志"><figcaption></figcaption></figure>
 
 **Naxus** 是一个 AI 驱动的 offensive security 平台，可用于全面扫描外部攻击面、审计移动应用、进行 Web black-box 测试和源代码审查。其 agents 会验证可利用的发现，并提供可追溯的证据、proof-of-concept exploits 和可执行的修复建议。<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ WebSec 提供渗透测试、安全订阅、人员配置和漏洞评估服务。�
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets 标志"><figcaption></figcaption></figure>
 
 
 **为实战而造，以你为中心。**\
@@ -142,7 +142,7 @@ WebSec 提供渗透测试、安全订阅、人员配置和漏洞评估服务。�
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower 标志"><figcaption></figcaption></figure>
 
 Last Tower Solutions 专注于为**教育**和**金融科技**行业提供网络安全咨询服务，包括云评估、内部和外部渗透测试、漏洞评估以及合规支持。<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Last Tower Solutions 专注于为**教育**和**金融科技**行业提供网络
 
 ### [Beaki — Food that fits you](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki 标志"><figcaption></figcaption></figure>
 
 **Beaki** 是一款个性化食品扫描器、卡路里计数器和营养追踪器。扫描条形码和超市货架，拍摄或描述餐食和餐厅菜单，即可获取根据你的目标、饮食、过敏情况和健康档案生成的可解释评分。Beaki 还可以追踪卡路里和宏量营养素，并创建包含购物清单的个性化膳食计划。<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Last Tower Solutions 专注于为**教育**和**金融科技**行业提供网络
 
 ## Github 统计数据
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks 的 GitHub 统计](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
