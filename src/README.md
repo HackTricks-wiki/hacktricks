@@ -105,7 +105,7 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 ### [NaxusAI – Autonomous Offensive Security](https://www.naxusai.com/)
 
-<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAI logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt="NaxusAIのロゴ"><figcaption></figcaption></figure>
 
 **Naxus** は、外部 attack surface 全体のスキャン、モバイルアプリ監査、web black-box testing、ソースコードレビューを行う AI 搭載の offensive-security プラットフォームです。agent が悪用可能な検出結果を検証し、追跡可能な証拠、proof-of-concept exploit、実行可能な修正案を提供します。<sup>[[7]](#references)</sup>
 
@@ -127,7 +127,7 @@ WebSec は、penetration testing、セキュリティサブスクリプション
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmetsのロゴ"><figcaption></figcaption></figure>
 
 
 **現場のために。あなたに合わせて。**\
@@ -142,7 +142,7 @@ WebSec は、penetration testing、セキュリティサブスクリプション
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttowerのロゴ"><figcaption></figcaption></figure>
 
 Last Tower Solutions は、**教育**と**FinTech**分野のサイバーセキュリティコンサルティングに注力しており、クラウド評価、内部・外部 penetration test、脆弱性評価、コンプライアンス支援を提供しています。<sup>[[10]](#references)</sup>
 
@@ -152,7 +152,7 @@ Last Tower Solutions は、**教育**と**FinTech**分野のサイバーセキ�
 
 ### [Beaki — Food that fits you](https://www.beaki.app/)
 
-<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beaki logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/beaki-logo.png" alt="Beakiのロゴ"><figcaption></figcaption></figure>
 
 **Beaki** は、パーソナライズされた食品スキャナー、カロリーカウンター、栄養トラッカーです。バーコードやスーパーマーケットの棚をスキャンしたり、食事やレストランのメニューを撮影または説明したりすると、目標、食事、アレルギー、健康プロフィールに合わせた説明可能なスコアを取得できます。Beaki はカロリーとマクロ栄養素も記録し、買い物リスト付きのパーソナライズされた食事プランを作成します。<sup>[[11]](#references)</sup>
 
@@ -166,7 +166,7 @@ Android または iPhone で[**Beaki を無料でダウンロード**](https://w
 
 ## Github Stats
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricksのGitHub統計](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 ## References
 
