@@ -640,8 +640,29 @@ function playground_text(playground, hidden = true) {
         vi: ["Tìm kiếm","Tìm kiếm trong sách này…","Ngôn ngữ","Mục lục","Trên trang này","Chương trước","Chương tiếp theo","Điều hướng trang","Đang tải tính năng tìm kiếm…","Tính năng tìm kiếm không khả dụng"],
         zh: ["搜索","搜索本书…","语言","目录","本页内容","上一章","下一章","页面导航","正在加载搜索…","搜索不可用"],
     };
+    const searchResults = {
+        af: ["Resultate vir “{query}”: {count}", "Geen resultate vir “{query}” nie.", "Voorskou van soekresultaat", "Boek"],
+        de: ["Ergebnisse für „{query}“: {count}", "Keine Ergebnisse für „{query}“.", "Vorschau des Suchergebnisses", "Buch"],
+        el: ["Αποτελέσματα για «{query}»: {count}", "Δεν βρέθηκαν αποτελέσματα για «{query}».", "Προεπισκόπηση αποτελέσματος αναζήτησης", "Βιβλίο"],
+        en: ["Results for “{query}”: {count}", "No results for “{query}”.", "Search result preview", "Book"],
+        es: ["Resultados para «{query}»: {count}", "No hay resultados para «{query}».", "Vista previa del resultado de búsqueda", "Libro"],
+        fr: ["Résultats pour « {query} » : {count}", "Aucun résultat pour « {query} ».", "Aperçu du résultat de recherche", "Livre"],
+        hi: ["“{query}” के लिए नतीजे: {count}", "“{query}” के लिए कोई नतीजा नहीं मिला।", "खोज नतीजे की झलक", "पुस्तक"],
+        it: ["Risultati per «{query}»: {count}", "Nessun risultato per «{query}».", "Anteprima del risultato di ricerca", "Libro"],
+        ja: ["「{query}」の検索結果：{count}件", "「{query}」に一致する結果はありません。", "検索結果のプレビュー", "書籍"],
+        ko: ["‘{query}’ 검색 결과: {count}건", "‘{query}’에 대한 검색 결과가 없습니다.", "검색 결과 미리보기", "책"],
+        pl: ["Wyniki dla „{query}”: {count}", "Brak wyników dla „{query}”.", "Podgląd wyniku wyszukiwania", "Książka"],
+        pt: ["Resultados para “{query}”: {count}", "Nenhum resultado para “{query}”.", "Prévia do resultado da pesquisa", "Livro"],
+        sr: ["Резултати за „{query}”: {count}", "Нема резултата за „{query}”.", "Преглед резултата претраге", "Књига"],
+        sw: ["Matokeo ya “{query}”: {count}", "Hakuna matokeo ya “{query}”.", "Onyesho la awali la tokeo la utafutaji", "Kitabu"],
+        tr: ["“{query}” için sonuç sayısı: {count}", "“{query}” için sonuç bulunamadı.", "Arama sonucu önizlemesi", "Kitap"],
+        uk: ["Результати для «{query}»: {count}", "Для «{query}» нічого не знайдено.", "Попередній перегляд результату пошуку", "Книга"],
+        vi: ["Kết quả cho “{query}”: {count}", "Không có kết quả cho “{query}”.", "Bản xem trước kết quả tìm kiếm", "Sách"],
+        zh: ["“{query}”的搜索结果：{count} 条", "未找到与“{query}”相关的结果。", "搜索结果预览", "手册"],
+    };
     const locale = document.documentElement.lang.toLowerCase().split("-")[0];
-    const translation = Object.hasOwn(labels, locale) ? labels[locale] : labels.en;
+    const supportedLocale = Object.hasOwn(labels, locale) ? locale : "en";
+    const translation = labels[supportedLocale];
     const messages = Object.fromEntries(keys.map((key, index) => [key, translation[index]]));
 
     for (const control of document.querySelectorAll("[data-nav-label]")) {
@@ -656,6 +677,14 @@ function playground_text(playground, hidden = true) {
             control.dataset.searchLabel = message;
             control.dataset.searchLoading = messages.loadingSearch;
             control.dataset.searchUnavailable = messages.searchUnavailable;
+            const [matches, noMatches, preview, book] = searchResults[supportedLocale];
+            Object.assign(control.dataset, {
+                searchLocale: supportedLocale,
+                searchMatches: matches,
+                searchNoMatches: noMatches,
+                searchPreview: preview,
+                searchBookLabel: book,
+            });
         }
         if (control.hasAttribute("placeholder")) { control.setAttribute("placeholder", message); }
         if (control.tagName === "SPAN") { control.textContent = message; }

@@ -16,6 +16,10 @@ const searchStart = searchSource.indexOf("  const searchLabels =");
 const searchEnd = searchSource.indexOf("  const HOT=", searchStart);
 assert(searchStart >= 0 && searchEnd > searchStart);
 const searchStates = new vm.Script(searchSource.slice(searchStart, searchEnd) + "\nsetIconState;");
+const resultStart = searchSource.indexOf("  const resultNumber =");
+const resultEnd = searchSource.indexOf("  function makeTeaser(", resultStart);
+assert(resultStart >= 0 && resultEnd > resultStart);
+const resultMessages = new vm.Script(searchSource.slice(resultStart, resultEnd) + "\nresultMessage;");
 const template = fs.readFileSync("theme/index.hbs", "utf8");
 const keys = Array.from(new Set(Array.from(template.matchAll(/data-nav-label="([^"]+)"/g), match => match[1])));
 const matrix = execFileSync("python3", ["scripts/translation_matrix.py"], { encoding: "utf8" });
@@ -65,6 +69,19 @@ function translate(language) {
     setIconState("ready");
     assert.equal(icon.attributes.get("aria-label"), labels.search);
     assert(!icon.attributes.has("title"));
+    const resultMessage = resultMessages.runInNewContext({ searchLabels: icon.dataset });
+    assert.equal(resultMessage(0, ""), "");
+    const literalQuery = "<em>{count}</em>";
+    labels.zero = resultMessage(0, literalQuery);
+    labels.multiple = resultMessage(1234, literalQuery);
+    for (const message of [labels.zero, labels.multiple]) {
+        assert(message.includes(literalQuery));
+        assert(!message.includes("{query}"));
+    }
+    assert(labels.multiple.includes(new Intl.NumberFormat(icon.dataset.searchLocale).format(1234)));
+    labels.preview = icon.dataset.searchPreview;
+    labels.book = icon.dataset.searchBookLabel;
+    assert(labels.preview && labels.book);
     return labels;
 }
 

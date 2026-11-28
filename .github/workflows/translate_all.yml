@@ -24,6 +24,7 @@ on:
       - 'theme/book.js'
       - 'theme/ht_searcher.js'
       - 'scripts/test_navigation_l10n.js'
+      - 'scripts/test_search.js'
   workflow_dispatch:
     inputs:
       validate_only:
@@ -94,7 +95,7 @@ jobs:
           done
           python -m unittest discover -s "$workdir" -p 'test_translat*.py'
           python scripts/translation_matrix.py --check-menu theme/index.hbs
-          node --test scripts/test_navigation_l10n.js
+          node --test scripts/test_navigation_l10n.js scripts/test_search.js
 
   select-languages:
     if: ${{ github.event_name != 'pull_request' && !inputs.validate_only }}
