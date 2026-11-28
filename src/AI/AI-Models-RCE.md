@@ -32,7 +32,7 @@ Moreover, there some python pickle based models like the ones used by [PyTorch](
 
 A model-loading path that calls unrestricted `pickle.load()`, `joblib.load()`, or `torch.load(..., weights_only=False)` is an execution sink, not merely a parser.<sup>[[22]](#references)</sup> In PyTorch 2.6, `torch.load()` defaults to `weights_only=True` when no custom pickle module is supplied; the examples below require an unrestricted loader or an application that disables this protection to load an unsupported object.<sup>[[4]](#references)</sup> A clean static-scan result does not change that boundary.<sup>[[21]](#references)</sup>
 
-See [Python pickle deserialization](../pentesting-web/deserialization/#pickle) for the basic `__reduce__` primitive and [Fickling's ML import allowlist](../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md#ml-pickle-import-allowlisting-for-aiml-models-fickling) for runtime import checks.
+See [Python pickle deserialization](../pentesting-web/deserialization/#pickle) for the basic `__reduce__` primitive and [Fickling's ML import allowlist](keras-model-deserialization-rce-and-gadget-hunting.md#ml-pickle-import-allowlisting-for-aiml-models-fickling) for runtime import checks.
 
 #### Register a callable, then resolve it with `EXT2`
 
@@ -416,7 +416,7 @@ For a focused guide on .keras internals, Lambda-layer RCE, the arbitrary import 
 
 
 {{#ref}}
-../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
 ## References
